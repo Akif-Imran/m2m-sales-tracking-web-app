@@ -31,8 +31,6 @@ import {
   IconSettingsExclamation,
   IconHelpCircle,
   IconInfoCircle,
-  IconMapPins,
-  IconForklift,
   IconChecklist,
   IconBuildingBank,
 } from "@tabler/icons-react";

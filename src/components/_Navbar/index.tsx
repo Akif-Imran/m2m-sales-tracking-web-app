@@ -7,9 +7,8 @@ import {
   IconSettingsExclamation,
   IconHelpCircle,
   IconInfoCircle,
-  IconMapPins,
-  IconForklift,
   IconChecklist,
+  IconBuildingBank,
 } from "@tabler/icons-react";
 import type { TablerIconsProps } from "@tabler/icons-react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
@@ -42,7 +41,7 @@ const data: NavbarButtons[] = [
   {
     link: routes.company.list,
     label: "Company",
-    icon: IconForklift,
+    icon: IconBuildingBank,
     adminOnly: false,
   },
   {

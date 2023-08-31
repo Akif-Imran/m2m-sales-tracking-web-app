@@ -33,6 +33,8 @@ import {
   IconInfoCircle,
   IconMapPins,
   IconForklift,
+  IconChecklist,
+  IconBuildingBank,
 } from "@tabler/icons-react";
 import type { TablerIconsProps } from "@tabler/icons-react";
 import { useAuthContext } from "@contexts";
@@ -72,7 +74,7 @@ const data: NavbarButtons[] = [
   {
     link: routes.company.list,
     label: "Company",
-    icon: IconForklift,
+    icon: IconBuildingBank,
     adminOnly: false,
   },
   {
@@ -90,7 +92,7 @@ const data: NavbarButtons[] = [
   {
     link: routes.task.list,
     label: "Tasks",
-    icon: IconMapPins,
+    icon: IconChecklist,
     adminOnly: false,
   },
   {

@@ -9,6 +9,7 @@ import {
   IconInfoCircle,
   IconMapPins,
   IconForklift,
+  IconChecklist,
 } from "@tabler/icons-react";
 import type { TablerIconsProps } from "@tabler/icons-react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
@@ -59,7 +60,7 @@ const data: NavbarButtons[] = [
   {
     link: routes.task.list,
     label: "Tasks",
-    icon: IconMapPins,
+    icon: IconChecklist,
     adminOnly: false,
   },
   {

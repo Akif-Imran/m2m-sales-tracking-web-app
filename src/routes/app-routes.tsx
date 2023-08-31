@@ -1,5 +1,17 @@
 import { _AppShell, _RequireAuth, _SocketWrapper } from "@components";
-import { Dashboard, Error404, ForgotPassword, Login, Register, _VerifyOTP, Settings } from "@pages";
+import {
+  Dashboard,
+  Error404,
+  ForgotPassword,
+  Login,
+  Register,
+  _VerifyOTP,
+  Settings,
+  Company,
+  Projects,
+  Tasks,
+  Users,
+} from "@pages";
 import { routes } from "./routes";
 import { Suspense, lazy } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
@@ -8,6 +20,10 @@ import React from "react";
 
 interface OwnProps {}
 const MainApp: React.FC<OwnProps> = () => {
+  //company
+  //projects
+  //task
+  //users
   //settings
   const _ChangePassword = lazy(() => import("../pages/settings/change-password"));
   const _AppTheme = lazy(() => import("../pages/settings/app-theme"));
@@ -27,11 +43,7 @@ const MainApp: React.FC<OwnProps> = () => {
       <Route path={routes.auth.verify_otp} element={<_VerifyOTP />} />
       <Route
         path={routes.dashboard.home}
-        element={
-          <_RequireAuth
-            children={<_AppShell page={<SuspendedView children={<Dashboard />} />} />}
-          />
-        }
+        element={<_RequireAuth children={<_AppShell page={<Dashboard />} />} />}
       />
 
       {/* notification */}
@@ -43,6 +55,30 @@ const MainApp: React.FC<OwnProps> = () => {
           />
         }
       />
+
+      {/* company */}
+      <Route
+        path={routes.company.list}
+        element={<_RequireAuth children={<_AppShell page={<Company />} />} />}
+      />
+
+      {/* projects */}
+      <Route
+        path={routes.project.list}
+        element={<_RequireAuth children={<_AppShell page={<Projects />} />} />}
+      ></Route>
+
+      {/* task */}
+      <Route
+        path={routes.task.list}
+        element={<_RequireAuth children={<_AppShell page={<Tasks />} />} />}
+      ></Route>
+
+      {/* users */}
+      <Route
+        path={routes.user.list}
+        element={<_RequireAuth children={<_AppShell page={<Users />} />} />}
+      ></Route>
 
       {/* settings */}
       <Route

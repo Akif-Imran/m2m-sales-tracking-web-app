@@ -4,10 +4,11 @@ import { useAuthContext } from "@contexts";
 import { getDashCounts } from "@services";
 import { colors } from "@theme";
 import { notify } from "@utility";
-import { Card, Flex, Grid, Select, Text, rem } from "@mantine/core";
+import { Card, Flex, Grid, Select, Tabs, Text, rem } from "@mantine/core";
 import { Chart, GoogleChartOptions } from "react-google-charts";
 import { DateTime } from "luxon";
 import { DAY_MM_DD_YYYY } from "@constants";
+import { IconCalendar, IconGraph } from "@tabler/icons-react";
 
 interface OwnProps {}
 interface ChartData {
@@ -264,169 +265,198 @@ const Dashboard: React.FC<OwnProps> = () => {
   }, []);
 
   return (
-    <Grid>
-      <Grid.Col md={6} lg={6} xl={6}>
-        <Card p="xs" shadow="sm" className={classes.card} my={4} radius={"md"}>
-          <Text fw={"bold"} fz={rem(60)} color={colors.titleText}>
-            {forkliftCounts?.total || 0}
-          </Text>
-          <Text fz="md" className={classes.label} color={colors.titleText} mt={-10} mb={2}>
-            Fleet Utilization
-          </Text>
-          <Chart chartType="Line" width="100%" height="50%" data={line?.data} options={options} />
-        </Card>
-      </Grid.Col>
+    <Tabs defaultValue="gallery">
+      <Tabs.List>
+        <Tabs.Tab value="analytics" icon={<IconGraph size={16} />}>
+          Analytics
+        </Tabs.Tab>
+        <Tabs.Tab value="calendar" icon={<IconCalendar size={16} />}>
+          Calendar
+        </Tabs.Tab>
+      </Tabs.List>
 
-      <Grid.Col md={6} lg={6} xl={6}>
-        <Card p="xs" shadow="sm" className={classes.card} my={4} radius={"md"}>
-          <Text fw={"bold"} fz={rem(60)} color={colors.titleText}>
-            {driverActivityLine?.total || 0}
-          </Text>
-          <Text fz="md" className={classes.label} color={colors.titleText} mt={-10} mb={2}>
-            Driver Activity
-          </Text>
-          <Chart
-            chartType="Line"
-            width="100%"
-            height="50%"
-            data={driverActivityLine?.data}
-            options={options}
-          />
-        </Card>
-      </Grid.Col>
-
-      <Grid.Col md={12} lg={12} xl={12}>
-        <Card p="xs" shadow="sm" className={classes.card} my={4} radius={"md"}>
-          <Text fw={"bold"} fz={rem(60)} color={colors.titleText}>
-            {collisionLine?.total || 0}
-          </Text>
-          <Text fz="md" className={classes.label} color={colors.titleText} mt={-10} mb={2}>
-            Collisions (Last 7 Days)
-          </Text>
-          <Chart
-            chartType="Line"
-            width="100%"
-            height="50%"
-            data={collisionLine?.data}
-            options={options}
-          />
-        </Card>
-      </Grid.Col>
-
-      <Grid.Col md={6} lg={6} xl={6}>
-        <Card p="xs" shadow="sm" className={classes.card} my={4} radius={"md"}>
-          <Text fw={"bold"} fz={rem(60)} color={colors.titleText}>
-            {forkliftCounts?.total || 0}
-          </Text>
-          <Text fz="md" className={classes.label} color={colors.titleText} mt={-10} mb={2}>
-            Fleet Status
-          </Text>
-          <Chart chartType="PieChart" data={forkliftCounts?.data} options={options} />
-        </Card>
-      </Grid.Col>
-
-      <Grid.Col md={6} lg={6} xl={6}>
-        <Card p="xs" shadow="sm" className={classes.card} my={4} px={"xs"} radius={"md"}>
-          <Text fw={"bold"} fz={rem(60)} color={colors.titleText}>
-            {driverCounts?.total || 0}
-          </Text>
-          <Text fz="md" className={classes.label} color={colors.titleText} mt={-10} mb={2}>
-            Drivers
-          </Text>
-          <Chart chartType="PieChart" data={driverCounts?.data} options={options} />
-        </Card>
-      </Grid.Col>
-
-      <Grid.Col md={6} lg={6} xl={6}>
-        <Card p={"xs"} shadow="sm" className={classes.card} my={4} radius={"md"}>
-          <Text fw={"bold"} fz={rem(60)} color={colors.titleText}>
-            {0 || 0}
-          </Text>
-          <Text fz="md" className={classes.label} color={colors.titleText} mt={-10} mb={2}>
-            Top 3 Received Alarm (Monthly)
-          </Text>
-          <Chart chartType="Bar" width="100%" height="50%" data={alarms?.data} options={options} />
-        </Card>
-      </Grid.Col>
-
-      <Grid.Col md={6} lg={6} xl={6}>
-        <Card p="xs" shadow="sm" className={classes.card} my={4} radius={"md"}>
-          <Flex direction={"row"} justify={"space-between"}>
-            <Flex direction={"column"}>
+      <Tabs.Panel value="analytics" pt={"sm"}>
+        <Grid>
+          <Grid.Col md={6} lg={6} xl={6}>
+            <Card p="xs" shadow="sm" className={classes.card} my={4} radius={"md"}>
               <Text fw={"bold"} fz={rem(60)} color={colors.titleText}>
-                {mostRepeatedAlarm?.total || 0}
+                {forkliftCounts?.total || 0}
               </Text>
               <Text fz="md" className={classes.label} color={colors.titleText} mt={-10} mb={2}>
-                Most Received Alarm
+                Fleet Utilization
               </Text>
-            </Flex>
-            <Select
-              size="xs"
-              placeholder="Pick one"
-              data={[
-                { value: "today", label: "Today" },
-                { value: "month", label: "This Month" },
-                { value: "90", label: "Last 90 Days" },
-              ]}
-              defaultValue={"today"}
-            />
-          </Flex>
-          <Chart chartType="PieChart" data={mostRepeatedAlarm?.data} options={options} />
-        </Card>
-      </Grid.Col>
+              <Chart
+                chartType="Line"
+                width="100%"
+                height="50%"
+                data={line?.data}
+                options={options}
+              />
+            </Card>
+          </Grid.Col>
 
-      <Grid.Col md={6} lg={6} xl={6}>
-        <Card p="xs" shadow="sm" className={classes.card} my={4} radius={"md"}>
-          <Flex direction={"row"} justify={"space-between"}>
-            <Flex direction={"column"}>
+          <Grid.Col md={6} lg={6} xl={6}>
+            <Card p="xs" shadow="sm" className={classes.card} my={4} radius={"md"}>
               <Text fw={"bold"} fz={rem(60)} color={colors.titleText}>
-                {mostRepeatedMaintenance?.total || 0}
+                {driverActivityLine?.total || 0}
               </Text>
               <Text fz="md" className={classes.label} color={colors.titleText} mt={-10} mb={2}>
-                Most Received Maintenance
+                Driver Activity
               </Text>
-            </Flex>
-            <Select
-              size="xs"
-              placeholder="Pick one"
-              data={[
-                { value: "today", label: "Today" },
-                { value: "month", label: "This Month" },
-                { value: "90", label: "Last 90 Days" },
-              ]}
-              defaultValue={"today"}
-            />
-          </Flex>
-          <Chart chartType="PieChart" data={mostRepeatedMaintenance?.data} options={options} />
-        </Card>
-      </Grid.Col>
+              <Chart
+                chartType="Line"
+                width="100%"
+                height="50%"
+                data={driverActivityLine?.data}
+                options={options}
+              />
+            </Card>
+          </Grid.Col>
 
-      <Grid.Col md={6} lg={6} xl={6}>
-        <Card p="xs" shadow="sm" className={classes.card} my={4} radius={"md"}>
-          <Flex direction={"row"} justify={"space-between"}>
-            <Flex direction={"column"}>
+          <Grid.Col md={12} lg={12} xl={12}>
+            <Card p="xs" shadow="sm" className={classes.card} my={4} radius={"md"}>
               <Text fw={"bold"} fz={rem(60)} color={colors.titleText}>
-                {mostMileage?.total || 0}
+                {collisionLine?.total || 0}
               </Text>
               <Text fz="md" className={classes.label} color={colors.titleText} mt={-10} mb={2}>
-                Most Mileage
+                Collisions (Last 7 Days)
               </Text>
-            </Flex>
-            <Select
-              size="xs"
-              placeholder="Pick one"
-              data={[
-                { value: "today", label: "Today" },
-                { value: "month", label: "This Month" },
-                { value: "90", label: "Last 90 Days" },
-              ]}
-              defaultValue={"today"}
-            />
-          </Flex>
-          <Chart chartType="PieChart" data={mostMileage?.data} options={options} />
-        </Card>
-      </Grid.Col>
-    </Grid>
+              <Chart
+                chartType="Line"
+                width="100%"
+                height="50%"
+                data={collisionLine?.data}
+                options={options}
+              />
+            </Card>
+          </Grid.Col>
+
+          <Grid.Col md={6} lg={6} xl={6}>
+            <Card p="xs" shadow="sm" className={classes.card} my={4} radius={"md"}>
+              <Text fw={"bold"} fz={rem(60)} color={colors.titleText}>
+                {forkliftCounts?.total || 0}
+              </Text>
+              <Text fz="md" className={classes.label} color={colors.titleText} mt={-10} mb={2}>
+                Fleet Status
+              </Text>
+              <Chart chartType="PieChart" data={forkliftCounts?.data} options={options} />
+            </Card>
+          </Grid.Col>
+
+          <Grid.Col md={6} lg={6} xl={6}>
+            <Card p="xs" shadow="sm" className={classes.card} my={4} px={"xs"} radius={"md"}>
+              <Text fw={"bold"} fz={rem(60)} color={colors.titleText}>
+                {driverCounts?.total || 0}
+              </Text>
+              <Text fz="md" className={classes.label} color={colors.titleText} mt={-10} mb={2}>
+                Drivers
+              </Text>
+              <Chart chartType="PieChart" data={driverCounts?.data} options={options} />
+            </Card>
+          </Grid.Col>
+
+          <Grid.Col md={6} lg={6} xl={6}>
+            <Card p={"xs"} shadow="sm" className={classes.card} my={4} radius={"md"}>
+              <Text fw={"bold"} fz={rem(60)} color={colors.titleText}>
+                {0 || 0}
+              </Text>
+              <Text fz="md" className={classes.label} color={colors.titleText} mt={-10} mb={2}>
+                Top 3 Received Alarm (Monthly)
+              </Text>
+              <Chart
+                chartType="Bar"
+                width="100%"
+                height="50%"
+                data={alarms?.data}
+                options={options}
+              />
+            </Card>
+          </Grid.Col>
+
+          <Grid.Col md={6} lg={6} xl={6}>
+            <Card p="xs" shadow="sm" className={classes.card} my={4} radius={"md"}>
+              <Flex direction={"row"} justify={"space-between"}>
+                <Flex direction={"column"}>
+                  <Text fw={"bold"} fz={rem(60)} color={colors.titleText}>
+                    {mostRepeatedAlarm?.total || 0}
+                  </Text>
+                  <Text fz="md" className={classes.label} color={colors.titleText} mt={-10} mb={2}>
+                    Most Received Alarm
+                  </Text>
+                </Flex>
+                <Select
+                  size="xs"
+                  placeholder="Pick one"
+                  data={[
+                    { value: "today", label: "Today" },
+                    { value: "month", label: "This Month" },
+                    { value: "90", label: "Last 90 Days" },
+                  ]}
+                  defaultValue={"today"}
+                />
+              </Flex>
+              <Chart chartType="PieChart" data={mostRepeatedAlarm?.data} options={options} />
+            </Card>
+          </Grid.Col>
+
+          <Grid.Col md={6} lg={6} xl={6}>
+            <Card p="xs" shadow="sm" className={classes.card} my={4} radius={"md"}>
+              <Flex direction={"row"} justify={"space-between"}>
+                <Flex direction={"column"}>
+                  <Text fw={"bold"} fz={rem(60)} color={colors.titleText}>
+                    {mostRepeatedMaintenance?.total || 0}
+                  </Text>
+                  <Text fz="md" className={classes.label} color={colors.titleText} mt={-10} mb={2}>
+                    Most Received Maintenance
+                  </Text>
+                </Flex>
+                <Select
+                  size="xs"
+                  placeholder="Pick one"
+                  data={[
+                    { value: "today", label: "Today" },
+                    { value: "month", label: "This Month" },
+                    { value: "90", label: "Last 90 Days" },
+                  ]}
+                  defaultValue={"today"}
+                />
+              </Flex>
+              <Chart chartType="PieChart" data={mostRepeatedMaintenance?.data} options={options} />
+            </Card>
+          </Grid.Col>
+
+          <Grid.Col md={6} lg={6} xl={6}>
+            <Card p="xs" shadow="sm" className={classes.card} my={4} radius={"md"}>
+              <Flex direction={"row"} justify={"space-between"}>
+                <Flex direction={"column"}>
+                  <Text fw={"bold"} fz={rem(60)} color={colors.titleText}>
+                    {mostMileage?.total || 0}
+                  </Text>
+                  <Text fz="md" className={classes.label} color={colors.titleText} mt={-10} mb={2}>
+                    Most Mileage
+                  </Text>
+                </Flex>
+                <Select
+                  size="xs"
+                  placeholder="Pick one"
+                  data={[
+                    { value: "today", label: "Today" },
+                    { value: "month", label: "This Month" },
+                    { value: "90", label: "Last 90 Days" },
+                  ]}
+                  defaultValue={"today"}
+                />
+              </Flex>
+              <Chart chartType="PieChart" data={mostMileage?.data} options={options} />
+            </Card>
+          </Grid.Col>
+        </Grid>
+      </Tabs.Panel>
+
+      <Tabs.Panel value="calendar" pt={"sm"}>
+        <div>Under development</div>
+      </Tabs.Panel>
+    </Tabs>
   );
 };
 

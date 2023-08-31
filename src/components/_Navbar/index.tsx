@@ -3,12 +3,12 @@ import { Navbar, Tooltip } from "@mantine/core";
 import {
   IconSettings,
   IconDashboard,
-  IconAsset,
   IconUserCircle,
   IconSettingsExclamation,
   IconHelpCircle,
   IconInfoCircle,
   IconMapPins,
+  IconForklift,
 } from "@tabler/icons-react";
 import type { TablerIconsProps } from "@tabler/icons-react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
@@ -17,10 +17,10 @@ import { routes } from "@routes";
 
 type ActivePage =
   | "Dashboard"
-  | "Vehicles"
-  | "Drivers"
-  | "Services"
-  | "Pois"
+  | "Company"
+  | "Projects"
+  | "Users"
+  | "Tasks"
   | "Settings"
   | "Help"
   | "About";
@@ -39,26 +39,26 @@ const data: NavbarButtons[] = [
     adminOnly: false,
   },
   {
-    link: routes.vehicles.list,
-    label: "Vehicles",
-    icon: IconAsset,
+    link: routes.company.list,
+    label: "Company",
+    icon: IconForklift,
     adminOnly: false,
   },
   {
-    link: routes.services.list,
-    label: "Services",
+    link: routes.project.list,
+    label: "Projects",
     icon: IconSettingsExclamation,
     adminOnly: false,
   },
   {
-    link: routes.drivers.list,
-    label: "Drivers",
+    link: routes.user.list,
+    label: "Users",
     icon: IconUserCircle,
     adminOnly: false,
   },
   {
-    link: routes.poi.list,
-    label: "Pois",
+    link: routes.task.list,
+    label: "Tasks",
     icon: IconMapPins,
     adminOnly: false,
   },
@@ -131,14 +131,14 @@ const _Navbar: React.FC<_NavbarProps> = ({ opened, close }) => {
     }
     if (active === "Dashboard") {
       navigate(routes.dashboard.home);
-    } else if (active == "Vehicles") {
-      navigate(routes.vehicles.list);
-    } else if (active === "Services") {
-      navigate(routes.services.list);
-    } else if (active === "Drivers") {
-      navigate(routes.drivers.list);
-    } else if (active === "Pois") {
-      navigate(routes.poi.list);
+    } else if (active == "Company") {
+      navigate(routes.company.list);
+    } else if (active === "Projects") {
+      navigate(routes.project.list);
+    } else if (active === "Tasks") {
+      navigate(routes.task.list);
+    } else if (active === "Users") {
+      navigate(routes.user.list);
     } else if (active === "Settings") {
       navigate(routes.settings.home);
     } else if (active === "About") {

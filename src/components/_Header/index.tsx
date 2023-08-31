@@ -48,10 +48,10 @@ import { DAY_MM_DD_YYYY_HH_MM_SS_A } from "@constants";
 
 type ActivePage =
   | "Dashboard"
-  | "Fleet"
-  | "Drivers"
-  | "Services"
-  | "Pois"
+  | "Company"
+  | "Projects"
+  | "Users"
+  | "Tasks"
   | "Settings"
   | "Help"
   | "About";
@@ -70,26 +70,26 @@ const data: NavbarButtons[] = [
     adminOnly: false,
   },
   {
-    link: routes.vehicles.list,
-    label: "Fleet",
+    link: routes.company.list,
+    label: "Company",
     icon: IconForklift,
     adminOnly: false,
   },
   {
-    link: routes.services.list,
-    label: "Services",
+    link: routes.project.list,
+    label: "Projects",
     icon: IconSettingsExclamation,
     adminOnly: false,
   },
   {
-    link: routes.drivers.list,
-    label: "Drivers",
+    link: routes.user.list,
+    label: "Users",
     icon: IconUserCircle,
     adminOnly: false,
   },
   {
-    link: routes.poi.list,
-    label: "Pois",
+    link: routes.task.list,
+    label: "Tasks",
     icon: IconMapPins,
     adminOnly: false,
   },
@@ -210,14 +210,14 @@ const _Header = ({ toggleNavbar, opened }: _HeaderProps) => {
     }
     if (active === "Dashboard") {
       navigate(routes.dashboard.home);
-    } else if (active == "Fleet") {
-      navigate(routes.vehicles.list);
-    } else if (active === "Services") {
-      navigate(routes.services.list);
-    } else if (active === "Drivers") {
-      navigate(routes.drivers.list);
-    } else if (active === "Pois") {
-      navigate(routes.poi.list);
+    } else if (active == "Company") {
+      navigate(routes.company.list);
+    } else if (active === "Projects") {
+      navigate(routes.project.list);
+    } else if (active === "Tasks") {
+      navigate(routes.task.list);
+    } else if (active === "Users") {
+      navigate(routes.user.list);
     } else if (active === "Settings") {
       navigate(routes.settings.home);
     } else if (active === "About") {

@@ -24,18 +24,6 @@ const Settings: React.FC<OwnProps> = () => {
             title="Change Password"
             onClick={() => navigate(routes.settings.change_password)}
           />
-          <_SettingsCard
-            title="Driver Working Time"
-            onClick={() => navigate(routes.settings.driver_working_time)}
-          />
-          <_SettingsCard
-            title="Vehicle Icons"
-            onClick={() => navigate(routes.settings.vehicle_icons)}
-          />
-          <_SettingsCard
-            title="Checklist Management"
-            onClick={() => navigate(routes.settings.checklist_management)}
-          />
           <_SettingsCard title="App Theme" onClick={() => navigate(routes.settings.app_theme)} />
         </ScrollArea>
       </Grid.Col>

@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "ES2020",
+    "target": "ESNext",
     "useDefineForClassFields": true,
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
     "module": "ESNext",
@@ -15,11 +15,43 @@
     "jsx": "react-jsx",
 
     /* Linting */
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictPropertyInitialization": true,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+    "noImplicitReturns": true,
+    "forceConsistentCasingInFileNames": true,
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+    "baseUrl": "./",
+    "paths": {
+      "@api": ["./src/api/index.ts"],
+      "@store": ["./src/store/index.ts"],
+      "@slices": ["./src/store/slices/index.ts"],
+      "@thunks": ["./src/store/thunks/index.ts"],
+      "@assets": ["./src/assets"],
+      "@markers": ["./src/assets/app-images/markers/index.ts"],
+      "@map-markers": ["./src/assets/app-images/map-markers/index.ts"],
+      "@components": ["./src/components/index.ts"],
+      "@constants": ["./src/constants/index.ts"],
+      "@contexts": ["./src/contexts/index.ts"],
+      "@helpers": ["./src/helpers/index.ts"],
+      "@hooks": ["./src/hooks/index.ts"],
+      "@pages": ["./src/pages/index.ts"],
+      "@routes": ["./src/routes/index.ts"],
+      "@services": ["./src/services/index.ts"],
+      "@theme": ["./src/theme/index.ts"],
+      "@app-types": ["./src/types/index.ts"],
+      "@utility": ["./src/utils/index.ts"]
+    }
   },
-  "include": ["src"],
-  "references": [{ "path": "./tsconfig.node.json" }]
+  "include": ["src", "src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.json"],
+  "references": [{ "path": "./tsconfig.node.json" }],
+  "exclude": ["node_modules"]
 }

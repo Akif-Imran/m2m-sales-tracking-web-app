@@ -265,7 +265,7 @@ const Dashboard: React.FC<OwnProps> = () => {
   }, []);
 
   return (
-    <Tabs defaultValue="gallery">
+    <Tabs defaultValue="analytics">
       <Tabs.List>
         <Tabs.Tab value="analytics" icon={<IconGraph size={16} />}>
           Analytics

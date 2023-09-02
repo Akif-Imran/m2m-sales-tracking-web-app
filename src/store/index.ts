@@ -1,13 +1,11 @@
 import { configureStore } from "@reduxjs/toolkit";
-import { devicesReducer, serviceReducer, serviceStatusReducer } from "@slices";
+import { companyReducer } from "@slices";
 import { useSelector } from "react-redux";
 import { TypedUseSelectorHook, useDispatch } from "react-redux";
 
 const store = configureStore({
   reducer: {
-    devices: devicesReducer,
-    services: serviceReducer,
-    serviceStatusList: serviceStatusReducer,
+    companies: companyReducer,
   },
 });
 

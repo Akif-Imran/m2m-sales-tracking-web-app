@@ -19,21 +19,38 @@ interface ILoginUserData {
   user_type: IUserType;
 }
 
-interface ICompany {
-  logo: string;
-  _id: string;
-  name: string;
-  contactPersonId: string;
+interface ICompanyContact {
+  id: number;
+  number: string;
   designation: string;
+  email: string;
+  phone: string;
+}
+interface ICompany {
+  id: number;
+  logo: string;
+  name: string;
+  contactPerson: {
+    id: number;
+    name: string;
+    designation: string;
+    email: string;
+    phone: string;
+  };
   email: string;
   phone: string;
   address: string;
   city: string;
   country: string;
 }
+interface IProjectStatus {
+  id: number;
+  name: string;
+}
 interface IProject {
   logo: string;
   _id: string;
+  projectNumber: number;
   name: string;
   customerName: string; //company
   projectType: string;
@@ -43,9 +60,13 @@ interface IProject {
   projectManager: number;
   startDate: string;
   endDate: string;
-  status: string;
+  statusId: string;
+  statusName: string;
 }
-type ITaskStatusType = "Pending" | "Accepted" | "Declined" | "Deployed" | "Completed";
+interface ITaskStatus {
+  id: number;
+  name: string;
+}
 interface INotification {
   title: string;
   body: string;
@@ -57,4 +78,9 @@ interface INotification {
   _id: string;
   data: Record<string, number | string | boolean | null>;
   __v: number;
+}
+
+interface IDepartmentType {
+  id: number;
+  name: string;
 }

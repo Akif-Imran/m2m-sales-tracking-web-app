@@ -1,14 +1,23 @@
-import React from "react";
+import React, { useState } from "react";
 import { useStyles } from "./styles";
-import { useAuthContext } from "@contexts";
-import { getDashCounts } from "@services";
 import { colors } from "@theme";
-import { notify } from "@utility";
-import { Card, Flex, Grid, Select, Tabs, Text, rem } from "@mantine/core";
+import {
+  Button,
+  Card,
+  Flex,
+  Grid,
+  ScrollArea,
+  Select,
+  Table,
+  Tabs,
+  Text,
+  rem,
+} from "@mantine/core";
 import { Chart, GoogleChartOptions } from "react-google-charts";
-import { DateTime } from "luxon";
-import { DAY_MM_DD_YYYY } from "@constants";
 import { IconCalendar, IconGraph } from "@tabler/icons-react";
+import { useToggle } from "@mantine/hooks";
+import { DateTime } from "luxon";
+import { DAY_MM_DD_YYYY_HH_MM_SS_A } from "@constants";
 
 interface OwnProps {}
 interface ChartData {
@@ -18,19 +27,19 @@ interface ChartData {
 
 const Dashboard: React.FC<OwnProps> = () => {
   const { classes, theme } = useStyles();
-  const {
-    state: { token },
-  } = useAuthContext();
   // const [isFetching, setIsFetching] = React.useState(false);
-  const [forkliftCounts, setForkliftCounts] = React.useState<ChartData>();
-  const [driverCounts, setDriverCounts] = React.useState<ChartData>();
-  const [alarms, setAlarms] = React.useState<ChartData>();
-  const [line, setLine] = React.useState<ChartData>();
-  const [collisionLine, setCollisionLine] = React.useState<ChartData>();
-  const [driverActivityLine, setDriverActivityLine] = React.useState<ChartData>();
-  const [mostRepeatedAlarm, setMostRepeatedAlarm] = React.useState<ChartData>();
-  const [mostRepeatedMaintenance, setMostRepeatedMaintenance] = React.useState<ChartData>();
-  const [mostMileage, setMostMileage] = React.useState<ChartData>();
+  const [projectCounts, setProjectsCounts] = React.useState<ChartData>();
+  const [projectValueCounts, setProjectValueCounts] = React.useState<ChartData>();
+  const [projectTargetCounts, setProjectTargetCounts] = React.useState<ChartData>();
+  const [projectValueTargetCounts, setProjectValueTargetCounts] = React.useState<ChartData>();
+  const [projectOverDue, _setProjectOverDue] = useState([
+    { name: "HYCO", dueDate: "2023-08-23T15:00:00.000Z" },
+    { name: "HIKKO", dueDate: "2023-09-01T12:00:00.000Z" },
+  ]);
+  const [pendingTasks, _setPendingTasks] = useState([
+    { name: "Jason", task: "Repair AAV", dueDate: "2023-08-22T20:00:00.000Z" },
+  ]);
+  const [value, toggle] = useToggle(["by value", "by project"]);
 
   const options: GoogleChartOptions = {
     title: "",
@@ -40,6 +49,11 @@ const Dashboard: React.FC<OwnProps> = () => {
     backgroundColor: colors.white,
     curveType: "function",
     sliceVisibilityThreshold: 0,
+    animation: {
+      duration: 1000,
+      easing: "out",
+      startup: true,
+    },
     pieSliceTextStyle: {
       color: colors.white,
     },
@@ -95,174 +109,100 @@ const Dashboard: React.FC<OwnProps> = () => {
     },
   };
 
-  const fetchDashCounts = React.useCallback(() => {
-    getDashCounts(token)
-      .then((res) => {
-        if (res.success) {
-          const {
-            moving,
-            parked,
-            total_vehicles,
-            driver_available,
-            driver_unavailable,
-            total_driver,
-          } = res.data;
-          const reporting = Math.abs(parked + moving);
-          const not_reporting = Math.abs(total_vehicles - reporting);
-          const vehicleLegends = [
-            ["Vehicle Status", "Counts"],
-            [`Moving (${moving || 0})`, moving || 0],
-            [`Parked (${parked || 0})`, parked || 0],
-            [`Reporting (${reporting || 0})`, reporting || 0],
-            [`Not Reporting (${not_reporting || 0})`, not_reporting || 0],
-          ];
-          setForkliftCounts({
-            data: vehicleLegends,
-            total: total_vehicles,
-          });
-          //------driver counts------
-          const unavailable = driver_unavailable < 0 ? 0 : driver_unavailable;
-          const driverLegends = [
-            ["Driver Status", "Counts"],
-            [`Available (${driver_available || 0})`, driver_available],
-            [`Unavailable (${unavailable || 0})`, unavailable],
-          ];
-          setDriverCounts({
-            data: driverLegends,
-            total: total_driver,
-          });
-        }
-      })
-      .catch((err) => {
-        notify("Dash Counts", "An error occurred", "error");
-        console.log(err?.message);
-      });
-  }, [token]);
-
-  React.useEffect(() => {
-    fetchDashCounts();
-  }, [fetchDashCounts]);
-
-  React.useEffect(() => {
-    const alarmsData = [
-      ["Month", "MOTOR_ALERT", "COLLISION_ALERT", "OVER_SPEEDING_ALERT"],
-      ["May", 47, 43, 56],
-      ["June", 84, 23, 12],
-      ["July", 12, 4, 75],
-      ["Aug", 45, 36, 34],
+  const drawProjectCharts = React.useCallback(() => {
+    const projectsLegends = [
+      ["Vehicle Status", "Counts"],
+      [`Quotation (${47})`, 47],
+      [`Follow Up (${376})`, 376],
+      [`Completed (${200})`, 200],
+      [`In Development (${13})`, 13],
     ];
-    setAlarms((_prev) => ({ data: alarmsData, total: 0 }));
-
-    const lineData = [
-      ["Day", "PT-01", "PT-02", "PT-03"],
-      [1, 37.8, 80.8, 41.8],
-      [2, 30.9, 69.5, 32.4],
-      [3, 25.4, 57, 25.7],
-      [4, 11.7, 18.8, 10.5],
-      [5, 11.9, 17.6, 10.4],
-      [6, 8.8, 13.6, 7.7],
-      [7, 7.6, 12.3, 9.6],
-      [8, 12.3, 29.2, 10.6],
-      [9, 16.9, 42.9, 14.8],
-      [10, 12.8, 30.9, 11.6],
+    setProjectsCounts({
+      data: projectsLegends,
+      total: 636,
+    });
+    //------driver counts------
+    const valueLegends = [
+      ["Project", "Value"],
+      [`RM (${6000}) Quotation`, 6000],
+      [`RM (${24000}) Completed`, 24000],
+      [`RM (${98000}) In Development`, 98000],
     ];
-    setLine((_prev) => ({ data: lineData, total: 0 }));
+    setProjectValueCounts({
+      data: valueLegends,
+      total: 128000,
+    });
   }, []);
 
   React.useEffect(() => {
-    const currentDate = DateTime.local();
-    const last7Days = [];
-    for (let i = 0; i < 7; i++) {
-      const date = currentDate.minus({ days: i });
-      last7Days.push(date.toFormat(DAY_MM_DD_YYYY));
-    }
-    const collisionData = [
-      ["Day", "PT-01", "PT-02", "PT-03", "PT-04", "PT-05", "PT-06", "PT-07"],
-      [last7Days[0], 37.8, 80.8, 41.8, 12.8, 30.9, 11.6, 45.2],
-      [last7Days[1], 30.9, 69.5, 32.4, 16.9, 42.9, 14.8, 32],
-      [last7Days[2], 25.4, 57, 25.7, 12.3, 29.2, 10.6, 89],
-      [last7Days[3], 11.7, 18.8, 10.5, 7.6, 12.3, 9.6, 23],
-      [last7Days[4], 11.9, 17.6, 10.4, 8.8, 13.6, 7.7, 56],
-      [last7Days[5], 8.8, 13.6, 7.7, 11.9, 17.6, 10.4, 87],
-      [last7Days[6], 7.6, 12.3, 9.6, 11.7, 18.8, 10.5, 90],
-      // [8, 12.3, 29.2, 10.6, 25.4, 57, 25.7, 12],
-      // [9, 16.9, 42.9, 14.8, 30.9, 69.5, 32.4, 23],
-      // [10, 12.8, 30.9, 11.6, 37.8, 80.8, 41.8, 45],
+    // const targetChart = [
+    //   ["Genre", "Fantasy & Sci Fi", { role: "annotation" }],
+    //   ["2023", 10, 24, ""],
+    //   ["2020", 16, 22, ""],
+    //   ["2030", 28, 19, ""],
+    // ];
+    const targetChart = [
+      ["Year", "Projects", "Target"],
+      ["Jan", 1000, 400],
+      ["Feb", 1170, 460],
+      ["March", 660, 1120],
+      ["April", 1030, 540],
+      ["May", 345, 734],
+      ["June", 453, 986],
+      ["July", 234, 456],
+      ["August", 235, 965],
     ];
-    setCollisionLine((_prev) => ({ data: collisionData, total: 58 }));
+    const valueTargetChart = [
+      ["Year", "Value", "Target"],
+      ["Jan", 2400, 12000],
+      ["Feb", 3600, 12000],
+      ["March", 4800, 12000],
+      ["April", 5600, 12000],
+      ["May", 9800, 12000],
+      ["June", 13400, 12000],
+      ["July", 15000, 24000],
+      ["August", 18000, 12000],
+    ];
+    setProjectTargetCounts({
+      data: targetChart,
+      total: 0,
+    });
+    setProjectValueTargetCounts({
+      data: valueTargetChart,
+      total: 0,
+    });
   }, []);
 
   React.useEffect(() => {
-    const currentDate = DateTime.local();
-    const last7Days = [];
-    for (let i = 0; i < 3; i++) {
-      const date = currentDate.minus({ days: i });
-      last7Days.push(date.toFormat(DAY_MM_DD_YYYY));
-    }
-    const driverActivity = [
-      ["Day", "Driver-01", "Driver-02", "Driver-03"],
-      [last7Days[0], 37.8, 80.8, 41.8],
-      [last7Days[1], 30.9, 69.5, 32.4],
-      [last7Days[2], 25.4, 57, 25.7],
-      // [last7Days[3], 11.7, 18.8, 10.5],
-      // [last7Days[4], 11.9, 17.6, 10.4],
-      // [last7Days[5], 8.8, 13.6, 7.7],
-      // [last7Days[6], 7.6, 12.3, 9.6],
-    ];
-    setDriverActivityLine((_prev) => ({ data: driverActivity, total: 77 }));
-  }, []);
+    drawProjectCharts();
+  }, [drawProjectCharts]);
 
-  React.useEffect(() => {
-    const currentDate = DateTime.local();
-    const last7Days = [];
-    for (let i = 0; i < 3; i++) {
-      const date = currentDate.minus({ days: i });
-      last7Days.push(date.toFormat(DAY_MM_DD_YYYY));
-    }
-    const repeatedAlarm = [
-      ["Alarm", "Counts"],
-      ["COLLISION_ALARM", 38],
-      ["MOTOR_ALARM", 31],
-      ["SERVO", 26],
-      // [last7Days[3], 11.7, 18.8, 10.5],
-      // [last7Days[4], 11.9, 17.6, 10.4],
-      // [last7Days[5], 8.8, 13.6, 7.7],
-      // [last7Days[6], 7.6, 12.3, 9.6],
-    ];
-    setMostRepeatedAlarm((_prev) => ({ data: repeatedAlarm, total: 95 }));
-  }, []);
+  const projectOverdueRows = projectOverDue.map((project, index) => {
+    const dueDate = DateTime.fromISO(project.dueDate).toLocal();
+    const dueDateSt = dueDate.toFormat(DAY_MM_DD_YYYY_HH_MM_SS_A);
+    const overDueDuration = DateTime.now().diff(dueDate).as("days");
+    return (
+      <tr key={index}>
+        <td>{project.name}</td>
+        <td>{dueDateSt}</td>
+        <td>{overDueDuration.toFixed(1)} Days</td>
+      </tr>
+    );
+  });
 
-  React.useEffect(() => {
-    const currentDate = DateTime.local();
-    const last7Days = [];
-    for (let i = 0; i < 3; i++) {
-      const date = currentDate.minus({ days: i });
-      last7Days.push(date.toFormat(DAY_MM_DD_YYYY));
-    }
-    const repeatedMaintenance = [
-      ["Maintenance", "Counts"],
-      ["Tire Breakdown", 11],
-      ["Engine Breakdown", 9],
-      ["Oil Change", 3],
-      // [last7Days[3], 11.7, 18.8, 10.5],
-      // [last7Days[4], 11.9, 17.6, 10.4],
-      // [last7Days[5], 8.8, 13.6, 7.7],
-      // [last7Days[6], 7.6, 12.3, 9.6],
-    ];
-    setMostRepeatedMaintenance((_prev) => ({ data: repeatedMaintenance, total: 23 }));
-  }, []);
-
-  React.useEffect(() => {
-    const mostMileage = [
-      ["Vehicle", "Miles"],
-      [`PT-01 (${56})`, 56],
-      [`PT-02 (${48})`, 48],
-      [`PT-03 (${32})`, 32],
-      [`PT-04 (${26})`, 26],
-      [`PT-05 (${19})`, 19],
-    ];
-    setMostMileage((_prev) => ({ data: mostMileage, total: 181 }));
-  }, []);
+  const pendingTaskRows = pendingTasks.map((task, index) => {
+    const dueDate = DateTime.fromISO(task.dueDate).toLocal();
+    const dueDateSt = dueDate.toFormat(DAY_MM_DD_YYYY_HH_MM_SS_A);
+    const overDueDuration = DateTime.now().diff(dueDate).as("days");
+    return (
+      <tr key={index}>
+        <td>{task.name}</td>
+        <td>{task.task}</td>
+        <td>{dueDateSt}</td>
+        <td>{overDueDuration.toFixed(1)} Days</td>
+      </tr>
+    );
+  });
 
   return (
     <Tabs defaultValue="analytics">
@@ -277,177 +217,160 @@ const Dashboard: React.FC<OwnProps> = () => {
 
       <Tabs.Panel value="analytics" pt={"sm"}>
         <Grid>
-          <Grid.Col md={6} lg={6} xl={6}>
-            <Card p="xs" shadow="sm" className={classes.card} my={4} radius={"md"}>
+          <Grid.Col md={3} lg={3} xl={3}>
+            <Card p="sm" shadow="sm" className={classes.card} my={4} radius={"md"}>
               <Text fw={"bold"} fz={rem(60)} color={colors.titleText}>
-                {forkliftCounts?.total || 0}
+                {248}
               </Text>
               <Text fz="md" className={classes.label} color={colors.titleText} mt={-10} mb={2}>
-                Fleet Utilization
+                Companies
               </Text>
-              <Chart
-                chartType="Line"
-                width="100%"
-                height="50%"
-                data={line?.data}
-                options={options}
-              />
+            </Card>
+          </Grid.Col>
+
+          <Grid.Col md={3} lg={3} xl={3}>
+            <Card p="sm" shadow="sm" className={classes.card} my={4} radius={"md"}>
+              <Text fw={"bold"} fz={rem(60)} color={colors.titleText}>
+                {897}
+              </Text>
+              <Text fz="md" className={classes.label} color={colors.titleText} mt={-10} mb={2}>
+                Contacts
+              </Text>
+            </Card>
+          </Grid.Col>
+
+          <Grid.Col md={3} lg={3} xl={3}>
+            <Card p="sm" shadow="sm" className={classes.card} my={4} radius={"md"}>
+              <Text fw={"bold"} fz={rem(60)} color={colors.titleText}>
+                {200}
+              </Text>
+              <Text fz="md" className={classes.label} color={colors.titleText} mt={-10} mb={2}>
+                Projects Completed
+              </Text>
+            </Card>
+          </Grid.Col>
+
+          <Grid.Col md={3} lg={3} xl={3}>
+            <Card p="sm" shadow="sm" className={classes.card} my={4} radius={"md"}>
+              <Text fw={"bold"} fz={rem(60)} color={colors.titleText}>
+                {87}
+              </Text>
+              <Text fz="md" className={classes.label} color={colors.titleText} mt={-10} mb={2}>
+                Tasks
+              </Text>
             </Card>
           </Grid.Col>
 
           <Grid.Col md={6} lg={6} xl={6}>
             <Card p="xs" shadow="sm" className={classes.card} my={4} radius={"md"}>
               <Text fw={"bold"} fz={rem(60)} color={colors.titleText}>
-                {driverActivityLine?.total || 0}
+                {projectCounts?.total || 0}
               </Text>
               <Text fz="md" className={classes.label} color={colors.titleText} mt={-10} mb={2}>
-                Driver Activity
+                Projects
               </Text>
-              <Chart
-                chartType="Line"
-                width="100%"
-                height="50%"
-                data={driverActivityLine?.data}
-                options={options}
-              />
-            </Card>
-          </Grid.Col>
-
-          <Grid.Col md={12} lg={12} xl={12}>
-            <Card p="xs" shadow="sm" className={classes.card} my={4} radius={"md"}>
-              <Text fw={"bold"} fz={rem(60)} color={colors.titleText}>
-                {collisionLine?.total || 0}
-              </Text>
-              <Text fz="md" className={classes.label} color={colors.titleText} mt={-10} mb={2}>
-                Collisions (Last 7 Days)
-              </Text>
-              <Chart
-                chartType="Line"
-                width="100%"
-                height="50%"
-                data={collisionLine?.data}
-                options={options}
-              />
-            </Card>
-          </Grid.Col>
-
-          <Grid.Col md={6} lg={6} xl={6}>
-            <Card p="xs" shadow="sm" className={classes.card} my={4} radius={"md"}>
-              <Text fw={"bold"} fz={rem(60)} color={colors.titleText}>
-                {forkliftCounts?.total || 0}
-              </Text>
-              <Text fz="md" className={classes.label} color={colors.titleText} mt={-10} mb={2}>
-                Fleet Status
-              </Text>
-              <Chart chartType="PieChart" data={forkliftCounts?.data} options={options} />
+              <Chart chartType="PieChart" data={projectCounts?.data} options={options} />
             </Card>
           </Grid.Col>
 
           <Grid.Col md={6} lg={6} xl={6}>
             <Card p="xs" shadow="sm" className={classes.card} my={4} px={"xs"} radius={"md"}>
               <Text fw={"bold"} fz={rem(60)} color={colors.titleText}>
-                {driverCounts?.total || 0}
+                {projectValueCounts?.total || 0}
               </Text>
               <Text fz="md" className={classes.label} color={colors.titleText} mt={-10} mb={2}>
-                Drivers
+                Value
               </Text>
-              <Chart chartType="PieChart" data={driverCounts?.data} options={options} />
+              <Chart chartType="PieChart" data={projectValueCounts?.data} options={options} />
             </Card>
           </Grid.Col>
 
           <Grid.Col md={6} lg={6} xl={6}>
-            <Card p={"xs"} shadow="sm" className={classes.card} my={4} radius={"md"}>
-              <Text fw={"bold"} fz={rem(60)} color={colors.titleText}>
-                {0 || 0}
+            <Card
+              p="xs"
+              pt={"lg"}
+              shadow="sm"
+              className={classes.card}
+              my={4}
+              px={"xs"}
+              radius={"md"}
+            >
+              <Text fz="md" className={classes.label} color={colors.titleText} mb={2}>
+                Monthly Project Chart ({value === "by value" ? "By Value" : "By Project"})
               </Text>
-              <Text fz="md" className={classes.label} color={colors.titleText} mt={-10} mb={2}>
-                Top 3 Received Alarm (Monthly)
-              </Text>
+              <Flex direction={"row"} gap={"xs"} align={"center"} justify={"flex-end"}>
+                <Button variant="filled" size="xs" onClick={() => toggle()}>
+                  {value.toUpperCase()}
+                </Button>
+                <Select
+                  w={rem(90)}
+                  size="xs"
+                  data={[{ value: "2023", label: "2023" }]}
+                  defaultValue={"2023"}
+                  withinPortal
+                />
+              </Flex>
               <Chart
-                chartType="Bar"
-                width="100%"
-                height="50%"
-                data={alarms?.data}
-                options={options}
+                chartType="ColumnChart"
+                data={
+                  value === "by value" ? projectValueTargetCounts?.data : projectTargetCounts?.data
+                }
+                options={{ ...options, isStacked: true }}
               />
             </Card>
           </Grid.Col>
 
           <Grid.Col md={6} lg={6} xl={6}>
-            <Card p="xs" shadow="sm" className={classes.card} my={4} radius={"md"}>
-              <Flex direction={"row"} justify={"space-between"}>
-                <Flex direction={"column"}>
-                  <Text fw={"bold"} fz={rem(60)} color={colors.titleText}>
-                    {mostRepeatedAlarm?.total || 0}
-                  </Text>
-                  <Text fz="md" className={classes.label} color={colors.titleText} mt={-10} mb={2}>
-                    Most Received Alarm
-                  </Text>
-                </Flex>
-                <Select
-                  size="xs"
-                  placeholder="Pick one"
-                  data={[
-                    { value: "today", label: "Today" },
-                    { value: "month", label: "This Month" },
-                    { value: "90", label: "Last 90 Days" },
-                  ]}
-                  defaultValue={"today"}
-                />
-              </Flex>
-              <Chart chartType="PieChart" data={mostRepeatedAlarm?.data} options={options} />
+            <Card p="xs" shadow="sm" className={classes.card} my={4} px={"xs"} radius={"md"}>
+              <Text fw={"bold"} fz={rem(60)} color={colors.titleText} mt={-16}>
+                {projectOverDue.length}
+              </Text>
+              <Text fz="md" className={classes.label} color={colors.titleText} mt={-10} mb={2}>
+                Projects behind timeline
+              </Text>
+              <ScrollArea h={rem(272)}>
+                <Table>
+                  <thead>
+                    <tr>
+                      <th>Project Name</th>
+                      <th>Due Date</th>
+                      <th>Delay (Days)</th>
+                    </tr>
+                  </thead>
+                  <tbody>{projectOverdueRows}</tbody>
+                </Table>
+              </ScrollArea>
             </Card>
           </Grid.Col>
 
           <Grid.Col md={6} lg={6} xl={6}>
-            <Card p="xs" shadow="sm" className={classes.card} my={4} radius={"md"}>
-              <Flex direction={"row"} justify={"space-between"}>
-                <Flex direction={"column"}>
-                  <Text fw={"bold"} fz={rem(60)} color={colors.titleText}>
-                    {mostRepeatedMaintenance?.total || 0}
-                  </Text>
-                  <Text fz="md" className={classes.label} color={colors.titleText} mt={-10} mb={2}>
-                    Most Received Maintenance
-                  </Text>
-                </Flex>
-                <Select
-                  size="xs"
-                  placeholder="Pick one"
-                  data={[
-                    { value: "today", label: "Today" },
-                    { value: "month", label: "This Month" },
-                    { value: "90", label: "Last 90 Days" },
-                  ]}
-                  defaultValue={"today"}
-                />
-              </Flex>
-              <Chart chartType="PieChart" data={mostRepeatedMaintenance?.data} options={options} />
-            </Card>
-          </Grid.Col>
-
-          <Grid.Col md={6} lg={6} xl={6}>
-            <Card p="xs" shadow="sm" className={classes.card} my={4} radius={"md"}>
-              <Flex direction={"row"} justify={"space-between"}>
-                <Flex direction={"column"}>
-                  <Text fw={"bold"} fz={rem(60)} color={colors.titleText}>
-                    {mostMileage?.total || 0}
-                  </Text>
-                  <Text fz="md" className={classes.label} color={colors.titleText} mt={-10} mb={2}>
-                    Most Mileage
-                  </Text>
-                </Flex>
-                <Select
-                  size="xs"
-                  placeholder="Pick one"
-                  data={[
-                    { value: "today", label: "Today" },
-                    { value: "month", label: "This Month" },
-                    { value: "90", label: "Last 90 Days" },
-                  ]}
-                  defaultValue={"today"}
-                />
-              </Flex>
-              <Chart chartType="PieChart" data={mostMileage?.data} options={options} />
+            <Card p="xs" shadow="sm" className={classes.card} my={4} px={"xs"} radius={"md"}>
+              <Text fw={"bold"} fz={rem(60)} color={colors.titleText} mt={-16}>
+                {pendingTasks.length}
+              </Text>
+              <Text
+                fz="md"
+                className={classes.label}
+                color={colors.titleText}
+                mt={-10}
+                mb={2}
+                ml={rem(8)}
+              >
+                Pending Tasks
+              </Text>
+              <ScrollArea h={rem(272)}>
+                <Table>
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Task</th>
+                      <th>Expected Date</th>
+                      <th>Delay (Days)</th>
+                    </tr>
+                  </thead>
+                  <tbody>{pendingTaskRows}</tbody>
+                </Table>
+              </ScrollArea>
             </Card>
           </Grid.Col>
         </Grid>

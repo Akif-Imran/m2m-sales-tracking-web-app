@@ -17,7 +17,7 @@ const companySlice = createSlice({
   initialState: initialState,
   reducers: {
     addCompany: (state, action: PayloadAction<ICompany>) => {
-      
+      console.log(state, action.type);
     },
   },
 });

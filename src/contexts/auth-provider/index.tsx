@@ -112,9 +112,7 @@ interface AuthState {
   token: string;
   user: ILoginUserData | null;
   isAdmin: boolean;
-  isService: boolean;
   isDriver: boolean;
-  isWarehouse: boolean;
 }
 
 type AuthAction =
@@ -153,9 +151,7 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
         isAuthorized: false,
         isLoading: false,
         isAdmin: false,
-        isService: false,
         isDriver: false,
-        isWarehouse: false,
       };
     case "LOGIN":
       return {
@@ -164,8 +160,6 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
         user: action.payload.user,
         isAdmin: action.payload.user.user_type === "Admin",
         isDriver: action.payload.user.user_type === "Driver",
-        isService: action.payload.user.user_type === "Services",
-        isWarehouse: action.payload.user.user_type === "Warehouse",
         isAuthorized: true,
         isLoading: false,
       };
@@ -177,8 +171,6 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
         isAuthorized: true,
         isAdmin: action.payload.user.user_type === "Admin",
         isDriver: action.payload.user.user_type === "Driver",
-        isService: action.payload.user.user_type === "Services",
-        isWarehouse: action.payload.user.user_type === "Warehouse",
       };
     default:
       return state;
@@ -192,8 +184,6 @@ const initAuthState: AuthState = {
   user: null,
   isAdmin: false,
   isDriver: false,
-  isService: false,
-  isWarehouse: false,
 };
 
 const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) => {

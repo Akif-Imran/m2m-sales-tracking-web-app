@@ -4,6 +4,11 @@ export const useStyles = createStyles((theme) => ({
   card: {
     backgroundColor: theme.colorScheme === "dark" ? theme.colors.dark[7] : theme.white,
   },
+  centeredContent: {
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+  },
   chartsContainer: {
     display: "flex",
     flex: 1,

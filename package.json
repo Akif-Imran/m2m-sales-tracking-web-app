@@ -37,6 +37,7 @@
     "yup": "^1.2.0"
   },
   "devDependencies": {
+    "@faker-js/faker": "^8.0.2",
     "@types/google.visualization": "^0.0.69",
     "@types/react": "^18.2.15",
     "@types/react-dom": "^18.2.7",

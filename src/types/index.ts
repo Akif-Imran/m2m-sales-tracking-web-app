@@ -25,6 +25,7 @@ interface ICompanyContact {
   designation: string;
   email: string;
   phone: string;
+  
 }
 interface ICompany {
   id: number;

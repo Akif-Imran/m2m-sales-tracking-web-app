@@ -13,11 +13,20 @@ const initialState: State = {
 };
 
 const companySlice = createSlice({
-  name: "devices",
+  name: "company",
   initialState: initialState,
   reducers: {
-    addCompany: (state, action: PayloadAction<ICompany>) => {
-      console.log(state, action.type);
+    addCompany: (state, action: PayloadAction<Omit<ICompany, "id">>) => {
+      const id = Date.now();
+      state.data.push({ id, ...action.payload });
+    },
+    updateCompany: (state, action: PayloadAction<ICompany>) => {
+      const index = state.data.findIndex((contact) => contact.id === action.payload.id);
+      state.data[index] = action.payload;
+    },
+    deleteCompany: (state, action: PayloadAction<number>) => {
+      const index = state.data.findIndex((contact) => contact.id === action.payload);
+      state.data.splice(index, 1);
     },
   },
 });

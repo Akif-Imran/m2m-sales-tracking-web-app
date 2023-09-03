@@ -1,4 +1,25 @@
 type IUserType = "Admin" | "Sales" | "Driver";
+interface IUserAccountType {
+  id: number;
+  name: string;
+}
+interface IUser {
+  avatar: string;
+  id: number;
+  firstName: string;
+  lastName: string;
+  companyId: number;
+  email: string;
+  password: string;
+  phone: string;
+  departmentId: number;
+  departmentName: string;
+  address: string;
+  city: string;
+  country: string;
+  userTypeId: number;
+  userTypeName: string;
+}
 interface ILoginUserData {
   id: number;
   name: string;
@@ -49,10 +70,9 @@ interface IProjectStatus {
 }
 interface IProject {
   logo: string;
-  _id: string;
-  projectNumber: number;
+  id: number;
   name: string;
-  customerName: string; //company
+  companyId: number; //company
   projectType: string;
   city: string;
   value: number; //value in RM

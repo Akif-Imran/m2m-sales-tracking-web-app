@@ -32,5 +32,5 @@ const companySlice = createSlice({
 });
 
 export { companySlice };
-export const { addCompany } = companySlice.actions;
+export const { addCompany, deleteCompany, updateCompany } = companySlice.actions;
 export const companyReducer = companySlice.reducer;

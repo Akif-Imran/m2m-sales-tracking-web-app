@@ -1,10 +1,11 @@
 import React from "react";
 import { useStyles } from "./styles";
 import {
+  ActionIcon,
   Avatar,
   Button,
-  Center,
   Flex,
+  Group,
   ScrollArea,
   Stack,
   Table,
@@ -12,52 +13,68 @@ import {
   TextInput,
 } from "@mantine/core";
 import { useGStyles } from "../../../styles";
-import { IconPlus, IconSearch } from "@tabler/icons-react";
-import { useAppSelector } from "@store";
+import { IconPlus, IconSearch, IconTrash } from "@tabler/icons-react";
+import { useAppDispatch, useAppSelector } from "@store";
 import { colors } from "@theme";
-import {
-  GridColumn,
-  GridCellKind,
-  Item,
-  GridCell,
-  GridSelection,
-} from "@glideapps/glide-data-grid";
-import { DataEditor, CompactSelection } from "@glideapps/glide-data-grid";
 import { _AddCompanyModal } from "../components";
+import { openDeleteModalHelper } from "@helpers";
+import { notify } from "@utility";
+import { deleteCompany } from "@slices";
 
 interface OwnProps {}
 
 const Company: React.FC<OwnProps> = () => {
   useStyles();
+  const dispatch = useAppDispatch();
   const { classes: gclasses, theme } = useGStyles();
   const [searchQuery, setSearchQuery] = React.useState("");
   const { data } = useAppSelector((state) => state.companies);
   const [addCompanyModalOpened, setAddCompanyModalOpened] = React.useState(false);
   const [searchedData, setSearchedData] = React.useState<ICompany[]>([]);
-  const [selection, setSelection] = React.useState<GridSelection>({
-    columns: CompactSelection.empty(),
-    rows: CompactSelection.empty(),
-  });
-
-  console.log(selection);
 
   const onChangeSearch = (query: string) => {
     setSearchQuery(query);
-    data.filter((company) => company.name.includes(query));
+    const filtered = data.filter((company) =>
+      company.name.toLowerCase().includes(query.toLocaleLowerCase())
+    );
+    setSearchedData(filtered);
   };
 
   React.useEffect(() => {
     setSearchedData(data);
   }, [data]);
 
+  const handleDelete = (id: number) => {
+    openDeleteModalHelper({
+      theme: theme,
+      title: `Delete Service`,
+      loading: false,
+      description: (
+        <Text fw={"normal"} fs={"normal"} fz={"sm"} color={colors.titleText}>
+          Are you sure you want to delete this Service? This action is destructive and you will have
+          to contact support to restore data.
+        </Text>
+      ),
+      cancelLabel: "Cancel",
+      confirmLabel: "Delete Service",
+      onConfirm: () => {
+        dispatch(deleteCompany(id));
+        notify("Delete Company", "Company deleted successfully!", "success");
+      },
+      onCancel: () => notify("Delete Company", "Operation canceled!", "error"),
+    });
+  };
+
   const rows =
-    data.length === 0 ? (
-      <Center>
-        <Text color={colors.titleText}>No Companies</Text>
-      </Center>
+    searchedData.length === 0 ? (
+      <tr>
+        <td colSpan={14} color={colors.titleText} align="center">
+          No Companies
+        </td>
+      </tr>
     ) : (
       <>
-        {data.map((company, index) => (
+        {searchedData.map((company, index) => (
           <tr key={company.id}>
             <td>{index + 1}</td>
             <td>
@@ -69,82 +86,25 @@ const Company: React.FC<OwnProps> = () => {
             <td>{company.contact.designation}</td>
             <td>{company.contact.email}</td>
             <td>{company.contact.phone}</td>
-            <td>{company.name}</td>
+            <td>{company.email}</td>
+            <td>{company.phone}</td>
+            <td>{company.address}</td>
+            <td>{company.city}</td>
+            <td>{company.country}</td>
+            <td>
+              <Group>
+                {/* <ActionIcon color="gray" size={"sm"}>
+                  <IconPencil />
+                </ActionIcon> */}
+                <ActionIcon color="red" size={"sm"} onClick={() => handleDelete(company.id)}>
+                  <IconTrash />
+                </ActionIcon>
+              </Group>
+            </td>
           </tr>
         ))}
       </>
     );
-
-  const columns: GridColumn[] = [
-    { title: "Logo", id: "logo", group: "Company", width: 100 },
-    { title: "Id", id: "id", group: "Company" },
-    { title: "Name", id: "name", group: "Company" },
-    { title: "Contact Person", id: "contact.name", group: "Contact Person" },
-    { title: "Designation", id: "contact.designation", group: "Contact Person" },
-    { title: "Email", id: "contact.email", group: "Contact Person" },
-    { title: "Phone", id: "contact.phone", group: "Contact Person" },
-    { title: "Company Email", id: "email", group: "Company" },
-    { title: "Company Phone", id: "phone", group: "Company" },
-    { title: "Address", id: "address", group: "Company" },
-    { title: "City", id: "city", group: "Company" },
-    { title: "Country", id: "country", group: "Company" },
-  ];
-
-  function getData([col, row]: Item): GridCell {
-    const dataRow = searchedData[row];
-    console.log(col, row);
-
-    const indexes = [
-      "logo",
-      "id",
-      "name",
-      "contact.name",
-      "contact.designation",
-      "contact.email",
-      "contact.phone",
-      "email",
-      "phone",
-      "address",
-      "city",
-      "country",
-    ];
-    const d = indexes[col];
-    const nestedKeys: Record<number, string> = {
-      3: "name",
-      4: "designation",
-      5: "email",
-      6: "phone",
-    };
-
-    if (col === 0) {
-      return {
-        kind: GridCellKind.Image,
-        allowAdd: true,
-        data: [dataRow.logo],
-        allowOverlay: false,
-        displayData: [dataRow.logo],
-      };
-    } else if (Object.keys(nestedKeys).includes(col.toString())) {
-      const key = nestedKeys[col];
-      return {
-        kind: GridCellKind.Text,
-        // @ts-expect-error key
-        data: dataRow.contact[key],
-        allowOverlay: false,
-        // @ts-expect-error key
-        displayData: dataRow.contact[key],
-      };
-    } else {
-      return {
-        kind: GridCellKind.Text,
-        // @ts-expect-error key
-        data: dataRow[d].toString(),
-        allowOverlay: false,
-        // @ts-expect-error key
-        displayData: dataRow[d].toString(),
-      };
-    }
-  }
 
   return (
     <Stack spacing={"xs"}>
@@ -167,40 +127,38 @@ const Company: React.FC<OwnProps> = () => {
           Company
         </Button>
       </Flex>
-      <ScrollArea type="scroll" h={{ md: "98vh" }}>
-        <Table>
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Logo</th>
-              <th>Id</th>
-              <th>Name</th>
-            </tr>
-          </thead>
-          <tbody>{rows}</tbody>
-        </Table>
+      <ScrollArea type="scroll" h={"80vh"}>
+        <ScrollArea w={"140vw"}>
+          <Table border={1} bgcolor={theme.white} withBorder>
+            <thead>
+              <tr>
+                <th colSpan={4}>Company</th>
+                <th colSpan={4}>Contact Person</th>
+                <th colSpan={6}>Company Details</th>
+              </tr>
+              <tr>
+                <th>#</th>
+                <th>Logo</th>
+                <th>Id</th>
+                <th>Name</th>
+
+                <th>Name</th>
+                <th>Designation</th>
+                <th>Email</th>
+                <th>Phone</th>
+
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Address</th>
+                <th>City</th>
+                <th>Country</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>{rows}</tbody>
+          </Table>
+        </ScrollArea>
       </ScrollArea>
-      <DataEditor
-        theme={{
-          accentFg: theme.white,
-          accentColor: theme.colors[theme.primaryColor][6],
-          accentLight: theme.colors[theme.primaryColor][0],
-          bgCell: theme.white,
-          bgHeader: theme.white,
-          borderColor: colors.thinGray,
-        }}
-        freezeColumns={3}
-        gridSelection={selection}
-        onGridSelectionChange={setSelection}
-        rowMarkers="both"
-        getCellContent={getData}
-        columns={columns}
-        rows={searchedData.length}
-        width={"100%"}
-        height={"80vh"}
-        smoothScrollX
-        smoothScrollY
-      />
       <_AddCompanyModal
         title="Add Company"
         opened={addCompanyModalOpened}

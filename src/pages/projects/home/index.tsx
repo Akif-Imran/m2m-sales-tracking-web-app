@@ -24,7 +24,13 @@ import {
   useAppSelector,
 } from "@store";
 import { useGStyles } from "../../../styles";
-import { IconPencil, IconPlus, IconSearch, IconTrash } from "@tabler/icons-react";
+import {
+  IconPencil,
+  IconPlus,
+  IconRotateClockwise2,
+  IconSearch,
+  IconTrash,
+} from "@tabler/icons-react";
 import { modalOverlayPropsHelper, openDeleteModalHelper } from "@helpers";
 import { notify } from "@utility";
 import { colors } from "@theme";
@@ -138,7 +144,7 @@ const Projects: React.FC<OwnProps> = () => {
                     size={"sm"}
                     onClick={() => showUpdateStatusModal(project.statusId, project.id)}
                   >
-                    <IconPencil />
+                    <IconRotateClockwise2 />
                   </ActionIcon>
                   <ActionIcon color="red" size={"sm"} onClick={() => handleDelete(project.id)}>
                     <IconTrash />

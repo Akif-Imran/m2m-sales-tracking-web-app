@@ -28,7 +28,7 @@ const Company: React.FC<OwnProps> = () => {
     ) : (
       <>
         {data.map((company) => (
-          <div>{company._id}</div>
+          <div key={company.id}>{company.name}</div>
         ))}
       </>
     );

@@ -21,26 +21,25 @@ interface ILoginUserData {
 
 interface ICompanyContact {
   id: number;
-  number: string;
+  name: string;
   designation: string;
   email: string;
   phone: string;
-  
+  companyId: number;
 }
 interface ICompany {
   id: number;
   logo: string;
   name: string;
-  contactPerson: {
-    id: number;
+  email: string;
+  phone: string;
+  address: string;
+  contact: {
     name: string;
     designation: string;
     email: string;
     phone: string;
   };
-  email: string;
-  phone: string;
-  address: string;
   city: string;
   country: string;
 }

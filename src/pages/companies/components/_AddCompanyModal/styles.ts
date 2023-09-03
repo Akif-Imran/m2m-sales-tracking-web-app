@@ -1,3 +1,8 @@
-import { createStyles } from "@mantine/core";
+import { createStyles, rem } from "@mantine/core";
 
-export const useStyles = createStyles({});
+export const useStyles = createStyles({
+  fileUploadButton: {
+    marginTop: rem(-32),
+    marginLeft: rem(128),
+  },
+});

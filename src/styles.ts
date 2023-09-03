@@ -13,4 +13,12 @@ export const useGStyles = createStyles({
     marginLeft: rem(2),
     flexGrow: 1,
   },
+  radioContainer: {
+    display: "flex",
+    flexDirection: "column",
+    flex: 1,
+    flexGrow: 1,
+    justifyContent: "space-between",
+    rowGap: rem(6),
+  },
 });

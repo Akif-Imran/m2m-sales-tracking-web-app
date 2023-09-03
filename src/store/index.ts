@@ -44,11 +44,21 @@ export const selectUsers = (state: RootState) => state.users;
 export const selectUserTypes = (state: RootState) => state.userTypes;
 
 //memoized selectors
-export const dropDownListSelectors = createSelector(
+export const selectUsersBasedOnType = createSelector(selectUsers, (users) => {
+  return {
+    engineers: users.data.filter((user) => user.userTypeName === "Engineer"),
+    sales: users.data.filter((user) => user.userTypeName === "Sales"),
+    admins: users.data.filter((user) => user.userTypeName === "Admin"),
+  };
+});
+export const selectRecordsForDropdown = createSelector(
   selectCompanies,
   selectDepartments,
   selectUserTypes,
-  (companies, departments, userTypes) => {
+  selectUsers,
+  selectProjectStatusList,
+  selectTaskStatusList,
+  (companies, departments, userTypes, users, projectStatus, taskStatus) => {
     return {
       companies: companies.data.map((company) => ({
         value: company.id.toString(),
@@ -62,6 +72,26 @@ export const dropDownListSelectors = createSelector(
         value: userType.id.toString(),
         label: userType.name,
       })),
+      projectStatus: projectStatus.data.map((status) => ({
+        value: status.id.toString(),
+        label: status.name,
+      })),
+      taskStatus: taskStatus.data.map((status) => ({
+        value: status.id.toString(),
+        label: status.name,
+      })),
+      salesPersons: users.data
+        .filter((user) => user.userTypeName === "Sales")
+        .map((sales) => ({
+          value: sales.id.toString(),
+          label: `${sales.firstName} ${sales.lastName}`,
+        })),
+      projectManagers: users.data
+        .filter((user) => user.userTypeName === "Engineer")
+        .map((engineer) => ({
+          value: engineer.id.toString(),
+          label: `${engineer.firstName} ${engineer.lastName}`,
+        })),
     };
   }
 );

@@ -5,6 +5,7 @@ interface State {
   isLoading: boolean;
   error: null | SerializedError;
 }
+type UpdateStatus = { projectId: number; statusId: number; statusName: string };
 
 const initialState: State = {
   data: [],
@@ -24,6 +25,11 @@ const projectSlice = createSlice({
       const index = state.data.findIndex((contact) => contact.id === action.payload.id);
       state.data[index] = action.payload;
     },
+    updateProjectStatus: (state, action: PayloadAction<UpdateStatus>) => {
+      const index = state.data.findIndex((project) => project.id === action.payload.projectId);
+      state.data[index].statusId = action.payload.statusId;
+      state.data[index].statusName = action.payload.statusName;
+    },
     deleteProject: (state, action: PayloadAction<number>) => {
       const index = state.data.findIndex((contact) => contact.id === action.payload);
       state.data.splice(index, 1);
@@ -32,5 +38,6 @@ const projectSlice = createSlice({
 });
 
 export { projectSlice };
-export const { addProject, deleteProject, updateProject } = projectSlice.actions;
+export const { addProject, deleteProject, updateProject, updateProjectStatus } =
+  projectSlice.actions;
 export const projectReducer = projectSlice.reducer;

@@ -1,1 +1,1 @@
-export { _AddCompanyModal } from "./_AddCompanyModal";
+export { _AddProjectModal } from "./_AddProjectModal";

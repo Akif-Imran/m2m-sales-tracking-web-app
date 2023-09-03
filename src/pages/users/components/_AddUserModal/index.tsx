@@ -19,7 +19,7 @@ import {
 import { useFormik } from "formik";
 import { IconUpload } from "@tabler/icons-react";
 import { notify } from "@utility";
-import { dropDownListSelectors, useAppDispatch, useAppSelector } from "@store";
+import { selectRecordsForDropdown, useAppDispatch, useAppSelector } from "@store";
 import { addUser } from "@slices";
 
 interface OwnProps {
@@ -31,7 +31,7 @@ interface IUserForm extends Omit<IUser, "id"> {}
 
 const _AddUserModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
   const { theme, classes } = useStyles();
-  const { companies, departments, userTypes } = useAppSelector(dropDownListSelectors);
+  const { companies, departments, userTypes } = useAppSelector(selectRecordsForDropdown);
   const dispatch = useAppDispatch();
 
   const company = useFormik<IUserForm>({

@@ -76,11 +76,11 @@ interface IProject {
   projectType: string;
   city: string;
   value: number; //value in RM
-  salesPerson: number;
-  projectManager: number;
+  salesPersonId: number;
+  projectManagerId: number;
   startDate: string;
-  endDate: string;
-  statusId: string;
+  plannedEndDate: string;
+  statusId: number;
   statusName: string;
 }
 interface ITaskStatus {

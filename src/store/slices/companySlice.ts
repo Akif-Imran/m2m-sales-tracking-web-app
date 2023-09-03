@@ -7,7 +7,24 @@ interface State {
 }
 
 const initialState: State = {
-  data: [],
+  data: [
+    {
+      id: 1,
+      logo: "",
+      name: "ABC Tech Solutions Sdn Bhd",
+      contact: {
+        name: "Default Contact",
+        designation: "Manager",
+        email: "example.contact@gmail.com",
+        phone: "+60 123 7653457",
+      },
+      email: "abc.company@gmail.com",
+      phone: "+60 191 9998883",
+      address: "123 Jalan Bukit Bintang Wilayah Persekutuan Kuala Lumpur",
+      city: "Kuala Lumpur",
+      country: "Malaysia",
+    },
+  ],
   isLoading: false,
   error: null,
 };

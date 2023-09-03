@@ -3,22 +3,35 @@ import { useStyles } from "./styles";
 import {
   ActionIcon,
   Avatar,
+  Badge,
   Button,
   Flex,
   Group,
+  Modal,
+  Radio,
   ScrollArea,
   Stack,
   Table,
   Text,
   TextInput,
 } from "@mantine/core";
-import { useAppDispatch, useAppSelector } from "@store";
+import {
+  selectCompanies,
+  selectProjects,
+  selectRecordsForDropdown,
+  selectUsers,
+  useAppDispatch,
+  useAppSelector,
+} from "@store";
 import { useGStyles } from "../../../styles";
-import { IconPlus, IconSearch, IconTrash } from "@tabler/icons-react";
-import { openDeleteModalHelper } from "@helpers";
+import { IconPencil, IconPlus, IconSearch, IconTrash } from "@tabler/icons-react";
+import { modalOverlayPropsHelper, openDeleteModalHelper } from "@helpers";
 import { notify } from "@utility";
 import { colors } from "@theme";
-import { deleteProject } from "@slices";
+import { deleteProject, updateProjectStatus } from "@slices";
+import { _AddProjectModal } from "../components";
+import { DateTime } from "luxon";
+import { DAY_MM_DD_YYYY, projectStatusColors } from "@constants";
 
 interface OwnProps {}
 
@@ -27,26 +40,40 @@ const Projects: React.FC<OwnProps> = () => {
   const dispatch = useAppDispatch();
   const { classes: gclasses, theme } = useGStyles();
   const [searchQuery, setSearchQuery] = React.useState("");
-  const { data } = useAppSelector((state) => state.companies);
-  const [addCompanyModalOpened, setAddCompanyModalOpened] = React.useState(false);
-  const [searchedData, setSearchedData] = React.useState<ICompany[]>([]);
+  const { data: projects } = useAppSelector(selectProjects);
+  const { data: companies } = useAppSelector(selectCompanies);
+  const { data: users } = useAppSelector(selectUsers);
+  const [addProjectModalOpened, setAddProjectModalOpened] = React.useState(false);
+  const [searchedData, setSearchedData] = React.useState<IProject[]>([]);
+
+  const { projectStatus: projectStatusList } = useAppSelector(selectRecordsForDropdown);
+  const [visible, setVisible] = React.useState<boolean>(false);
+  const [selectedStatus, setSelectedStatus] = React.useState<string>();
+  const [selectedProject, setSelectedProject] = React.useState<number>(0);
+
+  const showUpdateStatusModal = (statusId: number, projectId: number) => {
+    setSelectedStatus(statusId.toString());
+    setSelectedProject(projectId);
+    setVisible(true);
+  };
+  const hideUpdateStatusModal = () => setVisible(false);
 
   const onChangeSearch = (query: string) => {
     setSearchQuery(query);
-    const filtered = data.filter((company) =>
+    const filtered = projects.filter((company) =>
       company.name.toLowerCase().includes(query.toLocaleLowerCase())
     );
     setSearchedData(filtered);
   };
 
   React.useEffect(() => {
-    setSearchedData(data);
-  }, [data]);
+    setSearchedData(projects);
+  }, [projects]);
 
   const handleDelete = (id: number) => {
     openDeleteModalHelper({
       theme: theme,
-      title: `Delete Service`,
+      title: `Delete Project`,
       loading: false,
       description: (
         <Text fw={"normal"} fs={"normal"} fz={"sm"} color={colors.titleText}>
@@ -55,12 +82,12 @@ const Projects: React.FC<OwnProps> = () => {
         </Text>
       ),
       cancelLabel: "Cancel",
-      confirmLabel: "Delete Service",
+      confirmLabel: "Delete Project",
       onConfirm: () => {
         dispatch(deleteProject(id));
-        notify("Delete Company", "Company deleted successfully!", "success");
+        notify("Delete Project", "Project deleted successfully!", "success");
       },
-      onCancel: () => notify("Delete Company", "Operation canceled!", "error"),
+      onCancel: () => notify("Delete Project", "Operation canceled!", "error"),
     });
   };
 
@@ -73,35 +100,54 @@ const Projects: React.FC<OwnProps> = () => {
       </tr>
     ) : (
       <>
-        {searchedData.map((project, index) => (
-          <tr key={project.id}>
-            <td>{index + 1}</td>
-            <td>
-              <Avatar src={project.logo} size={50} />
-            </td>
-            <td>{project.id}</td>
-            <td>{project.name}</td>
-            <td>{project.contact.name}</td>
-            <td>{project.contact.designation}</td>
-            <td>{project.contact.email}</td>
-            <td>{project.contact.phone}</td>
-            <td>{project.email}</td>
-            <td>{project.phone}</td>
-            <td>{project.address}</td>
-            <td>{project.city}</td>
-            <td>{project.country}</td>
-            <td>
-              <Group>
-                {/* <ActionIcon color="gray" size={"sm"}>
-                  <IconPencil />
-                </ActionIcon> */}
-                <ActionIcon color="red" size={"sm"} onClick={() => handleDelete(project.id)}>
-                  <IconTrash />
-                </ActionIcon>
-              </Group>
-            </td>
-          </tr>
-        ))}
+        {searchedData.map((project, index) => {
+          const company = companies.find((company) => company.id === project.companyId);
+          const sales = users.find((user) => user.id === project.salesPersonId);
+          const projectManager = users.find((user) => user.id === project.projectManagerId);
+          return (
+            <tr key={project.id}>
+              <td>{index + 1}</td>
+              <td>
+                <Avatar src={project.logo ? project.logo : "/user.png"} size={50} />
+              </td>
+              <td>{project.id}</td>
+              <td>{project.name}</td>
+              <td>
+                <Badge variant="filled" color={projectStatusColors[project.statusName]}>
+                  {project.statusName}
+                </Badge>
+              </td>
+
+              <td>{company?.name || "N/A"}</td>
+
+              <td>{project.projectType}</td>
+              <td>{project.city}</td>
+              <td>{project.value} (RM)</td>
+              <td>
+                {sales?.firstName || "N/A"} {sales?.lastName || "N/A"}
+              </td>
+              <td>
+                {projectManager?.firstName || "N/A"} {projectManager?.lastName || "N/A"}
+              </td>
+              <td>{DateTime.fromISO(project.startDate).toLocal().toFormat(DAY_MM_DD_YYYY)}</td>
+              <td>{DateTime.fromISO(project.plannedEndDate).toLocal().toFormat(DAY_MM_DD_YYYY)}</td>
+              <td>
+                <Group>
+                  <ActionIcon
+                    color="gray"
+                    size={"sm"}
+                    onClick={() => showUpdateStatusModal(project.statusId, project.id)}
+                  >
+                    <IconPencil />
+                  </ActionIcon>
+                  <ActionIcon color="red" size={"sm"} onClick={() => handleDelete(project.id)}>
+                    <IconTrash />
+                  </ActionIcon>
+                </Group>
+              </td>
+            </tr>
+          );
+        })}
       </>
     );
 
@@ -121,7 +167,7 @@ const Projects: React.FC<OwnProps> = () => {
         <Button
           variant="filled"
           rightIcon={<IconPlus size={16} />}
-          onClick={() => setAddCompanyModalOpened(true)}
+          onClick={() => setAddProjectModalOpened(true)}
         >
           Project
         </Button>
@@ -131,26 +177,26 @@ const Projects: React.FC<OwnProps> = () => {
           <Table border={1} bgcolor={theme.white} withBorder>
             <thead>
               <tr>
-                <th colSpan={4}>Company</th>
-                <th colSpan={4}>Contact Person</th>
-                <th colSpan={6}>Company Details</th>
+                <th colSpan={5}>Project</th>
+                <th colSpan={1}>Company</th>
+                <th colSpan={8}>Project Details</th>
               </tr>
               <tr>
                 <th>#</th>
                 <th>Logo</th>
                 <th>Id</th>
                 <th>Name</th>
+                <th>Status</th>
 
-                <th>Name</th>
-                <th>Designation</th>
-                <th>Email</th>
-                <th>Phone</th>
-
-                <th>Email</th>
-                <th>Phone</th>
-                <th>Address</th>
+                <th>Customer Name</th>
+                <th>Project Type</th>
                 <th>City</th>
-                <th>Country</th>
+                <th>Value (RM)</th>
+
+                <th>Sales Person</th>
+                <th>Project Manager</th>
+                <th>Start Date</th>
+                <th>Planned End Date</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -158,6 +204,50 @@ const Projects: React.FC<OwnProps> = () => {
           </Table>
         </ScrollArea>
       </ScrollArea>
+      <_AddProjectModal
+        title="Add Project"
+        opened={addProjectModalOpened}
+        onClose={() => setAddProjectModalOpened(false)}
+      />
+      <Modal
+        centered
+        radius="md"
+        opened={visible}
+        onClose={hideUpdateStatusModal}
+        title="Project Status"
+        scrollAreaComponent={ScrollArea.Autosize}
+        withinPortal
+        withOverlay
+        overlayProps={modalOverlayPropsHelper(theme)}
+      >
+        <Radio.Group
+          value={selectedStatus}
+          name="userFilter"
+          defaultValue="7"
+          onChange={(value) => {
+            if (!value) {
+              notify("Update Project Status", "Invalid status value", "error");
+              return;
+            }
+            const typeName = projectStatusList.find((status) => status.value === value)?.label;
+            if (!typeName) return;
+            dispatch(
+              updateProjectStatus({
+                projectId: selectedProject,
+                statusId: parseInt(value),
+                statusName: typeName,
+              })
+            );
+            hideUpdateStatusModal();
+          }}
+        >
+          <div className={gclasses.radioContainer}>
+            {projectStatusList.map((value) => {
+              return <Radio value={value.value} label={value.label} />;
+            })}
+          </div>
+        </Radio.Group>
+      </Modal>
     </Stack>
   );
 };

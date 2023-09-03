@@ -5,6 +5,7 @@ import {
   departmentReducer,
   projectReducer,
   projectStatusListReducer,
+  taskReducer,
   taskStatusListReducer,
   userReducer,
   userTypeReducer,
@@ -19,6 +20,7 @@ const store = configureStore({
     departments: departmentReducer,
     projects: projectReducer,
     projectStatusList: projectStatusListReducer,
+    tasks: taskReducer,
     taskStatusList: taskStatusListReducer,
     users: userReducer,
     userTypes: userTypeReducer,
@@ -39,11 +41,30 @@ export const selectCompanyContact = (state: RootState) => state.companyContacts;
 export const selectDepartments = (state: RootState) => state.departments;
 export const selectProjects = (state: RootState) => state.projects;
 export const selectProjectStatusList = (state: RootState) => state.projectStatusList;
+export const selectTasks = (state: RootState) => state.tasks;
 export const selectTaskStatusList = (state: RootState) => state.taskStatusList;
 export const selectUsers = (state: RootState) => state.users;
 export const selectUserTypes = (state: RootState) => state.userTypes;
 
 //memoized selectors
+export const selectTasksCombined = createSelector(
+  selectProjects,
+  selectUsers,
+  selectTasks,
+  (projects, users, tasks) => {
+    return {
+      tasks: tasks.data.map((task) => {
+        const project = projects.data.find((project) => project.id === task.projectId);
+        const user = users.data.find((user) => user.id === task.assigneeId);
+        return {
+          ...task,
+          project,
+          assignee: user,
+        };
+      }),
+    };
+  }
+);
 export const selectUsersBasedOnType = createSelector(selectUsers, (users) => {
   return {
     engineers: users.data.filter((user) => user.userTypeName === "Engineer"),

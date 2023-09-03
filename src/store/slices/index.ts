@@ -6,3 +6,4 @@ export * from "./projectSlice";
 export * from "./userSlice";
 export * from "./userTypeSlice";
 export * from "./companyContactSlice";
+export * from "./taskSlice";

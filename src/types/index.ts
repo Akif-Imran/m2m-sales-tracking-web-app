@@ -87,6 +87,19 @@ interface ITaskStatus {
   id: number;
   name: string;
 }
+interface ITask {
+  id: number;
+  name: string;
+  projectId: number;
+  assigneeId: number;
+  title: string;
+  description: string;
+  createdDate: string;
+  plannedEndDate: string;
+  completedDate: string;
+  statusId: number;
+  statusName: string;
+}
 interface INotification {
   title: string;
   body: string;

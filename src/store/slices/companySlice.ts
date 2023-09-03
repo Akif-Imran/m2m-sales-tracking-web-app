@@ -38,16 +38,24 @@ const companySlice = createSlice({
       state.data.push({ id, ...action.payload });
     },
     updateCompany: (state, action: PayloadAction<ICompany>) => {
-      const index = state.data.findIndex((contact) => contact.id === action.payload.id);
+      const index = state.data.findIndex((company) => company.id === action.payload.id);
       state.data[index] = action.payload;
     },
     deleteCompany: (state, action: PayloadAction<number>) => {
-      const index = state.data.findIndex((contact) => contact.id === action.payload);
+      const index = state.data.findIndex((company) => company.id === action.payload);
       state.data.splice(index, 1);
+    },
+    updateCompanyContact: (state, action: PayloadAction<Omit<ICompanyContact, "id">>) => {
+      const index = state.data.findIndex((company) => company.id === action.payload.companyId);
+      state.data[index].contact.name = action.payload.name;
+      state.data[index].contact.email = action.payload.email;
+      state.data[index].contact.phone = action.payload.phone;
+      state.data[index].contact.designation = action.payload.designation;
     },
   },
 });
 
 export { companySlice };
-export const { addCompany, deleteCompany, updateCompany } = companySlice.actions;
+export const { addCompany, deleteCompany, updateCompany, updateCompanyContact } =
+  companySlice.actions;
 export const companyReducer = companySlice.reducer;

@@ -24,13 +24,7 @@ import {
   useAppSelector,
 } from "@store";
 import { useGStyles } from "../../../styles";
-import {
-  IconPencil,
-  IconPlus,
-  IconRotateClockwise2,
-  IconSearch,
-  IconTrash,
-} from "@tabler/icons-react";
+import { IconPlus, IconRotateClockwise2, IconSearch, IconTrash } from "@tabler/icons-react";
 import { modalOverlayPropsHelper, openDeleteModalHelper } from "@helpers";
 import { notify } from "@utility";
 import { colors } from "@theme";

@@ -6,20 +6,29 @@ import {
   Button,
   Flex,
   Group,
+  Modal,
   ScrollArea,
+  Select,
   Stack,
   Table,
   Text,
   TextInput,
+  rem,
 } from "@mantine/core";
 import { useGStyles } from "../../../styles";
-import { IconPlus, IconSearch, IconTrash } from "@tabler/icons-react";
-import { useAppDispatch, useAppSelector } from "@store";
+import {
+  IconPlus,
+  IconRotateClockwise2,
+  IconSearch,
+  IconTrash,
+  IconUserPlus,
+} from "@tabler/icons-react";
+import { selectCompanies, selectCompanyContact, useAppDispatch, useAppSelector } from "@store";
 import { colors } from "@theme";
-import { _AddCompanyModal } from "../components";
-import { openDeleteModalHelper } from "@helpers";
+import { _AddCompanyModal, _AddContactModal } from "../components";
+import { modalOverlayPropsHelper, openDeleteModalHelper } from "@helpers";
 import { notify } from "@utility";
-import { deleteCompany } from "@slices";
+import { deleteCompany, updateCompanyContact } from "@slices";
 
 interface OwnProps {}
 
@@ -28,21 +37,66 @@ const Company: React.FC<OwnProps> = () => {
   const dispatch = useAppDispatch();
   const { classes: gclasses, theme } = useGStyles();
   const [searchQuery, setSearchQuery] = React.useState("");
-  const { data } = useAppSelector((state) => state.companies);
+  const { data: companies } = useAppSelector(selectCompanies);
+  const { data: contacts } = useAppSelector(selectCompanyContact);
+  const [contactsList, setContactsList] = React.useState<{ value: string; label: string }[]>([]);
+
   const [addCompanyModalOpened, setAddCompanyModalOpened] = React.useState(false);
+  const [addContactModalOpened, setAddContactModalOpened] = React.useState(false);
   const [searchedData, setSearchedData] = React.useState<ICompany[]>([]);
+
+  const [visible, setVisible] = React.useState<boolean>(false);
+  const [selectedContact, setSelectedContact] = React.useState<number>(0);
+  const [selectedCompany, setSelectedCompany] = React.useState<number>(0);
+
+  const showContactUpdateModal = (companyId: number) => {
+    setSelectedCompany(companyId);
+    setVisible(true);
+  };
+  const hideContactUpdateModal = () => setVisible(false);
+
+  const updateContact = () => {
+    const contact = contacts.find((contact) => contact.id === selectedContact);
+    if (!contact) {
+      notify("Update Contact", "Contact not found!", "error");
+      return;
+    }
+    dispatch(
+      updateCompanyContact({
+        companyId: selectedCompany,
+        email: contact.email,
+        phone: contact.phone,
+        name: contact.name,
+        designation: contact.designation,
+      })
+    );
+    notify("Update Contact", "Contact updated successfully!", "success");
+    hideContactUpdateModal();
+  };
 
   const onChangeSearch = (query: string) => {
     setSearchQuery(query);
-    const filtered = data.filter((company) =>
+    const filtered = companies.filter((company) =>
       company.name.toLowerCase().includes(query.toLocaleLowerCase())
     );
     setSearchedData(filtered);
   };
 
   React.useEffect(() => {
-    setSearchedData(data);
-  }, [data]);
+    setSearchedData(companies);
+  }, [companies]);
+
+  React.useEffect(() => {
+    const contactsList = contacts
+      .filter((contact) => contact.companyId === selectedCompany)
+      .map((contact) => {
+        return {
+          value: contact.id.toString(),
+          label: contact.name,
+        };
+      });
+    setContactsList(contactsList);
+  }, [contacts, selectedCompany]);
 
   const handleDelete = (id: number) => {
     openDeleteModalHelper({
@@ -93,9 +147,13 @@ const Company: React.FC<OwnProps> = () => {
             <td>{company.country}</td>
             <td>
               <Group>
-                {/* <ActionIcon color="gray" size={"sm"}>
-                  <IconPencil />
-                </ActionIcon> */}
+                <ActionIcon
+                  color="gray"
+                  size={"sm"}
+                  onClick={() => showContactUpdateModal(company.id)}
+                >
+                  <IconRotateClockwise2 />
+                </ActionIcon>
                 <ActionIcon color="red" size={"sm"} onClick={() => handleDelete(company.id)}>
                   <IconTrash />
                 </ActionIcon>
@@ -125,6 +183,13 @@ const Company: React.FC<OwnProps> = () => {
           onClick={() => setAddCompanyModalOpened(true)}
         >
           Company
+        </Button>
+        <Button
+          variant="filled"
+          rightIcon={<IconUserPlus size={16} />}
+          onClick={() => setAddContactModalOpened(true)}
+        >
+          Contact
         </Button>
       </Flex>
       <ScrollArea type="scroll" h={"80vh"}>
@@ -164,6 +229,44 @@ const Company: React.FC<OwnProps> = () => {
         opened={addCompanyModalOpened}
         onClose={() => setAddCompanyModalOpened(false)}
       />
+      <_AddContactModal
+        title="Add Contact"
+        opened={addContactModalOpened}
+        onClose={() => setAddContactModalOpened(false)}
+      />
+      <Modal
+        centered
+        radius="md"
+        opened={visible}
+        onClose={hideContactUpdateModal}
+        title="Project Status"
+        scrollAreaComponent={ScrollArea.Autosize}
+        withinPortal
+        withOverlay
+        overlayProps={modalOverlayPropsHelper(theme)}
+      >
+        <Select
+          required
+          withAsterisk={false}
+          searchable
+          nothingFound="No Companies"
+          label="Company"
+          value={selectedContact.toString()}
+          onChange={(value) => {
+            if (!value) return;
+            setSelectedContact(parseInt(value));
+          }}
+          data={contactsList}
+        />
+        <Group align="flex-end" position="right" mt={rem(32)}>
+          <Button variant="outline" onClick={() => hideContactUpdateModal()} size="xs">
+            Cancel
+          </Button>
+          <Button variant="filled" onClick={() => updateContact()} size="xs">
+            Save
+          </Button>
+        </Group>
+      </Modal>
     </Stack>
   );
 };

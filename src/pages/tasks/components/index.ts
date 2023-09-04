@@ -1,1 +1,1 @@
-export { _AddCompanyModal } from "./_AddCompanyModal";
+export { _AddTaskModal } from "./_AddTaskModal";

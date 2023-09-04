@@ -1,3 +1,4 @@
+import { DATE_FORMAT_YYYY_MM_DD_HH_MM_SS } from "@helpers";
 import { PayloadAction, SerializedError, createSlice } from "@reduxjs/toolkit";
 
 interface State {
@@ -33,7 +34,16 @@ const taskSlice = createSlice({
       const index = state.data.findIndex((task) => task.id === action.payload);
       state.data.splice(index, 1);
     },
-    updateTaskStatus: (state, action: PayloadAction<UpdateTaskStatus>) => {},
+    updateTaskStatus: (state, action: PayloadAction<UpdateTaskStatus>) => {
+      const index = state.data.findIndex((task) => task.id === action.payload.taskId);
+      state.data[index].statusId = action.payload.statusId;
+      state.data[index].statusName = action.payload.statusName;
+      if (action.payload.statusName === "Completed") {
+        state.data[index].completedDate = DATE_FORMAT_YYYY_MM_DD_HH_MM_SS(new Date());
+      } else {
+        state.data[index].completedDate = "";
+      }
+    },
   },
 });
 

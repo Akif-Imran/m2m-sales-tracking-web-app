@@ -89,7 +89,6 @@ interface ITaskStatus {
 }
 interface ITask {
   id: number;
-  name: string;
   projectId: number;
   assigneeId: number;
   title: string;

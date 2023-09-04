@@ -24,10 +24,11 @@ import {
 import { useGStyles } from "../../../styles";
 import { colors } from "@theme";
 import { DateTime } from "luxon";
-import { DAY_MM_DD_YYYY_HH_MM_SS_A } from "@constants";
+import { DAY_MM_DD_YYYY_HH_MM_SS_A, taskStatusColors } from "@constants";
 import { modalOverlayPropsHelper, openDeleteModalHelper } from "@helpers";
 import { notify } from "@utility";
 import { deleteTask, updateTaskStatus } from "@slices";
+import { _AddTaskModal } from "../components";
 
 interface OwnProps {}
 
@@ -56,7 +57,8 @@ const Tasks: React.FC<OwnProps> = () => {
     setSearchQuery(query);
     const filtered = tasks.filter(
       (task) =>
-        task.name.toLowerCase().includes(query.toLowerCase()) ||
+        task.assignee?.firstName.toLowerCase().includes(query.toLowerCase()) ||
+        task.assignee?.lastName.toLowerCase().includes(query.toLowerCase()) ||
         task.statusName.toLowerCase().includes(query.toLowerCase()) ||
         task.title.toLowerCase().includes(query.toLowerCase())
     );
@@ -101,17 +103,26 @@ const Tasks: React.FC<OwnProps> = () => {
           <tr key={task.id}>
             <td>{index + 1}</td>
             <td>{task.id}</td>
-            <td>{task.name}</td>
+            <td>
+              {task.assignee?.firstName} {task.assignee?.lastName}
+            </td>
+            <td>
+              <Badge variant="filled" color={taskStatusColors[task.statusName]}>
+                {task.statusName}
+              </Badge>
+            </td>
             <td>{task.project?.name || "N/A"}</td>
             <td>{task.title}</td>
             <td>
               {DateTime.fromISO(task.createdDate).toLocal().toFormat(DAY_MM_DD_YYYY_HH_MM_SS_A)}
             </td>
             <td>
-              {DateTime.fromISO(task.completedDate).toLocal().toFormat(DAY_MM_DD_YYYY_HH_MM_SS_A)}
+              {DateTime.fromISO(task.plannedEndDate).toLocal().toFormat(DAY_MM_DD_YYYY_HH_MM_SS_A)}
             </td>
             <td>
-              <Badge>{task.statusName}</Badge>
+              {task.completedDate
+                ? DateTime.fromISO(task.completedDate).toLocal().toFormat(DAY_MM_DD_YYYY_HH_MM_SS_A)
+                : "N/A"}
             </td>
             <td>
               <Group>
@@ -165,6 +176,7 @@ const Tasks: React.FC<OwnProps> = () => {
 
                 <th>Title</th>
                 <th>Created Date</th>
+                <th>Deadline</th>
                 <th>Completed Date</th>
                 <th>Actions</th>
               </tr>
@@ -173,11 +185,11 @@ const Tasks: React.FC<OwnProps> = () => {
           </Table>
         </ScrollArea>
       </ScrollArea>
-      {/* <_AddCompanyModal
-        title="Add Company"
-        opened={addCompanyModalOpened}
-        onClose={() => setAddCompanyModalOpened(false)}
-      /> */}
+      <_AddTaskModal
+        title="Add Task"
+        opened={addTaskModalOpened}
+        onClose={() => setAddTaskModalOpened(false)}
+      />
       <Modal
         centered
         radius="md"
@@ -198,6 +210,7 @@ const Tasks: React.FC<OwnProps> = () => {
               notify("Update Task Status", "Invalid status value", "error");
               return;
             }
+            setSelectedStatus(value);
             const typeName = taskStatusList.find((status) => status.value === value)?.label;
             if (!typeName) return;
             dispatch(
@@ -207,12 +220,13 @@ const Tasks: React.FC<OwnProps> = () => {
                 statusName: typeName,
               })
             );
+            notify("Update Task Status", "Task status updated successfully!", "success");
             hideUpdateStatusModal();
           }}
         >
           <div className={gclasses.radioContainer}>
             {taskStatusList.map((value) => {
-              return <Radio value={value.value} label={value.label} />;
+              return <Radio value={value.value} label={value.label} key={value.value} />;
             })}
           </div>
         </Radio.Group>

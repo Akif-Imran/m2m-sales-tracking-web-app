@@ -74,16 +74,21 @@ export const selectUsersBasedOnType = createSelector(selectUsers, (users) => {
 });
 export const selectRecordsForDropdown = createSelector(
   selectCompanies,
+  selectProjects,
   selectDepartments,
   selectUserTypes,
   selectUsers,
   selectProjectStatusList,
   selectTaskStatusList,
-  (companies, departments, userTypes, users, projectStatus, taskStatus) => {
+  (companies, projects, departments, userTypes, users, projectStatus, taskStatus) => {
     return {
       companies: companies.data.map((company) => ({
         value: company.id.toString(),
         label: company.name,
+      })),
+      projects: projects.data.map((project) => ({
+        value: project.id.toString(),
+        label: project.name,
       })),
       departments: departments.data.map((department) => ({
         value: department.id.toString(),

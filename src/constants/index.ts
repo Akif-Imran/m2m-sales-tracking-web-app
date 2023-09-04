@@ -25,6 +25,14 @@ export const projectStatusColors: Record<string, string> = {
   "Follow Up": "yellow",
 };
 
+export const taskStatusColors: Record<string, string> = {
+  Pending: "red",
+  Accepted: "blue",
+  Declined: "dark",
+  Delayed: "orange",
+  Completed: "green",
+};
+
 export enum DriverFilters {
   "ALL" = 1,
   "ASSIGNED" = 2,

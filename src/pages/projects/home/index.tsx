@@ -243,7 +243,7 @@ const Projects: React.FC<OwnProps> = () => {
         >
           <div className={gclasses.radioContainer}>
             {projectStatusList.map((value) => {
-              return <Radio value={value.value} label={value.label} />;
+              return <Radio value={value.value} label={value.label} key={value.value} />;
             })}
           </div>
         </Radio.Group>

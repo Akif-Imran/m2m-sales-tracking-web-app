@@ -38,6 +38,9 @@ interface OwnProps {}
 
 const Projects: React.FC<OwnProps> = () => {
   useStyles();
+  const {
+    state: { isAdmin },
+  } = useAuthContext();
   const dispatch = useAppDispatch();
   const { classes: gclasses, theme } = useGStyles();
   const {
@@ -152,18 +155,22 @@ const Projects: React.FC<OwnProps> = () => {
               <td>{DateTime.fromISO(project.startDate).toLocal().toFormat(DAY_MM_DD_YYYY)}</td>
               <td>{DateTime.fromISO(project.plannedEndDate).toLocal().toFormat(DAY_MM_DD_YYYY)}</td>
               <td>
-                <Group>
-                  <ActionIcon
-                    color="gray"
-                    size={"sm"}
-                    onClick={() => showUpdateStatusModal(project.statusId, project.id)}
-                  >
-                    <IconRotateClockwise2 />
-                  </ActionIcon>
-                  <ActionIcon color="red" size={"sm"} onClick={() => handleDelete(project.id)}>
-                    <IconTrash />
-                  </ActionIcon>
-                </Group>
+                {isAdmin ? (
+                  <Group>
+                    <ActionIcon
+                      color="gray"
+                      size={"sm"}
+                      onClick={() => showUpdateStatusModal(project.statusId, project.id)}
+                    >
+                      <IconRotateClockwise2 />
+                    </ActionIcon>
+                    <ActionIcon color="red" size={"sm"} onClick={() => handleDelete(project.id)}>
+                      <IconTrash />
+                    </ActionIcon>
+                  </Group>
+                ) : (
+                  "Admin Required"
+                )}
               </td>
             </tr>
           );
@@ -184,13 +191,15 @@ const Projects: React.FC<OwnProps> = () => {
           //   <IconFilter size={14} color={colors.borderColor} onClick={showFilterModal} />
           // }
         />
-        <Button
-          variant="filled"
-          rightIcon={<IconPlus size={16} />}
-          onClick={() => setAddProjectModalOpened(true)}
-        >
-          Project
-        </Button>
+        {isAdmin && (
+          <Button
+            variant="filled"
+            rightIcon={<IconPlus size={16} />}
+            onClick={() => setAddProjectModalOpened(true)}
+          >
+            Project
+          </Button>
+        )}
       </Flex>
       <ScrollArea type="scroll" h={"80vh"}>
         <ScrollArea w={"140vw"}>

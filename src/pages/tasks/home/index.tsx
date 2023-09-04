@@ -36,7 +36,7 @@ interface OwnProps {}
 const Tasks: React.FC<OwnProps> = () => {
   useStyles();
   const {
-    state: { user },
+    state: { user, isAdmin },
   } = useAuthContext();
   const dispatch = useAppDispatch();
   const { classes: gclasses, theme } = useGStyles();
@@ -146,14 +146,22 @@ const Tasks: React.FC<OwnProps> = () => {
                 : "N/A"}
             </td>
             <td>
-              <Group>
-                <ActionIcon color="gray" size={"sm"} onClick={() => showUpdateStatusModal(task.id)}>
-                  <IconRotateClockwise2 />
-                </ActionIcon>
-                <ActionIcon color="red" size={"sm"} onClick={() => handleDelete(task.id)}>
-                  <IconTrash />
-                </ActionIcon>
-              </Group>
+              {isAdmin ? (
+                <Group>
+                  <ActionIcon
+                    color="gray"
+                    size={"sm"}
+                    onClick={() => showUpdateStatusModal(task.id)}
+                  >
+                    <IconRotateClockwise2 />
+                  </ActionIcon>
+                  <ActionIcon color="red" size={"sm"} onClick={() => handleDelete(task.id)}>
+                    <IconTrash />
+                  </ActionIcon>
+                </Group>
+              ) : (
+                "Admin Required"
+              )}
             </td>
           </tr>
         ))}
@@ -170,13 +178,15 @@ const Tasks: React.FC<OwnProps> = () => {
           icon={<IconSearch size={16} />}
           onChange={(e) => onChangeSearch(e.target?.value)}
         />
-        <Button
-          variant="filled"
-          rightIcon={<IconPlus size={16} />}
-          onClick={() => setAddTaskModalOpened(true)}
-        >
-          Task
-        </Button>
+        {isAdmin && (
+          <Button
+            variant="filled"
+            rightIcon={<IconPlus size={16} />}
+            onClick={() => setAddTaskModalOpened(true)}
+          >
+            Task
+          </Button>
+        )}
       </Flex>
       <ScrollArea type="scroll" h={"80vh"}>
         <ScrollArea w={"120vw"}>

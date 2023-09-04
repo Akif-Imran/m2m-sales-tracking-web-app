@@ -55,6 +55,8 @@ type ActivePage =
   | "Settings"
   | "Help"
   | "About";
+
+const removePages: ActivePage[] = ["Company", "Users"];
 interface NavbarButtons {
   link: string;
   label: ActivePage;
@@ -125,7 +127,7 @@ const _Header = ({ toggleNavbar, opened }: _HeaderProps) => {
   const { classes, theme, cx } = useStyles();
   const [notificationOpened, setNotificationOpened] = useState(false);
   const {
-    state: { token, user },
+    state: { token, user, isAdmin },
     logout,
   } = useAuthContext();
   const [notifications, _setNotifications] = React.useState<INotification[]>([]);
@@ -228,33 +230,35 @@ const _Header = ({ toggleNavbar, opened }: _HeaderProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active]);
 
-  const links = data.map((item) => {
-    // we need to make change to the api need to inform yahya about them.
-    return (
-      <Tooltip
-        label={item.label}
-        withinPortal
-        position="bottom"
-        arrowPosition="center"
-        withArrow
-        key={item.label}
-      >
-        <NavLink
-          className={cx(classes.link, {
-            [classes.linkActive]: item.label === active,
-            [classes.iconCentered]: !opened,
-          })}
-          to={item.link}
-          onClick={(_event) => {
-            setActive(item.label);
-          }}
+  const links = data
+    .filter((value) => (isAdmin ? true : !removePages.includes(value.label)))
+    .map((item) => {
+      // we need to make change to the api need to inform yahya about them.
+      return (
+        <Tooltip
+          label={item.label}
+          withinPortal
+          position="bottom"
+          arrowPosition="center"
+          withArrow
+          key={item.label}
         >
-          <item.icon className={classes.linkIcon} stroke={1.5} />
-          {opened && <span>{item.label}</span>}
-        </NavLink>
-      </Tooltip>
-    );
-  });
+          <NavLink
+            className={cx(classes.link, {
+              [classes.linkActive]: item.label === active,
+              [classes.iconCentered]: !opened,
+            })}
+            to={item.link}
+            onClick={(_event) => {
+              setActive(item.label);
+            }}
+          >
+            <item.icon className={classes.linkIcon} stroke={1.5} />
+            {opened && <span>{item.label}</span>}
+          </NavLink>
+        </Tooltip>
+      );
+    });
 
   const rows = isFetching ? (
     <Stack>

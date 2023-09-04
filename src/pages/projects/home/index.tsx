@@ -36,6 +36,13 @@ import { useAuthContext } from "@contexts";
 
 interface OwnProps {}
 
+interface ProjectSort {
+  statusName: string;
+  projectManagerId: string;
+  salesPersonId: string;
+  // Add other properties as needed
+}
+
 const Projects: React.FC<OwnProps> = () => {
   useStyles();
   const {
@@ -46,6 +53,7 @@ const Projects: React.FC<OwnProps> = () => {
   const {
     state: { user },
   } = useAuthContext();
+
   const [searchQuery, setSearchQuery] = React.useState("");
   const { data: projects } = useAppSelector(selectProjects);
   const { data: companies } = useAppSelector(selectCompanies);
@@ -57,6 +65,11 @@ const Projects: React.FC<OwnProps> = () => {
   const [visible, setVisible] = React.useState<boolean>(false);
   const [selectedStatus, setSelectedStatus] = React.useState<string>();
   const [selectedProject, setSelectedProject] = React.useState<number>(0);
+  const [sortOrder, setSortOrder] = React.useState<ProjectSort>({
+    statusName: "asc", // Initial sorting order (asc or desc)
+    projectManagerId: "asc",
+    salesPersonId: "asc",
+  });
 
   const showUpdateStatusModal = (statusId: number, projectId: number) => {
     setSelectedStatus(statusId.toString());
@@ -80,6 +93,26 @@ const Projects: React.FC<OwnProps> = () => {
       );
       setSearchedData(filtered);
     }
+  };
+
+  const sortData = (columnName: keyof ProjectSort) => {
+    const sortOrderCopy = { ...sortOrder };
+    sortOrderCopy[columnName] = sortOrderCopy[columnName] === "asc" ? "desc" : "asc";
+    setSortOrder(sortOrderCopy);
+
+    // Sort your data based on the selected column
+    // For example, if columnName is 'status':
+    const sortedData = [...searchedData].sort((a, b) => {
+      const valueA = a[columnName].toString().toLowerCase();
+      const valueB = b[columnName].toString().toLowerCase();
+      if (sortOrderCopy[columnName] === "asc") {
+        return valueA.localeCompare(valueB);
+      } else {
+        return valueB.localeCompare(valueA);
+      }
+    });
+
+    setSearchedData(sortedData);
   };
 
   React.useEffect(() => {
@@ -215,15 +248,21 @@ const Projects: React.FC<OwnProps> = () => {
                 <th>Logo</th>
                 <th>Id</th>
                 <th>Name</th>
-                <th>Status</th>
+                <th onClick={() => sortData("statusName")}>
+                  Status {sortOrder.statusName === "asc" ? "▲" : "▼"}
+                </th>
 
                 <th>Customer Name</th>
                 <th>Project Type</th>
                 <th>City</th>
                 <th>Value (RM)</th>
 
-                <th>Sales Person</th>
-                <th>Project Manager</th>
+                <th onClick={() => sortData("salesPersonId")}>
+                  Sales Person {sortOrder.salesPersonId === "asc" ? "▲" : "▼"}
+                </th>
+                <th onClick={() => sortData("projectManagerId")}>
+                  Project Manager {sortOrder.projectManagerId === "asc" ? "▲" : "▼"}
+                </th>
                 <th>Start Date</th>
                 <th>Planned End Date</th>
                 <th>Actions</th>

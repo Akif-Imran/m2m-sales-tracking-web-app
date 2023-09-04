@@ -10,6 +10,8 @@ import {
   Grid,
   Group,
   Modal,
+  PasswordInput,
+  Select,
   Stack,
   TextInput,
   rem,
@@ -17,39 +19,41 @@ import {
 import { useFormik } from "formik";
 import { IconUpload } from "@tabler/icons-react";
 import { notify } from "@utility";
-import { useAppDispatch } from "@store";
-import { addCompany } from "@slices";
+import { selectRecordsForDropdown, useAppDispatch, useAppSelector } from "@store";
+import { addUser } from "@slices";
 
 interface OwnProps {
   opened: boolean;
   onClose: () => void;
   title: string;
 }
-interface ICompanyForm extends Omit<ICompany, "id"> {}
+interface IUserForm extends Omit<IUser, "id"> {}
 
-const _AddCompanyModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
+const _AddUserModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
   const { theme, classes } = useStyles();
+  const { companies, departments, userTypes } = useAppSelector(selectRecordsForDropdown);
   const dispatch = useAppDispatch();
 
-  const company = useFormik<ICompanyForm>({
+  const company = useFormik<IUserForm>({
     initialValues: {
-      logo: "",
-      name: "",
-      contact: {
-        name: "",
-        designation: "",
-        email: "",
-        phone: "",
-      },
-      email: "",
-      phone: "",
-      address: "",
-      city: "",
-      country: "",
+      avatar: "", //
+      firstName: "", //
+      lastName: "", //
+      email: "", //
+      password: "", //
+      phone: "", //
+      address: "", //
+      city: "", //
+      country: "", //
+      companyId: 0, //
+      departmentId: 0,
+      departmentName: "",
+      userTypeId: 0,
+      userTypeName: "",
     },
     onSubmit(values, helpers) {
       console.log(values);
-      dispatch(addCompany(values));
+      dispatch(addUser(values));
       helpers.resetForm();
       onClose();
     },
@@ -64,7 +68,7 @@ const _AddCompanyModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
     reader.onload = (e) => {
       const dataUri = e?.target?.result as string;
       if (dataUri) {
-        company.setValues((prev) => ({ ...prev, logo: dataUri }));
+        company.setValues((prev) => ({ ...prev, avatar: dataUri }));
       }
     };
     reader.readAsDataURL(file);
@@ -76,11 +80,31 @@ const _AddCompanyModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
     company.resetForm();
     onClose();
   };
+  const handleOnChangeUserType = (value: string | null) => {
+    if (!value) return;
+    const typeName = userTypes.find((type) => type.value === value)?.label;
+    if (!typeName) return;
+    company.setValues((prev) => ({
+      ...prev,
+      userTypeId: parseInt(value),
+      userTypeName: typeName,
+    }));
+  };
+
+  const handleOnChangeDepartment = (value: string | null) => {
+    if (!value) return;
+    const typeName = departments.find((type) => type.value === value)?.label;
+    if (!typeName) return;
+    company.setValues((prev) => ({
+      ...prev,
+      departmentId: parseInt(value),
+      departmentName: typeName,
+    }));
+  };
 
   return (
     <Modal
       size="xl"
-      // fullScreen
       withinPortal
       withOverlay
       title={title}
@@ -90,8 +114,8 @@ const _AddCompanyModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
     >
       <Stack>
         <Flex direction={"column"} align={"center"} justify={"flex-end"}>
-          {company.values.logo ? (
-            <Avatar src={company.values.logo} radius={rem(250)} size={rem(170)} />
+          {company.values.avatar ? (
+            <Avatar src={company.values.avatar} radius={rem(250)} size={rem(170)} />
           ) : (
             <Avatar src={"/user.png"} radius={rem(250)} size={rem(170)} />
           )}
@@ -105,7 +129,7 @@ const _AddCompanyModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
                   {...props}
                   rightIcon={<IconUpload size={16} color={theme.white} stroke={1.5} />}
                 >
-                  Logo
+                  Avatar
                 </Button>
               )}
             </FileButton>
@@ -114,35 +138,25 @@ const _AddCompanyModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
         <Grid columns={25}>
           <Grid.Col span={12}>
             <Stack spacing={"xs"}>
-              <Divider label="Company" labelPosition="center" />
-              <TextInput
-                required
-                withAsterisk={false}
-                label="Name"
-                name="name"
-                id="name"
-                value={company.values.name}
-                onChange={company.handleChange}
-                onBlur={company.handleBlur}
-              />
+              <Divider label="User" labelPosition="center" />
               <Group grow align="flex-start">
                 <TextInput
                   required
                   withAsterisk={false}
-                  label="Email"
-                  name="email"
-                  id="email"
-                  value={company.values.email}
+                  label="First Name"
+                  name="firstName"
+                  id="firstName"
+                  value={company.values.firstName}
                   onChange={company.handleChange}
                   onBlur={company.handleBlur}
                 />
                 <TextInput
                   required
                   withAsterisk={false}
-                  label="Phone"
-                  name="phone"
-                  id="phone"
-                  value={company.values.phone}
+                  label="Last Name"
+                  name="lastName"
+                  id="lastName"
+                  value={company.values.lastName}
                   onChange={company.handleChange}
                   onBlur={company.handleBlur}
                 />
@@ -150,12 +164,27 @@ const _AddCompanyModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
               <TextInput
                 required
                 withAsterisk={false}
-                label="Address"
-                name="address"
-                id="address"
-                value={company.values.address}
+                label="Email"
+                name="email"
+                id="email"
+                value={company.values.email}
                 onChange={company.handleChange}
                 onBlur={company.handleBlur}
+              />
+              <PasswordInput
+                required
+                withAsterisk={false}
+                label="Password"
+                name="password"
+                id="password"
+                value={company.values.password}
+                onChange={company.handleChange}
+                onBlur={company.handleBlur}
+                error={
+                  company.touched.password && company.errors.password
+                    ? `${company.errors.password}`
+                    : null
+                }
               />
               <Group grow align="flex-start">
                 <TextInput
@@ -179,6 +208,16 @@ const _AddCompanyModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
                   onBlur={company.handleBlur}
                 />
               </Group>
+              <TextInput
+                required
+                withAsterisk={false}
+                label="Address"
+                name="address"
+                id="address"
+                value={company.values.address}
+                onChange={company.handleChange}
+                onBlur={company.handleBlur}
+              />
             </Stack>
           </Grid.Col>
 
@@ -186,49 +225,52 @@ const _AddCompanyModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
 
           <Grid.Col span={12}>
             <Stack spacing={"xs"}>
-              <Divider label="Contact" labelPosition="center" />
+              <Divider label="More Details" labelPosition="center" />
               <TextInput
                 required
                 withAsterisk={false}
-                label="Name"
-                name="contact.name"
-                id="contact.name"
-                value={company.values.contact.name}
+                placeholder="+XX XXX XXXXXXX"
+                label="Mobile No."
+                name="phone"
+                id="phone"
+                value={company.values.phone}
                 onChange={company.handleChange}
                 onBlur={company.handleBlur}
               />
               <Group grow align="flex-start">
-                <TextInput
+                <Select
                   required
                   withAsterisk={false}
-                  label="Email"
-                  name="contact.email"
-                  id="contact.email"
-                  value={company.values.contact.email}
-                  onChange={company.handleChange}
-                  onBlur={company.handleBlur}
+                  searchable
+                  nothingFound="No Companies"
+                  label="Company"
+                  value={company.values.companyId.toString()}
+                  onChange={(value) => {
+                    if (!value) return;
+                    company.setValues((prev) => ({ ...prev, companyId: parseInt(value) }));
+                  }}
+                  data={companies}
                 />
-                <TextInput
+                <Select
                   required
                   withAsterisk={false}
-                  label="Phone"
-                  placeholder="+60 123 4562345"
-                  name="contact.phone"
-                  id="contact.phone"
-                  value={company.values.contact.phone}
-                  onChange={company.handleChange}
-                  onBlur={company.handleBlur}
+                  searchable
+                  nothingFound="No Departments"
+                  label="Department"
+                  value={company.values.departmentId.toString()}
+                  onChange={handleOnChangeDepartment}
+                  data={departments}
                 />
               </Group>
-              <TextInput
+              <Select
                 required
                 withAsterisk={false}
-                label="Designation"
-                name="contact.designation"
-                id="contact.designation"
-                value={company.values.contact.designation}
-                onChange={company.handleChange}
-                onBlur={company.handleBlur}
+                searchable
+                nothingFound="No Such User Type"
+                label="User Type"
+                value={company.values.userTypeId.toString()}
+                onChange={handleOnChangeUserType}
+                data={userTypes}
               />
 
               <Group align="flex-end" position="right" mt={rem(32)}>
@@ -247,4 +289,4 @@ const _AddCompanyModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
   );
 };
 
-export { _AddCompanyModal };
+export { _AddUserModal };

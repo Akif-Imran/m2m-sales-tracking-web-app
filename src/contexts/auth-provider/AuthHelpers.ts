@@ -1,7 +1,7 @@
 import type { AuthModel } from "../types";
 import type { AxiosStatic } from "axios";
 
-const AUTH_LOCAL_STORAGE_KEY = "m2m-forklift-fleet-auth";
+const AUTH_LOCAL_STORAGE_KEY = "m2m-sales-tracking-auth";
 const getAuth = async (): Promise<AuthModel | undefined> => {
   if (!localStorage) {
     return;

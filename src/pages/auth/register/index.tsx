@@ -44,7 +44,7 @@ const OTPSchema = yup.object().shape({
 });
 
 const Register: React.FC = () => {
-  const { classes, } = useStyles();
+  const { classes, theme } = useStyles();
   const [_rememberMe, _setRememberMe] = React.useState(true);
   const [isRegistering, _setIsRegistering] = React.useState(true);
   const [_requestId, _setRequestId] = React.useState("");
@@ -65,24 +65,6 @@ const Register: React.FC = () => {
     },
     onSubmit: (values, _helpers) => {
       console.log("onSubmit for login", values);
-      /*  createCompany({
-        name: values.name,
-        email: values.email,
-        password: values.password,
-      })
-        .then((res) => {
-          notify("Register", res.message, res.success ? "success" : "error");
-          if (res.success) {
-            setIsRegistering(false);
-            setRequestId(res.request_id);
-            console.log("response", res);
-            // helpers.resetForm();
-          }
-        })
-        .catch((err) => {
-          notify("Register", "An error occurred.", "error");
-        })
-        .finally(() => {}); */
     },
     validationSchema: RegisterSchema,
   });
@@ -91,33 +73,9 @@ const Register: React.FC = () => {
     initialValues: {
       otp: "",
     },
-    onSubmit: (_values, _helpers) => {
-      /*       verifyOTP({
-        code: values.otp,
-        request_id: requestId,
-      })
-        .then((res) => {
-          if (res.success) {
-            notify("Verify", res.message, res.success ? "success" : "error");
-            navigate(routes.auth.login);
-          } else {
-            notify("Verify", res.message, res.success ? "success" : "error");
-          }
-        })
-        .catch((err) => {
-          notify("Register", "An error occurred.", "error");
-        }); */
-    },
+    onSubmit: (_values, _helpers) => {},
     validationSchema: OTPSchema,
   });
-
-  /*   React.useLayoutEffect(() => {
-    const creds = localStorage.getItem("login");
-    if (!creds) return;
-    const { email, password } = JSON.parse(creds);
-    form.initialValues.email = email;
-    form.initialValues.password = password;
-  }, []); */
 
   React.useEffect(() => {
     if (isAuthorized) navigate(redirectPath, { replace: true });
@@ -139,11 +97,16 @@ const Register: React.FC = () => {
               fontWeight: 900,
             })}
           >
-            Smart Fleet
+            Sales Tracking
           </Title>
           <Text color="white" size="sm" align="center" mt={5}>
             Fill out the fields below to create an account.{" "}
-            <Anchor size="sm" component="button" onClick={() => navigate(routes.auth.login)}>
+            <Anchor
+              size="sm"
+              component="button"
+              onClick={() => navigate(routes.auth.login)}
+              color={theme.primaryColor === "dark" ? "white" : theme.primaryColor}
+            >
               Already a member?
             </Anchor>
           </Text>

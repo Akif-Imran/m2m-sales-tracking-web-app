@@ -1,51 +1,86 @@
 type IUserType = "Admin" | "Sales" | "Driver";
-interface ILoginUserData {
+interface IUserAccountType {
   id: number;
   name: string;
+}
+interface IUser {
+  avatar: string;
+  id: number;
+  firstName: string;
+  lastName: string;
+  companyId: number;
   email: string;
   password: string;
-  user_type_id: number;
-  phone: null;
-  address: null;
-  state: null;
-  country: null;
-  company_id: null;
-  parent_id: null;
-  profile_picture: null;
-  fcm_token: null;
-  is_active: boolean;
-  createdAt: string;
-  updatedAt: null;
-  user_type: IUserType;
-}
-
-interface ICompany {
-  logo: string;
-  _id: string;
-  name: string;
-  contactPersonId: string;
-  designation: string;
-  email: string;
   phone: string;
+  departmentId: number;
+  departmentName: string;
   address: string;
   city: string;
   country: string;
+  userTypeId: number;
+  userTypeName: string;
+}
+type ILoginUserData = IUser;
+
+interface ICompanyContact {
+  id: number;
+  name: string;
+  designation: string;
+  email: string;
+  phone: string;
+  companyId: number;
+}
+interface ICompany {
+  id: number;
+  logo: string;
+  name: string;
+  email: string;
+  phone: string;
+  address: string;
+  contact: {
+    name: string;
+    designation: string;
+    email: string;
+    phone: string;
+  };
+  city: string;
+  country: string;
+}
+interface IProjectStatus {
+  id: number;
+  name: string;
 }
 interface IProject {
   logo: string;
-  _id: string;
+  id: number;
   name: string;
-  customerName: string; //company
+  companyId: number; //company
   projectType: string;
   city: string;
   value: number; //value in RM
-  salesPerson: number;
-  projectManager: number;
+  salesPersonId: number;
+  projectManagerId: number;
   startDate: string;
-  endDate: string;
-  status: string;
+  plannedEndDate: string;
+  statusId: number;
+  statusName: string;
 }
-type ITaskStatusType = "Pending" | "Accepted" | "Declined" | "Deployed" | "Completed";
+interface ITaskStatus {
+  id: number;
+  name: string;
+}
+interface ITask {
+  id: number;
+  projectId: number;
+  assigneeId: number;
+  title: string;
+  description: string;
+  createdDate: string;
+  plannedEndDate: string;
+  completedDate: string;
+  statusId: number;
+  statusName: string;
+}
 interface INotification {
   title: string;
   body: string;
@@ -57,4 +92,9 @@ interface INotification {
   _id: string;
   data: Record<string, number | string | boolean | null>;
   __v: number;
+}
+
+interface IDepartmentType {
+  id: number;
+  name: string;
 }

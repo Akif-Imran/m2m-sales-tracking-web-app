@@ -18,10 +18,19 @@ export const PoiTypesColor: Record<string, string> = {
   total: colors.titleText,
 } as const;
 
-export const serviceColors: Record<string, string> = {
-  Pending: "red",
+export const projectStatusColors: Record<string, string> = {
+  "In Development": "blue",
   Completed: "green",
-  "In Process": "dark",
+  Quotation: "red",
+  "Follow Up": "yellow",
+};
+
+export const taskStatusColors: Record<string, string> = {
+  Pending: "red",
+  Accepted: "blue",
+  Declined: "dark",
+  Delayed: "orange",
+  Completed: "green",
 };
 
 export enum DriverFilters {

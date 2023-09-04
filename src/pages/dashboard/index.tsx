@@ -6,6 +6,7 @@ import {
   Card,
   Flex,
   Grid,
+  Loader,
   ScrollArea,
   Select,
   Table,
@@ -18,6 +19,10 @@ import { IconCalendar, IconGraph } from "@tabler/icons-react";
 import { useToggle } from "@mantine/hooks";
 import { DateTime } from "luxon";
 import { DAY_MM_DD_YYYY_HH_MM_SS_A } from "@constants";
+import FullCalendar from "@fullcalendar/react";
+import dayGridPlugin from "@fullcalendar/daygrid";
+
+import { selectTasksCombined, useAppSelector } from "@store";
 
 interface OwnProps {}
 interface ChartData {
@@ -28,6 +33,8 @@ interface ChartData {
 const Dashboard: React.FC<OwnProps> = () => {
   const { classes, theme } = useStyles();
   // const [isFetching, setIsFetching] = React.useState(false);
+  const { tasks } = useAppSelector(selectTasksCombined);
+  const [calendarLoading, setIsCalendarLoading] = React.useState<boolean>(false);
   const [projectCounts, setProjectsCounts] = React.useState<ChartData>();
   const [projectValueCounts, setProjectValueCounts] = React.useState<ChartData>();
   const [projectTargetCounts, setProjectTargetCounts] = React.useState<ChartData>();
@@ -108,6 +115,8 @@ const Dashboard: React.FC<OwnProps> = () => {
       },
     },
   };
+
+  console.log(tasks);
 
   const drawProjectCharts = React.useCallback(() => {
     const projectsLegends = [
@@ -377,7 +386,24 @@ const Dashboard: React.FC<OwnProps> = () => {
       </Tabs.Panel>
 
       <Tabs.Panel value="calendar" pt={"sm"}>
-        <div>Under development</div>
+        {calendarLoading ? (
+          <Loader />
+        ) : (
+          <FullCalendar
+            plugins={[dayGridPlugin]}
+            height={"80vh"}
+            contentHeight={"auto"}
+            initialView="dayGridMonth"
+            loading={(loading) => setIsCalendarLoading(loading)}
+            events={tasks.map((task) => ({
+              title: task.title,
+              start: task.createdDate,
+              end: task.plannedEndDate,
+              backgroundColor: theme.colors[theme.primaryColor][6],
+              borderColor: theme.colors[theme.primaryColor][6],
+            }))}
+          />
+        )}
       </Tabs.Panel>
     </Tabs>
   );

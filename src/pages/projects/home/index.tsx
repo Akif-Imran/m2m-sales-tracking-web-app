@@ -32,6 +32,7 @@ import { deleteProject, updateProjectStatus } from "@slices";
 import { _AddProjectModal } from "../components";
 import { DateTime } from "luxon";
 import { DAY_MM_DD_YYYY, projectStatusColors } from "@constants";
+import { useAuthContext } from "@contexts";
 
 interface OwnProps {}
 
@@ -39,6 +40,9 @@ const Projects: React.FC<OwnProps> = () => {
   useStyles();
   const dispatch = useAppDispatch();
   const { classes: gclasses, theme } = useGStyles();
+  const {
+    state: { user },
+  } = useAuthContext();
   const [searchQuery, setSearchQuery] = React.useState("");
   const { data: projects } = useAppSelector(selectProjects);
   const { data: companies } = useAppSelector(selectCompanies);
@@ -60,15 +64,31 @@ const Projects: React.FC<OwnProps> = () => {
 
   const onChangeSearch = (query: string) => {
     setSearchQuery(query);
-    const filtered = projects.filter((company) =>
-      company.name.toLowerCase().includes(query.toLocaleLowerCase())
-    );
-    setSearchedData(filtered);
+    if (user?.userTypeName === "Admin") {
+      const filtered = projects.filter((project) =>
+        project.name.toLowerCase().includes(query.toLowerCase())
+      );
+      setSearchedData(filtered);
+    } else {
+      const filtered = projects.filter(
+        (project) =>
+          project.name.toLowerCase().includes(query.toLowerCase()) &&
+          (project.salesPersonId === user?.id || project.projectManagerId === user?.id)
+      );
+      setSearchedData(filtered);
+    }
   };
 
   React.useEffect(() => {
-    setSearchedData(projects);
-  }, [projects]);
+    if (user?.userTypeName === "Admin") {
+      setSearchedData(projects);
+    } else {
+      const filtered = projects.filter(
+        (project) => project.salesPersonId === user?.id || project.projectManagerId === user?.id
+      );
+      setSearchedData(filtered);
+    }
+  }, [projects, user]);
 
   const handleDelete = (id: number) => {
     openDeleteModalHelper({

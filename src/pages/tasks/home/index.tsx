@@ -29,11 +29,15 @@ import { modalOverlayPropsHelper, openDeleteModalHelper } from "@helpers";
 import { notify } from "@utility";
 import { deleteTask, updateTaskStatus } from "@slices";
 import { _AddTaskModal } from "../components";
+import { useAuthContext } from "@contexts";
 
 interface OwnProps {}
 
 const Tasks: React.FC<OwnProps> = () => {
   useStyles();
+  const {
+    state: { user },
+  } = useAuthContext();
   const dispatch = useAppDispatch();
   const { classes: gclasses, theme } = useGStyles();
   const [searchQuery, setSearchQuery] = React.useState("");
@@ -55,19 +59,36 @@ const Tasks: React.FC<OwnProps> = () => {
 
   const onChangeSearch = (query: string) => {
     setSearchQuery(query);
-    const filtered = tasks.filter(
-      (task) =>
-        task.assignee?.firstName.toLowerCase().includes(query.toLowerCase()) ||
-        task.assignee?.lastName.toLowerCase().includes(query.toLowerCase()) ||
-        task.statusName.toLowerCase().includes(query.toLowerCase()) ||
-        task.title.toLowerCase().includes(query.toLowerCase())
-    );
-    setSearchedData(filtered);
+    if (user?.userTypeName === "Admin") {
+      const filtered = tasks.filter(
+        (task) =>
+          task.assignee?.firstName.toLowerCase().includes(query.toLowerCase()) ||
+          task.assignee?.lastName.toLowerCase().includes(query.toLowerCase()) ||
+          task.statusName.toLowerCase().includes(query.toLowerCase()) ||
+          task.title.toLowerCase().includes(query.toLowerCase())
+      );
+      setSearchedData(filtered);
+    } else {
+      const filtered = tasks.filter(
+        (task) =>
+          (task.assignee?.firstName.toLowerCase().includes(query.toLowerCase()) ||
+            task.assignee?.lastName.toLowerCase().includes(query.toLowerCase()) ||
+            task.statusName.toLowerCase().includes(query.toLowerCase()) ||
+            task.title.toLowerCase().includes(query.toLowerCase())) &&
+          task.assigneeId === user?.id
+      );
+      setSearchedData(filtered);
+    }
   };
 
   React.useEffect(() => {
-    setSearchedData(tasks);
-  }, [tasks]);
+    if (user?.userTypeName === "Admin") {
+      setSearchedData(tasks);
+    } else {
+      const filtered = tasks.filter((task) => task.assigneeId === user?.id);
+      setSearchedData(filtered);
+    }
+  }, [tasks, user]);
 
   const handleDelete = (id: number) => {
     openDeleteModalHelper({

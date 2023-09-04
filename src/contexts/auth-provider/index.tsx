@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import { Center, Container, Stack, Text } from "@mantine/core";
-import { apiLogin } from "@services";
 import { colors } from "@theme";
 import TopBarProgress from "react-topbar-progress-indicator";
 import { notify } from "@utility";
 
 import * as authHelpers from "./AuthHelpers";
+import { selectUsers, useAppSelector } from "@store";
 
 /* interface UserContextType {
   isAuthorized: boolean;
@@ -112,7 +112,8 @@ interface AuthState {
   token: string;
   user: ILoginUserData | null;
   isAdmin: boolean;
-  isDriver: boolean;
+  isSales: boolean;
+  isEngineer: boolean;
 }
 
 type AuthAction =
@@ -151,15 +152,17 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
         isAuthorized: false,
         isLoading: false,
         isAdmin: false,
-        isDriver: false,
+        isEngineer: false,
+        isSales: false,
       };
     case "LOGIN":
       return {
         ...state,
         token: action.payload.token,
         user: action.payload.user,
-        isAdmin: action.payload.user.user_type === "Admin",
-        isDriver: action.payload.user.user_type === "Driver",
+        isAdmin: action.payload.user.userTypeName === "Admin",
+        isSales: action.payload.user.userTypeName === "Sales",
+        isEngineer: action.payload.user.userTypeName === "Engineer",
         isAuthorized: true,
         isLoading: false,
       };
@@ -169,8 +172,9 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
         ...action.payload,
         isLoading: false,
         isAuthorized: true,
-        isAdmin: action.payload.user.user_type === "Admin",
-        isDriver: action.payload.user.user_type === "Driver",
+        isAdmin: action.payload.user.userTypeName === "Admin",
+        isSales: action.payload.user.userTypeName === "Sales",
+        isEngineer: action.payload.user.userTypeName === "Engineer",
       };
     default:
       return state;
@@ -183,12 +187,14 @@ const initAuthState: AuthState = {
   token: "",
   user: null,
   isAdmin: false,
-  isDriver: false,
+  isEngineer: false,
+  isSales: false,
 };
 
 const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
   const [state, dispatch] = React.useReducer(authReducer, initAuthState);
   const [showSplashScreen, setShowSplashScreen] = useState(true);
+  const { data: users } = useAppSelector(selectUsers);
 
   React.useEffect(() => {
     (async () => {
@@ -224,34 +230,34 @@ const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
 
   const logout = React.useCallback(() => dispatch({ type: "LOGOUT" }), []);
 
-  const login = React.useCallback((email: string, password: string, save: boolean) => {
-    dispatch({ type: "LOAD_START" });
-    apiLogin({ email, password })
-      .then((res) => {
-        notify("Login", res?.message || "N/A", res.success ? "success" : "error");
-        if (res.success) {
-          if (save) {
-            authHelpers.setAuth({ token: res.token, user: res.data }).then(() => {
-              dispatch({
-                type: "LOGIN",
-                payload: { user: res.data, save: true, token: res.token },
-              });
-            });
-          } else {
+  const login = React.useCallback(
+    (email: string, password: string, save: boolean) => {
+      dispatch({ type: "LOAD_START" });
+      const user = users.find((user) => user.email === email && user.password === password);
+      if (!user) {
+        notify("Login", "Invalid username or password", "error");
+        dispatch({ type: "LOAD_STOP" });
+        return;
+      } else {
+        if (save) {
+          authHelpers.setAuth({ token: "", user: user }).then(() => {
             dispatch({
               type: "LOGIN",
-              payload: { user: res.data, save: true, token: res.token },
+              payload: { user: user, save: true, token: "" },
             });
-          }
+          });
+        } else {
+          dispatch({
+            type: "LOGIN",
+            payload: { user: user, save: false, token: "" },
+          });
         }
-      })
-      .catch((_err) => {
-        notify("Login", "Login Error occurred. Try again", "error");
-      })
-      .finally(() => {
-        dispatch({ type: "LOAD_STOP" });
-      });
-  }, []);
+      }
+
+      dispatch({ type: "LOAD_STOP" });
+    },
+    [users]
+  );
 
   const value = React.useMemo(() => ({ state, login, logout }), [state, login, logout]);
 

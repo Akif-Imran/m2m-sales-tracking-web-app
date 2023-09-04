@@ -372,10 +372,10 @@ const _Header = ({ toggleNavbar, opened }: _HeaderProps) => {
                 })}
               >
                 <Group spacing={7}>
-                  <Avatar src="/profile.png" alt={user?.name} radius="xl" size={35} />
+                  <Avatar src="/profile.png" alt={user?.firstName} radius="xl" size={35} />
                   <div>
                     <Text weight={700} size="sm" sx={{ lineHeight: 1 }} mr={3}>
-                      {user?.name} ({user?.user_type})
+                      {user?.firstName} {user?.lastName} ({user?.userTypeName})
                     </Text>
                     <Text weight={400} size="sm" sx={{ lineHeight: 1 }} mr={3}>
                       {user?.email}

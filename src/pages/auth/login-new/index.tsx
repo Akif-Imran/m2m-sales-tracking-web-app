@@ -28,7 +28,7 @@ const useStyles = createStyles(() => ({
 }));
 
 const Login: React.FC = () => {
-  const { classes } = useStyles();
+  const { classes, theme } = useStyles();
   const [rememberMe, setRememberMe] = React.useState(true);
   const {
     login,
@@ -82,11 +82,16 @@ const Login: React.FC = () => {
             fontWeight: 900,
           })}
         >
-          Smart Fleet
+          Sales Tracking
         </Title>
         <Text color="white" size="sm" align="center" mt={5}>
           Do not have an account yet?{" "}
-          <Anchor size="sm" component="button" onClick={() => navigate(routes.auth.register)}>
+          <Anchor
+            size="sm"
+            component="button"
+            onClick={() => navigate(routes.auth.register)}
+            color={theme.primaryColor === "dark" ? "white" : theme.primaryColor}
+          >
             Create account
           </Anchor>
         </Text>
@@ -145,6 +150,7 @@ const Login: React.FC = () => {
                 component="button"
                 size="sm"
                 onClick={() => navigate(routes.auth.forget_password)}
+                color={theme.primaryColor === "dark" ? "white" : theme.primaryColor}
               >
                 Forgot password?
               </Anchor>

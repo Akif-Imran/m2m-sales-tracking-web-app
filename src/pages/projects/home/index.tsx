@@ -32,13 +32,28 @@ import { deleteProject, updateProjectStatus } from "@slices";
 import { _AddProjectModal } from "../components";
 import { DateTime } from "luxon";
 import { DAY_MM_DD_YYYY, projectStatusColors } from "@constants";
+import { useAuthContext } from "@contexts";
 
 interface OwnProps {}
 
+interface ProjectSort {
+  statusName: string;
+  projectManagerId: string;
+  salesPersonId: string;
+  // Add other properties as needed
+}
+
 const Projects: React.FC<OwnProps> = () => {
   useStyles();
+  const {
+    state: { isAdmin },
+  } = useAuthContext();
   const dispatch = useAppDispatch();
   const { classes: gclasses, theme } = useGStyles();
+  const {
+    state: { user },
+  } = useAuthContext();
+
   const [searchQuery, setSearchQuery] = React.useState("");
   const { data: projects } = useAppSelector(selectProjects);
   const { data: companies } = useAppSelector(selectCompanies);
@@ -50,6 +65,11 @@ const Projects: React.FC<OwnProps> = () => {
   const [visible, setVisible] = React.useState<boolean>(false);
   const [selectedStatus, setSelectedStatus] = React.useState<string>();
   const [selectedProject, setSelectedProject] = React.useState<number>(0);
+  const [sortOrder, setSortOrder] = React.useState<ProjectSort>({
+    statusName: "asc", // Initial sorting order (asc or desc)
+    projectManagerId: "asc",
+    salesPersonId: "asc",
+  });
 
   const showUpdateStatusModal = (statusId: number, projectId: number) => {
     setSelectedStatus(statusId.toString());
@@ -60,15 +80,51 @@ const Projects: React.FC<OwnProps> = () => {
 
   const onChangeSearch = (query: string) => {
     setSearchQuery(query);
-    const filtered = projects.filter((company) =>
-      company.name.toLowerCase().includes(query.toLocaleLowerCase())
-    );
-    setSearchedData(filtered);
+    if (user?.userTypeName === "Admin") {
+      const filtered = projects.filter((project) =>
+        project.name.toLowerCase().includes(query.toLowerCase())
+      );
+      setSearchedData(filtered);
+    } else {
+      const filtered = projects.filter(
+        (project) =>
+          project.name.toLowerCase().includes(query.toLowerCase()) &&
+          (project.salesPersonId === user?.id || project.projectManagerId === user?.id)
+      );
+      setSearchedData(filtered);
+    }
+  };
+
+  const sortData = (columnName: keyof ProjectSort) => {
+    const sortOrderCopy = { ...sortOrder };
+    sortOrderCopy[columnName] = sortOrderCopy[columnName] === "asc" ? "desc" : "asc";
+    setSortOrder(sortOrderCopy);
+
+    // Sort your data based on the selected column
+    // For example, if columnName is 'status':
+    const sortedData = [...searchedData].sort((a, b) => {
+      const valueA = a[columnName].toString().toLowerCase();
+      const valueB = b[columnName].toString().toLowerCase();
+      if (sortOrderCopy[columnName] === "asc") {
+        return valueA.localeCompare(valueB);
+      } else {
+        return valueB.localeCompare(valueA);
+      }
+    });
+
+    setSearchedData(sortedData);
   };
 
   React.useEffect(() => {
-    setSearchedData(projects);
-  }, [projects]);
+    if (user?.userTypeName === "Admin") {
+      setSearchedData(projects);
+    } else {
+      const filtered = projects.filter(
+        (project) => project.salesPersonId === user?.id || project.projectManagerId === user?.id
+      );
+      setSearchedData(filtered);
+    }
+  }, [projects, user]);
 
   const handleDelete = (id: number) => {
     openDeleteModalHelper({
@@ -132,18 +188,22 @@ const Projects: React.FC<OwnProps> = () => {
               <td>{DateTime.fromISO(project.startDate).toLocal().toFormat(DAY_MM_DD_YYYY)}</td>
               <td>{DateTime.fromISO(project.plannedEndDate).toLocal().toFormat(DAY_MM_DD_YYYY)}</td>
               <td>
-                <Group>
-                  <ActionIcon
-                    color="gray"
-                    size={"sm"}
-                    onClick={() => showUpdateStatusModal(project.statusId, project.id)}
-                  >
-                    <IconRotateClockwise2 />
-                  </ActionIcon>
-                  <ActionIcon color="red" size={"sm"} onClick={() => handleDelete(project.id)}>
-                    <IconTrash />
-                  </ActionIcon>
-                </Group>
+                {isAdmin ? (
+                  <Group>
+                    <ActionIcon
+                      color="gray"
+                      size={"sm"}
+                      onClick={() => showUpdateStatusModal(project.statusId, project.id)}
+                    >
+                      <IconRotateClockwise2 />
+                    </ActionIcon>
+                    <ActionIcon color="red" size={"sm"} onClick={() => handleDelete(project.id)}>
+                      <IconTrash />
+                    </ActionIcon>
+                  </Group>
+                ) : (
+                  "Admin Required"
+                )}
               </td>
             </tr>
           );
@@ -164,13 +224,15 @@ const Projects: React.FC<OwnProps> = () => {
           //   <IconFilter size={14} color={colors.borderColor} onClick={showFilterModal} />
           // }
         />
-        <Button
-          variant="filled"
-          rightIcon={<IconPlus size={16} />}
-          onClick={() => setAddProjectModalOpened(true)}
-        >
-          Project
-        </Button>
+        {isAdmin && (
+          <Button
+            variant="filled"
+            rightIcon={<IconPlus size={16} />}
+            onClick={() => setAddProjectModalOpened(true)}
+          >
+            Project
+          </Button>
+        )}
       </Flex>
       <ScrollArea type="scroll" h={"80vh"}>
         <ScrollArea w={"140vw"}>
@@ -186,15 +248,21 @@ const Projects: React.FC<OwnProps> = () => {
                 <th>Logo</th>
                 <th>Id</th>
                 <th>Name</th>
-                <th>Status</th>
+                <th onClick={() => sortData("statusName")}>
+                  Status {sortOrder.statusName === "asc" ? "▲" : "▼"}
+                </th>
 
                 <th>Customer Name</th>
                 <th>Project Type</th>
                 <th>City</th>
                 <th>Value (RM)</th>
 
-                <th>Sales Person</th>
-                <th>Project Manager</th>
+                <th onClick={() => sortData("salesPersonId")}>
+                  Sales Person {sortOrder.salesPersonId === "asc" ? "▲" : "▼"}
+                </th>
+                <th onClick={() => sortData("projectManagerId")}>
+                  Project Manager {sortOrder.projectManagerId === "asc" ? "▲" : "▼"}
+                </th>
                 <th>Start Date</th>
                 <th>Planned End Date</th>
                 <th>Actions</th>

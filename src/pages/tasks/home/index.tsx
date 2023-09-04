@@ -29,11 +29,15 @@ import { modalOverlayPropsHelper, openDeleteModalHelper } from "@helpers";
 import { notify } from "@utility";
 import { deleteTask, updateTaskStatus } from "@slices";
 import { _AddTaskModal } from "../components";
+import { useAuthContext } from "@contexts";
 
 interface OwnProps {}
 
 const Tasks: React.FC<OwnProps> = () => {
   useStyles();
+  const {
+    state: { user, isAdmin },
+  } = useAuthContext();
   const dispatch = useAppDispatch();
   const { classes: gclasses, theme } = useGStyles();
   const [searchQuery, setSearchQuery] = React.useState("");
@@ -55,19 +59,36 @@ const Tasks: React.FC<OwnProps> = () => {
 
   const onChangeSearch = (query: string) => {
     setSearchQuery(query);
-    const filtered = tasks.filter(
-      (task) =>
-        task.assignee?.firstName.toLowerCase().includes(query.toLowerCase()) ||
-        task.assignee?.lastName.toLowerCase().includes(query.toLowerCase()) ||
-        task.statusName.toLowerCase().includes(query.toLowerCase()) ||
-        task.title.toLowerCase().includes(query.toLowerCase())
-    );
-    setSearchedData(filtered);
+    if (user?.userTypeName === "Admin") {
+      const filtered = tasks.filter(
+        (task) =>
+          task.assignee?.firstName.toLowerCase().includes(query.toLowerCase()) ||
+          task.assignee?.lastName.toLowerCase().includes(query.toLowerCase()) ||
+          task.statusName.toLowerCase().includes(query.toLowerCase()) ||
+          task.title.toLowerCase().includes(query.toLowerCase())
+      );
+      setSearchedData(filtered);
+    } else {
+      const filtered = tasks.filter(
+        (task) =>
+          (task.assignee?.firstName.toLowerCase().includes(query.toLowerCase()) ||
+            task.assignee?.lastName.toLowerCase().includes(query.toLowerCase()) ||
+            task.statusName.toLowerCase().includes(query.toLowerCase()) ||
+            task.title.toLowerCase().includes(query.toLowerCase())) &&
+          task.assigneeId === user?.id
+      );
+      setSearchedData(filtered);
+    }
   };
 
   React.useEffect(() => {
-    setSearchedData(tasks);
-  }, [tasks]);
+    if (user?.userTypeName === "Admin") {
+      setSearchedData(tasks);
+    } else {
+      const filtered = tasks.filter((task) => task.assigneeId === user?.id);
+      setSearchedData(filtered);
+    }
+  }, [tasks, user]);
 
   const handleDelete = (id: number) => {
     openDeleteModalHelper({
@@ -125,14 +146,22 @@ const Tasks: React.FC<OwnProps> = () => {
                 : "N/A"}
             </td>
             <td>
-              <Group>
-                <ActionIcon color="gray" size={"sm"} onClick={() => showUpdateStatusModal(task.id)}>
-                  <IconRotateClockwise2 />
-                </ActionIcon>
-                <ActionIcon color="red" size={"sm"} onClick={() => handleDelete(task.id)}>
-                  <IconTrash />
-                </ActionIcon>
-              </Group>
+              {isAdmin ? (
+                <Group>
+                  <ActionIcon
+                    color="gray"
+                    size={"sm"}
+                    onClick={() => showUpdateStatusModal(task.id)}
+                  >
+                    <IconRotateClockwise2 />
+                  </ActionIcon>
+                  <ActionIcon color="red" size={"sm"} onClick={() => handleDelete(task.id)}>
+                    <IconTrash />
+                  </ActionIcon>
+                </Group>
+              ) : (
+                "Admin Required"
+              )}
             </td>
           </tr>
         ))}
@@ -149,13 +178,15 @@ const Tasks: React.FC<OwnProps> = () => {
           icon={<IconSearch size={16} />}
           onChange={(e) => onChangeSearch(e.target?.value)}
         />
-        <Button
-          variant="filled"
-          rightIcon={<IconPlus size={16} />}
-          onClick={() => setAddTaskModalOpened(true)}
-        >
-          Task
-        </Button>
+        {isAdmin && (
+          <Button
+            variant="filled"
+            rightIcon={<IconPlus size={16} />}
+            onClick={() => setAddTaskModalOpened(true)}
+          >
+            Task
+          </Button>
+        )}
       </Flex>
       <ScrollArea type="scroll" h={"80vh"}>
         <ScrollArea w={"120vw"}>

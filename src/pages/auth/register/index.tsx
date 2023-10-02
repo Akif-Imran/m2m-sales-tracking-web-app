@@ -79,6 +79,7 @@ const Register: React.FC = () => {
     },
     onSubmit: (values, _helpers) => {
       console.log(values);
+      navigate(routes.auth.login);
     },
     validationSchema: OTPSchema,
   });
@@ -196,8 +197,8 @@ const Register: React.FC = () => {
 
           <Paper withBorder shadow="md" p={30} radius="md" mt="xl">
             <TextInput
+              required
               withAsterisk={false}
-              radius={"md"}
               label="Enter OTP"
               name="otp"
               id="otp"
@@ -206,7 +207,6 @@ const Register: React.FC = () => {
               onBlur={otp_form.handleBlur("otp")}
               error={otp_form.touched.otp && otp_form.errors.otp ? `${otp_form.errors.otp}` : null}
               placeholder="XXXX"
-              required
             />
             <Group position="apart" mt="lg" className={classes.controls}>
               <Anchor
@@ -222,7 +222,6 @@ const Register: React.FC = () => {
                 </Center>
               </Anchor>
               <Button
-                radius={"md"}
                 className={classes.control}
                 onClick={() => otp_form.handleSubmit()}
               >

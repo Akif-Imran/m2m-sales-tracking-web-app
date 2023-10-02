@@ -43,7 +43,7 @@ const Login: React.FC = () => {
     password: yup.string().min(2, "Too short!").required("Password is required!"),
   });
 
-  const formik = useFormik({
+  const form = useFormik({
     initialValues: {
       email: "",
       password: "",
@@ -67,6 +67,12 @@ const Login: React.FC = () => {
     if (isAuthorized) navigate(redirectPath, { replace: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthorized]);
+
+  const inputStyle = {
+    label: {
+      color: "white",
+    },
+  };
 
   return (
     <div className="bg">
@@ -96,55 +102,39 @@ const Login: React.FC = () => {
           </Anchor>
         </Text>
 
-        <Paper shadow="md" p={30} radius={"md"} bg={"transparent"}>
-          <form onSubmit={formik.handleSubmit}>
+        <Paper shadow="xl" p={30} bg={"transparent"}>
+          <form onSubmit={form.handleSubmit}>
             <TextInput
-              radius={"md"}
+              required
               withAsterisk={false}
               label="Email"
               placeholder="you@m2m.com"
-              required
               id="email"
               name="email"
-              size="sm"
-              error={formik.touched.email && formik.errors.email}
-              onChange={formik.handleChange}
-              value={formik.values.email}
-              styles={{
-                label: {
-                  color: "white",
-                },
-              }}
+              error={form.touched.email && form.errors.email}
+              onChange={form.handleChange}
+              value={form.values.email}
+              styles={inputStyle}
             />
             <PasswordInput
-              radius={"md"}
+              required
               withAsterisk={false}
               label="Password"
               placeholder="Your password"
-              required
               mt="md"
               id="password"
               name="password"
-              size="sm"
-              error={formik.touched.password && formik.errors.password}
-              onChange={formik.handleChange}
-              value={formik.values.password}
-              styles={{
-                label: {
-                  color: "white",
-                },
-              }}
+              error={form.touched.password && form.errors.password}
+              onChange={form.handleChange}
+              value={form.values.password}
+              styles={inputStyle}
             />
             <Group position="apart" mt="lg">
               <Checkbox
                 label="Keep me signed in"
                 checked={rememberMe}
                 onChange={(e) => setRememberMe(e.currentTarget.checked)}
-                styles={{
-                  label: {
-                    color: "white",
-                  },
-                }}
+                styles={inputStyle}
               />
               <Anchor
                 component="button"
@@ -155,14 +145,7 @@ const Login: React.FC = () => {
                 Forgot password?
               </Anchor>
             </Group>
-            <Button
-              fullWidth
-              radius={"md"}
-              mt="xl"
-              loading={isLoading}
-              type="submit"
-              loaderPosition="right"
-            >
+            <Button fullWidth mt="xl" loading={isLoading} type="submit" loaderPosition="right">
               Sign in
             </Button>
           </form>

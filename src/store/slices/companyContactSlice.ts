@@ -1,4 +1,5 @@
 import { PayloadAction, SerializedError, createSlice } from "@reduxjs/toolkit";
+import { updatePrimaryContact } from "./companySlice";
 
 interface State {
   data: ICompanyContact[];
@@ -7,7 +8,20 @@ interface State {
 }
 
 const initialState: State = {
-  data: [],
+  data: [
+    {
+      id: 1,
+      name: "Default Contact",
+      businessCard: "",
+      department: "Engineering",
+      designation: "Manager",
+      email: "example.contact@gmail.com",
+      mobile: "+62 756 345987",
+      phone: "+60 123 7653457",
+      primary: true,
+      companyId: 1,
+    },
+  ],
   isLoading: false,
   error: null,
 };
@@ -28,6 +42,19 @@ const companyContactSlice = createSlice({
       const index = state.data.findIndex((contact) => contact.id === action.payload);
       state.data.splice(index, 1);
     },
+  },
+  extraReducers: (builder) => {
+    builder.addCase(updatePrimaryContact, (state, action) => {
+      for (const c of state.data) {
+        if (c.companyId === action.payload.companyId) {
+          if (c.id === action.payload.contactId) {
+            c.primary = true;
+          } else {
+            c.primary = false;
+          }
+        }
+      }
+    });
   },
 });
 

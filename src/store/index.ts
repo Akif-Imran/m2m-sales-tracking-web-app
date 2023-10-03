@@ -121,3 +121,13 @@ export const selectRecordsForDropdown = createSelector(
     };
   }
 );
+export const selectCompaniesWithContact = createSelector(
+  selectCompanies,
+  selectCompanyContact,
+  (companies, contacts) => {
+    return companies.data.map((company) => {
+      const contact = contacts.data.find((contact) => contact.id === company.primaryContactId);
+      return { ...company, contact };
+    });
+  }
+);

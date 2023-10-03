@@ -35,17 +35,14 @@ const _AddCompanyModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
     initialValues: {
       logo: "",
       name: "",
-      contact: {
-        name: "",
-        designation: "",
-        email: "",
-        phone: "",
-      },
+      state: "",
+      website: "",
       email: "",
       phone: "",
       address: "",
       city: "",
       country: "",
+      primaryContactId: 0,
     },
     onSubmit(values, helpers) {
       console.log(values);
@@ -55,9 +52,9 @@ const _AddCompanyModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
     },
   });
 
-  const handleFileChange = (file: File) => {
+  const handleLogoChange = (file: File) => {
     if (file === null) {
-      notify("Image Upload", "Vehicle image not uploaded", "error");
+      notify("Image Upload", "Company logo not uploaded", "error");
       return;
     }
     const reader = new FileReader();
@@ -68,8 +65,6 @@ const _AddCompanyModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
       }
     };
     reader.readAsDataURL(file);
-    // const fileUri = URL.createObjectURL(file);
-    // setFileUri(fileUri);
   };
 
   const handleCancel = () => {
@@ -80,7 +75,6 @@ const _AddCompanyModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
   return (
     <Modal
       size="xl"
-      // fullScreen
       withinPortal
       withOverlay
       title={title}
@@ -89,31 +83,31 @@ const _AddCompanyModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
       overlayProps={modalOverlayPropsHelper(theme)}
     >
       <Stack>
-        <Flex direction={"column"} align={"center"} justify={"flex-end"}>
-          {company.values.logo ? (
-            <Avatar src={company.values.logo} radius={rem(250)} size={rem(170)} />
-          ) : (
-            <Avatar src={"/user.png"} radius={rem(250)} size={rem(170)} />
-          )}
-          <div className={classes.fileUploadButton}>
-            <FileButton onChange={handleFileChange} accept="image/png,image/jpeg">
-              {(props) => (
-                <Button
-                  radius={"xl"}
-                  variant="filled"
-                  color={theme.primaryColor}
-                  {...props}
-                  rightIcon={<IconUpload size={16} color={theme.white} stroke={1.5} />}
-                >
-                  Logo
-                </Button>
-              )}
-            </FileButton>
-          </div>
-        </Flex>
-        <Grid columns={25}>
+        <Grid>
           <Grid.Col span={12}>
             <Stack spacing={"xs"}>
+              <Flex direction={"column"} align={"center"} justify={"flex-end"}>
+                {company.values.logo ? (
+                  <Avatar src={company.values.logo} radius={rem(250)} size={rem(170)} />
+                ) : (
+                  <Avatar src={"/user.png"} radius={rem(250)} size={rem(170)} />
+                )}
+                <div className={classes.fileUploadButton}>
+                  <FileButton onChange={handleLogoChange} accept="image/png,image/jpeg">
+                    {(props) => (
+                      <Button
+                        radius={"xl"}
+                        variant="filled"
+                        color={theme.primaryColor}
+                        {...props}
+                        rightIcon={<IconUpload size={16} color={theme.white} stroke={1.5} />}
+                      >
+                        Logo
+                      </Button>
+                    )}
+                  </FileButton>
+                </div>
+              </Flex>
               <Divider label="Company" labelPosition="center" />
               <TextInput
                 required
@@ -171,6 +165,19 @@ const _AddCompanyModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
                 <TextInput
                   required
                   withAsterisk={false}
+                  label="State"
+                  name="state"
+                  id="state"
+                  value={company.values.state}
+                  onChange={company.handleChange}
+                  onBlur={company.handleBlur}
+                />
+              </Group>
+
+              <Group grow align="flex-start">
+                <TextInput
+                  required
+                  withAsterisk={false}
                   label="Country"
                   name="country"
                   id="country"
@@ -178,58 +185,17 @@ const _AddCompanyModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
                   onChange={company.handleChange}
                   onBlur={company.handleBlur}
                 />
-              </Group>
-            </Stack>
-          </Grid.Col>
-
-          <Grid.Col span={1} />
-
-          <Grid.Col span={12}>
-            <Stack spacing={"xs"}>
-              <Divider label="Contact" labelPosition="center" />
-              <TextInput
-                required
-                withAsterisk={false}
-                label="Name"
-                name="contact.name"
-                id="contact.name"
-                value={company.values.contact.name}
-                onChange={company.handleChange}
-                onBlur={company.handleBlur}
-              />
-              <Group grow align="flex-start">
                 <TextInput
                   required
                   withAsterisk={false}
-                  label="Email"
-                  name="contact.email"
-                  id="contact.email"
-                  value={company.values.contact.email}
-                  onChange={company.handleChange}
-                  onBlur={company.handleBlur}
-                />
-                <TextInput
-                  required
-                  withAsterisk={false}
-                  label="Phone"
-                  placeholder="+60 123 4562345"
-                  name="contact.phone"
-                  id="contact.phone"
-                  value={company.values.contact.phone}
+                  label="Website URL"
+                  name="website"
+                  id="website"
+                  value={company.values.website}
                   onChange={company.handleChange}
                   onBlur={company.handleBlur}
                 />
               </Group>
-              <TextInput
-                required
-                withAsterisk={false}
-                label="Designation"
-                name="contact.designation"
-                id="contact.designation"
-                value={company.values.contact.designation}
-                onChange={company.handleChange}
-                onBlur={company.handleBlur}
-              />
 
               <Group align="flex-end" position="right" mt={rem(32)}>
                 <Button variant="outline" onClick={handleCancel} size="xs">

@@ -1,11 +1,24 @@
 import { modalOverlayPropsHelper } from "@helpers";
 import React from "react";
 import { useStyles } from "./styles";
-import { Button, Divider, Group, Modal, Select, Stack, TextInput, rem } from "@mantine/core";
+import {
+  Avatar,
+  Button,
+  Divider,
+  FileButton,
+  Flex,
+  Group,
+  Modal,
+  Select,
+  Stack,
+  TextInput,
+  rem,
+} from "@mantine/core";
 import { useFormik } from "formik";
 import { notify } from "@utility";
 import { selectRecordsForDropdown, useAppDispatch, useAppSelector } from "@store";
 import { addContact } from "@slices";
+import { IconUpload } from "@tabler/icons-react";
 
 interface OwnProps {
   opened: boolean;
@@ -15,16 +28,20 @@ interface OwnProps {
 interface IContactForm extends Omit<ICompanyContact, "id"> {}
 
 const _AddContactModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
-  const { theme } = useStyles();
+  const { theme, classes } = useStyles();
   const dispatch = useAppDispatch();
   const { companies: companiesList } = useAppSelector(selectRecordsForDropdown);
 
   const form = useFormik<IContactForm>({
     initialValues: {
+      businessCard: "",
       name: "",
+      designation: "",
+      department: "",
       email: "",
       phone: "",
-      designation: "",
+      mobile: "",
+      primary: false,
       companyId: 0,
     },
     onSubmit(values, helpers) {
@@ -41,6 +58,21 @@ const _AddContactModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
     onClose();
   };
 
+  const handleLogoChange = (file: File) => {
+    if (file === null) {
+      notify("Image Upload", "Business card not uploaded", "error");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const dataUri = e?.target?.result as string;
+      if (dataUri) {
+        form.setValues((prev) => ({ ...prev, businessCard: dataUri }));
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
   return (
     <Modal
       size="xl"
@@ -52,6 +84,28 @@ const _AddContactModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
       overlayProps={modalOverlayPropsHelper(theme)}
     >
       <Stack spacing={"xs"}>
+        <Flex direction={"column"} align={"center"} justify={"flex-end"}>
+          {form.values.businessCard ? (
+            <Avatar src={form.values.businessCard} radius={rem(250)} size={rem(170)} />
+          ) : (
+            <Avatar src={"/user.png"} radius={rem(250)} size={rem(170)} />
+          )}
+          <div className={classes.fileUploadButton}>
+            <FileButton onChange={handleLogoChange} accept="image/png,image/jpeg">
+              {(props) => (
+                <Button
+                  radius={"xl"}
+                  variant="filled"
+                  color={theme.primaryColor}
+                  {...props}
+                  rightIcon={<IconUpload size={16} color={theme.white} stroke={1.5} />}
+                >
+                  BusinessCard
+                </Button>
+              )}
+            </FileButton>
+          </div>
+        </Flex>
         <Divider label="Company" labelPosition="center" />
         <Select
           required
@@ -95,6 +149,30 @@ const _AddContactModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
             name="designation"
             id="designation"
             value={form.values.designation}
+            onChange={form.handleChange}
+            onBlur={form.handleBlur}
+          />
+          <TextInput
+            required
+            withAsterisk={false}
+            label="Department"
+            name="department"
+            id="department"
+            value={form.values.department}
+            onChange={form.handleChange}
+            onBlur={form.handleBlur}
+          />
+        </Group>
+
+        <Group grow align="flex-start">
+          <TextInput
+            required
+            withAsterisk={false}
+            label="Mobile"
+            name="mobile"
+            id="mobile"
+            placeholder="+XX XXX XXXXXXX"
+            value={form.values.mobile}
             onChange={form.handleChange}
             onBlur={form.handleBlur}
           />

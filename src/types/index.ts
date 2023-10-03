@@ -24,10 +24,14 @@ type ILoginUserData = IUser;
 
 interface ICompanyContact {
   id: number;
+  businessCard: string;
   name: string;
   designation: string;
+  department: string;
   email: string;
   phone: string;
+  mobile: string;
+  primary: boolean;
   companyId: number;
 }
 interface ICompany {
@@ -37,14 +41,11 @@ interface ICompany {
   email: string;
   phone: string;
   address: string;
-  contact: {
-    name: string;
-    designation: string;
-    email: string;
-    phone: string;
-  };
   city: string;
+  state: string;
   country: string;
+  website: string;
+  primaryContactId: number;
 }
 interface IProjectStatus {
   id: number;

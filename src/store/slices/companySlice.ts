@@ -12,17 +12,14 @@ const initialState: State = {
       id: 1,
       logo: "",
       name: "ABC Tech Solutions Sdn Bhd",
-      contact: {
-        name: "Default Contact",
-        designation: "Manager",
-        email: "example.contact@gmail.com",
-        phone: "+60 123 7653457",
-      },
       email: "abc.company@gmail.com",
       phone: "+60 191 9998883",
       address: "123 Jalan Bukit Bintang Wilayah Persekutuan Kuala Lumpur",
       city: "Kuala Lumpur",
+      state: "Wilayah Persekutuan",
+      website: "https://www.abc.com",
       country: "Malaysia",
+      primaryContactId: 1,
     },
   ],
   isLoading: false,
@@ -45,17 +42,19 @@ const companySlice = createSlice({
       const index = state.data.findIndex((company) => company.id === action.payload);
       state.data.splice(index, 1);
     },
-    updateCompanyContact: (state, action: PayloadAction<Omit<ICompanyContact, "id">>) => {
+    updatePrimaryContact: (state, action: PayloadAction<IUpdatePrimaryContactPayload>) => {
       const index = state.data.findIndex((company) => company.id === action.payload.companyId);
-      state.data[index].contact.name = action.payload.name;
-      state.data[index].contact.email = action.payload.email;
-      state.data[index].contact.phone = action.payload.phone;
-      state.data[index].contact.designation = action.payload.designation;
+      state.data[index].primaryContactId = action.payload.contactId;
     },
   },
 });
 
 export { companySlice };
-export const { addCompany, deleteCompany, updateCompany, updateCompanyContact } =
+export const { addCompany, deleteCompany, updateCompany, updatePrimaryContact } =
   companySlice.actions;
 export const companyReducer = companySlice.reducer;
+
+interface IUpdatePrimaryContactPayload {
+  companyId: number;
+  contactId: number;
+}

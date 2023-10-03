@@ -9,6 +9,9 @@ import {
   Settings,
   Company,
   Projects,
+  FollowUps,
+  PurchaseRequests,
+  Claims,
   Tasks,
   Users,
 } from "@pages";
@@ -66,6 +69,24 @@ const MainApp: React.FC<OwnProps> = () => {
       <Route
         path={routes.project.list}
         element={<_RequireAuth children={<_AppShell page={<Projects />} />} />}
+      ></Route>
+
+      {/* follow ups */}
+      <Route
+        path={routes.project.followUps.list}
+        element={<_RequireAuth children={<_AppShell page={<FollowUps />} />} />}
+      ></Route>
+
+      {/* purchase requests  */}
+      <Route
+        path={routes.project.purchaseRequest.list}
+        element={<_RequireAuth children={<_AppShell page={<PurchaseRequests />} />} />}
+      ></Route>
+
+      {/* claims */}
+      <Route
+        path={routes.project.claims.list}
+        element={<_RequireAuth children={<_AppShell page={<Claims />} />} />}
       ></Route>
 
       {/* task */}

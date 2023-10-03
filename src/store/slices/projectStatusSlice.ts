@@ -8,10 +8,11 @@ interface State {
 
 const initialState: State = {
   data: [
-    { id: 1, name: "In Development" },
-    { id: 2, name: "Completed" },
-    { id: 3, name: "Quotation" },
-    { id: 4, name: "Follow Up" },
+    { id: 1, name: "Follow up added (10%)" },
+    { id: 2, name: "Quotation submitted (30%)" },
+    { id: 3, name: "Work order received (60%)" },
+    { id: 4, name: "Payment received (80%)" },
+    { id: 5, name: "Delivered (100%)" },
   ],
   isLoading: false,
   error: null,

@@ -3,6 +3,7 @@ import {
   companyContactReducer,
   companyReducer,
   departmentReducer,
+  followUpReducer,
   projectReducer,
   projectStatusListReducer,
   taskReducer,
@@ -19,6 +20,7 @@ const store = configureStore({
     companies: companyReducer,
     departments: departmentReducer,
     projects: projectReducer,
+    followUps: followUpReducer,
     projectStatusList: projectStatusListReducer,
     tasks: taskReducer,
     taskStatusList: taskStatusListReducer,
@@ -40,6 +42,7 @@ export const selectCompanies = (state: RootState) => state.companies;
 export const selectCompanyContact = (state: RootState) => state.companyContacts;
 export const selectDepartments = (state: RootState) => state.departments;
 export const selectProjects = (state: RootState) => state.projects;
+export const selectFollowUps = (state: RootState) => state.followUps;
 export const selectProjectStatusList = (state: RootState) => state.projectStatusList;
 export const selectTasks = (state: RootState) => state.tasks;
 export const selectTaskStatusList = (state: RootState) => state.taskStatusList;
@@ -119,5 +122,47 @@ export const selectRecordsForDropdown = createSelector(
           label: `${engineer.firstName} ${engineer.lastName}`,
         })),
     };
+  }
+);
+export const selectCompaniesWithContact = createSelector(
+  selectCompanies,
+  selectCompanyContact,
+  (companies, contacts) => {
+    return companies.data.map((company) => {
+      const contact = contacts.data.find((contact) => contact.id === company.primaryContactId);
+      return { ...company, contact };
+    });
+  }
+);
+export const selectProjectWithRecords = createSelector(
+  selectProjects,
+  selectCompanies,
+  selectUsers,
+  (projects, companies, users) => {
+    return projects.data.map((project) => {
+      const company = companies.data.find((company) => company.id === project.companyId);
+      const salesPerson = users.data.find((user) => user.id === project.salesPersonId);
+      return {
+        ...project,
+        company: company,
+        salesPerson: salesPerson,
+      };
+    });
+  }
+);
+export const selectFollowUpsWithRecords = createSelector(
+  selectFollowUps,
+  selectProjects,
+  selectCompanyContact,
+  selectUsers,
+  (followups, projects, contacts, users) => {
+    return followups.data.map((followup) => {
+      const project = projects.data.find((project) => project.id === followup.projectId);
+      const followUpPerson = users.data.find((user) => user.id === followup.followUpPersonId);
+      const contactPerson = contacts.data.find(
+        (contact) => contact.id === followup.contactPersonId
+      );
+      return { ...followup, project, contactPerson, followUpPerson };
+    });
   }
 );

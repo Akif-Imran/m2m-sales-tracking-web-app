@@ -1,6 +1,6 @@
 export { Login, Register, ForgotPassword, _VerifyOTP } from "./auth";
 export { Dashboard } from "./dashboard";
-export { Projects } from "./projects";
+export { Projects, Claims, PurchaseRequests, FollowUps } from "./projects";
 export { Company } from "./companies";
 export { Tasks } from "./tasks";
 export { Users } from "./users";

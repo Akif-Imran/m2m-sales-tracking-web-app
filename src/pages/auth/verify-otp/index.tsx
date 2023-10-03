@@ -51,12 +51,11 @@ const _VerifyOTP: React.FC = () => {
         Enter OTP sent to your email.
       </Text>
 
-      <Paper withBorder shadow="md" p={30} radius="md" mt="xl">
-        <TextInput radius={"md"} label="Enter OTP" placeholder="XXXX" required />
+      <Paper withBorder shadow="xl" p={30} mt="xl">
+        <TextInput label="Enter OTP" placeholder="XXXX" required />
         <Group position="apart" mt="lg" className={classes.controls}>
           <Anchor
             color="dimmed"
-            size="sm"
             className={classes.control}
             component="button"
             onClick={() => navigate(routes.auth.login)}
@@ -66,9 +65,7 @@ const _VerifyOTP: React.FC = () => {
               <Box ml={5}>Back to the login page</Box>
             </Center>
           </Anchor>
-          <Button radius={"md"} className={classes.control}>
-            Verify
-          </Button>
+          <Button className={classes.control}>Verify</Button>
         </Group>
       </Paper>
     </Container>

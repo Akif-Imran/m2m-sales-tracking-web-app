@@ -18,6 +18,15 @@ const routes = {
   },
   project: {
     list: "/projects",
+    followUps: {
+      list: "/follow-ups",
+    },
+    purchaseRequest: {
+      list: "/purchase-requests",
+    },
+    claims: {
+      list: "/claims",
+    },
     details: "details/:projectId",
     details_nav: (projectId: string) => `details/${projectId}`,
   },

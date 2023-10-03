@@ -2,7 +2,6 @@ import React from "react";
 import { useStyles } from "./styles";
 import {
   ActionIcon,
-  Avatar,
   Badge,
   Button,
   Flex,
@@ -16,10 +15,8 @@ import {
   TextInput,
 } from "@mantine/core";
 import {
-  selectCompanies,
-  selectProjects,
+  selectProjectWithRecords,
   selectRecordsForDropdown,
-  selectUsers,
   useAppDispatch,
   useAppSelector,
 } from "@store";
@@ -38,7 +35,6 @@ interface OwnProps {}
 
 interface ProjectSort {
   statusName: string;
-  projectManagerId: string;
   salesPersonId: string;
   // Add other properties as needed
 }
@@ -46,20 +42,15 @@ interface ProjectSort {
 const Projects: React.FC<OwnProps> = () => {
   useStyles();
   const {
-    state: { isAdmin },
+    state: { user, isAdmin },
   } = useAuthContext();
   const dispatch = useAppDispatch();
   const { classes: gclasses, theme } = useGStyles();
-  const {
-    state: { user },
-  } = useAuthContext();
 
   const [searchQuery, setSearchQuery] = React.useState("");
-  const { data: projects } = useAppSelector(selectProjects);
-  const { data: companies } = useAppSelector(selectCompanies);
-  const { data: users } = useAppSelector(selectUsers);
+  const projects = useAppSelector(selectProjectWithRecords);
   const [addProjectModalOpened, setAddProjectModalOpened] = React.useState(false);
-  const [searchedData, setSearchedData] = React.useState<IProject[]>([]);
+  const [searchedData, setSearchedData] = React.useState<typeof projects>([]);
 
   const { projectStatus: projectStatusList } = useAppSelector(selectRecordsForDropdown);
   const [visible, setVisible] = React.useState<boolean>(false);
@@ -67,7 +58,6 @@ const Projects: React.FC<OwnProps> = () => {
   const [selectedProject, setSelectedProject] = React.useState<number>(0);
   const [sortOrder, setSortOrder] = React.useState<ProjectSort>({
     statusName: "asc", // Initial sorting order (asc or desc)
-    projectManagerId: "asc",
     salesPersonId: "asc",
   });
 
@@ -89,7 +79,7 @@ const Projects: React.FC<OwnProps> = () => {
       const filtered = projects.filter(
         (project) =>
           project.name.toLowerCase().includes(query.toLowerCase()) &&
-          (project.salesPersonId === user?.id || project.projectManagerId === user?.id)
+          project.salesPersonId === user?.id
       );
       setSearchedData(filtered);
     }
@@ -119,9 +109,7 @@ const Projects: React.FC<OwnProps> = () => {
     if (user?.userTypeName === "Admin") {
       setSearchedData(projects);
     } else {
-      const filtered = projects.filter(
-        (project) => project.salesPersonId === user?.id || project.projectManagerId === user?.id
-      );
+      const filtered = projects.filter((project) => project.salesPersonId === user?.id);
       setSearchedData(filtered);
     }
   }, [projects, user]);
@@ -157,36 +145,31 @@ const Projects: React.FC<OwnProps> = () => {
     ) : (
       <>
         {searchedData.map((project, index) => {
-          const company = companies.find((company) => company.id === project.companyId);
-          const sales = users.find((user) => user.id === project.salesPersonId);
-          const projectManager = users.find((user) => user.id === project.projectManagerId);
+          const value = Intl.NumberFormat("en-US", {
+            style: "currency",
+            currency: project.value.currency,
+            maximumFractionDigits: 2,
+          }).format(project.value.amount);
           return (
             <tr key={project.id}>
               <td>{index + 1}</td>
-              <td>
-                <Avatar src={project.logo ? project.logo : "/user.png"} size={50} />
-              </td>
               <td>{project.id}</td>
               <td>{project.name}</td>
+              <td>{project.description}</td>
               <td>
-                <Badge variant="filled" color={projectStatusColors[project.statusName]}>
+                <Badge variant="filled" color={projectStatusColors[project.statusId]}>
                   {project.statusName}
                 </Badge>
               </td>
-
-              <td>{company?.name || "N/A"}</td>
-
               <td>{project.projectType}</td>
-              <td>{project.city}</td>
-              <td>{project.value} (RM)</td>
+              <td>{value}</td>
+              <td>{DateTime.fromISO(project.contractDate).toLocal().toFormat(DAY_MM_DD_YYYY)}</td>
+              <td>{DateTime.fromISO(project.deliveryDate).toLocal().toFormat(DAY_MM_DD_YYYY)}</td>
+              <td>{project.quotation}</td>
               <td>
-                {sales?.firstName || "N/A"} {sales?.lastName || "N/A"}
+                {project?.salesPerson?.firstName || "N/A"} {project?.salesPerson?.lastName || "N/A"}
               </td>
-              <td>
-                {projectManager?.firstName || "N/A"} {projectManager?.lastName || "N/A"}
-              </td>
-              <td>{DateTime.fromISO(project.startDate).toLocal().toFormat(DAY_MM_DD_YYYY)}</td>
-              <td>{DateTime.fromISO(project.plannedEndDate).toLocal().toFormat(DAY_MM_DD_YYYY)}</td>
+              <td>{project?.company?.name || "N/A"}</td>
               <td>
                 {isAdmin ? (
                   <Group>
@@ -240,31 +223,26 @@ const Projects: React.FC<OwnProps> = () => {
             <thead>
               <tr>
                 <th colSpan={5}>Project</th>
+                <th colSpan={6}>Project Details</th>
                 <th colSpan={1}>Company</th>
-                <th colSpan={8}>Project Details</th>
               </tr>
               <tr>
                 <th>#</th>
-                <th>Logo</th>
                 <th>Id</th>
                 <th>Name</th>
+                <th>Description</th>
                 <th onClick={() => sortData("statusName")}>
                   Status {sortOrder.statusName === "asc" ? "▲" : "▼"}
                 </th>
-
-                <th>Customer Name</th>
                 <th>Project Type</th>
-                <th>City</th>
-                <th>Value (RM)</th>
-
+                <th>Value</th>
+                <th>Contract Date</th>
+                <th>Delivery Date</th>
+                <th>Quotation</th>
                 <th onClick={() => sortData("salesPersonId")}>
                   Sales Person {sortOrder.salesPersonId === "asc" ? "▲" : "▼"}
                 </th>
-                <th onClick={() => sortData("projectManagerId")}>
-                  Project Manager {sortOrder.projectManagerId === "asc" ? "▲" : "▼"}
-                </th>
-                <th>Start Date</th>
-                <th>Planned End Date</th>
+                <th>Customer Name</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -273,7 +251,7 @@ const Projects: React.FC<OwnProps> = () => {
         </ScrollArea>
       </ScrollArea>
       <_AddProjectModal
-        title="Add Project"
+        title="Add Lead/Project"
         opened={addProjectModalOpened}
         onClose={() => setAddProjectModalOpened(false)}
       />

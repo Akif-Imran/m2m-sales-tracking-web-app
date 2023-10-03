@@ -23,12 +23,17 @@ import {
   IconTrash,
   IconUserPlus,
 } from "@tabler/icons-react";
-import { selectCompanies, selectCompanyContact, useAppDispatch, useAppSelector } from "@store";
+import {
+  selectCompaniesWithContact,
+  selectCompanyContact,
+  useAppDispatch,
+  useAppSelector,
+} from "@store";
 import { colors } from "@theme";
 import { _AddCompanyModal, _AddContactModal } from "../components";
 import { modalOverlayPropsHelper, openDeleteModalHelper } from "@helpers";
 import { notify } from "@utility";
-import { deleteCompany, updateCompanyContact } from "@slices";
+import { deleteCompany, updatePrimaryContact } from "@slices";
 
 interface OwnProps {}
 
@@ -37,19 +42,19 @@ const Company: React.FC<OwnProps> = () => {
   const dispatch = useAppDispatch();
   const { classes: gclasses, theme } = useGStyles();
   const [searchQuery, setSearchQuery] = React.useState("");
-  const { data: companies } = useAppSelector(selectCompanies);
+  const companies = useAppSelector(selectCompaniesWithContact);
   const { data: contacts } = useAppSelector(selectCompanyContact);
   const [contactsList, setContactsList] = React.useState<{ value: string; label: string }[]>([]);
 
   const [addCompanyModalOpened, setAddCompanyModalOpened] = React.useState(false);
   const [addContactModalOpened, setAddContactModalOpened] = React.useState(false);
-  const [searchedData, setSearchedData] = React.useState<ICompany[]>([]);
+  const [searchedData, setSearchedData] = React.useState<typeof companies>([]);
 
   const [visible, setVisible] = React.useState<boolean>(false);
   const [selectedContact, setSelectedContact] = React.useState<number>(0);
   const [selectedCompany, setSelectedCompany] = React.useState<number>(0);
 
-  const showContactUpdateModal = (companyId: number) => {
+  const showPrimaryContactUpdateModal = (companyId: number) => {
     setSelectedCompany(companyId);
     setVisible(true);
   };
@@ -61,15 +66,7 @@ const Company: React.FC<OwnProps> = () => {
       notify("Update Contact", "Contact not found!", "error");
       return;
     }
-    dispatch(
-      updateCompanyContact({
-        companyId: selectedCompany,
-        email: contact.email,
-        phone: contact.phone,
-        name: contact.name,
-        designation: contact.designation,
-      })
-    );
+    dispatch(updatePrimaryContact({ companyId: selectedCompany, contactId: contact.id }));
     notify("Update Contact", "Contact updated successfully!", "success");
     hideContactUpdateModal();
   };
@@ -136,10 +133,12 @@ const Company: React.FC<OwnProps> = () => {
             </td>
             <td>{company.id}</td>
             <td>{company.name}</td>
-            <td>{company.contact.name}</td>
-            <td>{company.contact.designation}</td>
-            <td>{company.contact.email}</td>
-            <td>{company.contact.phone}</td>
+            <td>{company?.contact?.name}</td>
+            <td>{company?.contact?.department}</td>
+            <td>{company?.contact?.designation}</td>
+            <td>{company?.contact?.email}</td>
+            <td>{company?.contact?.phone}</td>
+            <td>{company?.contact?.mobile}</td>
             <td>{company.email}</td>
             <td>{company.phone}</td>
             <td>{company.address}</td>
@@ -150,7 +149,7 @@ const Company: React.FC<OwnProps> = () => {
                 <ActionIcon
                   color="gray"
                   size={"sm"}
-                  onClick={() => showContactUpdateModal(company.id)}
+                  onClick={() => showPrimaryContactUpdateModal(company.id)}
                 >
                   <IconRotateClockwise2 />
                 </ActionIcon>
@@ -193,12 +192,12 @@ const Company: React.FC<OwnProps> = () => {
         </Button>
       </Flex>
       <ScrollArea type="scroll" h={"80vh"}>
-        <ScrollArea w={"140vw"}>
+        <ScrollArea w={"160vw"}>
           <Table border={1} bgcolor={theme.white} withBorder>
             <thead>
               <tr>
                 <th colSpan={4}>Company</th>
-                <th colSpan={4}>Contact Person</th>
+                <th colSpan={6}>Contact Person</th>
                 <th colSpan={6}>Company Details</th>
               </tr>
               <tr>
@@ -239,7 +238,7 @@ const Company: React.FC<OwnProps> = () => {
         radius="md"
         opened={visible}
         onClose={hideContactUpdateModal}
-        title="Project Status"
+        title="Primary Contact"
         scrollAreaComponent={ScrollArea.Autosize}
         withinPortal
         withOverlay
@@ -247,8 +246,9 @@ const Company: React.FC<OwnProps> = () => {
       >
         <Select
           required
-          withAsterisk={false}
+          withinPortal
           searchable
+          withAsterisk={false}
           nothingFound="No Companies"
           label="Company"
           value={selectedContact.toString()}

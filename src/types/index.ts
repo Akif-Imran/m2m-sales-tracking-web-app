@@ -1,3 +1,4 @@
+type IDropDownList = { value: string; label: string }[];
 type IUserType = "Admin" | "Sales" | "Driver";
 interface IUserAccountType {
   id: number;
@@ -24,10 +25,14 @@ type ILoginUserData = IUser;
 
 interface ICompanyContact {
   id: number;
+  businessCard: string;
   name: string;
   designation: string;
+  department: string;
   email: string;
   phone: string;
+  mobile: string;
+  primary: boolean;
   companyId: number;
 }
 interface ICompany {
@@ -37,33 +42,61 @@ interface ICompany {
   email: string;
   phone: string;
   address: string;
-  contact: {
-    name: string;
-    designation: string;
-    email: string;
-    phone: string;
-  };
   city: string;
+  state: string;
   country: string;
+  website: string;
+  primaryContactId: number;
 }
 interface IProjectStatus {
   id: number;
   name: string;
 }
 interface IProject {
-  logo: string;
   id: number;
   name: string;
-  companyId: number; //company
+  description: string;
   projectType: string;
-  city: string;
-  value: number; //value in RM
+  value: {
+    currency: string;
+    amount: number;
+  };
+  contractDate: string;
+  deliveryDate: string;
+  quotation: string;
   salesPersonId: number;
-  projectManagerId: number;
-  startDate: string;
-  plannedEndDate: string;
+  //costing
   statusId: number;
   statusName: string;
+  companyId: number; //company
+}
+interface IFollowUp {
+  id: number;
+  projectId: number;
+  contactPersonId: number;
+  followUpPersonId: number;
+  meetingDate: string;
+  meetingPlace: string;
+  address: string;
+  city: string;
+  state: string;
+  country: string;
+  meetingAgenda: string;
+  meetingSummary: string;
+  nextFollowUp: {
+    place: string;
+    meetingDate: string;
+    meetingAgenda: string;
+  };
+  expenses: {
+    type: string;
+    name: string;
+    amount: {
+      currency: string;
+      amount: number;
+    };
+    receipt: string;
+  };
 }
 interface ITaskStatus {
   id: number;

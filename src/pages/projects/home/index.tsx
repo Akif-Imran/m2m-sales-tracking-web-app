@@ -42,13 +42,10 @@ interface ProjectSort {
 const Projects: React.FC<OwnProps> = () => {
   useStyles();
   const {
-    state: { isAdmin },
+    state: { user, isAdmin },
   } = useAuthContext();
   const dispatch = useAppDispatch();
   const { classes: gclasses, theme } = useGStyles();
-  const {
-    state: { user },
-  } = useAuthContext();
 
   const [searchQuery, setSearchQuery] = React.useState("");
   const projects = useAppSelector(selectProjectWithRecords);

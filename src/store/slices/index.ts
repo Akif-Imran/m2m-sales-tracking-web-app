@@ -7,3 +7,4 @@ export * from "./userSlice";
 export * from "./userTypeSlice";
 export * from "./companyContactSlice";
 export * from "./taskSlice";
+export * from "./followUpSlice";

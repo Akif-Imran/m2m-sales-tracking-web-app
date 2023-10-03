@@ -50,6 +50,9 @@ type ActivePage =
   | "Dashboard"
   | "Company"
   | "Projects"
+  | "Follow ups"
+  | "Purchase Request"
+  | "Claims"
   | "Users"
   | "Tasks"
   | "Settings"
@@ -59,12 +62,13 @@ type ActivePage =
 const removePages: ActivePage[] = ["Company", "Users"];
 interface NavbarButtons {
   link: string;
+  links?: { link: string; label: ActivePage }[];
   label: ActivePage;
   icon: (props: TablerIconsProps) => JSX.Element;
   adminOnly: boolean;
 }
 
-const data: NavbarButtons[] = [
+const buttons: NavbarButtons[] = [
   {
     link: routes.dashboard.home,
     label: "Dashboard",
@@ -80,6 +84,24 @@ const data: NavbarButtons[] = [
   {
     link: routes.project.list,
     label: "Projects",
+    links: [
+      {
+        link: routes.project.list,
+        label: "Projects",
+      },
+      {
+        link: routes.project.followUps.list,
+        label: "Follow ups",
+      },
+      {
+        link: routes.project.purchaseRequest.list,
+        label: "Purchase Request",
+      },
+      {
+        link: routes.project.claims.list,
+        label: "Claims",
+      },
+    ],
     icon: IconSettingsExclamation,
     adminOnly: false,
   },
@@ -130,6 +152,7 @@ const _Header = ({ toggleNavbar, opened }: _HeaderProps) => {
     state: { token, user, isAdmin },
     logout,
   } = useAuthContext();
+
   const [notifications, _setNotifications] = React.useState<INotification[]>([]);
   const [searchedNotifications, setSearchedNotifications] = React.useState<INotification[]>([]);
   const [isFetching, setIsFetching] = React.useState(false);
@@ -216,6 +239,12 @@ const _Header = ({ toggleNavbar, opened }: _HeaderProps) => {
       navigate(routes.company.list);
     } else if (active === "Projects") {
       navigate(routes.project.list);
+    } else if (active === "Follow ups") {
+      navigate(routes.project.followUps.list);
+    } else if (active === "Purchase Request") {
+      navigate(routes.project.purchaseRequest.list);
+    } else if (active === "Claims") {
+      navigate(routes.project.claims.list);
     } else if (active === "Tasks") {
       navigate(routes.task.list);
     } else if (active === "Users") {
@@ -230,9 +259,36 @@ const _Header = ({ toggleNavbar, opened }: _HeaderProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active]);
 
-  const links = data
+  const links = buttons
     .filter((value) => (isAdmin ? true : !removePages.includes(value.label)))
     .map((item) => {
+      const menuItems = item.links?.map((item) => (
+        <Menu.Item key={item.link} onClick={() => setActive(item.label)}>
+          {item.label}
+        </Menu.Item>
+      ));
+      if (menuItems) {
+        return (
+          <Menu key={item.label} trigger="hover" transitionProps={{ exitDuration: 0 }} withinPortal>
+            <Menu.Target>
+              <NavLink
+                className={cx(classes.link, {
+                  [classes.linkActive]: item.label === active,
+                  [classes.iconCentered]: !opened,
+                })}
+                to={item.link}
+                onClick={(_event) => {
+                  setActive(item.label);
+                }}
+              >
+                <item.icon className={classes.linkIcon} stroke={1.5} />
+                {opened && <span>{item.label}</span>}
+              </NavLink>
+            </Menu.Target>
+            <Menu.Dropdown>{menuItems}</Menu.Dropdown>
+          </Menu>
+        );
+      }
       // we need to make change to the api need to inform yahya about them.
       return (
         <Tooltip

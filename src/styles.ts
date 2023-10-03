@@ -1,6 +1,10 @@
 import { createStyles, rem } from "@mantine/core";
 
 export const useGStyles = createStyles({
+  fileUploadButton: {
+    marginTop: rem(-32),
+    marginLeft: rem(128),
+  },
   searchContainer: {
     display: "flex",
     flex: 1,

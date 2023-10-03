@@ -1,6 +1,7 @@
 import { colors } from "@theme";
 
 export const DAY_MM_DD_YYYY_HH_MM_SS_A = "EEE dd MMM, yyyy hh:mm:ss a";
+export const YYYY_MM_DD_HH_MM_SS_A = "yyyy-MM-dd hh:mm:ss a";
 export const DAY_MM_DD_YYYY = "EEE dd MMM, yyyy";
 export const HH_MM_SS_A = "hh:mm:ss a";
 
@@ -42,3 +43,9 @@ export enum DriverFilters {
 export enum ActivityFilters {
   "ALL" = 1,
 }
+
+export const currencyList = [
+  { value: "USD", label: "USD" },
+  { value: "MYR", label: "MYR" },
+  { value: "CAD", label: "CAD" },
+];

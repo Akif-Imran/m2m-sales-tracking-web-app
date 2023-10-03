@@ -1,3 +1,4 @@
+type IDropDownList = { value: string; label: string }[];
 type IUserType = "Admin" | "Sales" | "Driver";
 interface IUserAccountType {
   id: number;
@@ -68,6 +69,34 @@ interface IProject {
   statusId: number;
   statusName: string;
   companyId: number; //company
+}
+interface IFollowUp {
+  id: number;
+  projectId: number;
+  contactPersonId: number;
+  followUpPersonId: number;
+  meetingDate: string;
+  meetingPlace: string;
+  address: string;
+  city: string;
+  state: string;
+  country: string;
+  meetingAgenda: string;
+  meetingSummary: string;
+  nextFollowUp: {
+    place: string;
+    meetingDate: string;
+    meetingAgenda: string;
+  };
+  expenses: {
+    type: string;
+    name: string;
+    amount: {
+      currency: string;
+      amount: number;
+    };
+    receipt: string;
+  };
 }
 interface ITaskStatus {
   id: number;

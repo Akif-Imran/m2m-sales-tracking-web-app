@@ -1,27 +1,13 @@
 import { DATE_FORMAT_YYYY_MM_DD, modalOverlayPropsHelper } from "@helpers";
 import React from "react";
 import { useStyles } from "./styles";
-import {
-  Avatar,
-  Button,
-  Divider,
-  FileButton,
-  Flex,
-  Grid,
-  Group,
-  Modal,
-  Select,
-  Stack,
-  TextInput,
-  rem,
-} from "@mantine/core";
+import { Button, Grid, Group, Modal, Select, Stack, TextInput, Textarea, rem } from "@mantine/core";
 import { useFormik } from "formik";
-import { IconCalendar, IconUpload } from "@tabler/icons-react";
-import { notify } from "@utility";
+import { IconCalendar } from "@tabler/icons-react";
 import { selectRecordsForDropdown, useAppDispatch, useAppSelector } from "@store";
 import { addProject } from "@slices";
 import { DateTime } from "luxon";
-import { DatePickerInput } from "@mantine/dates";
+import { DatePickerInput, DateValue } from "@mantine/dates";
 import { colors } from "@theme";
 
 interface OwnProps {
@@ -32,31 +18,37 @@ interface OwnProps {
 interface IProjectForm extends Omit<IProject, "id"> {}
 
 const _AddProjectModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
-  const { theme, classes } = useStyles();
+  const { theme } = useStyles();
   const dispatch = useAppDispatch();
-  const [startDate, setStartDate] = React.useState(new Date());
-  const [plannedEndDate, setPlannedEndDate] = React.useState(new Date());
+  const [contractDate, setContractDate] = React.useState(new Date());
+  const [deliveryDate, setDeliveryDate] = React.useState(new Date());
   const {
     companies: companiesList,
     salesPersons: salesPersonsList,
-    projectManagers: projectManagersList,
     projectStatus: projectStatusList,
   } = useAppSelector(selectRecordsForDropdown);
+  const currencyList = [
+    { label: "MYR", value: "MYR" },
+    { label: "USD", value: "USD" },
+    { label: "CAD", value: "CAD" },
+  ];
 
   const form = useFormik<IProjectForm>({
     initialValues: {
-      logo: "",
       name: "",
-      companyId: 0,
+      description: "",
+      projectType: "",
+      value: {
+        amount: 0,
+        currency: "MYR",
+      },
+      contractDate: DateTime.now().toFormat("yyyy-MM-dd"),
+      deliveryDate: DateTime.now().toFormat("yyyy-MM-dd"),
+      quotation: "",
+      salesPersonId: 0,
       statusId: 0,
       statusName: "",
-      projectType: "",
-      projectManagerId: 0,
-      salesPersonId: 0,
-      value: 0,
-      city: "",
-      startDate: DateTime.now().toFormat("yyyy-MM-dd"),
-      plannedEndDate: DateTime.now().toFormat("yyyy-MM-dd"),
+      companyId: 0,
     },
     onSubmit(values, helpers) {
       console.log(values);
@@ -65,23 +57,6 @@ const _AddProjectModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
       onClose();
     },
   });
-
-  const handleFileChange = (file: File) => {
-    if (file === null) {
-      notify("Image Upload", "Vehicle image not uploaded", "error");
-      return;
-    }
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const dataUri = e?.target?.result as string;
-      if (dataUri) {
-        form.setValues((prev) => ({ ...prev, logo: dataUri }));
-      }
-    };
-    reader.readAsDataURL(file);
-    // const fileUri = URL.createObjectURL(file);
-    // setFileUri(fileUri);
-  };
 
   const handleCancel = () => {
     form.resetForm();
@@ -95,6 +70,7 @@ const _AddProjectModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
       companyId: parseInt(value),
     }));
   };
+
   const handleOnChangeStatus = (value: string | null) => {
     if (!value) return;
     const typeName = projectStatusList.find((status) => status.value === value)?.label;
@@ -106,6 +82,34 @@ const _AddProjectModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
     }));
   };
 
+  const handleOnChangeValueCurrency = (value: string | null) => {
+    if (!value) return;
+    form.setValues((prev) => ({
+      ...prev,
+      value: { ...prev.value, currency: value },
+    }));
+  };
+
+  const handleOnChangeContractDate = (value: DateValue) => {
+    if (value) {
+      setContractDate(value);
+      form.setValues((prev) => ({
+        ...prev,
+        contractDate: DATE_FORMAT_YYYY_MM_DD(value),
+      }));
+    }
+  };
+
+  const handleOnChangeDeliveryDate = (value: DateValue) => {
+    if (value) {
+      setDeliveryDate(value);
+      form.setValues((prev) => ({
+        ...prev,
+        deliveryDate: DATE_FORMAT_YYYY_MM_DD(value),
+      }));
+    }
+  };
+
   const handleOnChangeSalesPerson = (value: string | null) => {
     if (!value) return;
     form.setValues((prev) => ({
@@ -114,14 +118,11 @@ const _AddProjectModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
     }));
   };
 
-  const handleOnChangeProjectManager = (value: string | null) => {
-    if (!value) return;
-    form.setValues((prev) => ({
-      ...prev,
-      projectManagerId: parseInt(value),
-    }));
+  const inputWithSelectStyle = {
+    rightSection: {
+      width: rem(88),
+    },
   };
-
   return (
     <Modal
       size="xl"
@@ -134,32 +135,9 @@ const _AddProjectModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
       overlayProps={modalOverlayPropsHelper(theme)}
     >
       <Stack>
-        <Flex direction={"column"} align={"center"} justify={"flex-end"}>
-          {form.values.logo ? (
-            <Avatar src={form.values.logo} radius={rem(250)} size={rem(170)} />
-          ) : (
-            <Avatar src={"/user.png"} radius={rem(250)} size={rem(170)} />
-          )}
-          <div className={classes.fileUploadButton}>
-            <FileButton onChange={handleFileChange} accept="image/png,image/jpeg">
-              {(props) => (
-                <Button
-                  radius={"xl"}
-                  variant="filled"
-                  color={theme.primaryColor}
-                  {...props}
-                  rightIcon={<IconUpload size={16} color={theme.white} stroke={1.5} />}
-                >
-                  Logo
-                </Button>
-              )}
-            </FileButton>
-          </div>
-        </Flex>
-        <Grid columns={25}>
+        <Grid>
           <Grid.Col span={12}>
             <Stack spacing={"xs"}>
-              <Divider label="Project" labelPosition="center" />
               <TextInput
                 required
                 withAsterisk={false}
@@ -167,6 +145,15 @@ const _AddProjectModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
                 name="name"
                 id="name"
                 value={form.values.name}
+                onChange={form.handleChange}
+                onBlur={form.handleBlur}
+              />
+              <Textarea
+                rows={5}
+                label="Description"
+                name="description"
+                id="description"
+                value={form.values.description}
                 onChange={form.handleChange}
                 onBlur={form.handleBlur}
               />
@@ -184,12 +171,84 @@ const _AddProjectModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
                 <TextInput
                   required
                   withAsterisk={false}
-                  label="City"
-                  name="city"
-                  id="city"
-                  value={form.values.city}
+                  label="Value"
+                  name="value.amount"
+                  id="value.amount"
+                  value={form.values.value.amount}
                   onChange={form.handleChange}
                   onBlur={form.handleBlur}
+                  styles={inputWithSelectStyle}
+                  rightSection={
+                    <Select
+                      required
+                      withAsterisk={false}
+                      searchable
+                      radius={"xl"}
+                      variant="unstyled"
+                      nothingFound="No such currency"
+                      value={form.values.value.currency}
+                      onChange={handleOnChangeValueCurrency}
+                      data={currencyList}
+                    />
+                  }
+                />
+              </Group>
+              <Group grow align="flex-start">
+                <DatePickerInput
+                  radius={"md"}
+                  required
+                  withAsterisk={false}
+                  name="contractDate"
+                  id="contractDate"
+                  label="Contract Date"
+                  onBlur={form.handleBlur}
+                  defaultValue={contractDate}
+                  onChange={handleOnChangeContractDate}
+                  icon={<IconCalendar size={16} stroke={1.5} color={colors.titleText} />}
+                  error={
+                    form.touched.contractDate && form.errors.contractDate
+                      ? `${form.errors.contractDate}`
+                      : null
+                  }
+                />
+                <DatePickerInput
+                  radius={"md"}
+                  required
+                  withAsterisk={false}
+                  name="deliveryDate"
+                  id="deliveryDate"
+                  label="Delivery Date"
+                  onBlur={form.handleBlur}
+                  defaultValue={deliveryDate}
+                  onChange={handleOnChangeDeliveryDate}
+                  icon={<IconCalendar size={16} stroke={1.5} color={colors.titleText} />}
+                  error={
+                    form.touched.deliveryDate && form.errors.deliveryDate
+                      ? `${form.errors.deliveryDate}`
+                      : null
+                  }
+                />
+              </Group>
+              <Group grow align="flex-start">
+                <TextInput
+                  required
+                  withAsterisk={false}
+                  label="Quotation"
+                  name="quotation"
+                  id="quotation"
+                  value={form.values.quotation}
+                  onChange={form.handleChange}
+                  onBlur={form.handleBlur}
+                />
+                <Select
+                  required
+                  withAsterisk={false}
+                  searchable
+                  nothingFound="No Sales Persons"
+                  label="Sales Person"
+                  value={form.values.salesPersonId.toString()}
+                  onChange={handleOnChangeSalesPerson}
+                  data={salesPersonsList}
                 />
               </Group>
               <Select
@@ -212,107 +271,6 @@ const _AddProjectModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
                 onChange={handleOnChangeStatus}
                 data={projectStatusList}
               />
-            </Stack>
-          </Grid.Col>
-
-          <Grid.Col span={1} />
-
-          <Grid.Col span={12}>
-            <Stack spacing={"xs"}>
-              <Divider label="Details" labelPosition="center" />
-              <Group grow align="flex-start">
-                <Select
-                  required
-                  withAsterisk={false}
-                  searchable
-                  nothingFound="No Sales Persons"
-                  label="Sales Person"
-                  value={form.values.salesPersonId.toString()}
-                  onChange={handleOnChangeSalesPerson}
-                  data={salesPersonsList}
-                />
-                <Select
-                  required
-                  withAsterisk={false}
-                  searchable
-                  nothingFound="No Project Managers"
-                  label="Project Managers"
-                  value={form.values.projectManagerId.toString()}
-                  onChange={handleOnChangeProjectManager}
-                  data={projectManagersList}
-                />
-              </Group>
-              <TextInput
-                required
-                withAsterisk={false}
-                label="Value (RM)"
-                name="value"
-                id="value"
-                type="number"
-                value={form.values.value.toString()}
-                onChange={form.handleChange}
-                onBlur={form.handleBlur}
-              />
-              <DatePickerInput
-                radius={"md"}
-                required
-                withAsterisk={false}
-                name="startDate"
-                id="startDate"
-                label="Start Date"
-                onBlur={form.handleBlur}
-                defaultValue={startDate}
-                onChange={(value) => {
-                  if (value) {
-                    setStartDate(value);
-                    form.setValues((prev) => ({
-                      ...prev,
-                      startDate: DATE_FORMAT_YYYY_MM_DD(value),
-                    }));
-                  }
-                }}
-                error={
-                  form.touched.startDate && form.errors.startDate
-                    ? `${form.errors.startDate}`
-                    : null
-                }
-                icon={<IconCalendar size={16} stroke={1.5} color={colors.titleText} />}
-              />
-              <DatePickerInput
-                radius={"md"}
-                required
-                withAsterisk={false}
-                name="plannedEndDate"
-                id="plannedEndDate"
-                label="Planned End Date"
-                onBlur={form.handleBlur}
-                defaultValue={plannedEndDate}
-                onChange={(value) => {
-                  if (value) {
-                    setPlannedEndDate(value);
-                    form.setValues((prev) => ({
-                      ...prev,
-                      plannedEndDate: DATE_FORMAT_YYYY_MM_DD(value),
-                    }));
-                  }
-                }}
-                error={
-                  form.touched.plannedEndDate && form.errors.plannedEndDate
-                    ? `${form.errors.plannedEndDate}`
-                    : null
-                }
-                icon={<IconCalendar size={16} stroke={1.5} color={colors.titleText} />}
-              />
-              {/* <TextInput
-                required
-                withAsterisk={false}
-                label="Designation"
-                name="contact.designation"
-                id="contact.designation"
-                value={company.values.contact.designation}
-                onChange={company.handleChange}
-                onBlur={company.handleBlur}
-              /> */}
 
               <Group align="flex-end" position="right" mt={rem(32)}>
                 <Button variant="outline" onClick={handleCancel} size="xs">

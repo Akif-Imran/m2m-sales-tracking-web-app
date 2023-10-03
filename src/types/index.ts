@@ -52,19 +52,22 @@ interface IProjectStatus {
   name: string;
 }
 interface IProject {
-  logo: string;
   id: number;
   name: string;
-  companyId: number; //company
+  description: string;
   projectType: string;
-  city: string;
-  value: number; //value in RM
+  value: {
+    currency: string;
+    amount: number;
+  };
+  contractDate: string;
+  deliveryDate: string;
+  quotation: string;
   salesPersonId: number;
-  projectManagerId: number;
-  startDate: string;
-  plannedEndDate: string;
+  //costing
   statusId: number;
   statusName: string;
+  companyId: number; //company
 }
 interface ITaskStatus {
   id: number;

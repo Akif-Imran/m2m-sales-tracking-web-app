@@ -131,3 +131,19 @@ export const selectCompaniesWithContact = createSelector(
     });
   }
 );
+export const selectProjectWithRecords = createSelector(
+  selectProjects,
+  selectCompanies,
+  selectUsers,
+  (projects, companies, users) => {
+    return projects.data.map((project) => {
+      const company = companies.data.find((company) => company.id === project.companyId);
+      const salesPerson = users.data.find((user) => user.id === project.salesPersonId);
+      return {
+        ...project,
+        company: company,
+        salesPerson: salesPerson,
+      };
+    });
+  }
+);

@@ -18,11 +18,12 @@ export const PoiTypesColor: Record<string, string> = {
   total: colors.titleText,
 } as const;
 
-export const projectStatusColors: Record<string, string> = {
-  "In Development": "blue",
-  Completed: "green",
-  Quotation: "red",
-  "Follow Up": "yellow",
+export const projectStatusColors: Record<number, string> = {
+  1: "red",
+  2: "yellow",
+  3: "orange",
+  4: "blue",
+  5: "green",
 };
 
 export const taskStatusColors: Record<string, string> = {

@@ -112,6 +112,7 @@ interface AuthState {
   token: string;
   user: ILoginUserData | null;
   isAdmin: boolean;
+  isHR: boolean;
   isSales: boolean;
   isEngineer: boolean;
 }
@@ -162,6 +163,7 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
         user: action.payload.user,
         isAdmin: action.payload.user.userTypeName === "Admin",
         isSales: action.payload.user.userTypeName === "Sales",
+        isHR: action.payload.user.userTypeName === "HR",
         isEngineer: action.payload.user.userTypeName === "Engineer",
         isAuthorized: true,
         isLoading: false,
@@ -174,6 +176,7 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
         isAuthorized: true,
         isAdmin: action.payload.user.userTypeName === "Admin",
         isSales: action.payload.user.userTypeName === "Sales",
+        isHR: action.payload.user.userTypeName === "HR",
         isEngineer: action.payload.user.userTypeName === "Engineer",
       };
     default:
@@ -188,6 +191,7 @@ const initAuthState: AuthState = {
   user: null,
   isAdmin: false,
   isEngineer: false,
+  isHR: false,
   isSales: false,
 };
 

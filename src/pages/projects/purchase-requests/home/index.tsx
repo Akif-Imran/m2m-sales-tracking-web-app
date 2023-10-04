@@ -6,6 +6,8 @@ import {
   Button,
   Flex,
   Group,
+  Modal,
+  Radio,
   ScrollArea,
   Stack,
   Table,
@@ -13,13 +15,18 @@ import {
   TextInput,
 } from "@mantine/core";
 import { _AddPurchaseRequestModal } from "../components";
-import { IconPlus, IconSearch, IconTrash } from "@tabler/icons-react";
+import { IconPlus, IconRotateClockwise2, IconSearch, IconTrash } from "@tabler/icons-react";
 import { DAY_MM_DD_YYYY_HH_MM_SS_A, purchaseRequestStatusColors } from "@constants";
 import { colors } from "@theme";
-import { openDeleteModalHelper } from "@helpers";
+import { modalOverlayPropsHelper, openDeleteModalHelper } from "@helpers";
 import { notify } from "@utility";
-import { deletePurchaseRequest } from "@slices";
-import { selectPurchaseRequestsWithRecords, useAppDispatch, useAppSelector } from "@store";
+import { deletePurchaseRequest, updatePurchaseRequestStatus } from "@slices";
+import {
+  selectPurchaseRequestsWithRecords,
+  selectRecordsForDropdown,
+  useAppDispatch,
+  useAppSelector,
+} from "@store";
 import { useAuthContext } from "@contexts";
 import { useGStyles } from "@global-styles";
 import { DateTime } from "luxon";
@@ -29,19 +36,23 @@ interface OwnProps {}
 export const PurchaseRequests: React.FC<OwnProps> = () => {
   useStyles();
   const {
-    state: { isAdmin, user },
+    state: { isAdmin, isHR, user },
   } = useAuthContext();
   const dispatch = useAppDispatch();
   const { classes: gclasses, theme } = useGStyles();
+  const { purchaseRequestStatus } = useAppSelector(selectRecordsForDropdown);
 
   const [searchQuery, setSearchQuery] = React.useState("");
   const requests = useAppSelector(selectPurchaseRequestsWithRecords);
   const [addRequestModalOpened, setAddRequestModalOpened] = React.useState(false);
   const [searchedData, setSearchedData] = React.useState<typeof requests>([]);
+  const [visible, setVisible] = React.useState<boolean>(false);
+  const [selectedStatus, setSelectedStatus] = React.useState<string>();
+  const [selectedRequest, setSelectedRequest] = React.useState<number>(0);
 
   const onChangeSearch = (query: string) => {
     setSearchQuery(query);
-    if (isAdmin) {
+    if (isAdmin || isHR) {
       const filtered = requests.filter(
         (request) =>
           request.project?.name.toLowerCase().includes(query.toLowerCase()) ||
@@ -65,6 +76,13 @@ export const PurchaseRequests: React.FC<OwnProps> = () => {
     }
   };
 
+  const showUpdateStatusModal = (statusId: number, requestId: number) => {
+    setSelectedStatus(statusId.toString());
+    setSelectedRequest(requestId);
+    setVisible(true);
+  };
+  const hideUpdateStatusModal = () => setVisible(false);
+
   const handleDelete = (id: number) => {
     openDeleteModalHelper({
       theme: theme,
@@ -87,13 +105,13 @@ export const PurchaseRequests: React.FC<OwnProps> = () => {
   };
 
   React.useEffect(() => {
-    if (isAdmin) {
+    if (isAdmin || isHR) {
       setSearchedData(requests);
     } else {
       const filtered = requests.filter((followup) => followup.requestedById === user?.id);
       setSearchedData(filtered);
     }
-  }, [requests, isAdmin, user?.id]);
+  }, [requests, isAdmin, isHR, user?.id]);
 
   const rows =
     searchedData.length === 0 ? (
@@ -134,15 +152,22 @@ export const PurchaseRequests: React.FC<OwnProps> = () => {
               <td>{value}</td>
               <td>{request.remarks}</td>
               <td>
-                {isAdmin ? (
-                  <Group>
+                <Group>
+                  {isHR && (
+                    <ActionIcon
+                      color="gray"
+                      size={"sm"}
+                      onClick={() => showUpdateStatusModal(request.statusId, request.id)}
+                    >
+                      <IconRotateClockwise2 />
+                    </ActionIcon>
+                  )}
+                  {isAdmin && (
                     <ActionIcon color="red" size={"sm"} onClick={() => handleDelete(request.id)}>
                       <IconTrash />
                     </ActionIcon>
-                  </Group>
-                ) : (
-                  "Admin Required"
-                )}
+                  )}
+                </Group>
               </td>
             </tr>
           );
@@ -162,7 +187,7 @@ export const PurchaseRequests: React.FC<OwnProps> = () => {
           //   <IconFilter size={14} color={colors.borderColor} onClick={showFilterModal} />
           // }
         />
-        {isAdmin && (
+        {!isHR && (
           <Button
             variant="filled"
             rightIcon={<IconPlus size={16} />}
@@ -207,6 +232,45 @@ export const PurchaseRequests: React.FC<OwnProps> = () => {
         opened={addRequestModalOpened}
         onClose={() => setAddRequestModalOpened(false)}
       />
+      <Modal
+        centered
+        radius="md"
+        opened={visible}
+        onClose={hideUpdateStatusModal}
+        title="Project Status"
+        scrollAreaComponent={ScrollArea.Autosize}
+        withinPortal
+        withOverlay
+        overlayProps={modalOverlayPropsHelper(theme)}
+      >
+        <Radio.Group
+          value={selectedStatus}
+          name="userFilter"
+          defaultValue="7"
+          onChange={(value) => {
+            if (!value) {
+              notify("Update Purchase Request Status", "Invalid status value", "error");
+              return;
+            }
+            const typeName = purchaseRequestStatus.find((status) => status.value === value)?.label;
+            if (!typeName) return;
+            dispatch(
+              updatePurchaseRequestStatus({
+                purchaseRequestId: selectedRequest,
+                statusId: parseInt(value),
+                statusName: typeName,
+              })
+            );
+            hideUpdateStatusModal();
+          }}
+        >
+          <div className={gclasses.radioContainer}>
+            {purchaseRequestStatus.map((value) => {
+              return <Radio value={value.value} label={value.label} key={value.value} />;
+            })}
+          </div>
+        </Radio.Group>
+      </Modal>
     </Stack>
   );
 };

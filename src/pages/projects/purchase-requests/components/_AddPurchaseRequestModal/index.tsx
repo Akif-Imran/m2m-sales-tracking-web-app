@@ -162,7 +162,6 @@ export const _AddPurchaseRequestModal: React.FC<OwnProps> = ({ onClose, opened, 
                 onBlur={form.handleBlur}
               />
               <DatePickerInput
-                radius={"md"}
                 required
                 withAsterisk={false}
                 placeholder="Select Warranty Date"

@@ -14,6 +14,8 @@ interface IUser {
   phone: string;
   departmentId: number;
   departmentName: string;
+  designation: string;
+  joiningDate: string;
   address: string;
   city: string;
   country: string;

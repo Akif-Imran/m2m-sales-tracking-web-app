@@ -24,12 +24,15 @@ import {
   selectCompanyContact,
   selectProjectWithRecords,
   selectRecordsForDropdown,
+  useAppDispatch,
   useAppSelector,
 } from "@store";
-import { YYYY_MM_DD_HH_MM_SS_A } from "@constants";
+import { YYYY_MM_DD_HH_MM_SS_A, currencyList } from "@constants";
 import { IconUpload } from "@tabler/icons-react";
 import { useGStyles } from "../../../../../styles";
 import { notify } from "@utility";
+import { DateTimePicker } from "@mantine/dates";
+import { addFollowUp } from "@slices";
 
 interface OwnProps {
   opened: boolean;
@@ -45,6 +48,7 @@ const _AddFollowUpModal: React.FC<OwnProps> = ({ title, opened, onClose }) => {
   const {
     state: { user },
   } = useAuthContext();
+  const dispatch = useAppDispatch();
   const projects = useAppSelector(selectProjectWithRecords);
   const { projects: projectsList } = useAppSelector(selectRecordsForDropdown);
   const contacts = useAppSelector(selectCompanyContact);
@@ -80,7 +84,7 @@ const _AddFollowUpModal: React.FC<OwnProps> = ({ title, opened, onClose }) => {
     },
     onSubmit(values, helpers) {
       console.log(values);
-      //dispatch
+      dispatch(addFollowUp(values));
       helpers.resetForm();
       onClose();
     },
@@ -99,6 +103,19 @@ const _AddFollowUpModal: React.FC<OwnProps> = ({ title, opened, onClose }) => {
       }
     };
     reader.readAsDataURL(file);
+  };
+
+  const handleOnChangeValueCurrency = (value: string | null) => {
+    if (!value) return;
+    form.setValues((prev) => ({
+      ...prev,
+      expenses: { ...prev.expenses, amount: { ...prev.expenses.amount, currency: value } },
+    }));
+  };
+
+  const handleCancel = () => {
+    form.resetForm();
+    onClose();
   };
 
   React.useEffect(() => {
@@ -160,15 +177,23 @@ const _AddFollowUpModal: React.FC<OwnProps> = ({ title, opened, onClose }) => {
               />
             </Group>
             <Group grow align="flex-start">
-              <TextInput
+              <DateTimePicker
                 required
                 withAsterisk={false}
                 label="Meeting Date/Time"
+                valueFormat="YYYY-MM-DD hh:mm A"
+                clearable={false}
+                placeholder="Pick date and time"
                 name="meetingDate"
                 id="meetingDate"
-                value={form.values.meetingDate}
-                onChange={form.handleChange}
                 onBlur={form.handleBlur}
+                onChange={(date) => {
+                  if (!date) return;
+                  form.setValues((prev) => ({
+                    ...prev,
+                    meetingDate: date?.toISOString(),
+                  }));
+                }}
               />
               <TextInput
                 required
@@ -262,15 +287,26 @@ const _AddFollowUpModal: React.FC<OwnProps> = ({ title, opened, onClose }) => {
                 onChange={form.handleChange}
                 onBlur={form.handleBlur}
               />
-              <TextInput
+              <DateTimePicker
                 required
                 withAsterisk={false}
                 label="Date/Time"
+                valueFormat="YYYY-MM-DD hh:mm A"
+                clearable={false}
+                placeholder="Pick date and time"
                 name="nextFollowUp.meetingDate"
                 id="nextFollowUp.meetingDate"
-                value={form.values.nextFollowUp.meetingDate}
-                onChange={form.handleChange}
                 onBlur={form.handleBlur}
+                onChange={(date) => {
+                  if (!date) return;
+                  form.setValues((prev) => ({
+                    ...prev,
+                    nextFollowUp: {
+                      ...prev.nextFollowUp,
+                      meetingDate: date?.toISOString(),
+                    },
+                  }));
+                }}
               />
             </Group>
           </Stack>
@@ -330,13 +366,59 @@ const _AddFollowUpModal: React.FC<OwnProps> = ({ title, opened, onClose }) => {
             <TextInput
               required
               withAsterisk={false}
-              label="Type"
-              name="expenses.type"
-              id="expenses.type"
-              value={form.values.expenses.type}
+              label="Name"
+              name="expenses.name"
+              id="expenses.name"
+              value={form.values.expenses.name}
               onChange={form.handleChange}
               onBlur={form.handleBlur}
             />
+            <Group grow align="flex-start">
+              <TextInput
+                required
+                withAsterisk={false}
+                label="Type"
+                name="expenses.type"
+                id="expenses.type"
+                value={form.values.expenses.type}
+                onChange={form.handleChange}
+                onBlur={form.handleBlur}
+              />
+              <TextInput
+                required
+                withAsterisk={false}
+                label="Amount"
+                name="expenses.amount.amount"
+                id="expenses.amount.amount"
+                type="number"
+                value={form.values.expenses.amount.amount.toString()}
+                onChange={form.handleChange}
+                onBlur={form.handleBlur}
+                rightSectionWidth={rem(88)}
+                rightSection={
+                  <Select
+                    required
+                    withAsterisk={false}
+                    searchable
+                    radius={"xl"}
+                    variant="unstyled"
+                    nothingFound="No such currency"
+                    value={form.values.expenses.amount.currency}
+                    onChange={handleOnChangeValueCurrency}
+                    data={currencyList}
+                  />
+                }
+              />
+            </Group>
+
+            <Group align="flex-end" position="right" mt={rem(32)}>
+              <Button variant="outline" onClick={handleCancel} size="xs">
+                Cancel
+              </Button>
+              <Button variant="filled" onClick={() => form.handleSubmit()} size="xs">
+                Save
+              </Button>
+            </Group>
           </Stack>
         </Grid.Col>
       </Grid>

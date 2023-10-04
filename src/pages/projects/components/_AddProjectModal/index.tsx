@@ -118,11 +118,6 @@ const _AddProjectModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
     }));
   };
 
-  const inputWithSelectStyle = {
-    rightSection: {
-      width: rem(88),
-    },
-  };
   return (
     <Modal
       size="xl"
@@ -177,7 +172,7 @@ const _AddProjectModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
                   value={form.values.value.amount}
                   onChange={form.handleChange}
                   onBlur={form.handleBlur}
-                  styles={inputWithSelectStyle}
+                  rightSectionWidth={rem(88)}
                   rightSection={
                     <Select
                       required

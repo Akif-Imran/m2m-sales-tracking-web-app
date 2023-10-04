@@ -20,6 +20,8 @@ import { useGStyles } from "../../../styles";
 import { deleteUser } from "@slices";
 import { notify } from "@utility";
 import { _AddUserModal } from "../components";
+import { DateTime } from "luxon";
+import { DAY_MM_DD_YYYY } from "@constants";
 
 interface OwnProps {}
 
@@ -94,6 +96,8 @@ const Users: React.FC<OwnProps> = () => {
               <td>{user.password}</td>
               <td>{user.phone}</td>
               <td>{user.departmentName}</td>
+              <td>{user.designation}</td>
+              <td>{DateTime.fromISO(user.joiningDate).toFormat(DAY_MM_DD_YYYY)}</td>
               <td>{user.userTypeName}</td>
               <td>{user.address}</td>
               <td>{user.city}</td>
@@ -139,7 +143,7 @@ const Users: React.FC<OwnProps> = () => {
               <tr>
                 <th colSpan={4}>User</th>
                 <th colSpan={1}>Company</th>
-                <th colSpan={6}>User Details</th>
+                <th colSpan={8}>User Details</th>
               </tr>
               <tr>
                 <th>#</th>
@@ -153,6 +157,8 @@ const Users: React.FC<OwnProps> = () => {
                 <th>Password</th>
                 <th>Phone</th>
                 <th>Department</th>
+                <th>Designation</th>
+                <th>Joining Date</th>
                 <th>User Type</th>
                 <th>Address</th>
                 <th>City</th>

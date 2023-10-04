@@ -27,11 +27,16 @@ export const projectStatusColors: Record<number, string> = {
   5: "green",
 };
 
+export const purchaseRequestStatusColors: Record<number, string> = {
+  1: "red",
+  2: "green",
+  3: "orange",
+  5: "blue",
+};
+
 export const taskStatusColors: Record<string, string> = {
   Pending: "red",
   Accepted: "blue",
-  Declined: "dark",
-  Delayed: "orange",
   Completed: "green",
 };
 

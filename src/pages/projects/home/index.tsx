@@ -42,7 +42,7 @@ interface ProjectSort {
 const Projects: React.FC<OwnProps> = () => {
   useStyles();
   const {
-    state: { user, isAdmin },
+    state: { user, isAdmin, isHR },
   } = useAuthContext();
   const dispatch = useAppDispatch();
   const { classes: gclasses, theme } = useGStyles();
@@ -70,7 +70,7 @@ const Projects: React.FC<OwnProps> = () => {
 
   const onChangeSearch = (query: string) => {
     setSearchQuery(query);
-    if (user?.userTypeName === "Admin") {
+    if (isAdmin || isHR) {
       const filtered = projects.filter((project) =>
         project.name.toLowerCase().includes(query.toLowerCase())
       );
@@ -106,13 +106,13 @@ const Projects: React.FC<OwnProps> = () => {
   };
 
   React.useEffect(() => {
-    if (user?.userTypeName === "Admin") {
+    if (isAdmin || isHR) {
       setSearchedData(projects);
     } else {
       const filtered = projects.filter((project) => project.salesPersonId === user?.id);
       setSearchedData(filtered);
     }
-  }, [projects, user]);
+  }, [isAdmin, isHR, projects, user?.id]);
 
   const handleDelete = (id: number) => {
     openDeleteModalHelper({

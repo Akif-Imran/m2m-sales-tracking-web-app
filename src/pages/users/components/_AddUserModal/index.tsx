@@ -1,4 +1,4 @@
-import { modalOverlayPropsHelper } from "@helpers";
+import { DATE_FORMAT_YYYY_MM_DD, modalOverlayPropsHelper } from "@helpers";
 import React from "react";
 import { useStyles } from "./styles";
 import {
@@ -17,10 +17,12 @@ import {
   rem,
 } from "@mantine/core";
 import { useFormik } from "formik";
-import { IconUpload } from "@tabler/icons-react";
+import { IconCalendar, IconUpload } from "@tabler/icons-react";
 import { notify } from "@utility";
 import { selectRecordsForDropdown, useAppDispatch, useAppSelector } from "@store";
 import { addUser } from "@slices";
+import { DatePickerInput, DateValue } from "@mantine/dates";
+import { colors } from "@theme";
 
 interface OwnProps {
   opened: boolean;
@@ -34,9 +36,11 @@ const _AddUserModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
   const { companies, departments, userTypes } = useAppSelector(selectRecordsForDropdown);
   const dispatch = useAppDispatch();
 
-  const company = useFormik<IUserForm>({
+  const form = useFormik<IUserForm>({
     initialValues: {
       avatar: "", //
+      designation: "",
+      joiningDate: "",
       firstName: "", //
       lastName: "", //
       email: "", //
@@ -68,7 +72,7 @@ const _AddUserModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
     reader.onload = (e) => {
       const dataUri = e?.target?.result as string;
       if (dataUri) {
-        company.setValues((prev) => ({ ...prev, avatar: dataUri }));
+        form.setValues((prev) => ({ ...prev, avatar: dataUri }));
       }
     };
     reader.readAsDataURL(file);
@@ -77,14 +81,14 @@ const _AddUserModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
   };
 
   const handleCancel = () => {
-    company.resetForm();
+    form.resetForm();
     onClose();
   };
   const handleOnChangeUserType = (value: string | null) => {
     if (!value) return;
     const typeName = userTypes.find((type) => type.value === value)?.label;
     if (!typeName) return;
-    company.setValues((prev) => ({
+    form.setValues((prev) => ({
       ...prev,
       userTypeId: parseInt(value),
       userTypeName: typeName,
@@ -95,11 +99,20 @@ const _AddUserModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
     if (!value) return;
     const typeName = departments.find((type) => type.value === value)?.label;
     if (!typeName) return;
-    company.setValues((prev) => ({
+    form.setValues((prev) => ({
       ...prev,
       departmentId: parseInt(value),
       departmentName: typeName,
     }));
+  };
+
+  const handleOnChangeJoiningDate = (value: DateValue) => {
+    if (value) {
+      form.setValues((prev) => ({
+        ...prev,
+        joiningDate: DATE_FORMAT_YYYY_MM_DD(value),
+      }));
+    }
   };
 
   return (
@@ -114,8 +127,8 @@ const _AddUserModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
     >
       <Stack>
         <Flex direction={"column"} align={"center"} justify={"flex-end"}>
-          {company.values.avatar ? (
-            <Avatar src={company.values.avatar} radius={rem(250)} size={rem(170)} />
+          {form.values.avatar ? (
+            <Avatar src={form.values.avatar} radius={rem(250)} size={rem(170)} />
           ) : (
             <Avatar src={"/user.png"} radius={rem(250)} size={rem(170)} />
           )}
@@ -146,9 +159,9 @@ const _AddUserModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
                   label="First Name"
                   name="firstName"
                   id="firstName"
-                  value={company.values.firstName}
-                  onChange={company.handleChange}
-                  onBlur={company.handleBlur}
+                  value={form.values.firstName}
+                  onChange={form.handleChange}
+                  onBlur={form.handleBlur}
                 />
                 <TextInput
                   required
@@ -156,9 +169,9 @@ const _AddUserModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
                   label="Last Name"
                   name="lastName"
                   id="lastName"
-                  value={company.values.lastName}
-                  onChange={company.handleChange}
-                  onBlur={company.handleBlur}
+                  value={form.values.lastName}
+                  onChange={form.handleChange}
+                  onBlur={form.handleBlur}
                 />
               </Group>
               <TextInput
@@ -167,9 +180,9 @@ const _AddUserModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
                 label="Email"
                 name="email"
                 id="email"
-                value={company.values.email}
-                onChange={company.handleChange}
-                onBlur={company.handleBlur}
+                value={form.values.email}
+                onChange={form.handleChange}
+                onBlur={form.handleBlur}
               />
               <PasswordInput
                 required
@@ -177,13 +190,11 @@ const _AddUserModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
                 label="Password"
                 name="password"
                 id="password"
-                value={company.values.password}
-                onChange={company.handleChange}
-                onBlur={company.handleBlur}
+                value={form.values.password}
+                onChange={form.handleChange}
+                onBlur={form.handleBlur}
                 error={
-                  company.touched.password && company.errors.password
-                    ? `${company.errors.password}`
-                    : null
+                  form.touched.password && form.errors.password ? `${form.errors.password}` : null
                 }
               />
               <Group grow align="flex-start">
@@ -193,9 +204,9 @@ const _AddUserModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
                   label="City"
                   name="city"
                   id="city"
-                  value={company.values.city}
-                  onChange={company.handleChange}
-                  onBlur={company.handleBlur}
+                  value={form.values.city}
+                  onChange={form.handleChange}
+                  onBlur={form.handleBlur}
                 />
                 <TextInput
                   required
@@ -203,9 +214,9 @@ const _AddUserModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
                   label="Country"
                   name="country"
                   id="country"
-                  value={company.values.country}
-                  onChange={company.handleChange}
-                  onBlur={company.handleBlur}
+                  value={form.values.country}
+                  onChange={form.handleChange}
+                  onBlur={form.handleBlur}
                 />
               </Group>
               <TextInput
@@ -214,9 +225,9 @@ const _AddUserModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
                 label="Address"
                 name="address"
                 id="address"
-                value={company.values.address}
-                onChange={company.handleChange}
-                onBlur={company.handleBlur}
+                value={form.values.address}
+                onChange={form.handleChange}
+                onBlur={form.handleBlur}
               />
             </Stack>
           </Grid.Col>
@@ -233,9 +244,9 @@ const _AddUserModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
                 label="Mobile No."
                 name="phone"
                 id="phone"
-                value={company.values.phone}
-                onChange={company.handleChange}
-                onBlur={company.handleBlur}
+                value={form.values.phone}
+                onChange={form.handleChange}
+                onBlur={form.handleBlur}
               />
               <Group grow align="flex-start">
                 <Select
@@ -244,10 +255,10 @@ const _AddUserModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
                   searchable
                   nothingFound="No Companies"
                   label="Company"
-                  value={company.values.companyId.toString()}
+                  value={form.values.companyId.toString()}
                   onChange={(value) => {
                     if (!value) return;
-                    company.setValues((prev) => ({ ...prev, companyId: parseInt(value) }));
+                    form.setValues((prev) => ({ ...prev, companyId: parseInt(value) }));
                   }}
                   data={companies}
                 />
@@ -257,7 +268,7 @@ const _AddUserModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
                   searchable
                   nothingFound="No Departments"
                   label="Department"
-                  value={company.values.departmentId.toString()}
+                  value={form.values.departmentId.toString()}
                   onChange={handleOnChangeDepartment}
                   data={departments}
                 />
@@ -268,16 +279,44 @@ const _AddUserModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
                 searchable
                 nothingFound="No Such User Type"
                 label="User Type"
-                value={company.values.userTypeId.toString()}
+                value={form.values.userTypeId.toString()}
                 onChange={handleOnChangeUserType}
                 data={userTypes}
               />
+              <Group grow align="flex-start">
+                <DatePickerInput
+                  required
+                  withAsterisk={false}
+                  placeholder="Joining Date"
+                  name="joiningDate"
+                  id="joiningDate"
+                  label="Joining Date"
+                  onBlur={form.handleBlur}
+                  onChange={handleOnChangeJoiningDate}
+                  icon={<IconCalendar size={16} stroke={1.5} color={colors.titleText} />}
+                  error={
+                    form.touched.joiningDate && form.errors.joiningDate
+                      ? `${form.errors.joiningDate}`
+                      : null
+                  }
+                />
+                <TextInput
+                  required
+                  withAsterisk={false}
+                  label="Designation"
+                  name="designation"
+                  id="designation"
+                  value={form.values.designation}
+                  onChange={form.handleChange}
+                  onBlur={form.handleBlur}
+                />
+              </Group>
 
               <Group align="flex-end" position="right" mt={rem(32)}>
                 <Button variant="outline" onClick={handleCancel} size="xs">
                   Cancel
                 </Button>
-                <Button variant="filled" onClick={() => company.handleSubmit()} size="xs">
+                <Button variant="filled" onClick={() => form.handleSubmit()} size="xs">
                   Save
                 </Button>
               </Group>

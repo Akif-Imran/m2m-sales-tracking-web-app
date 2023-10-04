@@ -27,7 +27,7 @@ const _AddTaskModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
 
   const form = useFormik<ITaskForm>({
     initialValues: {
-      statusId: 0,
+      statusId: 1,
       statusName: "",
       projectId: 0,
       title: "",
@@ -132,41 +132,42 @@ const _AddTaskModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
           onChange={form.handleChange}
           onBlur={form.handleBlur}
         />
-        <Select
-          required
-          withAsterisk={false}
-          searchable
-          nothingFound="No Status"
-          label="Status"
-          value={form.values.statusId.toString()}
-          onChange={handleOnChangeStatus}
-          data={taskStatus}
-        />
-        <DateTimePicker
-          radius={"md"}
-          required
-          withAsterisk={false}
-          name="plannedEndDate"
-          id="plannedEndDate"
-          label="Deadline"
-          onBlur={form.handleBlur}
-          defaultValue={plannedEndDate}
-          onChange={(value) => {
-            if (value) {
-              setPlannedEndDate(value);
-              form.setValues((prev) => ({
-                ...prev,
-                plannedEndDate: DATE_FORMAT_YYYY_MM_DD_HH_MM_SS(value),
-              }));
+        <Group grow align="flex-start">
+          <Select
+            required
+            withAsterisk={false}
+            searchable
+            nothingFound="No Status"
+            label="Status"
+            value={form.values.statusId.toString()}
+            onChange={handleOnChangeStatus}
+            data={taskStatus}
+          />
+          <DateTimePicker
+            required
+            withAsterisk={false}
+            name="plannedEndDate"
+            id="plannedEndDate"
+            label="Deadline"
+            onBlur={form.handleBlur}
+            defaultValue={plannedEndDate}
+            onChange={(value) => {
+              if (value) {
+                setPlannedEndDate(value);
+                form.setValues((prev) => ({
+                  ...prev,
+                  plannedEndDate: DATE_FORMAT_YYYY_MM_DD_HH_MM_SS(value),
+                }));
+              }
+            }}
+            error={
+              form.touched.plannedEndDate && form.errors.plannedEndDate
+                ? `${form.errors.plannedEndDate}`
+                : null
             }
-          }}
-          error={
-            form.touched.plannedEndDate && form.errors.plannedEndDate
-              ? `${form.errors.plannedEndDate}`
-              : null
-          }
-          icon={<IconCalendar size={16} stroke={1.5} color={colors.titleText} />}
-        />
+            icon={<IconCalendar size={16} stroke={1.5} color={colors.titleText} />}
+          />
+        </Group>
 
         <Group align="flex-end" position="right" mt={rem(32)}>
           <Button variant="outline" onClick={handleCancel} size="xs">

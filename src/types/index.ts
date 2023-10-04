@@ -1,5 +1,4 @@
 type IDropDownList = { value: string; label: string }[];
-type IUserType = "Admin" | "Sales" | "Driver";
 interface IUserAccountType {
   id: number;
   name: string;
@@ -15,6 +14,8 @@ interface IUser {
   phone: string;
   departmentId: number;
   departmentName: string;
+  designation: string;
+  joiningDate: string;
   address: string;
   city: string;
   country: string;
@@ -130,4 +131,37 @@ interface INotification {
 interface IDepartmentType {
   id: number;
   name: string;
+}
+
+interface IPurchaseRequestStatus {
+  id: number;
+  name: string;
+}
+interface IPurchaseRequest {
+  id: number;
+  requestedById: number; //user id
+  projectId: number;
+  itemName: string;
+  itemType: string;
+  warranty: string; //date
+  qty: number;
+  supplierId: number;
+  price: {
+    amount: number;
+    currency: string;
+  };
+  remarks: string;
+  statusId: number;
+  statusName: string;
+}
+interface ISupplier {
+  id: number;
+  name: string;
+  email: string;
+  phone: string;
+  address: string;
+  city: string;
+  state: string;
+  country: string;
+  websiteURL: string;
 }

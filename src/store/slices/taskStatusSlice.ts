@@ -10,8 +10,6 @@ const initialState: State = {
   data: [
     { id: 1, name: "Pending" },
     { id: 2, name: "Accepted" },
-    { id: 3, name: "Declined" },
-    { id: 4, name: "Delayed" },
     { id: 5, name: "Completed" },
   ],
   isLoading: false,

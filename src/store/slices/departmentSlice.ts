@@ -10,6 +10,7 @@ const initialState: State = {
   data: [
     { id: 1, name: "Sales" },
     { id: 2, name: "Engineering" },
+    { id: 3, name: "Account / HR" },
   ],
   isLoading: false,
   error: null,

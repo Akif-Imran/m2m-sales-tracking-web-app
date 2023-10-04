@@ -1,5 +1,4 @@
 type IDropDownList = { value: string; label: string }[];
-type IUserType = "Admin" | "Sales" | "Driver";
 interface IUserAccountType {
   id: number;
   name: string;

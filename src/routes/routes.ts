@@ -44,6 +44,7 @@ const routes = {
     home: "/settings",
     change_password: "change-password",
     app_theme: "app-theme",
+    suppliers: "suppliers",
   },
   help: {
     home: "/help",

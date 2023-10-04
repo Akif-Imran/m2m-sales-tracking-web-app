@@ -130,3 +130,36 @@ interface IDepartmentType {
   id: number;
   name: string;
 }
+
+interface IPurchaseRequestStatus {
+  id: number;
+  name: string;
+}
+interface IPurchaseRequest {
+  id: number;
+  requestedById: number; //user id
+  projectId: number;
+  itemName: string;
+  itemType: string;
+  warranty: string; //date
+  qty: number;
+  supplierId: number;
+  price: {
+    amount: number;
+    currency: string;
+  };
+  remarks: string;
+  statusId: number;
+  statusName: string;
+}
+interface ISupplier {
+  id: number;
+  name: string;
+  email: string;
+  phone: string;
+  address: string;
+  city: string;
+  state: string;
+  country: string;
+  websiteURL: string;
+}

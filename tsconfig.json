@@ -48,7 +48,8 @@
       "@services": ["./src/services/index.ts"],
       "@theme": ["./src/theme/index.ts"],
       "@app-types": ["./src/types/index.ts"],
-      "@utility": ["./src/utils/index.ts"]
+      "@utility": ["./src/utils/index.ts"],
+      "@global-styles": ["./src/styles.ts"]
     }
   },
   "include": ["src", "src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.json"],

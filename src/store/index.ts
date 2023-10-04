@@ -6,6 +6,9 @@ import {
   followUpReducer,
   projectReducer,
   projectStatusListReducer,
+  purchaseRequestReducer,
+  purchaseRequestStatusListReducer,
+  supplierReducer,
   taskReducer,
   taskStatusListReducer,
   userReducer,
@@ -20,12 +23,15 @@ const store = configureStore({
     companies: companyReducer,
     departments: departmentReducer,
     projects: projectReducer,
-    followUps: followUpReducer,
     projectStatusList: projectStatusListReducer,
+    followUps: followUpReducer,
+    purchaseRequest: purchaseRequestReducer,
+    purchaseRequestStatusList: purchaseRequestStatusListReducer,
     tasks: taskReducer,
     taskStatusList: taskStatusListReducer,
     users: userReducer,
     userTypes: userTypeReducer,
+    suppliers: supplierReducer,
   },
 });
 
@@ -42,12 +48,16 @@ export const selectCompanies = (state: RootState) => state.companies;
 export const selectCompanyContact = (state: RootState) => state.companyContacts;
 export const selectDepartments = (state: RootState) => state.departments;
 export const selectProjects = (state: RootState) => state.projects;
-export const selectFollowUps = (state: RootState) => state.followUps;
 export const selectProjectStatusList = (state: RootState) => state.projectStatusList;
+export const selectFollowUps = (state: RootState) => state.followUps;
+export const selectPurchaseRequests = (state: RootState) => state.purchaseRequest;
+export const selectPurchaseRequestsStatusList = (state: RootState) =>
+  state.purchaseRequestStatusList;
 export const selectTasks = (state: RootState) => state.tasks;
 export const selectTaskStatusList = (state: RootState) => state.taskStatusList;
 export const selectUsers = (state: RootState) => state.users;
 export const selectUserTypes = (state: RootState) => state.userTypes;
+export const selectSuppliers = (state: RootState) => state.suppliers;
 
 //memoized selectors
 export const selectTasksCombined = createSelector(
@@ -83,7 +93,19 @@ export const selectRecordsForDropdown = createSelector(
   selectUsers,
   selectProjectStatusList,
   selectTaskStatusList,
-  (companies, projects, departments, userTypes, users, projectStatus, taskStatus) => {
+  selectPurchaseRequestsStatusList,
+  selectSuppliers,
+  (
+    companies,
+    projects,
+    departments,
+    userTypes,
+    users,
+    projectStatus,
+    taskStatus,
+    purchaseRequestStatus,
+    suppliers
+  ) => {
     return {
       companies: companies.data.map((company) => ({
         value: company.id.toString(),
@@ -92,6 +114,10 @@ export const selectRecordsForDropdown = createSelector(
       projects: projects.data.map((project) => ({
         value: project.id.toString(),
         label: project.name,
+      })),
+      suppliers: suppliers.data.map((supplier) => ({
+        value: supplier.id.toString(),
+        label: supplier.name,
       })),
       departments: departments.data.map((department) => ({
         value: department.id.toString(),
@@ -106,6 +132,10 @@ export const selectRecordsForDropdown = createSelector(
         label: status.name,
       })),
       taskStatus: taskStatus.data.map((status) => ({
+        value: status.id.toString(),
+        label: status.name,
+      })),
+      purchaseRequestStatus: purchaseRequestStatus.data.map((status) => ({
         value: status.id.toString(),
         label: status.name,
       })),
@@ -163,6 +193,25 @@ export const selectFollowUpsWithRecords = createSelector(
         (contact) => contact.id === followup.contactPersonId
       );
       return { ...followup, project, contactPerson, followUpPerson };
+    });
+  }
+);
+export const selectPurchaseRequestsWithRecords = createSelector(
+  selectPurchaseRequests,
+  selectUsers,
+  selectSuppliers,
+  selectProjects,
+  (requests, users, suppliers, projects) => {
+    return requests.data.map((request) => {
+      const requestByPerson = users.data.find((user) => user.id === request.requestedById);
+      const project = projects.data.find((project) => project.id === request.projectId);
+      const supplier = suppliers.data.find((supplier) => supplier.id === request.supplierId);
+      return {
+        ...request,
+        requestByPerson,
+        project,
+        supplier,
+      };
     });
   }
 );

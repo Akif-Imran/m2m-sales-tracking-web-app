@@ -24,6 +24,7 @@ export default defineConfig({
       "@theme": path.resolve(__dirname, "./src/theme/index.ts"),
       "@app-types": path.resolve(__dirname, "./src/types/index.ts"),
       "@utility": path.resolve(__dirname, "./src/utils/index.ts"),
+      "@global-styles": path.resolve(__dirname, "./src/styles.ts"),
     },
   },
   plugins: [react()],

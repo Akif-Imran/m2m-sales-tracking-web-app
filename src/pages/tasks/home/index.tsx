@@ -36,7 +36,7 @@ interface OwnProps {}
 const Tasks: React.FC<OwnProps> = () => {
   useStyles();
   const {
-    state: { user, isAdmin },
+    state: { user, isAdmin, isSales },
   } = useAuthContext();
   const dispatch = useAppDispatch();
   const { classes: gclasses, theme } = useGStyles();
@@ -146,22 +146,16 @@ const Tasks: React.FC<OwnProps> = () => {
                 : "N/A"}
             </td>
             <td>
-              {isAdmin ? (
-                <Group>
-                  <ActionIcon
-                    color="gray"
-                    size={"sm"}
-                    onClick={() => showUpdateStatusModal(task.id)}
-                  >
-                    <IconRotateClockwise2 />
-                  </ActionIcon>
+              <Group>
+                <ActionIcon color="gray" size={"sm"} onClick={() => showUpdateStatusModal(task.id)}>
+                  <IconRotateClockwise2 />
+                </ActionIcon>
+                {isAdmin && (
                   <ActionIcon color="red" size={"sm"} onClick={() => handleDelete(task.id)}>
                     <IconTrash />
                   </ActionIcon>
-                </Group>
-              ) : (
-                "Admin Required"
-              )}
+                )}
+              </Group>
             </td>
           </tr>
         ))}
@@ -256,9 +250,11 @@ const Tasks: React.FC<OwnProps> = () => {
           }}
         >
           <div className={gclasses.radioContainer}>
-            {taskStatusList.map((value) => {
-              return <Radio value={value.value} label={value.label} key={value.value} />;
-            })}
+            {taskStatusList
+              .filter((status) => (isSales ? status.label !== "Pending" : true))
+              .map((value) => {
+                return <Radio value={value.value} label={value.label} key={value.value} />;
+              })}
           </div>
         </Radio.Group>
       </Modal>

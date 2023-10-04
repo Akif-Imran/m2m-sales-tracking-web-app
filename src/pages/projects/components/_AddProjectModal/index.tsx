@@ -169,6 +169,7 @@ const _AddProjectModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
                   label="Value"
                   name="value.amount"
                   id="value.amount"
+                  type="number"
                   value={form.values.value.amount}
                   onChange={form.handleChange}
                   onBlur={form.handleBlur}

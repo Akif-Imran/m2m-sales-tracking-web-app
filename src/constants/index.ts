@@ -30,8 +30,6 @@ export const projectStatusColors: Record<number, string> = {
 export const taskStatusColors: Record<string, string> = {
   Pending: "red",
   Accepted: "blue",
-  Declined: "dark",
-  Delayed: "orange",
   Completed: "green",
 };
 

@@ -8,7 +8,25 @@ interface State {
 type UpdateStatus = { projectId: number; statusId: number; statusName: string };
 
 const initialState: State = {
-  data: [],
+  data: [
+    {
+      id: 1,
+      companyId: 1,
+      contractDate: "2023-10-05",
+      deliveryDate: "2023-10-25",
+      description: "description",
+      name: "DATABASE_REMOTE_URL",
+      projectType: "Sales",
+      quotation: "IGJ8GWG2",
+      salesPersonId: 2,
+      statusId: 1,
+      statusName: "Follow up added (10%)",
+      value: {
+        amount: 15000,
+        currency: "MYR",
+      },
+    },
+  ],
   isLoading: false,
   error: null,
 };

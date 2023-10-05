@@ -11,3 +11,5 @@ export * from "./followUpSlice";
 export * from "./purchaseRequestSlice";
 export * from "./purchaseRequestStatusSlice";
 export * from "./supplierSlice";
+export * from "./claimsSlice";
+export * from "./claimsStatusSlice";

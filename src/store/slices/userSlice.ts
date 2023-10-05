@@ -68,8 +68,8 @@ const initialState: State = {
     {
       avatar: "",
       id: 4,
-      firstName: "Bob",
-      lastName: "Johnson",
+      firstName: "Bobby",
+      lastName: "Lee",
       companyId: 1,
       email: "hr@example.com",
       password: "123",

@@ -154,6 +154,24 @@ interface IPurchaseRequest {
   statusId: number;
   statusName: string;
 }
+
+interface IClaim {
+  id: number;
+  requestedById: number; //user id
+  projectId: number;
+  itemName: string;
+  itemType: string;
+  warranty: string;
+  qty: number;
+  supplierId: number;
+  price: {
+    amount: number;
+    currency: string;
+  };
+  remarks: string;
+  statusId: number;
+  statusName: string;
+}
 interface ISupplier {
   id: number;
   name: string;

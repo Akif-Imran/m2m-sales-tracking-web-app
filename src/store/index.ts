@@ -1,5 +1,7 @@
 import { configureStore, createSelector } from "@reduxjs/toolkit";
 import {
+  claimsReducer,
+  claimsStatusListReducer,
   companyContactReducer,
   companyReducer,
   departmentReducer,
@@ -27,6 +29,8 @@ const store = configureStore({
     followUps: followUpReducer,
     purchaseRequest: purchaseRequestReducer,
     purchaseRequestStatusList: purchaseRequestStatusListReducer,
+    claims: claimsReducer,
+    claimsStatusList: claimsStatusListReducer,
     tasks: taskReducer,
     taskStatusList: taskStatusListReducer,
     users: userReducer,
@@ -53,6 +57,9 @@ export const selectFollowUps = (state: RootState) => state.followUps;
 export const selectPurchaseRequests = (state: RootState) => state.purchaseRequest;
 export const selectPurchaseRequestsStatusList = (state: RootState) =>
   state.purchaseRequestStatusList;
+export const selectClaims = (state: RootState) => state.claims;
+export const selectClaimsStatusList = (state: RootState) => state.claimsStatusList;
+
 export const selectTasks = (state: RootState) => state.tasks;
 export const selectTaskStatusList = (state: RootState) => state.taskStatusList;
 export const selectUsers = (state: RootState) => state.users;
@@ -95,6 +102,7 @@ export const selectRecordsForDropdown = createSelector(
   selectTaskStatusList,
   selectPurchaseRequestsStatusList,
   selectSuppliers,
+  selectClaimsStatusList,
   (
     companies,
     projects,
@@ -104,7 +112,8 @@ export const selectRecordsForDropdown = createSelector(
     projectStatus,
     taskStatus,
     purchaseRequestStatus,
-    suppliers
+    suppliers,
+    claimsStatus
   ) => {
     return {
       companies: companies.data.map((company) => ({
@@ -136,6 +145,10 @@ export const selectRecordsForDropdown = createSelector(
         label: status.name,
       })),
       purchaseRequestStatus: purchaseRequestStatus.data.map((status) => ({
+        value: status.id.toString(),
+        label: status.name,
+      })),
+      claimsStatus: claimsStatus.data.map((status) => ({
         value: status.id.toString(),
         label: status.name,
       })),
@@ -203,6 +216,25 @@ export const selectPurchaseRequestsWithRecords = createSelector(
   selectProjects,
   (requests, users, suppliers, projects) => {
     return requests.data.map((request) => {
+      const requestByPerson = users.data.find((user) => user.id === request.requestedById);
+      const project = projects.data.find((project) => project.id === request.projectId);
+      const supplier = suppliers.data.find((supplier) => supplier.id === request.supplierId);
+      return {
+        ...request,
+        requestByPerson,
+        project,
+        supplier,
+      };
+    });
+  }
+);
+export const selectClaimsWithRecords = createSelector(
+  selectClaims,
+  selectUsers,
+  selectSuppliers,
+  selectProjects,
+  (claims, users, suppliers, projects) => {
+    return claims.data.map((request) => {
       const requestByPerson = users.data.find((user) => user.id === request.requestedById);
       const project = projects.data.find((project) => project.id === request.projectId);
       const supplier = suppliers.data.find((supplier) => supplier.id === request.supplierId);

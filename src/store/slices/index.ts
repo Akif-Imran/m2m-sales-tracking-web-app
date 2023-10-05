@@ -13,3 +13,6 @@ export * from "./purchaseRequestStatusSlice";
 export * from "./supplierSlice";
 export * from "./claimsSlice";
 export * from "./claimsStatusSlice";
+export * from "./leaveApplicationSlice";
+export * from "./leaveStatusSlice";
+export * from "./leaveTypeSlice";

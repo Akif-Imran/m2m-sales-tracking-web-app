@@ -34,6 +34,9 @@ const routes = {
     list: "/users",
     details: "details/:userId",
     details_nav: (userId: string) => `details/${userId}`,
+    leaves: {
+      list: "/leave-applications",
+    },
   },
   task: {
     list: "/tasks",

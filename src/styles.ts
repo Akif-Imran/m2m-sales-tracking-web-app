@@ -25,4 +25,14 @@ export const useGStyles = createStyles({
     justifyContent: "space-between",
     rowGap: rem(6),
   },
+  radioContainerRow: {
+    display: "flex",
+    flexDirection: "row",
+    flex: 1,
+    flexGrow: 1,
+    justifyContent: "space-between",
+    flexWrap: "wrap",
+    columnGap: rem(6),
+    rowGap: rem(6),
+  },
 });

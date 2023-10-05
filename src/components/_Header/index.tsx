@@ -54,6 +54,7 @@ type ActivePage =
   | "Purchase Request"
   | "Claims"
   | "Users"
+  | "Leaves"
   | "Tasks"
   | "Settings"
   | "Help"
@@ -108,6 +109,16 @@ const buttons: NavbarButtons[] = [
   {
     link: routes.user.list,
     label: "Users",
+    links: [
+      {
+        link: routes.user.list,
+        label: "Users",
+      },
+      {
+        link: routes.user.leaves.list,
+        label: "Leaves",
+      },
+    ],
     icon: IconUserCircle,
     adminOnly: false,
   },
@@ -149,7 +160,7 @@ const _Header = ({ toggleNavbar, opened }: _HeaderProps) => {
   const { classes, theme, cx } = useStyles();
   const [notificationOpened, setNotificationOpened] = useState(false);
   const {
-    state: { token, user, isAdmin },
+    state: { token, user, isAdmin, isHR },
     logout,
   } = useAuthContext();
 
@@ -249,6 +260,8 @@ const _Header = ({ toggleNavbar, opened }: _HeaderProps) => {
       navigate(routes.task.list);
     } else if (active === "Users") {
       navigate(routes.user.list);
+    } else if (active === "Leaves") {
+      navigate(routes.user.leaves.list);
     } else if (active === "Settings") {
       navigate(routes.settings.home);
     } else if (active === "About") {
@@ -260,7 +273,7 @@ const _Header = ({ toggleNavbar, opened }: _HeaderProps) => {
   }, [active]);
 
   const links = buttons
-    .filter((value) => (isAdmin ? true : !removePages.includes(value.label)))
+    .filter((value) => (isAdmin || isHR ? true : !removePages.includes(value.label)))
     .map((item) => {
       const menuItems = item.links?.map((item) => (
         <Menu.Item key={item.link} onClick={() => setActive(item.label)}>

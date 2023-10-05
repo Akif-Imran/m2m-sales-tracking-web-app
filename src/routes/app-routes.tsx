@@ -27,6 +27,7 @@ const MainApp: React.FC<OwnProps> = () => {
   //projects
   //task
   //users
+  const _LeaveApplications = lazy(() => import("../pages/users/leaves/home"));
   //settings
   const _ChangePassword = lazy(() => import("../pages/settings/change-password"));
   const _AppTheme = lazy(() => import("../pages/settings/app-theme"));
@@ -100,6 +101,12 @@ const MainApp: React.FC<OwnProps> = () => {
       <Route
         path={routes.user.list}
         element={<_RequireAuth children={<_AppShell page={<Users />} />} />}
+      ></Route>
+
+      {/* users */}
+      <Route
+        path={routes.user.leaves.list}
+        element={<_RequireAuth children={<_AppShell page={<_LeaveApplications />} />} />}
       ></Route>
 
       {/* settings */}

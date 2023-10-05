@@ -183,3 +183,26 @@ interface ISupplier {
   country: string;
   websiteURL: string;
 }
+interface ILeaveType {
+  id: number;
+  name: string;
+}
+interface ILeaveStatus {
+  id: number;
+  name: string;
+}
+
+interface ILeaveApplication {
+  id: number;
+  requestedById: number; //user id
+  name: string;
+  typeId: number;
+  typeName: string;
+  reason: string;
+  remarks: string;
+  startDate: string;
+  endDate: string;
+  proof: string; //img
+  statusId: number;
+  statusName: string;
+}

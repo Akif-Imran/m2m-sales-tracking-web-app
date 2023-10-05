@@ -6,6 +6,9 @@ import {
   companyReducer,
   departmentReducer,
   followUpReducer,
+  leaveApplicationReducer,
+  leaveStatusReducer,
+  leaveTypeReducer,
   projectReducer,
   projectStatusListReducer,
   purchaseRequestReducer,
@@ -35,6 +38,9 @@ const store = configureStore({
     taskStatusList: taskStatusListReducer,
     users: userReducer,
     userTypes: userTypeReducer,
+    leaves: leaveApplicationReducer,
+    leaveStatusList: leaveStatusReducer,
+    leaveTypes: leaveTypeReducer,
     suppliers: supplierReducer,
   },
 });
@@ -59,11 +65,13 @@ export const selectPurchaseRequestsStatusList = (state: RootState) =>
   state.purchaseRequestStatusList;
 export const selectClaims = (state: RootState) => state.claims;
 export const selectClaimsStatusList = (state: RootState) => state.claimsStatusList;
-
 export const selectTasks = (state: RootState) => state.tasks;
 export const selectTaskStatusList = (state: RootState) => state.taskStatusList;
 export const selectUsers = (state: RootState) => state.users;
 export const selectUserTypes = (state: RootState) => state.userTypes;
+export const selectLeaves = (state: RootState) => state.leaves;
+export const selectLeaveStatusList = (state: RootState) => state.leaveStatusList;
+export const selectLeaveTypes = (state: RootState) => state.leaveTypes;
 export const selectSuppliers = (state: RootState) => state.suppliers;
 
 //memoized selectors
@@ -103,6 +111,8 @@ export const selectRecordsForDropdown = createSelector(
   selectPurchaseRequestsStatusList,
   selectSuppliers,
   selectClaimsStatusList,
+  selectLeaveStatusList,
+  selectLeaveTypes,
   (
     companies,
     projects,
@@ -113,7 +123,9 @@ export const selectRecordsForDropdown = createSelector(
     taskStatus,
     purchaseRequestStatus,
     suppliers,
-    claimsStatus
+    claimsStatus,
+    leaveStatus,
+    leaveTypes
   ) => {
     return {
       companies: companies.data.map((company) => ({
@@ -151,6 +163,14 @@ export const selectRecordsForDropdown = createSelector(
       claimsStatus: claimsStatus.data.map((status) => ({
         value: status.id.toString(),
         label: status.name,
+      })),
+      leaveStatus: leaveStatus.data.map((status) => ({
+        value: status.id.toString(),
+        label: status.name,
+      })),
+      leaveTypes: leaveTypes.data.map((type) => ({
+        value: type.id.toString(),
+        label: type.name,
       })),
       salesPersons: users.data
         .filter((user) => user.userTypeName === "Sales")
@@ -243,6 +263,20 @@ export const selectClaimsWithRecords = createSelector(
         requestByPerson,
         project,
         supplier,
+      };
+    });
+  }
+);
+
+export const selectLeavesWithRecords = createSelector(
+  selectUsers,
+  selectLeaves,
+  (users, leaves) => {
+    return leaves.data.map((leave) => {
+      const requestByPerson = users.data.find((user) => user.id === leave.requestedById);
+      return {
+        ...leave,
+        requestByPerson,
       };
     });
   }

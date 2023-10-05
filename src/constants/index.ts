@@ -39,6 +39,15 @@ export const claimStatusColors: Record<number, string> = {
   3: "orange",
   5: "blue",
 };
+export const leavesStatusColors: Record<number, string> = {
+  1: "red",
+  2: "green",
+  3: "orange",
+};
+export const leavesTypeColors: Record<number, string> = {
+  1: "green",
+  2: "red",
+};
 
 export const taskStatusColors: Record<string, string> = {
   Pending: "red",

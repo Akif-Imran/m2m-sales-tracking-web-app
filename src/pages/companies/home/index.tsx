@@ -5,6 +5,7 @@ import {
   Avatar,
   Button,
   Flex,
+  Grid,
   Group,
   Modal,
   ScrollArea,
@@ -17,9 +18,12 @@ import {
 } from "@mantine/core";
 import { useGStyles } from "../../../styles";
 import {
+  IconColumns2,
+  IconId,
   IconPlus,
   IconRotateClockwise2,
   IconSearch,
+  IconTable,
   IconTrash,
   IconUserPlus,
 } from "@tabler/icons-react";
@@ -30,10 +34,11 @@ import {
   useAppSelector,
 } from "@store";
 import { colors } from "@theme";
-import { _AddCompanyModal, _AddContactModal } from "../components";
+import { _AddCompanyModal, _AddContactModal, _CompanyCard } from "../components";
 import { modalOverlayPropsHelper, openDeleteModalHelper } from "@helpers";
 import { notify } from "@utility";
 import { deleteCompany, updatePrimaryContact } from "@slices";
+import { useToggle } from "@mantine/hooks";
 
 interface OwnProps {}
 
@@ -41,6 +46,7 @@ const Company: React.FC<OwnProps> = () => {
   useStyles();
   const dispatch = useAppDispatch();
   const { classes: gclasses, theme } = useGStyles();
+  const [viewMode, toggle] = useToggle(["cards", "two-column", "list"]);
   const [searchQuery, setSearchQuery] = React.useState("");
   const companies = useAppSelector(selectCompaniesWithContact);
   const { data: contacts } = useAppSelector(selectCompanyContact);
@@ -116,6 +122,15 @@ const Company: React.FC<OwnProps> = () => {
     });
   };
 
+  let icon: JSX.Element;
+  if (viewMode === "cards") {
+    icon = <IconId size={22} color={colors.white} />;
+  } else if (viewMode === "two-column") {
+    icon = <IconColumns2 size={22} color={colors.white} />;
+  } else {
+    icon = <IconTable size={22} color={colors.white} />;
+  }
+
   const rows =
     searchedData.length === 0 ? (
       <tr>
@@ -125,72 +140,61 @@ const Company: React.FC<OwnProps> = () => {
       </tr>
     ) : (
       <>
-        {searchedData.map((company, index) => (
-          <tr key={company.id}>
-            <td>{index + 1}</td>
-            <td>
-              <Avatar src={company.logo} size={50} />
-            </td>
-            <td>{company.id}</td>
-            <td>{company.name}</td>
-            <td>{company?.contact?.name}</td>
-            <td>{company?.contact?.department}</td>
-            <td>{company?.contact?.designation}</td>
-            <td>{company?.contact?.email}</td>
-            <td>{company?.contact?.phone}</td>
-            <td>{company?.contact?.mobile}</td>
-            <td>{company.email}</td>
-            <td>{company.phone}</td>
-            <td>{company.address}</td>
-            <td>{company.city}</td>
-            <td>{company.country}</td>
-            <td>
-              <Group>
-                <ActionIcon
-                  color="gray"
-                  size={"sm"}
-                  onClick={() => showPrimaryContactUpdateModal(company.id)}
-                >
-                  <IconRotateClockwise2 />
-                </ActionIcon>
-                <ActionIcon color="red" size={"sm"} onClick={() => handleDelete(company.id)}>
-                  <IconTrash />
-                </ActionIcon>
-              </Group>
-            </td>
-          </tr>
-        ))}
+        {searchedData.map((company, index) => {
+          if (viewMode === "list") {
+            return (
+              <tr key={company.id}>
+                <td>{index + 1}</td>
+                <td>
+                  <Avatar src={company.logo} size={50} />
+                </td>
+                <td>{company.id}</td>
+                <td>{company.name}</td>
+                <td>{company?.contact?.name}</td>
+                <td>{company?.contact?.department}</td>
+                <td>{company?.contact?.designation}</td>
+                <td>{company?.contact?.email}</td>
+                <td>{company?.contact?.phone}</td>
+                <td>{company?.contact?.mobile}</td>
+                <td>{company.email}</td>
+                <td>{company.phone}</td>
+                <td>{company.address}</td>
+                <td>{company.city}</td>
+                <td>{company.country}</td>
+                <td>
+                  <Group>
+                    <ActionIcon
+                      color="gray"
+                      size={"sm"}
+                      onClick={() => showPrimaryContactUpdateModal(company.id)}
+                    >
+                      <IconRotateClockwise2 />
+                    </ActionIcon>
+                    <ActionIcon color="red" size={"sm"} onClick={() => handleDelete(company.id)}>
+                      <IconTrash />
+                    </ActionIcon>
+                  </Group>
+                </td>
+              </tr>
+            );
+          } else if (viewMode === "cards") {
+            return (
+              <Grid.Col span={4}>
+                <_CompanyCard item={company} key={company.id} onClick={() => {}} />
+              </Grid.Col>
+            );
+          } else {
+            return <div>{company.name}</div>;
+          }
+        })}
       </>
     );
 
-  return (
-    <Stack spacing={"xs"}>
-      <Flex gap={"md"} className={gclasses.searchContainer}>
-        <TextInput
-          value={searchQuery}
-          className={gclasses.searchInput}
-          placeholder="Search by any field"
-          icon={<IconSearch size={16} />}
-          onChange={(e) => onChangeSearch(e.target?.value)}
-          // rightSection={
-          //   <IconFilter size={14} color={colors.borderColor} onClick={showFilterModal} />
-          // }
-        />
-        <Button
-          variant="filled"
-          rightIcon={<IconPlus size={16} />}
-          onClick={() => setAddCompanyModalOpened(true)}
-        >
-          Company
-        </Button>
-        <Button
-          variant="filled"
-          rightIcon={<IconUserPlus size={16} />}
-          onClick={() => setAddContactModalOpened(true)}
-        >
-          Contact
-        </Button>
-      </Flex>
+  let content: JSX.Element;
+  if (viewMode === "cards") {
+    content = <Grid>{rows}</Grid>;
+  } else if (viewMode === "list") {
+    content = (
       <ScrollArea type="scroll" h={"80vh"}>
         <ScrollArea w={"160vw"}>
           <Table border={1} bgcolor={theme.white} withBorder>
@@ -223,6 +227,48 @@ const Company: React.FC<OwnProps> = () => {
           </Table>
         </ScrollArea>
       </ScrollArea>
+    );
+  } else {
+    content = <div>two column</div>;
+  }
+
+  return (
+    <Stack spacing={"xs"}>
+      <Flex gap={"md"} className={gclasses.searchContainer}>
+        <TextInput
+          value={searchQuery}
+          className={gclasses.searchInput}
+          placeholder="Search by any field"
+          icon={<IconSearch size={16} />}
+          onChange={(e) => onChangeSearch(e.target?.value)}
+          // rightSection={
+          //   <IconFilter size={14} color={colors.borderColor} onClick={showFilterModal} />
+          // }
+        />
+        <ActionIcon
+          variant="filled"
+          size={"2.2rem"}
+          color={theme.primaryColor}
+          onClick={() => toggle()}
+        >
+          {icon}
+        </ActionIcon>
+        <Button
+          variant="filled"
+          rightIcon={<IconPlus size={16} />}
+          onClick={() => setAddCompanyModalOpened(true)}
+        >
+          Company
+        </Button>
+        <Button
+          variant="filled"
+          rightIcon={<IconUserPlus size={16} />}
+          onClick={() => setAddContactModalOpened(true)}
+        >
+          Contact
+        </Button>
+      </Flex>
+      {content}
       <_AddCompanyModal
         title="Add Company"
         opened={addCompanyModalOpened}

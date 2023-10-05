@@ -22,7 +22,7 @@ import { IconPlus, IconRotateClockwise2, IconSearch, IconTrash } from "@tabler/i
 import { DateTime } from "luxon";
 import { DAY_MM_DD_YYYY, leavesStatusColors, leavesTypeColors } from "@constants";
 import { colors } from "@theme";
-import { _AddLeaveModal } from "../components";
+import { _AddLeaveModal, _UpdateLeaveModal } from "../components";
 import { useAuthContext } from "@contexts";
 
 interface OwnProps {}
@@ -38,6 +38,27 @@ export const LeaveApplications: React.FC<OwnProps> = () => {
   const [addUserModalOpened, setAddUserModalOpened] = React.useState(false);
   const leaves = useAppSelector(selectLeavesWithRecords);
   const [searchedData, setSearchedData] = React.useState<typeof leaves>([]);
+
+  const [updateStatusValues, setUpdateStatusValues] = React.useState<{
+    statusId: number;
+    leaveId: number;
+    visible: boolean;
+  }>({
+    leaveId: 0,
+    statusId: 0,
+    visible: false,
+  });
+
+  const showUpdateStatusModal = (statusId: number, leaveId: number) => {
+    setUpdateStatusValues((prev) => ({
+      ...prev,
+      statusId: statusId,
+      leaveId: leaveId,
+      visible: true,
+    }));
+  };
+  const hideUpdateStatusModal = () =>
+    setUpdateStatusValues((prev) => ({ ...prev, visible: false }));
 
   const onChangeSearch = (query: string) => {
     setSearchQuery(query);
@@ -94,7 +115,7 @@ export const LeaveApplications: React.FC<OwnProps> = () => {
     searchedData.length === 0 ? (
       <tr>
         <td colSpan={14} color={colors.titleText} align="center">
-          No Users
+          No Leaves
         </td>
       </tr>
     ) : (
@@ -124,12 +145,20 @@ export const LeaveApplications: React.FC<OwnProps> = () => {
               <td>{leave.remarks}</td>
               <td>
                 <Group>
-                  <ActionIcon color="gray" size={"sm"}>
-                    <IconRotateClockwise2 />
-                  </ActionIcon>
-                  <ActionIcon color="red" size={"sm"} onClick={() => handleDelete(leave.id)}>
-                    <IconTrash />
-                  </ActionIcon>
+                  {isHR && (
+                    <ActionIcon
+                      color="gray"
+                      size={"sm"}
+                      onClick={() => showUpdateStatusModal(leave.statusId, leave.id)}
+                    >
+                      <IconRotateClockwise2 />
+                    </ActionIcon>
+                  )}
+                  {isAdmin && (
+                    <ActionIcon color="red" size={"sm"} onClick={() => handleDelete(leave.id)}>
+                      <IconTrash />
+                    </ActionIcon>
+                  )}
                 </Group>
               </td>
             </tr>
@@ -187,6 +216,13 @@ export const LeaveApplications: React.FC<OwnProps> = () => {
         title="Add Leave Application"
         opened={addUserModalOpened}
         onClose={() => setAddUserModalOpened(false)}
+      />
+      <_UpdateLeaveModal
+        title="Update Leave Application"
+        opened={updateStatusValues.visible}
+        onClose={() => hideUpdateStatusModal()}
+        leaveId={updateStatusValues.leaveId}
+        statusId={updateStatusValues.statusId}
       />
     </Stack>
   );

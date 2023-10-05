@@ -4,11 +4,25 @@ import { selectRecordsForDropdown, useAppDispatch, useAppSelector } from "@store
 import { addLeave } from "@slices";
 import { useFormik } from "formik";
 import { useAuthContext } from "@contexts";
-import { Avatar, Button, FileButton, Flex, Group, Modal, Select, Stack, rem } from "@mantine/core";
-import { modalOverlayPropsHelper } from "@helpers";
+import {
+  Avatar,
+  Button,
+  FileButton,
+  Flex,
+  Group,
+  Modal,
+  Select,
+  Stack,
+  TextInput,
+  Textarea,
+  rem,
+} from "@mantine/core";
+import { DATE_FORMAT_YYYY_MM_DD, modalOverlayPropsHelper } from "@helpers";
 import { useGStyles } from "@global-styles";
-import { IconUpload } from "@tabler/icons-react";
+import { IconCalendar, IconUpload } from "@tabler/icons-react";
 import { notify } from "@utility";
+import { DatePickerInput, DateValue } from "@mantine/dates";
+import { colors } from "@theme";
 
 interface OwnProps {
   opened: boolean;
@@ -25,6 +39,7 @@ const _AddLeaveModal: React.FC<OwnProps> = ({ onClose, opened, title }) => {
     state: { user },
   } = useAuthContext();
   const { leaveStatus, leaveTypes } = useAppSelector(selectRecordsForDropdown);
+  const leaveStatusList = leaveStatus.filter((status) => status.label === "Pending");
   const dispatch = useAppDispatch();
 
   const form = useFormik<ILeaveForm>({
@@ -37,9 +52,9 @@ const _AddLeaveModal: React.FC<OwnProps> = ({ onClose, opened, title }) => {
       remarks: "",
       requestedById: user!.id,
       statusId: 1,
-      statusName: "",
+      statusName: "Pending",
       typeId: 1,
-      typeName: "",
+      typeName: "Paid",
     },
     onSubmit(values, helpers) {
       console.log(values);
@@ -84,6 +99,29 @@ const _AddLeaveModal: React.FC<OwnProps> = ({ onClose, opened, title }) => {
     }));
   };
 
+  const handleOnChangeStartDate = (value: DateValue) => {
+    if (value) {
+      form.setValues((prev) => ({
+        ...prev,
+        startDate: DATE_FORMAT_YYYY_MM_DD(value),
+      }));
+    }
+  };
+
+  const handleOnChangeEndDate = (value: DateValue) => {
+    if (value) {
+      form.setValues((prev) => ({
+        ...prev,
+        endDate: DATE_FORMAT_YYYY_MM_DD(value),
+      }));
+    }
+  };
+
+  const handleCancel = () => {
+    form.resetForm();
+    onClose();
+  };
+
   return (
     <Modal
       size="xl"
@@ -111,19 +149,29 @@ const _AddLeaveModal: React.FC<OwnProps> = ({ onClose, opened, title }) => {
                   {...props}
                   rightIcon={<IconUpload size={16} color={theme.white} stroke={1.5} />}
                 >
-                  Avatar
+                  Proof
                 </Button>
               )}
             </FileButton>
           </div>
         </Flex>
+        <TextInput
+          required
+          withAsterisk={false}
+          label="Name"
+          name="name"
+          id="name"
+          value={form.values.name}
+          onChange={form.handleChange}
+          onBlur={form.handleBlur}
+        />
         <Group grow align="flex-start">
           <Select
             required
             withAsterisk={false}
             searchable
             nothingFound="No such type"
-            label="type"
+            label="Type"
             value={form.values.typeId.toString()}
             onChange={handleOnChangeType}
             data={leaveTypes}
@@ -136,8 +184,54 @@ const _AddLeaveModal: React.FC<OwnProps> = ({ onClose, opened, title }) => {
             label="Status"
             value={form.values.statusId.toString()}
             onChange={handleOnChangeStatus}
-            data={leaveStatus}
+            data={leaveStatusList}
           />
+        </Group>
+        <Group grow align="flex-start">
+          <DatePickerInput
+            required
+            withAsterisk={false}
+            placeholder="Select Start Date"
+            name="warranty"
+            id="warranty"
+            label="Warranty"
+            onBlur={form.handleBlur}
+            onChange={handleOnChangeStartDate}
+            icon={<IconCalendar size={16} stroke={1.5} color={colors.titleText} />}
+            error={
+              form.touched.startDate && form.errors.startDate ? `${form.errors.startDate}` : null
+            }
+          />
+          <DatePickerInput
+            required
+            withAsterisk={false}
+            placeholder="Select End Date"
+            name="endDate"
+            id="endDate"
+            label="End Date"
+            onBlur={form.handleBlur}
+            onChange={handleOnChangeEndDate}
+            icon={<IconCalendar size={16} stroke={1.5} color={colors.titleText} />}
+            error={form.touched.endDate && form.errors.endDate ? `${form.errors.endDate}` : null}
+          />
+        </Group>
+        <Textarea
+          minRows={5}
+          maxRows={5}
+          label="Reason"
+          name="reason"
+          id="reason"
+          value={form.values.reason}
+          onChange={form.handleChange}
+          onBlur={form.handleBlur}
+        />
+        <Group align="flex-end" position="right" mt={rem(32)}>
+          <Button variant="outline" onClick={handleCancel} size="xs">
+            Cancel
+          </Button>
+          <Button variant="filled" onClick={() => form.handleSubmit()} size="xs">
+            Save
+          </Button>
         </Group>
       </Stack>
     </Modal>

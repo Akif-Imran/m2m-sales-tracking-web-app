@@ -5,7 +5,7 @@ interface State {
   isLoading: boolean;
   error: null | SerializedError;
 }
-type UpdateStatus = { leaveId: number; statusId: number; statusName: string };
+type UpdateStatus = { leaveId: number; statusId: number; statusName: string; remarks: string };
 
 const initialState: State = {
   data: [],
@@ -29,6 +29,7 @@ const leaveApplicationSlice = createSlice({
       const index = state.data.findIndex((project) => project.id === action.payload.leaveId);
       state.data[index].statusId = action.payload.statusId;
       state.data[index].statusName = action.payload.statusName;
+      state.data[index].remarks = action.payload.remarks;
     },
     deleteLeave: (state, action: PayloadAction<number>) => {
       const index = state.data.findIndex((contact) => contact.id === action.payload);

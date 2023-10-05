@@ -160,7 +160,7 @@ const _Header = ({ toggleNavbar, opened }: _HeaderProps) => {
   const { classes, theme, cx } = useStyles();
   const [notificationOpened, setNotificationOpened] = useState(false);
   const {
-    state: { token, user, isAdmin },
+    state: { token, user, isAdmin, isHR },
     logout,
   } = useAuthContext();
 
@@ -273,7 +273,7 @@ const _Header = ({ toggleNavbar, opened }: _HeaderProps) => {
   }, [active]);
 
   const links = buttons
-    .filter((value) => (isAdmin ? true : !removePages.includes(value.label)))
+    .filter((value) => (isAdmin || isHR ? true : !removePages.includes(value.label)))
     .map((item) => {
       const menuItems = item.links?.map((item) => (
         <Menu.Item key={item.link} onClick={() => setActive(item.label)}>

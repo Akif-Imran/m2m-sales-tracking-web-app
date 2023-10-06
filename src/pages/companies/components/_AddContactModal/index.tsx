@@ -24,10 +24,11 @@ interface OwnProps {
   opened: boolean;
   onClose: () => void;
   title: string;
+  companyId?: number;
 }
 interface IContactForm extends Omit<ICompanyContact, "id"> {}
 
-const _AddContactModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
+const _AddContactModal: React.FC<OwnProps> = ({ opened, onClose, title, companyId }) => {
   const { theme, classes } = useStyles();
   const dispatch = useAppDispatch();
   const { companies: companiesList } = useAppSelector(selectRecordsForDropdown);
@@ -72,6 +73,13 @@ const _AddContactModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
     };
     reader.readAsDataURL(file);
   };
+
+  React.useEffect(() => {
+    if (companyId) {
+      form.setValues((prev) => ({ ...prev, companyId }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [companyId]);
 
   return (
     <Modal

@@ -14,6 +14,7 @@ import {
   Claims,
   Tasks,
   Users,
+  Reports,
 } from "@pages";
 import { routes } from "./routes";
 import { Suspense, lazy } from "react";
@@ -26,6 +27,17 @@ const MainApp: React.FC<OwnProps> = () => {
   //company
   //projects
   //task
+  //reports
+  const _CompaniesReport = lazy(() => import("../pages/reports/companies-report"));
+  const _ClaimsReport = lazy(() => import("../pages/reports/claims-report"));
+  const _TasksReport = lazy(() => import("../pages/reports/tasks-report"));
+  const _ProjectPerformanceReport = lazy(
+    () => import("../pages/reports/project-performance-report")
+  );
+  const _TeamPerformanceReport = lazy(() => import("../pages/reports/team-performance-report"));
+  const _LeavesReport = lazy(() => import("../pages/reports/leaves-report"));
+  const _PurchaseRequestReport = lazy(() => import("../pages/reports/purchase-request-report"));
+
   //users
   const _LeaveApplications = lazy(() => import("../pages/users/leaves/home"));
   //settings
@@ -96,6 +108,39 @@ const MainApp: React.FC<OwnProps> = () => {
         path={routes.task.list}
         element={<_RequireAuth children={<_AppShell page={<Tasks />} />} />}
       ></Route>
+      <Route
+        path={routes.reports.list}
+        element={<_RequireAuth children={<_AppShell page={<Reports />} />} />}
+      >
+        <Route
+          path={routes.reports.companies_report}
+          element={<SuspendedView children={<_CompaniesReport />} />}
+        />
+        <Route
+          path={routes.reports.claims_report}
+          element={<SuspendedView children={<_ClaimsReport />} />}
+        />
+        <Route
+          path={routes.reports.task_report}
+          element={<SuspendedView children={<_TasksReport />} />}
+        />
+        <Route
+          path={routes.reports.project_performance_report}
+          element={<SuspendedView children={<_ProjectPerformanceReport />} />}
+        />
+        <Route
+          path={routes.reports.team_performance_report}
+          element={<SuspendedView children={<_TeamPerformanceReport />} />}
+        />
+        <Route
+          path={routes.reports.leaves_report}
+          element={<SuspendedView children={<_LeavesReport />} />}
+        />
+        <Route
+          path={routes.reports.purchase_request_report}
+          element={<SuspendedView children={<_PurchaseRequestReport />} />}
+        />
+      </Route>
 
       {/* users */}
       <Route

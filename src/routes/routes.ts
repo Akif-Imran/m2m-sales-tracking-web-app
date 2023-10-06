@@ -16,6 +16,25 @@ const routes = {
     details: "details/:companyId",
     details_nav: (companyId: string) => `details/${companyId}`,
   },
+  reports: {
+    list: "/reports/:companyId",
+    list_nav: (companyId: string) => `/reports/${companyId}`,
+    companies_report: "companies-report/:companyId",
+    companies_report_nav: (companyId: string) => `companies-report/${companyId}`,
+    task_report: "task-report/:companyId",
+    task_report_nav: (companyId: string) => `task-report/${companyId}`,
+    claims_report: "claims-report/:companyId",
+    claims_report_nav: (companyId: string) => `claims-report/${companyId}`,
+    project_performance_report: "project-performance-report/:companyId",
+    project_performance_report_nav: (companyId: string) =>
+      `project-performance-report/${companyId}`,
+    team_performance_report: "team-performance-report/:companyId",
+    team_performance_report_nav: (companyId: string) => `team-performance-report/${companyId}`,
+    leaves_report: "leaves-report/:companyId",
+    leaves_report_nav: (companyId: string) => `leaves-report/${companyId}`,
+    purchase_request_report: "purchase-request-report/:companyId",
+    purchase_request_report_nav: (companyId: string) => `purchase-request-report/${companyId}`,
+  },
   project: {
     list: "/projects",
     followUps: {

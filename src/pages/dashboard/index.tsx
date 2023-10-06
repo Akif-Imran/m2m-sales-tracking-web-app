@@ -22,7 +22,11 @@ import { DAY_MM_DD_YYYY_HH_MM_SS_A } from "@constants";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 
-import { selectTasksCombined, useAppSelector } from "@store";
+import {
+  selectProjectWithRecords,
+  selectTasksCombined,
+  useAppSelector,
+} from "@store";
 
 interface OwnProps {}
 interface ChartData {
@@ -34,17 +38,35 @@ const Dashboard: React.FC<OwnProps> = () => {
   const { classes, theme } = useStyles();
   // const [isFetching, setIsFetching] = React.useState(false);
   const { tasks } = useAppSelector(selectTasksCombined);
+  const projects = useAppSelector(selectProjectWithRecords);
   const [calendarLoading, setIsCalendarLoading] = React.useState<boolean>(false);
   const [projectCounts, setProjectsCounts] = React.useState<ChartData>();
   const [projectValueCounts, setProjectValueCounts] = React.useState<ChartData>();
   const [projectTargetCounts, setProjectTargetCounts] = React.useState<ChartData>();
   const [projectValueTargetCounts, setProjectValueTargetCounts] = React.useState<ChartData>();
+  const [projectsInProcess, setProjectInProcess] = useState<
+    { name: string; dueDate: string; timeRemaining: string }[]
+  >([]);
+  const [mostFollowedUpLeadWithExpenses, _setMostFollowedUpLeadWithExpenses] = useState([
+    { name: "Project 1", followUpCount: 8, expenses: { amount: 15000, currency: "MYR" } },
+  ]);
   const [projectOverDue, _setProjectOverDue] = useState([
     { name: "HYCO", dueDate: "2023-08-23T15:00:00.000Z" },
     { name: "HIKKO", dueDate: "2023-09-01T12:00:00.000Z" },
   ]);
   const [pendingTasks, _setPendingTasks] = useState([
     { name: "Jason", task: "Repair AAV", dueDate: "2023-08-22T20:00:00.000Z" },
+  ]);
+  const [todayActivities, _setTodayActivities] = useState([
+    { name: "Repair AAV (2F)", type: "Task", dueDate: DateTime.now().plus({ hours: 1.5 }) },
+    { name: "Meet Json Brow", type: "Follow Up", dueDate: DateTime.now().plus({ hours: 3.5 }) },
+  ]);
+  const [upcomingTasks, _setUpcomingTasks] = useState([
+    {
+      name: "Alice Smith",
+      task: "Meeting with ABC's CTO",
+      dueDate: DateTime.now().plus({ days: 2 }),
+    },
   ]);
   const [value, toggle] = useToggle(["by value", "by project"]);
 
@@ -186,6 +208,21 @@ const Dashboard: React.FC<OwnProps> = () => {
     drawProjectCharts();
   }, [drawProjectCharts]);
 
+  React.useEffect(() => {
+    const inProcess = projects
+      .filter((project) => project.statusId === 3)
+      .map((project) => {
+        const delivery = DateTime.fromISO(project.deliveryDate);
+        const remainingDays = delivery.diff(DateTime.now()).as("days");
+        return {
+          name: project.name,
+          dueDate: delivery.toFormat(DAY_MM_DD_YYYY_HH_MM_SS_A),
+          timeRemaining: `${remainingDays} days`,
+        };
+      });
+    setProjectInProcess(inProcess);
+  }, [projects]);
+
   const projectOverdueRows = projectOverDue.map((project, index) => {
     const dueDate = DateTime.fromISO(project.dueDate).toLocal();
     const dueDateSt = dueDate.toFormat(DAY_MM_DD_YYYY_HH_MM_SS_A);
@@ -209,6 +246,53 @@ const Dashboard: React.FC<OwnProps> = () => {
         <td>{task.task}</td>
         <td>{dueDateSt}</td>
         <td>{overDueDuration.toFixed(1)} Days</td>
+      </tr>
+    );
+  });
+
+  const upcomingTaskRows = upcomingTasks.map((task, index) => {
+    const dueDateSt = task.dueDate.toFormat(DAY_MM_DD_YYYY_HH_MM_SS_A);
+    return (
+      <tr key={index}>
+        <td>{task.name}</td>
+        <td>{task.task}</td>
+        <td>{dueDateSt}</td>
+      </tr>
+    );
+  });
+
+  const mostFollowedUpLeadRows = mostFollowedUpLeadWithExpenses.map((lead, index) => {
+    const value = Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: lead.expenses.currency,
+      maximumFractionDigits: 2,
+    }).format(lead.expenses.amount);
+    return (
+      <tr key={index}>
+        <td>{lead.name}</td>
+        <td>{lead.followUpCount}</td>
+        <td>{value}</td>
+      </tr>
+    );
+  });
+
+  const todayActivitiesRows = todayActivities.map((task, index) => {
+    const dueDateSt = task.dueDate.toFormat(DAY_MM_DD_YYYY_HH_MM_SS_A);
+    return (
+      <tr key={index}>
+        <td>{task.name}</td>
+        <td>{task.type}</td>
+        <td>{dueDateSt}</td>
+      </tr>
+    );
+  });
+
+  const projectsInProcessRows = projectsInProcess.map((project, index) => {
+    return (
+      <tr key={index}>
+        <td>{project.name}</td>
+        <td>{project.dueDate}</td>
+        <td>{project.timeRemaining}</td>
       </tr>
     );
   });
@@ -271,26 +355,71 @@ const Dashboard: React.FC<OwnProps> = () => {
           </Grid.Col>
 
           <Grid.Col md={6} lg={6} xl={6}>
-            <Card p="xs" shadow="sm" className={classes.card} my={4} radius={"md"}>
-              <Text fw={"bold"} fz={rem(60)} color={colors.titleText}>
-                {projectCounts?.total || 0}
+            <Card p="xs" shadow="sm" className={classes.card} my={4} px={"xs"} radius={"md"}>
+              <Text fw={"bold"} fz={rem(60)} color={colors.titleText} mt={-16}>
+                {todayActivitiesRows.length}
               </Text>
               <Text fz="md" className={classes.label} color={colors.titleText} mt={-10} mb={2}>
-                Projects
+                Today's Activities
               </Text>
-              <Chart chartType="PieChart" data={projectCounts?.data} options={options} />
+              <ScrollArea h={rem(272)}>
+                <Table>
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Activity Type</th>
+                      <th>Due Date</th>
+                    </tr>
+                  </thead>
+                  <tbody>{todayActivitiesRows}</tbody>
+                </Table>
+              </ScrollArea>
             </Card>
           </Grid.Col>
 
           <Grid.Col md={6} lg={6} xl={6}>
             <Card p="xs" shadow="sm" className={classes.card} my={4} px={"xs"} radius={"md"}>
-              <Text fw={"bold"} fz={rem(60)} color={colors.titleText}>
-                {projectValueCounts?.total || 0}
+              <Text fw={"bold"} fz={rem(60)} color={colors.titleText} mt={-16}>
+                {projectsInProcess.length}
               </Text>
               <Text fz="md" className={classes.label} color={colors.titleText} mt={-10} mb={2}>
-                Value
+                Projects Under Development
               </Text>
-              <Chart chartType="PieChart" data={projectValueCounts?.data} options={options} />
+              <ScrollArea h={rem(272)}>
+                <Table>
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Due Date</th>
+                      <th>Time Remaining (Days)</th>
+                    </tr>
+                  </thead>
+                  <tbody>{projectsInProcessRows}</tbody>
+                </Table>
+              </ScrollArea>
+            </Card>
+          </Grid.Col>
+
+          <Grid.Col md={6} lg={6} xl={6}>
+            <Card p="xs" shadow="sm" className={classes.card} my={4} px={"xs"} radius={"md"}>
+              <Text fw={"bold"} fz={rem(60)} color={colors.titleText} mt={-16}>
+                {mostFollowedUpLeadRows.length}
+              </Text>
+              <Text fz="md" className={classes.label} color={colors.titleText} mt={-10} mb={2}>
+                Most followed up leads with expenses
+              </Text>
+              <ScrollArea h={rem(272)}>
+                <Table>
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>follow ups</th>
+                      <th>Expenses</th>
+                    </tr>
+                  </thead>
+                  <tbody>{mostFollowedUpLeadRows}</tbody>
+                </Table>
+              </ScrollArea>
             </Card>
           </Grid.Col>
 
@@ -312,9 +441,9 @@ const Dashboard: React.FC<OwnProps> = () => {
                   {value.toUpperCase()}
                 </Button>
                 <Select
-                  w={rem(90)}
+                  w={rem(128)}
                   size="xs"
-                  data={[{ value: "2023", label: "2023" }]}
+                  data={[{ label: "2023", value: "2023" }]}
                   defaultValue={"2023"}
                   withinPortal
                 />
@@ -326,6 +455,30 @@ const Dashboard: React.FC<OwnProps> = () => {
                 }
                 options={{ ...options, isStacked: true }}
               />
+            </Card>
+          </Grid.Col>
+
+          <Grid.Col md={6} lg={6} xl={6}>
+            <Card p="xs" shadow="sm" className={classes.card} my={4} radius={"md"}>
+              <Text fw={"bold"} fz={rem(60)} color={colors.titleText}>
+                {projectCounts?.total || 0}
+              </Text>
+              <Text fz="md" className={classes.label} color={colors.titleText} mt={-10} mb={2}>
+                Projects
+              </Text>
+              <Chart chartType="PieChart" data={projectCounts?.data} options={options} />
+            </Card>
+          </Grid.Col>
+
+          <Grid.Col md={6} lg={6} xl={6}>
+            <Card p="xs" shadow="sm" className={classes.card} my={4} px={"xs"} radius={"md"}>
+              <Text fw={"bold"} fz={rem(60)} color={colors.titleText}>
+                {projectValueCounts?.total || 0}
+              </Text>
+              <Text fz="md" className={classes.label} color={colors.titleText} mt={-10} mb={2}>
+                Value
+              </Text>
+              <Chart chartType="PieChart" data={projectValueCounts?.data} options={options} />
             </Card>
           </Grid.Col>
 
@@ -378,6 +531,36 @@ const Dashboard: React.FC<OwnProps> = () => {
                     </tr>
                   </thead>
                   <tbody>{pendingTaskRows}</tbody>
+                </Table>
+              </ScrollArea>
+            </Card>
+          </Grid.Col>
+
+          <Grid.Col md={6} lg={6} xl={6}>
+            <Card p="xs" shadow="sm" className={classes.card} my={4} px={"xs"} radius={"md"}>
+              <Text fw={"bold"} fz={rem(60)} color={colors.titleText} mt={-16}>
+                {upcomingTaskRows.length}
+              </Text>
+              <Text
+                fz="md"
+                className={classes.label}
+                color={colors.titleText}
+                mt={-10}
+                mb={2}
+                ml={rem(8)}
+              >
+                Upcoming Tasks (Next 2 Days)
+              </Text>
+              <ScrollArea h={rem(272)}>
+                <Table>
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Task</th>
+                      <th>Expected Date</th>
+                    </tr>
+                  </thead>
+                  <tbody>{upcomingTaskRows}</tbody>
                 </Table>
               </ScrollArea>
             </Card>

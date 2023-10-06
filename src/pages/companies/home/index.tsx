@@ -39,6 +39,9 @@ import { modalOverlayPropsHelper, openDeleteModalHelper } from "@helpers";
 import { notify } from "@utility";
 import { deleteCompany, updatePrimaryContact } from "@slices";
 import { useToggle } from "@mantine/hooks";
+import { _AddFollowUpModal } from "../../projects/follow-ups/components";
+import { _AddClaimModal } from "../../projects/claims/components";
+import { Outlet } from "react-router-dom";
 
 interface OwnProps {}
 
@@ -54,6 +57,8 @@ const Company: React.FC<OwnProps> = () => {
 
   const [addCompanyModalOpened, setAddCompanyModalOpened] = React.useState(false);
   const [addContactModalOpened, setAddContactModalOpened] = React.useState(false);
+  const [addFollowUpModalOpened, setAddFollowUpModalOpened] = React.useState(false);
+  const [addClaimModalOpened, setAddClaimModalOpened] = React.useState(false);
   const [searchedData, setSearchedData] = React.useState<typeof companies>([]);
 
   const [visible, setVisible] = React.useState<boolean>(false);
@@ -122,6 +127,21 @@ const Company: React.FC<OwnProps> = () => {
     });
   };
 
+  const handleOpenContact = (companyId: number) => {
+    setSelectedCompany(companyId);
+    setAddContactModalOpened(true);
+  };
+
+  const handleOpenFollowUp = (companyId: number) => {
+    setSelectedCompany(companyId);
+    setAddFollowUpModalOpened(true);
+  };
+
+  const handleOpenExpense = (companyId: number) => {
+    setSelectedCompany(companyId);
+    setAddClaimModalOpened(true);
+  };
+
   let icon: JSX.Element;
   if (viewMode === "cards") {
     icon = <IconId size={22} color={colors.white} />;
@@ -180,11 +200,27 @@ const Company: React.FC<OwnProps> = () => {
           } else if (viewMode === "cards") {
             return (
               <Grid.Col span={4}>
-                <_CompanyCard item={company} key={company.id} onClick={() => {}} />
+                <_CompanyCard
+                  item={company}
+                  key={company.id}
+                  openContact={() => handleOpenContact(company.id)}
+                  openFollowUp={() => handleOpenFollowUp(company.id)}
+                  openExpense={() => handleOpenExpense(company.id)}
+                  onClick={() => {}}
+                />
               </Grid.Col>
             );
           } else {
-            return <div>{company.name}</div>;
+            return (
+              <_CompanyCard
+                item={company}
+                key={company.id}
+                openContact={() => handleOpenContact(company.id)}
+                openFollowUp={() => handleOpenFollowUp(company.id)}
+                openExpense={() => handleOpenExpense(company.id)}
+                onClick={() => {}}
+              />
+            );
           }
         })}
       </>
@@ -229,7 +265,14 @@ const Company: React.FC<OwnProps> = () => {
       </ScrollArea>
     );
   } else {
-    content = <div>two column</div>;
+    content = (
+      <Grid>
+        <Grid.Col span={4}>{rows}</Grid.Col>
+        <Grid.Col span={8}>
+          <Outlet />
+        </Grid.Col>
+      </Grid>
+    );
   }
 
   return (
@@ -277,7 +320,18 @@ const Company: React.FC<OwnProps> = () => {
       <_AddContactModal
         title="Add Contact"
         opened={addContactModalOpened}
+        companyId={selectedCompany}
         onClose={() => setAddContactModalOpened(false)}
+      />
+      <_AddFollowUpModal
+        title="Add Follow Up"
+        opened={addFollowUpModalOpened}
+        onClose={() => setAddFollowUpModalOpened(false)}
+      />
+      <_AddClaimModal
+        title="Add Claim"
+        opened={addClaimModalOpened}
+        onClose={() => setAddClaimModalOpened(false)}
       />
       <Modal
         centered
@@ -295,8 +349,8 @@ const Company: React.FC<OwnProps> = () => {
           withinPortal
           searchable
           withAsterisk={false}
-          nothingFound="No Companies"
-          label="Company"
+          nothingFound="No contacts"
+          label="Primary Contact"
           value={selectedContact.toString()}
           onChange={(value) => {
             if (!value) return;

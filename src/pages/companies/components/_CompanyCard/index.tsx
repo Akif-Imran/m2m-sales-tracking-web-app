@@ -1,15 +1,30 @@
 import React from "react";
 import { useStyles } from "./styles";
 import { ActionIcon, Avatar, Card, Flex, Text, UnstyledButton, rem } from "@mantine/core";
-import { IconFiles, IconInfoSquareRounded, IconPlus } from "@tabler/icons-react";
+import {
+  IconCalendarPlus,
+  IconCash,
+  IconFiles,
+  IconInfoSquareRounded,
+  IconUserPlus,
+} from "@tabler/icons-react";
 import { colors } from "@theme";
 
 interface OwnProps {
   onClick: () => void;
   item: ICompany;
+  openContact: () => void;
+  openFollowUp: () => void;
+  openExpense: () => void;
 }
 
-const _CompanyCard: React.FC<OwnProps> = ({ onClick, item }) => {
+const _CompanyCard: React.FC<OwnProps> = ({
+  onClick,
+  item,
+  openContact,
+  openFollowUp,
+  openExpense,
+}) => {
   const { cx, classes } = useStyles();
   // const navigate = useNavigate();
 
@@ -64,16 +79,16 @@ const _CompanyCard: React.FC<OwnProps> = ({ onClick, item }) => {
               </ActionIcon>
             </Flex>
             <Text fw={"normal"} fs={"normal"} fz={"sm"} color={colors.titleText}>
-              {item?.email || "N/A"}
+              {item?.phone || "N/A"}
             </Text>
             <Text fw={"normal"} fs={"normal"} fz={"sm"} color={colors.titleText}>
-              {item?.phone || "N/A"}
+              {item?.email || "N/A"}
             </Text>
             <Text fw={"normal"} fs={"normal"} fz={"sm"} color={colors.titleText}>
               {item?.website || "N/A"}
             </Text>
             <Text fw={"normal"} fs={"normal"} fz={"sm"} color={colors.titleText}>
-              {item?.city || "N/A"}-{item?.state || "N/A"}-{item.country || "N/A"}
+              {item?.city || "N/A"} {item?.state || "N/A"} {item.country || "N/A"}
             </Text>
           </div>
         </div>
@@ -84,9 +99,10 @@ const _CompanyCard: React.FC<OwnProps> = ({ onClick, item }) => {
           className={cx(classes.bottomButton, classes.leftAlign)}
           onClick={(event) => {
             event.stopPropagation();
+            openContact();
           }}
         >
-          <IconPlus stroke={1.3} size={22} color={colors.titleText} />
+          <IconUserPlus stroke={1.3} size={22} color={colors.titleText} />
           <Text fw={"normal"} fs={"normal"} fz={"sm"} ml={rem(4)} className={classes.labelButton}>
             Contact
           </Text>
@@ -95,9 +111,10 @@ const _CompanyCard: React.FC<OwnProps> = ({ onClick, item }) => {
           className={cx(classes.bottomButton, classes.leftAlign)}
           onClick={(event) => {
             event.stopPropagation();
+            openFollowUp();
           }}
         >
-          <IconPlus stroke={1.3} size={22} color={colors.titleText} />
+          <IconCalendarPlus stroke={1.3} size={22} color={colors.titleText} />
           <Text fw={"normal"} fs={"normal"} fz={"sm"} ml={rem(4)} className={classes.labelButton}>
             Follow Up
           </Text>
@@ -106,9 +123,10 @@ const _CompanyCard: React.FC<OwnProps> = ({ onClick, item }) => {
           className={cx(classes.bottomButton, classes.rightAlign)}
           onClick={(event) => {
             event.stopPropagation();
+            openExpense();
           }}
         >
-          <IconPlus stroke={1.3} size={22} color={colors.titleText} />
+          <IconCash stroke={1.3} size={22} color={colors.titleText} />
           <Text
             fw={"normal"}
             fs={"normal"}

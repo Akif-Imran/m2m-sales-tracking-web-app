@@ -9,6 +9,8 @@ import {
   IconUserPlus,
 } from "@tabler/icons-react";
 import { colors } from "@theme";
+import { useNavigate } from "react-router-dom";
+import { routes } from "@routes";
 
 interface OwnProps {
   onClick: () => void;
@@ -26,13 +28,13 @@ const _CompanyCard: React.FC<OwnProps> = ({
   openExpense,
 }) => {
   const { cx, classes } = useStyles();
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
 
-  // const handleNavigate = (route: string) => {
-  //   // toggleLayout();
-  //   navigate(route);
-  //   // setScrollIndex(index);
-  // };
+  const handleNavigate = (route: string) => {
+    // toggleLayout();
+    navigate(route);
+    // setScrollIndex(index);
+  };
 
   const noImageStyle = {
     root: {
@@ -142,6 +144,7 @@ const _CompanyCard: React.FC<OwnProps> = ({
           className={cx(classes.bottomButton, classes.leftAlign)}
           onClick={(event) => {
             event.stopPropagation();
+            handleNavigate(routes.reports.list_nav(item.id.toString()));
           }}
         >
           <IconFiles stroke={1.3} size={22} color={colors.titleText} />

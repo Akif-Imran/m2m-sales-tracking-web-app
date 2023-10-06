@@ -161,7 +161,19 @@ const Company: React.FC<OwnProps> = () => {
     ) : (
       <>
         {searchedData.map((company, index) => {
-          if (viewMode === "list") {
+          if (viewMode === "cards") {
+            return (
+              <Grid.Col span={4} key={company.id}>
+                <_CompanyCard
+                  item={company}
+                  openContact={() => handleOpenContact(company.id)}
+                  openFollowUp={() => handleOpenFollowUp(company.id)}
+                  openExpense={() => handleOpenExpense(company.id)}
+                  onClick={() => {}}
+                />
+              </Grid.Col>
+            );
+          } else if (viewMode === "list") {
             return (
               <tr key={company.id}>
                 <td>{index + 1}</td>
@@ -196,19 +208,6 @@ const Company: React.FC<OwnProps> = () => {
                   </Group>
                 </td>
               </tr>
-            );
-          } else if (viewMode === "cards") {
-            return (
-              <Grid.Col span={4}>
-                <_CompanyCard
-                  item={company}
-                  key={company.id}
-                  openContact={() => handleOpenContact(company.id)}
-                  openFollowUp={() => handleOpenFollowUp(company.id)}
-                  openExpense={() => handleOpenExpense(company.id)}
-                  onClick={() => {}}
-                />
-              </Grid.Col>
             );
           } else {
             return (

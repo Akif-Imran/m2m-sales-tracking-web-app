@@ -72,9 +72,7 @@ const _CompanyCard: React.FC<OwnProps> = ({
                 variant="transparent"
                 onClick={(event) => {
                   event.stopPropagation();
-                  // props?.toggleLayout();
-                  // setScrollIndex(index);
-                  // navigate(routes.vehicles.details_nav(item.id.toString()));
+                  navigate(routes.company.project_nav(item.id.toString()));
                 }}
               >
                 <IconInfoSquareRounded size={22} stroke={1.3} color={colors.titleText} />

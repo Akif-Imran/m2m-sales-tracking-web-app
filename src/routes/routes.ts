@@ -13,6 +13,8 @@ const routes = {
   },
   company: {
     list: "/companies",
+    project: "/company-projects/:companyId",
+    project_nav: (companyId: string) => `/company-projects/${companyId}`,
     details: "details/:companyId",
     details_nav: (companyId: string) => `details/${companyId}`,
   },

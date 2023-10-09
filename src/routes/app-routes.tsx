@@ -25,6 +25,7 @@ import React from "react";
 interface OwnProps {}
 const MainApp: React.FC<OwnProps> = () => {
   //company
+  const _CompanyProject = lazy(() => import("../pages/companies/company-projects"));
   //projects
   //task
   //reports
@@ -77,6 +78,14 @@ const MainApp: React.FC<OwnProps> = () => {
       <Route
         path={routes.company.list}
         element={<_RequireAuth children={<_AppShell page={<Company />} />} />}
+      />
+      <Route
+        path={routes.company.project}
+        element={
+          <_RequireAuth
+            children={<_AppShell page={<SuspendedView children={<_CompanyProject />} />} />}
+          />
+        }
       />
 
       {/* projects */}

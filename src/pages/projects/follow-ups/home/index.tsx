@@ -182,7 +182,7 @@ export const FollowUps: React.FC<OwnProps> = () => {
           </Button>
         )}
       </Flex>
-      <ScrollArea type="scroll" h={"80vh"}>
+      <ScrollArea type="always" h={"80vh"}>
         <ScrollArea w={"140vw"}>
           <Table border={1} bgcolor={theme.white} withBorder>
             <thead>

@@ -163,7 +163,7 @@ const Company: React.FC<OwnProps> = () => {
         {searchedData.map((company, index) => {
           if (viewMode === "cards") {
             return (
-              <Grid.Col span={4} key={company.id}>
+              <Grid.Col span={6} key={company.id}>
                 <_CompanyCard
                   item={company}
                   openContact={() => handleOpenContact(company.id)}
@@ -227,10 +227,10 @@ const Company: React.FC<OwnProps> = () => {
 
   let content: JSX.Element;
   if (viewMode === "cards") {
-    content = <Grid>{rows}</Grid>;
+    content = <Grid columns={12}>{rows}</Grid>;
   } else if (viewMode === "list") {
     content = (
-      <ScrollArea type="scroll" h={"80vh"}>
+      <ScrollArea type="always" h={"80vh"}>
         <ScrollArea w={"160vw"}>
           <Table border={1} bgcolor={theme.white} withBorder>
             <thead>

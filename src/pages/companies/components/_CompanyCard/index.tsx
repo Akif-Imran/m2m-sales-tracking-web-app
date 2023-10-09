@@ -1,6 +1,6 @@
 import React from "react";
 import { useStyles } from "./styles";
-import { ActionIcon, Avatar, Card, Flex, Text, UnstyledButton, rem } from "@mantine/core";
+import { ActionIcon, Anchor, Avatar, Card, Flex, Text, UnstyledButton, rem } from "@mantine/core";
 import {
   IconCalendarPlus,
   IconCash,
@@ -55,7 +55,7 @@ const _CompanyCard: React.FC<OwnProps> = ({
       <div className={classes.imageWithInfoContainer}>
         <div className={classes.machineImageContainer}>
           <Avatar
-            src={item?.logo ? `${item?.logo}` : "/car.png"}
+            src={item?.logo ? `${item?.logo}` : "/company.png"}
             radius={item?.logo ? rem(250) : rem(250)}
             size={"xl"}
             //@ts-expect-error style work
@@ -83,12 +83,12 @@ const _CompanyCard: React.FC<OwnProps> = ({
             <Text fw={"normal"} fs={"normal"} fz={"sm"} color={colors.titleText}>
               {item?.phone || "N/A"}
             </Text>
-            <Text fw={"normal"} fs={"normal"} fz={"sm"} color={colors.titleText}>
+            <Anchor href={`mailto:${item?.email}`} underline={true} target="_blank" c={"blue"}>
               {item?.email || "N/A"}
-            </Text>
-            <Text fw={"normal"} fs={"normal"} fz={"sm"} color={colors.titleText}>
+            </Anchor>
+            <Anchor href={item?.website} underline={true} target="_blank" c={"blue"}>
               {item?.website || "N/A"}
-            </Text>
+            </Anchor>
             <Text fw={"normal"} fs={"normal"} fz={"sm"} color={colors.titleText}>
               {item?.city || "N/A"} {item?.state || "N/A"} {item.country || "N/A"}
             </Text>

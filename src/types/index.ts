@@ -116,16 +116,11 @@ interface ITask {
   statusName: string;
 }
 interface INotification {
+  id: number;
   title: string;
   body: string;
-  IMEI: string;
-  driver: boolean;
-  service: boolean;
-  fcm_token: string[];
+  isRead: boolean;
   createdAt: string;
-  _id: string;
-  data: Record<string, number | string | boolean | null>;
-  __v: number;
 }
 
 interface IDepartmentType {

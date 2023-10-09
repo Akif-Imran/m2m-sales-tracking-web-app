@@ -429,10 +429,9 @@ const _Header = ({ toggleNavbar, opened }: _HeaderProps) => {
                 className={classes.sideBar}
                 onClick={() => {
                   setNotificationOpened(true);
-                  // navigate(routes.notification.list);
                 }}
               >
-                <Indicator size={16} label={count} color={"red"}>
+                <Indicator size={16} label={count} color={"red"} disabled={count === 0}>
                   <IconBellFilled stroke={1.5} color="white" />
                 </Indicator>
               </UnstyledButton>

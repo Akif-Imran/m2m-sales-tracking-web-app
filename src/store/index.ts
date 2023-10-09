@@ -21,6 +21,7 @@ import {
 } from "@slices";
 import { useSelector } from "react-redux";
 import { TypedUseSelectorHook, useDispatch } from "react-redux";
+import { notificationReducer } from "./slices/notificationsSlice";
 
 const store = configureStore({
   reducer: {
@@ -42,6 +43,7 @@ const store = configureStore({
     leaveStatusList: leaveStatusReducer,
     leaveTypes: leaveTypeReducer,
     suppliers: supplierReducer,
+    notifications: notificationReducer,
   },
 });
 
@@ -73,6 +75,7 @@ export const selectLeaves = (state: RootState) => state.leaves;
 export const selectLeaveStatusList = (state: RootState) => state.leaveStatusList;
 export const selectLeaveTypes = (state: RootState) => state.leaveTypes;
 export const selectSuppliers = (state: RootState) => state.suppliers;
+export const selectNotifications = (state: RootState) => state.notifications;
 
 //memoized selectors
 export const selectTasksCombined = createSelector(

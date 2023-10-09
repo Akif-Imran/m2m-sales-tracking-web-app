@@ -1,25 +1,28 @@
 import React from "react";
 import { useStyles } from "./styles";
 import {
+  ActionIcon,
   Card,
   Center,
-  Divider,
   Flex,
   Grid,
   Loader,
   ScrollArea,
   Stack,
   Text,
-  rem,
 } from "@mantine/core";
 import { colors } from "@theme";
 import { DateTime } from "luxon";
 import { DAY_MM_DD_YYYY_HH_MM_SS_A } from "@constants";
+import { markAsRead } from "@slices";
+import { IconSquareRoundedCheck, IconSquareRounded } from "@tabler/icons-react";
+import { useAppDispatch } from "@store";
 
 interface OwnProps {}
 
 const Notification: React.FC<OwnProps> = () => {
-  const { classes } = useStyles();
+  const { classes, theme } = useStyles();
+  const dispatch = useAppDispatch();
   // const {} = useAuthContext();
   // const [searchQuery, setSearchQuery] = React.useState<string>("");
   const [notifications, _setNotifications] = React.useState<INotification[]>([]);
@@ -59,29 +62,39 @@ const Notification: React.FC<OwnProps> = () => {
       ) : (
         <>
           {searchedNotifications.map((notification) => (
-            <Card shadow="sm" mb={"xs"} px={"sm"} py={"xs"} radius={"md"} key={notification._id}>
-              <Stack spacing={"xs"}>
-                <Text className={classes.headerText} fz={rem(24)}>
-                  {notification.title}
+            <Card
+              shadow="sm"
+              mb={"xs"}
+              px={"sm"}
+              py={"xs"}
+              radius={"md"}
+              key={notification.id.toString()}
+            >
+              <Flex direction={"column"}>
+                <Flex direction={"row"} justify={"space-between"} align={"center"}>
+                  <Text size={"md"}>{notification.title}</Text>
+                  <ActionIcon
+                    onClick={
+                      !notification.isRead ? () => dispatch(markAsRead(notification.id)) : undefined
+                    }
+                  >
+                    {notification.isRead ? (
+                      <IconSquareRoundedCheck
+                        stroke={1.5}
+                        color={theme.colors[theme.primaryColor][6]}
+                      />
+                    ) : (
+                      <IconSquareRounded stroke={1.5} color={theme.colors[theme.primaryColor][6]} />
+                    )}
+                  </ActionIcon>
+                </Flex>
+                <Text size={"sm"} c={colors.titleText}>
+                  {notification.body}
                 </Text>
-                <Divider />
-                <Flex direction={"row"} justify={"space-between"} align={"flex-start"}>
-                  <Text className={classes.headerText}>IMEI</Text>
-                  <Text className={classes.descText}>{notification.IMEI || "N/A"}</Text>
-                </Flex>
-                <Flex direction={"row"} justify={"space-between"} align={"flex-start"}>
-                  <Text className={classes.headerText}>Date/Time</Text>
-                  <Text className={classes.descText}>
-                    {DateTime.fromISO(notification.createdAt, { zone: "utc" }).toFormat(
-                      DAY_MM_DD_YYYY_HH_MM_SS_A
-                    ) || "N/A"}
-                  </Text>
-                </Flex>
-                <Flex direction={"row"} justify={"space-between"} align={"flex-start"}>
-                  <Text className={classes.headerText}>Description</Text>
-                  <Text className={classes.descText}>{notification.body || "N/A"}</Text>
-                </Flex>
-              </Stack>
+                <Text className={classes.descText} c={"dark.1"}>
+                  {DateTime.fromISO(notification.createdAt).toFormat(DAY_MM_DD_YYYY_HH_MM_SS_A)}
+                </Text>
+              </Flex>
             </Card>
           ))}
         </>

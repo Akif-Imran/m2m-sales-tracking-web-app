@@ -17,22 +17,26 @@ import {
   Center,
   Loader,
   Card,
-  Divider,
   ScrollArea,
+  Indicator,
+  ActionIcon,
 } from "@mantine/core";
 import {
   IconLogout,
   IconChevronDown,
   IconTrash,
   IconBellFilled,
-  IconSettings,
+  // IconSettings,
   IconDashboard,
   IconUserCircle,
   IconSettingsExclamation,
-  IconHelpCircle,
-  IconInfoCircle,
+  // IconHelpCircle,
+  // IconInfoCircle,
   IconChecklist,
   IconBuildingBank,
+  IconDots,
+  IconSquareRounded,
+  IconSquareRoundedCheck,
 } from "@tabler/icons-react";
 import type { TablerIconsProps } from "@tabler/icons-react";
 import { useAuthContext } from "@contexts";
@@ -45,6 +49,8 @@ import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { routes } from "@routes";
 import { DateTime } from "luxon";
 import { DAY_MM_DD_YYYY_HH_MM_SS_A } from "@constants";
+import { selectNotifications, useAppDispatch, useAppSelector } from "@store";
+import { markAsRead } from "@slices";
 
 type ActivePage =
   | "Dashboard"
@@ -56,6 +62,7 @@ type ActivePage =
   | "Users"
   | "Leaves"
   | "Tasks"
+  | "More"
   | "Settings"
   | "Help"
   | "About";
@@ -130,22 +137,42 @@ const buttons: NavbarButtons[] = [
   },
   {
     link: routes.settings.home,
-    label: "Settings",
-    icon: IconSettings,
+    links: [
+      {
+        label: "Settings",
+        link: routes.settings.home,
+      },
+      {
+        label: "Help",
+        link: routes.help.home,
+      },
+      {
+        label: "About",
+        link: routes.about.home,
+      },
+    ],
+    label: "More",
+    icon: IconDots,
     adminOnly: true,
   },
-  {
-    link: routes.help.home,
-    label: "Help",
-    icon: IconHelpCircle,
-    adminOnly: false,
-  },
-  {
-    link: routes.about.home,
-    label: "About",
-    icon: IconInfoCircle,
-    adminOnly: false,
-  },
+  // {
+  //   link: routes.settings.home,
+  //   label: "Settings",
+  //   icon: IconSettings,
+  //   adminOnly: true,
+  // },
+  // {
+  //   link: routes.help.home,
+  //   label: "Help",
+  //   icon: IconHelpCircle,
+  //   adminOnly: false,
+  // },
+  // {
+  //   link: routes.about.home,
+  //   label: "About",
+  //   icon: IconInfoCircle,
+  //   adminOnly: false,
+  // },
   // { link: "", label: "Databases", icon: IconDatabaseImport },
   // { link: "", label: "Authentication", icon: Icon2fa },
   // { link: "", label: "Other Settings", icon: IconSettings },
@@ -158,49 +185,24 @@ interface _HeaderProps {
 
 const _Header = ({ toggleNavbar, opened }: _HeaderProps) => {
   const { classes, theme, cx } = useStyles();
-  const [notificationOpened, setNotificationOpened] = useState(false);
+  const dispatch = useAppDispatch();
   const {
     state: { token, user, isAdmin, isHR },
     logout,
   } = useAuthContext();
 
-  const [notifications, _setNotifications] = React.useState<INotification[]>([]);
-  const [searchedNotifications, setSearchedNotifications] = React.useState<INotification[]>([]);
-  const [isFetching, setIsFetching] = React.useState(false);
+  const [notificationOpened, setNotificationOpened] = useState(false);
+  const {
+    count,
+    data: notifications,
+    isLoading: isFetchingNotifications,
+  } = useAppSelector(selectNotifications);
   const navigate = useNavigate();
   //copies over
   const location = useLocation();
   const [active, setActive] = useState<ActivePage>("Dashboard");
-  // const [isProfileOpened, { toggle }] = useDisclosure(false);
   const [userMenuOpened, setUserMenuOpened] = useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
-
-  const fetchNotifications = React.useCallback(() => {
-    setIsFetching(true);
-    new Promise((resolve) => {
-      console.log(token);
-      setTimeout(resolve, 500);
-    })
-      .then((_res) => {})
-      .catch((_err) => {
-        notify("Notification", _err.message || "", "error");
-      })
-      .finally(() => {
-        setIsFetching(false);
-      });
-  }, [token]);
-
-  React.useEffect(() => {
-    if (!notifications) {
-      return;
-    }
-    setSearchedNotifications(notifications);
-  }, [notifications]);
-
-  React.useEffect(() => {
-    // addInfo();
-    fetchNotifications();
-  }, [fetchNotifications]);
 
   const handleDelete = () => {
     openDeleteModalHelper({
@@ -329,7 +331,7 @@ const _Header = ({ toggleNavbar, opened }: _HeaderProps) => {
       );
     });
 
-  const rows = isFetching ? (
+  const rows = isFetchingNotifications ? (
     <Stack>
       <Center>
         <Loader variant="dots" />
@@ -337,7 +339,7 @@ const _Header = ({ toggleNavbar, opened }: _HeaderProps) => {
     </Stack>
   ) : (
     <React.Fragment>
-      {searchedNotifications.length === 0 ? (
+      {notifications.length === 0 ? (
         <Stack>
           <Center>
             <Text color={colors.titleText}>No Notifications</Text>
@@ -345,30 +347,40 @@ const _Header = ({ toggleNavbar, opened }: _HeaderProps) => {
         </Stack>
       ) : (
         <>
-          {searchedNotifications.map((notification) => (
-            <Card shadow="sm" mb={"xs"} px={"sm"} py={"xs"} radius={"md"} key={notification._id}>
-              <Stack spacing={"xs"}>
-                <Text className={classes.headerText} fz={rem(24)}>
-                  {notification.title}
+          {notifications.map((notification) => (
+            <Card
+              shadow="sm"
+              mb={"xs"}
+              px={"sm"}
+              py={"xs"}
+              radius={"md"}
+              key={notification.id.toString()}
+            >
+              <Flex direction={"column"}>
+                <Flex direction={"row"} justify={"space-between"} align={"center"}>
+                  <Text size={"md"}>{notification.title}</Text>
+                  <ActionIcon
+                    onClick={
+                      !notification.isRead ? () => dispatch(markAsRead(notification.id)) : undefined
+                    }
+                  >
+                    {notification.isRead ? (
+                      <IconSquareRoundedCheck
+                        stroke={1.5}
+                        color={theme.colors[theme.primaryColor][6]}
+                      />
+                    ) : (
+                      <IconSquareRounded stroke={1.5} color={theme.colors[theme.primaryColor][6]} />
+                    )}
+                  </ActionIcon>
+                </Flex>
+                <Text size={"sm"} c={colors.titleText}>
+                  {notification.body}
                 </Text>
-                <Divider />
-                <Flex direction={"row"} justify={"space-between"} align={"flex-start"}>
-                  <Text className={classes.headerText}>IMEI</Text>
-                  <Text className={classes.descText}>{notification.IMEI || "N/A"}</Text>
-                </Flex>
-                <Flex direction={"row"} justify={"space-between"} align={"flex-start"}>
-                  <Text className={classes.headerText}>Date/Time</Text>
-                  <Text className={classes.descText}>
-                    {DateTime.fromISO(notification.createdAt, { zone: "utc" }).toFormat(
-                      DAY_MM_DD_YYYY_HH_MM_SS_A
-                    ) || "N/A"}
-                  </Text>
-                </Flex>
-                <Flex direction={"row"} justify={"space-between"} align={"flex-start"}>
-                  <Text className={classes.headerText}>Description</Text>
-                  <Text className={classes.descText}>{notification.body || "N/A"}</Text>
-                </Flex>
-              </Stack>
+                <Text className={classes.descText} c={"dark.1"}>
+                  {DateTime.fromISO(notification.createdAt).toFormat(DAY_MM_DD_YYYY_HH_MM_SS_A)}
+                </Text>
+              </Flex>
             </Card>
           ))}
         </>
@@ -417,10 +429,11 @@ const _Header = ({ toggleNavbar, opened }: _HeaderProps) => {
                 className={classes.sideBar}
                 onClick={() => {
                   setNotificationOpened(true);
-                  // navigate(routes.notification.list);
                 }}
               >
-                <IconBellFilled stroke={1.5} color="white" />
+                <Indicator size={16} label={count} color={"red"} disabled={count === 0}>
+                  <IconBellFilled stroke={1.5} color="white" />
+                </Indicator>
               </UnstyledButton>
             </Popover.Target>
 

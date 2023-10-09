@@ -16,3 +16,4 @@ export * from "./claimsStatusSlice";
 export * from "./leaveApplicationSlice";
 export * from "./leaveStatusSlice";
 export * from "./leaveTypeSlice";
+export * from "./notificationsSlice";

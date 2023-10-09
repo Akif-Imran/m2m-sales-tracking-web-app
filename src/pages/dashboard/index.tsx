@@ -23,6 +23,7 @@ import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 
 import {
+  selectFollowUpsWithRecords,
   selectProjectWithRecords,
   selectTasksCombined,
   useAppSelector,
@@ -38,15 +39,20 @@ const Dashboard: React.FC<OwnProps> = () => {
   const { classes, theme } = useStyles();
   // const [isFetching, setIsFetching] = React.useState(false);
   const { tasks } = useAppSelector(selectTasksCombined);
+  const followUps = useAppSelector(selectFollowUpsWithRecords);
   const projects = useAppSelector(selectProjectWithRecords);
-  const [calendarLoading, setIsCalendarLoading] = React.useState<boolean>(false);
+  const [calendarLoading, setIsCalendarLoading] = React.useState<boolean>(true);
   const [projectCounts, setProjectsCounts] = React.useState<ChartData>();
   const [projectValueCounts, setProjectValueCounts] = React.useState<ChartData>();
   const [projectTargetCounts, setProjectTargetCounts] = React.useState<ChartData>();
   const [projectValueTargetCounts, setProjectValueTargetCounts] = React.useState<ChartData>();
+  const [calendarTasks, setCalendarTasks] = React.useState<ICalendarEvent[]>([]);
   const [projectsInProcess, setProjectInProcess] = useState<
     { name: string; dueDate: string; timeRemaining: string }[]
   >([]);
+  const [projectsWithMostClaims, _setProjectsWithMostClaims] = React.useState([
+    { name: "Project 1", claims: 8, totalCost: { amount: 18000, currency: "MYR" } },
+  ]);
   const [mostFollowedUpLeadWithExpenses, _setMostFollowedUpLeadWithExpenses] = useState([
     { name: "Project 1", followUpCount: 8, expenses: { amount: 15000, currency: "MYR" } },
   ]);
@@ -223,6 +229,27 @@ const Dashboard: React.FC<OwnProps> = () => {
     setProjectInProcess(inProcess);
   }, [projects]);
 
+  React.useEffect(() => {
+    const tsk = tasks.map((task) => ({
+      title: task.title,
+      start: task.createdDate,
+      end: task.plannedEndDate,
+      backgroundColor: theme.colors[theme.primaryColor][6],
+      borderColor: theme.colors[theme.primaryColor][6],
+    }));
+
+    const follows = followUps.map((followUp) => ({
+      title: `Meeting: ${followUp.contactPerson?.name || ""}`,
+      start: followUp.nextFollowUp.meetingDate,
+      end: followUp.nextFollowUp.meetingDate,
+      allDay: true,
+      backgroundColor: theme.colors[theme.primaryColor][6],
+      borderColor: theme.colors[theme.primaryColor][6],
+    }));
+    setCalendarTasks(tsk.concat(follows));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tasks, followUps]);
+
   const projectOverdueRows = projectOverDue.map((project, index) => {
     const dueDate = DateTime.fromISO(project.dueDate).toLocal();
     const dueDateSt = dueDate.toFormat(DAY_MM_DD_YYYY_HH_MM_SS_A);
@@ -297,8 +324,30 @@ const Dashboard: React.FC<OwnProps> = () => {
     );
   });
 
+  const projectsWithMostClaimsRows = projectsWithMostClaims.map((project, index) => {
+    const value = Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: project.totalCost.currency,
+      maximumFractionDigits: 2,
+    }).format(project.totalCost.amount);
+    return (
+      <tr key={index}>
+        <td>{project.name}</td>
+        <td>{project.claims}</td>
+        <td>{value}</td>
+      </tr>
+    );
+  });
+
   return (
-    <Tabs defaultValue="analytics">
+    <Tabs
+      defaultValue="analytics"
+      onTabChange={(value) => {
+        if (value === "calendar") {
+          setTimeout(() => setIsCalendarLoading(false), 200);
+        }
+      }}
+    >
       <Tabs.List>
         <Tabs.Tab value="analytics" icon={<IconGraph size={16} />}>
           Analytics
@@ -565,6 +614,36 @@ const Dashboard: React.FC<OwnProps> = () => {
               </ScrollArea>
             </Card>
           </Grid.Col>
+
+          <Grid.Col md={6} lg={6} xl={6}>
+            <Card p="xs" shadow="sm" className={classes.card} my={4} px={"xs"} radius={"md"}>
+              <Text fw={"bold"} fz={rem(60)} color={colors.titleText} mt={-16}>
+                {projectsWithMostClaims.length}
+              </Text>
+              <Text
+                fz="md"
+                className={classes.label}
+                color={colors.titleText}
+                mt={-10}
+                mb={2}
+                ml={rem(8)}
+              >
+                Projects with most claims
+              </Text>
+              <ScrollArea h={rem(272)}>
+                <Table>
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>No. of Claims</th>
+                      <th>Total Cost</th>
+                    </tr>
+                  </thead>
+                  <tbody>{projectsWithMostClaimsRows}</tbody>
+                </Table>
+              </ScrollArea>
+            </Card>
+          </Grid.Col>
         </Grid>
       </Tabs.Panel>
 
@@ -578,13 +657,7 @@ const Dashboard: React.FC<OwnProps> = () => {
             contentHeight={"auto"}
             initialView="dayGridMonth"
             loading={(loading) => setIsCalendarLoading(loading)}
-            events={tasks.map((task) => ({
-              title: task.title,
-              start: task.createdDate,
-              end: task.plannedEndDate,
-              backgroundColor: theme.colors[theme.primaryColor][6],
-              borderColor: theme.colors[theme.primaryColor][6],
-            }))}
+            events={calendarTasks}
           />
         )}
       </Tabs.Panel>
@@ -593,3 +666,12 @@ const Dashboard: React.FC<OwnProps> = () => {
 };
 
 export { Dashboard };
+
+interface ICalendarEvent {
+  title?: string;
+  start?: string;
+  end?: string;
+  backgroundColor?: string;
+  borderColor?: string;
+  allDay?: boolean;
+}

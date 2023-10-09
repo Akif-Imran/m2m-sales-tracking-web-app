@@ -37,6 +37,7 @@ export const useStyles = createStyles((theme) => ({
     justifyContent: "space-between",
   },
   bottomButton: {
+    minWidth: rem(112),
     display: "flex",
     flexDirection: "row",
     // flex: 1,
@@ -59,5 +60,6 @@ export const useStyles = createStyles((theme) => ({
     color: colors.titleText,
     // textDecorationLine: "underline",
     accentColor: colors.titleText,
+    flexWrap: "nowrap",
   },
 }));

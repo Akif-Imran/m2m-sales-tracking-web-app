@@ -24,20 +24,29 @@ export const useStyles = createStyles((theme) => ({
     // border: "1px solid",
   },
   minorDetailsWithCount: {
-    display: "flex",
     flex: 1,
+    display: "flex",
     flexDirection: "column",
     justifyContent: "flex-start",
     alignItems: "flex-start",
     // border: "1px solid black",
   },
+  textWithIconButton: {
+    width: "100%",
+    display: "flex",
+    flex: 1,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    // border: "1px solid black",
+  },
   labelButtonsContainer: {
     display: "flex",
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "flex-end",
+    // justifyContent: "space-between", //when there are more buttons than 1
   },
   bottomButton: {
-    minWidth: rem(112),
     display: "flex",
     flexDirection: "row",
     // flex: 1,
@@ -49,6 +58,10 @@ export const useStyles = createStyles((theme) => ({
     "&:hover": {
       backgroundColor: theme.fn.lighten(colors.mediumGray, 0.6),
     },
+  },
+  noPadding: {
+    paddingBlock: 0,
+    paddingInline: 0,
   },
   leftAlign: {
     justifyContent: "flex-start",

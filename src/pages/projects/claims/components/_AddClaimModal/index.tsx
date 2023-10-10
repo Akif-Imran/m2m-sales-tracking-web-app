@@ -15,6 +15,7 @@ interface OwnProps {
   opened: boolean;
   onClose: () => void;
   title: string;
+  companyId?: number;
 }
 interface IRequestForm extends Omit<IClaim, "id"> {}
 

@@ -41,12 +41,14 @@ import { deleteCompany, updatePrimaryContact } from "@slices";
 import { useToggle } from "@mantine/hooks";
 import { _AddFollowUpModal } from "../../projects/follow-ups/components";
 import { _AddClaimModal } from "../../projects/claims/components";
+import { _AddPurchaseRequestModal } from "../../projects/purchase-requests/components";
 import { Outlet } from "react-router-dom";
 
 interface OwnProps {}
 
 const Company: React.FC<OwnProps> = () => {
   useStyles();
+  // const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { classes: gclasses, theme } = useGStyles();
   const [viewMode, toggle] = useToggle(["cards", "two-column", "list"]);
@@ -59,6 +61,7 @@ const Company: React.FC<OwnProps> = () => {
   const [addContactModalOpened, setAddContactModalOpened] = React.useState(false);
   const [addFollowUpModalOpened, setAddFollowUpModalOpened] = React.useState(false);
   const [addClaimModalOpened, setAddClaimModalOpened] = React.useState(false);
+  const [addPurchaseReqModalOpened, setAddPurchaseReqModalOpened] = React.useState(false);
   const [searchedData, setSearchedData] = React.useState<typeof companies>([]);
 
   const [visible, setVisible] = React.useState<boolean>(false);
@@ -141,6 +144,10 @@ const Company: React.FC<OwnProps> = () => {
     setSelectedCompany(companyId);
     setAddClaimModalOpened(true);
   };
+  const handleOpenPurchaseRequest = (companyId: number) => {
+    setSelectedCompany(companyId);
+    setAddPurchaseReqModalOpened(true);
+  };
 
   let icon: JSX.Element;
   if (viewMode === "cards") {
@@ -163,13 +170,13 @@ const Company: React.FC<OwnProps> = () => {
         {searchedData.map((company, index) => {
           if (viewMode === "cards") {
             return (
-              <Grid.Col span={6} key={company.id}>
+              <Grid.Col span={4} key={company.id}>
                 <_CompanyCard
                   item={company}
                   openContact={() => handleOpenContact(company.id)}
                   openFollowUp={() => handleOpenFollowUp(company.id)}
                   openExpense={() => handleOpenExpense(company.id)}
-                  onClick={() => {}}
+                  openPurchaseRequest={() => handleOpenPurchaseRequest(company.id)}
                 />
               </Grid.Col>
             );
@@ -217,7 +224,7 @@ const Company: React.FC<OwnProps> = () => {
                 openContact={() => handleOpenContact(company.id)}
                 openFollowUp={() => handleOpenFollowUp(company.id)}
                 openExpense={() => handleOpenExpense(company.id)}
-                onClick={() => {}}
+                openPurchaseRequest={() => handleOpenPurchaseRequest(company.id)}
               />
             );
           }
@@ -325,12 +332,20 @@ const Company: React.FC<OwnProps> = () => {
       <_AddFollowUpModal
         title="Add Follow Up"
         opened={addFollowUpModalOpened}
+        companyId={selectedCompany}
         onClose={() => setAddFollowUpModalOpened(false)}
       />
       <_AddClaimModal
         title="Add Claim"
         opened={addClaimModalOpened}
+        companyId={selectedCompany}
         onClose={() => setAddClaimModalOpened(false)}
+      />
+      <_AddPurchaseRequestModal
+        title="Add Purchase Request"
+        opened={addPurchaseReqModalOpened}
+        companyId={selectedCompany}
+        onClose={() => setAddPurchaseReqModalOpened(false)}
       />
       <Modal
         centered

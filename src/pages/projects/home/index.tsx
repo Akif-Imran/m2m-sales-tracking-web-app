@@ -30,6 +30,7 @@ import { _AddProjectModal } from "../components";
 import { DateTime } from "luxon";
 import { DAY_MM_DD_YYYY, projectStatusColors } from "@constants";
 import { useAuthContext } from "@contexts";
+import { useSearchParams } from "react-router-dom";
 
 interface OwnProps {}
 
@@ -47,9 +48,12 @@ const Projects: React.FC<OwnProps> = () => {
   const dispatch = useAppDispatch();
   const { classes: gclasses, theme } = useGStyles();
 
+  const [searchParams, _setSearchParams] = useSearchParams();
+  const modal = searchParams.get("open");
+  console.log("which modal to open", modal);
   const [searchQuery, setSearchQuery] = React.useState("");
   const projects = useAppSelector(selectProjectWithRecords);
-  const [addProjectModalOpened, setAddProjectModalOpened] = React.useState(false);
+  const [addProjectModalOpened, setAddProjectModalOpened] = React.useState(modal === "add");
   const [searchedData, setSearchedData] = React.useState<typeof projects>([]);
 
   const { projectStatus: projectStatusList } = useAppSelector(selectRecordsForDropdown);
@@ -105,15 +109,6 @@ const Projects: React.FC<OwnProps> = () => {
     setSearchedData(sortedData);
   };
 
-  React.useEffect(() => {
-    if (isAdmin || isHR) {
-      setSearchedData(projects);
-    } else {
-      const filtered = projects.filter((project) => project.salesPersonId === user?.id);
-      setSearchedData(filtered);
-    }
-  }, [isAdmin, isHR, projects, user?.id]);
-
   const handleDelete = (id: number) => {
     openDeleteModalHelper({
       theme: theme,
@@ -134,6 +129,21 @@ const Projects: React.FC<OwnProps> = () => {
       onCancel: () => notify("Delete Project", "Operation canceled!", "error"),
     });
   };
+
+  React.useEffect(() => {
+    if (isAdmin || isHR) {
+      setSearchedData(projects);
+    } else {
+      const filtered = projects.filter((project) => project.salesPersonId === user?.id);
+      setSearchedData(filtered);
+    }
+  }, [isAdmin, isHR, projects, user?.id]);
+
+  // React.useEffect(() => {
+  //   if (modal === "add") {
+  //     setAddProjectModalOpened(true);
+  //   }
+  // }, [modal]);
 
   const rows =
     searchedData.length === 0 ? (

@@ -27,6 +27,13 @@ export const projectStatusColors: Record<number, string> = {
   5: "green",
 };
 
+export const userStatusColors: Record<number, string> = {
+  1: "red",
+  2: "yellow",
+  3: "green",
+  4: "blue",
+};
+
 export const purchaseRequestStatusColors: Record<number, string> = {
   1: "red",
   2: "green",

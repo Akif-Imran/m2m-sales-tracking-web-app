@@ -1,6 +1,7 @@
 import React from "react";
 import { useStyles } from "./styles";
 import {
+  ActionIcon,
   Anchor,
   Badge,
   Card,
@@ -24,7 +25,9 @@ import { DAY_MM_DD_YYYY, DAY_MM_DD_YYYY_HH_MM_SS_A, projectStatusColors } from "
 import { useParams } from "react-router-dom";
 import { DateTime } from "luxon";
 import { colors } from "@theme";
-import { IconChevronRight } from "@tabler/icons-react";
+import { IconChevronRight, IconPlus } from "@tabler/icons-react";
+import { _AddContactModal } from "../components";
+import { _AddFollowUpModal } from "../../projects/follow-ups/components";
 
 interface OwnProps {}
 type ArrayToObj<T extends Array<Record<string, unknown>>> = T extends Array<infer U> ? U : never;
@@ -42,6 +45,9 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
   const [contacts, setContacts] = React.useState<typeof contactsList>([]);
   const [followUps, setFollowUps] = React.useState<typeof followUpList>([]);
   const [selectedProject, setSelectedProject] = React.useState<ArrayToObj<typeof projectsList>>();
+
+  const [addContactModalOpened, setAddContactModalOpened] = React.useState(false);
+  const [addFollowUpModalOpened, setAddFollowUpModalOpened] = React.useState(false);
 
   React.useEffect(() => {
     if (!companyId) return;
@@ -78,223 +84,261 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
   if (isLoading) {
     return <div>Loading...</div>;
   } else if (!company || !selectedProject) {
-    return <div>Invalid Data</div>;
+    return <div>Nothing to see here...</div>;
   } else {
     return (
-      <Grid>
-        <Grid.Col span={3}>
-          <Card shadow="sm" mb={"xs"} px={"sm"} py={"xs"} radius={"md"}>
-            <Center>
-              <Text {...titleTextStyle} size={"lg"}>
-                Leads/Projects List
-              </Text>
-            </Center>
-          </Card>
-          <ScrollArea type="scroll" h={"96vh"}>
-            {projects.map((project) => {
-              return (
-                <Card
-                  key={project.id}
-                  shadow="sm"
-                  mb={"xs"}
-                  px={"sm"}
-                  py={"xs"}
-                  radius={"md"}
-                  onClick={() => handleSelectProject(project.id)}
-                >
-                  <Flex direction={"row"} justify={"space-between"} align={"center"}>
-                    <Flex direction={"column"}>
-                      <Text {...titleTextStyle}>{project.name}</Text>
-                      <Badge variant="filled" color={projectStatusColors[project.statusId]}>
-                        {project.statusName}
-                      </Badge>
-                    </Flex>
-                    {selectedProject.id === project.id && (
-                      <IconChevronRight size={24} color={colors.titleText} />
-                    )}
-                  </Flex>
-                </Card>
-              );
-            })}
-          </ScrollArea>
-        </Grid.Col>
-
-        <Grid.Col span={9}>
-          <Stack spacing={"xs"}>
-            <Grid>
-              <Grid.Col span={8}>
-                <Card shadow="sm" mb={"xs"} px={"sm"} py={"xs"} radius={"md"} h={"48vh"}>
-                  <Stack spacing={"xs"}>
-                    <Flex direction={"row"} align={"center"}>
-                      <Text {...titleTextStyle} size={"lg"}>
-                        Project Details
-                      </Text>
-                      <Badge
-                        ml={"lg"}
-                        variant="filled"
-                        color={projectStatusColors[selectedProject.statusId]}
-                      >
-                        {selectedProject.statusName}
-                      </Badge>
-                    </Flex>
-                    <Divider color={colors.borderColor} mb={rem(8)} />
-                    <Flex direction={"row"} align={"center"} columnGap={"sm"}>
-                      <Text {...titleTextStyle}>Name: </Text>
-                      <Text {...bodyTextStyle}>{selectedProject.name}</Text>
-                    </Flex>
-                    <Flex direction={"row"} align={"center"} justify={"space-between"}>
-                      <Flex direction={"row"} align={"center"} columnGap={"sm"}>
-                        <Text {...titleTextStyle}>Type: </Text>
-                        <Text {...bodyTextStyle}>{selectedProject.projectType}</Text>
-                      </Flex>
-                      <Flex direction={"row"} align={"center"} columnGap={"sm"}>
-                        <Text {...titleTextStyle}>Salesman: </Text>
-                        <Text {...bodyTextStyle}>
-                          {selectedProject.salesPerson?.firstName}{" "}
-                          {selectedProject.salesPerson?.lastName}
-                        </Text>
-                      </Flex>
-                    </Flex>
-                    <Flex direction={"row"} align={"center"} justify={"space-between"}>
-                      <Flex direction={"row"} align={"center"} columnGap={"sm"}>
-                        <Text {...titleTextStyle}>Value: </Text>
-                        <Text {...bodyTextStyle}>
-                          {Intl.NumberFormat("en-US", {
-                            style: "currency",
-                            currency: selectedProject.value.currency,
-                            maximumFractionDigits: 2,
-                            minimumFractionDigits: 2,
-                          }).format(selectedProject.value.amount)}
-                        </Text>
-                      </Flex>
-                      <Flex direction={"row"} align={"center"} columnGap={"sm"}>
-                        <Text {...titleTextStyle}>Contract: </Text>
-                        <Text {...bodyTextStyle}>
-                          {DateTime.fromISO(selectedProject.contractDate).toFormat(DAY_MM_DD_YYYY)}
-                        </Text>
-                      </Flex>
-                    </Flex>
-                    <Flex direction={"row"} align={"center"} justify={"space-between"}>
-                      <Flex direction={"row"} align={"center"} columnGap={"sm"}>
-                        <Text {...titleTextStyle}>Quotation: </Text>
-                        <Text {...bodyTextStyle}>{selectedProject.quotation}</Text>
-                      </Flex>
-                      <Flex direction={"row"} align={"center"} columnGap={"sm"}>
-                        <Text {...titleTextStyle}>Delivery: </Text>
-                        <Text {...bodyTextStyle}>
-                          {" "}
-                          {DateTime.fromISO(selectedProject.deliveryDate).toFormat(DAY_MM_DD_YYYY)}
-                        </Text>
-                      </Flex>
-                    </Flex>
-                    <Flex direction={"row"} align={"center"} columnGap={"sm"}>
-                      <Text {...titleTextStyle}>Description: </Text>
-                      <Text {...bodyTextStyle}>{selectedProject.description}</Text>
-                    </Flex>
-                  </Stack>
-                </Card>
-              </Grid.Col>
-
-              <Grid.Col span={4}>
-                <ScrollArea type="scroll" h={"48vh"}>
-                  <Card shadow="sm" mb={"xs"} px={"sm"} py={"xs"} radius={"md"}>
-                    <Text {...titleTextStyle} size={"lg"}>
-                      Contacts
-                    </Text>
-                    <Divider color={colors.borderColor} mb={rem(8)} />
-                    {contacts.map((contact) => {
-                      return (
-                        <>
-                          <Flex direction={"column"} my={"md"}>
-                            <Text {...bodyTextStyle}>{contact?.name}</Text>
-                            <Text {...bodyTextStyle}>{contact?.designation}</Text>
-                            <Anchor
-                              {...bodyTextStyle}
-                              href={contact?.email}
-                              target={"_blank"}
-                              c={"blue"}
-                            >
-                              {contact?.email}
-                            </Anchor>
-                            <Text {...bodyTextStyle}>
-                              {contact?.phone}, {contact?.mobile}
-                            </Text>
-                          </Flex>
-                          <Divider />
-                        </>
-                      );
-                    })}
-                  </Card>
-                </ScrollArea>
-              </Grid.Col>
-            </Grid>
-
-            <ScrollArea type="scroll" h={"48vh"}>
-              <Card shadow="sm" mb={"xs"} px={"sm"} py={"xs"} radius={"md"}>
+      <>
+        <Grid>
+          <Grid.Col span={3}>
+            <Card shadow="sm" mb={"xs"} px={"sm"} py={"xs"} radius={"md"}>
+              <Center>
                 <Text {...titleTextStyle} size={"lg"}>
-                  Meetings / Follow Up:
+                  Leads/Projects List
                 </Text>
-                <Divider color={colors.borderColor} mb={rem(8)} />
-                {followUps.map((followUp) => {
-                  const value = Intl.NumberFormat("en-US", {
-                    style: "currency",
-                    currency: followUp.expenses.amount.currency,
-                    maximumFractionDigits: 2,
-                    minimumFractionDigits: 2,
-                  }).format(followUp.expenses.amount.amount);
+              </Center>
+            </Card>
+            <ScrollArea type="scroll" h={"96vh"}>
+              {projects.map((project) => {
+                return (
+                  <Card
+                    key={project.id}
+                    shadow="sm"
+                    mb={"xs"}
+                    px={"sm"}
+                    py={"xs"}
+                    radius={"md"}
+                    onClick={() => handleSelectProject(project.id)}
+                  >
+                    <Flex direction={"row"} justify={"space-between"} align={"center"}>
+                      <Flex direction={"column"}>
+                        <Text {...titleTextStyle}>{project.name}</Text>
+                        <Badge variant="filled" color={projectStatusColors[project.statusId]}>
+                          {project.statusName}
+                        </Badge>
+                      </Flex>
+                      {selectedProject.id === project.id && (
+                        <IconChevronRight size={24} color={colors.titleText} />
+                      )}
+                    </Flex>
+                  </Card>
+                );
+              })}
+            </ScrollArea>
+          </Grid.Col>
 
-                  return (
-                    <Flex direction={"column"} my={"md"}>
+          <Grid.Col span={9}>
+            <Stack spacing={"xs"}>
+              <Grid>
+                <Grid.Col span={8}>
+                  <Card shadow="sm" mb={"xs"} px={"sm"} py={"xs"} radius={"md"} h={"48vh"}>
+                    <Stack spacing={"xs"}>
+                      <Flex direction={"row"} align={"center"}>
+                        <Text {...titleTextStyle} size={"lg"}>
+                          Project Details
+                        </Text>
+                        <Badge
+                          ml={"lg"}
+                          variant="filled"
+                          color={projectStatusColors[selectedProject.statusId]}
+                        >
+                          {selectedProject.statusName}
+                        </Badge>
+                      </Flex>
+                      <Divider color={colors.borderColor} mb={rem(8)} />
+                      <Flex direction={"row"} align={"center"} columnGap={"sm"}>
+                        <Text {...titleTextStyle}>Name: </Text>
+                        <Text {...bodyTextStyle}>{selectedProject.name}</Text>
+                      </Flex>
                       <Flex direction={"row"} align={"center"} justify={"space-between"}>
                         <Flex direction={"row"} align={"center"} columnGap={"sm"}>
-                          <Text {...titleTextStyle}>Date/Time: </Text>
+                          <Text {...titleTextStyle}>Type: </Text>
+                          <Text {...bodyTextStyle}>{selectedProject.projectType}</Text>
+                        </Flex>
+                        <Flex direction={"row"} align={"center"} columnGap={"sm"}>
+                          <Text {...titleTextStyle}>Salesman: </Text>
                           <Text {...bodyTextStyle}>
-                            {" "}
-                            {DateTime.fromISO(followUp.meetingDate).toFormat(
-                              DAY_MM_DD_YYYY_HH_MM_SS_A
+                            {selectedProject.salesPerson?.firstName}{" "}
+                            {selectedProject.salesPerson?.lastName}
+                          </Text>
+                        </Flex>
+                      </Flex>
+                      <Flex direction={"row"} align={"center"} justify={"space-between"}>
+                        <Flex direction={"row"} align={"center"} columnGap={"sm"}>
+                          <Text {...titleTextStyle}>Value: </Text>
+                          <Text {...bodyTextStyle}>
+                            {Intl.NumberFormat("en-US", {
+                              style: "currency",
+                              currency: selectedProject.value.currency,
+                              maximumFractionDigits: 2,
+                              minimumFractionDigits: 2,
+                            }).format(selectedProject.value.amount)}
+                          </Text>
+                        </Flex>
+                        <Flex direction={"row"} align={"center"} columnGap={"sm"}>
+                          <Text {...titleTextStyle}>Contract: </Text>
+                          <Text {...bodyTextStyle}>
+                            {DateTime.fromISO(selectedProject.contractDate).toFormat(
+                              DAY_MM_DD_YYYY
                             )}
                           </Text>
                         </Flex>
-
+                      </Flex>
+                      <Flex direction={"row"} align={"center"} justify={"space-between"}>
                         <Flex direction={"row"} align={"center"} columnGap={"sm"}>
-                          <Text {...titleTextStyle}>Location:</Text>
-                          <Text {...bodyTextStyle}>{followUp.meetingPlace}</Text>
+                          <Text {...titleTextStyle}>Quotation: </Text>
+                          <Text {...bodyTextStyle}>{selectedProject.quotation}</Text>
                         </Flex>
-
                         <Flex direction={"row"} align={"center"} columnGap={"sm"}>
-                          <Text {...titleTextStyle}>Meeting With:</Text>
-                          <Text {...bodyTextStyle}>{followUp.contactPerson?.name}</Text>
+                          <Text {...titleTextStyle}>Delivery: </Text>
+                          <Text {...bodyTextStyle}>
+                            {" "}
+                            {DateTime.fromISO(selectedProject.deliveryDate).toFormat(
+                              DAY_MM_DD_YYYY
+                            )}
+                          </Text>
                         </Flex>
                       </Flex>
+                      <Flex direction={"row"} align={"center"} columnGap={"sm"}>
+                        <Text {...titleTextStyle}>Description: </Text>
+                        <Text {...bodyTextStyle}>{selectedProject.description}</Text>
+                      </Flex>
+                    </Stack>
+                  </Card>
+                </Grid.Col>
 
-                      <Flex direction={"row"} align={"center"} justify={"space-between"}>
-                        <Flex direction={"row"} align={"flex-start"} columnGap={"sm"}>
-                          <Text {...titleTextStyle}>Agenda:</Text>
-                          <Text {...bodyTextStyle}>{followUp.meetingAgenda}</Text>
-                        </Flex>
+                <Grid.Col span={4}>
+                  <ScrollArea type="scroll" h={"48vh"}>
+                    <Card shadow="sm" mb={"xs"} px={"sm"} py={"xs"} radius={"md"}>
+                      <Flex direction={"row"} justify={"space-between"} align={"center"}>
+                        <Text {...titleTextStyle} size={"lg"}>
+                          Contacts
+                        </Text>
+                        <ActionIcon
+                          variant="filled"
+                          size={"sm"}
+                          color={"dark"}
+                          onClick={() => setAddContactModalOpened(true)}
+                        >
+                          <IconPlus size={16} stroke={1.3} color={colors.white} />
+                        </ActionIcon>
                       </Flex>
+                      <Divider color={colors.borderColor} mb={rem(8)} />
+                      {contacts.map((contact) => {
+                        return (
+                          <>
+                            <Flex direction={"column"} my={"md"}>
+                              <Text {...bodyTextStyle}>{contact?.name}</Text>
+                              <Text {...bodyTextStyle}>{contact?.designation}</Text>
+                              <Anchor
+                                {...bodyTextStyle}
+                                href={contact?.email}
+                                target={"_blank"}
+                                c={"blue"}
+                              >
+                                {contact?.email}
+                              </Anchor>
+                              <Text {...bodyTextStyle}>
+                                {contact?.phone}, {contact?.mobile}
+                              </Text>
+                            </Flex>
+                            <Divider />
+                          </>
+                        );
+                      })}
+                    </Card>
+                  </ScrollArea>
+                </Grid.Col>
+              </Grid>
 
-                      <Flex direction={"row"} align={"center"} justify={"space-between"}>
-                        <Flex direction={"row"} align={"flex-start"} columnGap={"sm"}>
-                          <Text {...titleTextStyle}>Summary:</Text>
-                          <Text {...bodyTextStyle}>{followUp.meetingSummary}</Text>
-                        </Flex>
-                      </Flex>
+              <ScrollArea type="scroll" h={"48vh"}>
+                <Card shadow="sm" mb={"xs"} px={"sm"} py={"xs"} radius={"md"}>
+                  <Flex direction={"row"} justify={"space-between"} align={"center"}>
+                    <Text {...titleTextStyle} size={"lg"}>
+                      Meetings / Follow Up:
+                    </Text>
+                    <ActionIcon
+                      variant="filled"
+                      size={"sm"}
+                      color={"dark"}
+                      onClick={() => setAddFollowUpModalOpened(true)}
+                    >
+                      <IconPlus size={16} stroke={1.3} color={colors.white} />
+                    </ActionIcon>
+                  </Flex>
+                  <Divider color={colors.borderColor} mb={rem(8)} />
+                  {followUps.map((followUp) => {
+                    const value = Intl.NumberFormat("en-US", {
+                      style: "currency",
+                      currency: followUp.expenses.amount.currency,
+                      maximumFractionDigits: 2,
+                      minimumFractionDigits: 2,
+                    }).format(followUp.expenses.amount.amount);
 
-                      <Flex direction={"row"} align={"center"} justify={"space-between"}>
-                        <Flex direction={"row"} align={"flex-start"} columnGap={"sm"}>
-                          <Text {...titleTextStyle}>Total Expense:</Text>
-                          <Text {...bodyTextStyle}>{value}</Text>
+                    return (
+                      <Flex direction={"column"} my={"md"}>
+                        <Flex direction={"row"} align={"center"} justify={"space-between"}>
+                          <Flex direction={"row"} align={"center"} columnGap={"sm"}>
+                            <Text {...titleTextStyle}>Date/Time: </Text>
+                            <Text {...bodyTextStyle}>
+                              {" "}
+                              {DateTime.fromISO(followUp.meetingDate).toFormat(
+                                DAY_MM_DD_YYYY_HH_MM_SS_A
+                              )}
+                            </Text>
+                          </Flex>
+
+                          <Flex direction={"row"} align={"center"} columnGap={"sm"}>
+                            <Text {...titleTextStyle}>Location:</Text>
+                            <Text {...bodyTextStyle}>{followUp.meetingPlace}</Text>
+                          </Flex>
+
+                          <Flex direction={"row"} align={"center"} columnGap={"sm"}>
+                            <Text {...titleTextStyle}>Meeting With:</Text>
+                            <Text {...bodyTextStyle}>{followUp.contactPerson?.name}</Text>
+                          </Flex>
+                        </Flex>
+
+                        <Flex direction={"row"} align={"center"} justify={"space-between"}>
+                          <Flex direction={"row"} align={"flex-start"} columnGap={"sm"}>
+                            <Text {...titleTextStyle}>Agenda:</Text>
+                            <Text {...bodyTextStyle}>{followUp.meetingAgenda}</Text>
+                          </Flex>
+                        </Flex>
+
+                        <Flex direction={"row"} align={"center"} justify={"space-between"}>
+                          <Flex direction={"row"} align={"flex-start"} columnGap={"sm"}>
+                            <Text {...titleTextStyle}>Summary:</Text>
+                            <Text {...bodyTextStyle}>{followUp.meetingSummary}</Text>
+                          </Flex>
+                        </Flex>
+
+                        <Flex direction={"row"} align={"center"} justify={"space-between"}>
+                          <Flex direction={"row"} align={"flex-start"} columnGap={"sm"}>
+                            <Text {...titleTextStyle}>Total Expense:</Text>
+                            <Text {...bodyTextStyle}>{value}</Text>
+                          </Flex>
                         </Flex>
                       </Flex>
-                    </Flex>
-                  );
-                })}
-              </Card>
-            </ScrollArea>
-          </Stack>
-        </Grid.Col>
-      </Grid>
+                    );
+                  })}
+                </Card>
+              </ScrollArea>
+            </Stack>
+          </Grid.Col>
+        </Grid>
+        <_AddContactModal
+          title="Add Contact"
+          opened={addContactModalOpened}
+          companyId={company.id}
+          onClose={() => setAddContactModalOpened(false)}
+        />
+        <_AddFollowUpModal
+          title="Add Follow Up"
+          opened={addFollowUpModalOpened}
+          projectId={selectedProject.id}
+          onClose={() => setAddFollowUpModalOpened(false)}
+        />
+      </>
     );
   }
 };

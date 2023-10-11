@@ -40,11 +40,18 @@ interface OwnProps {
   onClose: () => void;
   title: string;
   companyId?: number;
+  projectId?: number;
 }
 
 interface IFollowUpForm extends Omit<IFollowUp, "id"> {}
 
-const _AddFollowUpModal: React.FC<OwnProps> = ({ title, opened, onClose }) => {
+const _AddFollowUpModal: React.FC<OwnProps> = ({
+  title,
+  opened,
+  onClose,
+  projectId,
+  companyId,
+}) => {
   const { theme } = useStyles();
   const { classes: gclasses } = useGStyles();
   const {
@@ -55,6 +62,7 @@ const _AddFollowUpModal: React.FC<OwnProps> = ({ title, opened, onClose }) => {
   const { projects: projectsList } = useAppSelector(selectRecordsForDropdown);
   const contacts = useAppSelector(selectCompanyContact);
   const [contactList, setContactList] = React.useState<IDropDownList>([]);
+  const [companyProjectList, setCompanyProjectsList] = React.useState<IDropDownList>([]);
 
   const form = useFormik<IFollowUpForm>({
     initialValues: {
@@ -132,6 +140,23 @@ const _AddFollowUpModal: React.FC<OwnProps> = ({ title, opened, onClose }) => {
     setContactList(compContacts);
   }, [contacts.data, form.values.projectId, projects]);
 
+  React.useEffect(() => {
+    if (!companyId) return;
+    const project_s = projects
+      .filter((project) => project.companyId === companyId)
+      .map((project) => ({
+        label: project.name,
+        value: project.id.toString(),
+      }));
+    setCompanyProjectsList(project_s);
+  }, [companyId, projects]);
+
+  React.useEffect(() => {
+    if (!projectId) return;
+    form.setValues((prev) => ({ ...prev, projectId: projectId }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [projectId]);
+
   return (
     <Modal
       // size="xl"
@@ -172,7 +197,7 @@ const _AddFollowUpModal: React.FC<OwnProps> = ({ title, opened, onClose }) => {
                     if (!value) return;
                     form.setValues((prev) => ({ ...prev, projectId: parseInt(value) }));
                   }}
-                  data={projectsList}
+                  data={companyId ? companyProjectList : projectsList}
                 />
                 <Select
                   required
@@ -194,6 +219,7 @@ const _AddFollowUpModal: React.FC<OwnProps> = ({ title, opened, onClose }) => {
                 <DateTimePicker
                   required
                   withAsterisk={false}
+                  dropdownType="modal"
                   label="Meeting Date/Time"
                   valueFormat="YYYY-MM-DD hh:mm A"
                   clearable={false}

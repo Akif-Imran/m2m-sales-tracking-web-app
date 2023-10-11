@@ -405,12 +405,14 @@ const Dashboard: React.FC<OwnProps> = () => {
 
           <Grid.Col md={6} lg={6} xl={6}>
             <Card p="xs" shadow="sm" className={classes.card} my={4} px={"xs"} radius={"md"}>
-              <Text fw={"bold"} fz={rem(60)} color={colors.titleText} mt={-16}>
-                {todayActivitiesRows.length}
-              </Text>
-              <Text fz="md" className={classes.label} color={colors.titleText} mt={-10} mb={2}>
-                Today's Activities
-              </Text>
+              <div className={classes.grayContainer}>
+                <Text fw={"bold"} fz={rem(60)} color={colors.titleText} mt={-16}>
+                  {todayActivitiesRows.length}
+                </Text>
+                <Text fz="md" className={classes.label} color={colors.titleText} mt={-10} mb={2}>
+                  Today's Activities
+                </Text>
+              </div>
               <ScrollArea h={rem(272)}>
                 <Table>
                   <thead>
@@ -428,12 +430,14 @@ const Dashboard: React.FC<OwnProps> = () => {
 
           <Grid.Col md={6} lg={6} xl={6}>
             <Card p="xs" shadow="sm" className={classes.card} my={4} px={"xs"} radius={"md"}>
-              <Text fw={"bold"} fz={rem(60)} color={colors.titleText} mt={-16}>
-                {projectsInProcess.length}
-              </Text>
-              <Text fz="md" className={classes.label} color={colors.titleText} mt={-10} mb={2}>
-                Projects Under Development
-              </Text>
+              <div className={classes.grayContainer}>
+                <Text fw={"bold"} fz={rem(60)} color={colors.titleText} mt={-16}>
+                  {projectsInProcess.length}
+                </Text>
+                <Text fz="md" className={classes.label} color={colors.titleText} mt={-10} mb={2}>
+                  Projects Under Development
+                </Text>
+              </div>
               <ScrollArea h={rem(272)}>
                 <Table>
                   <thead>
@@ -451,12 +455,14 @@ const Dashboard: React.FC<OwnProps> = () => {
 
           <Grid.Col md={6} lg={6} xl={6}>
             <Card p="xs" shadow="sm" className={classes.card} my={4} px={"xs"} radius={"md"}>
-              <Text fw={"bold"} fz={rem(60)} color={colors.titleText} mt={-16}>
-                {mostFollowedUpLeadRows.length}
-              </Text>
-              <Text fz="md" className={classes.label} color={colors.titleText} mt={-10} mb={2}>
-                Most followed up leads with expenses
-              </Text>
+              <div className={classes.grayContainer}>
+                <Text fw={"bold"} fz={rem(60)} color={colors.titleText} mt={-16}>
+                  {mostFollowedUpLeadRows.length}
+                </Text>
+                <Text fz="md" className={classes.label} color={colors.titleText} mt={-10} mb={2}>
+                  Most followed up leads with expenses
+                </Text>
+              </div>
               <ScrollArea h={rem(272)}>
                 <Table>
                   <thead>
@@ -473,30 +479,24 @@ const Dashboard: React.FC<OwnProps> = () => {
           </Grid.Col>
 
           <Grid.Col md={6} lg={6} xl={6}>
-            <Card
-              p="xs"
-              pt={"lg"}
-              shadow="sm"
-              className={classes.card}
-              my={4}
-              px={"xs"}
-              radius={"md"}
-            >
-              <Text fz="md" className={classes.label} color={colors.titleText} mb={2}>
-                Monthly Project Chart ({value === "by value" ? "By Value" : "By Project"})
-              </Text>
-              <Flex direction={"row"} gap={"xs"} align={"center"} justify={"flex-end"}>
-                <Button variant="filled" size="xs" onClick={() => toggle()}>
-                  {value.toUpperCase()}
-                </Button>
-                <Select
-                  w={rem(128)}
-                  size="xs"
-                  data={[{ label: "2023", value: "2023" }]}
-                  defaultValue={"2023"}
-                  withinPortal
-                />
-              </Flex>
+            <Card p="xs" shadow="sm" className={classes.card} my={4} px={"xs"} radius={"md"}>
+              <div className={classes.grayContainer}>
+                <Text fz="md" className={classes.label} color={colors.titleText} mb={2} pt={"sm"}>
+                  Monthly Project Chart ({value === "by value" ? "By Value" : "By Project"})
+                </Text>
+                <Flex direction={"row"} gap={"xs"} align={"center"} justify={"flex-end"}>
+                  <Button variant="filled" size="xs" onClick={() => toggle()}>
+                    {value.toUpperCase()}
+                  </Button>
+                  <Select
+                    w={rem(128)}
+                    size="xs"
+                    data={[{ label: "2023", value: "2023" }]}
+                    defaultValue={"2023"}
+                    withinPortal
+                  />
+                </Flex>
+              </div>
               <Chart
                 chartType="ColumnChart"
                 data={
@@ -509,36 +509,42 @@ const Dashboard: React.FC<OwnProps> = () => {
 
           <Grid.Col md={6} lg={6} xl={6}>
             <Card p="xs" shadow="sm" className={classes.card} my={4} radius={"md"}>
-              <Text fw={"bold"} fz={rem(60)} color={colors.titleText}>
-                {projectCounts?.total || 0}
-              </Text>
-              <Text fz="md" className={classes.label} color={colors.titleText} mt={-10} mb={2}>
-                Projects
-              </Text>
+              <div className={classes.grayContainer}>
+                <Text fw={"bold"} fz={rem(60)} color={colors.titleText}>
+                  {projectCounts?.total || 0}
+                </Text>
+                <Text fz="md" className={classes.label} color={colors.titleText} mt={-10} mb={2}>
+                  Projects
+                </Text>
+              </div>
               <Chart chartType="PieChart" data={projectCounts?.data} options={options} />
             </Card>
           </Grid.Col>
 
           <Grid.Col md={6} lg={6} xl={6}>
             <Card p="xs" shadow="sm" className={classes.card} my={4} px={"xs"} radius={"md"}>
-              <Text fw={"bold"} fz={rem(60)} color={colors.titleText}>
-                {projectValueCounts?.total || 0}
-              </Text>
-              <Text fz="md" className={classes.label} color={colors.titleText} mt={-10} mb={2}>
-                Value
-              </Text>
+              <div className={classes.grayContainer}>
+                <Text fw={"bold"} fz={rem(60)} color={colors.titleText}>
+                  {projectValueCounts?.total || 0}
+                </Text>
+                <Text fz="md" className={classes.label} color={colors.titleText} mt={-10} mb={2}>
+                  Value
+                </Text>
+              </div>
               <Chart chartType="PieChart" data={projectValueCounts?.data} options={options} />
             </Card>
           </Grid.Col>
 
           <Grid.Col md={6} lg={6} xl={6}>
             <Card p="xs" shadow="sm" className={classes.card} my={4} px={"xs"} radius={"md"}>
-              <Text fw={"bold"} fz={rem(60)} color={colors.titleText} mt={-16}>
-                {projectOverDue.length}
-              </Text>
-              <Text fz="md" className={classes.label} color={colors.titleText} mt={-10} mb={2}>
-                Projects behind timeline
-              </Text>
+              <div className={classes.grayContainer}>
+                <Text fw={"bold"} fz={rem(60)} color={colors.titleText} mt={-16}>
+                  {projectOverDue.length}
+                </Text>
+                <Text fz="md" className={classes.label} color={colors.titleText} mt={-10} mb={2}>
+                  Projects behind timeline
+                </Text>
+              </div>
               <ScrollArea h={rem(272)}>
                 <Table>
                   <thead>
@@ -556,19 +562,21 @@ const Dashboard: React.FC<OwnProps> = () => {
 
           <Grid.Col md={6} lg={6} xl={6}>
             <Card p="xs" shadow="sm" className={classes.card} my={4} px={"xs"} radius={"md"}>
-              <Text fw={"bold"} fz={rem(60)} color={colors.titleText} mt={-16}>
-                {pendingTasks.length}
-              </Text>
-              <Text
-                fz="md"
-                className={classes.label}
-                color={colors.titleText}
-                mt={-10}
-                mb={2}
-                ml={rem(8)}
-              >
-                Pending Tasks
-              </Text>
+              <div className={classes.grayContainer}>
+                <Text fw={"bold"} fz={rem(60)} color={colors.titleText} mt={-16}>
+                  {pendingTasks.length}
+                </Text>
+                <Text
+                  fz="md"
+                  className={classes.label}
+                  color={colors.titleText}
+                  mt={-10}
+                  mb={2}
+                  ml={rem(8)}
+                >
+                  Pending Tasks
+                </Text>
+              </div>
               <ScrollArea h={rem(272)}>
                 <Table>
                   <thead>
@@ -587,19 +595,21 @@ const Dashboard: React.FC<OwnProps> = () => {
 
           <Grid.Col md={6} lg={6} xl={6}>
             <Card p="xs" shadow="sm" className={classes.card} my={4} px={"xs"} radius={"md"}>
-              <Text fw={"bold"} fz={rem(60)} color={colors.titleText} mt={-16}>
-                {upcomingTaskRows.length}
-              </Text>
-              <Text
-                fz="md"
-                className={classes.label}
-                color={colors.titleText}
-                mt={-10}
-                mb={2}
-                ml={rem(8)}
-              >
-                Upcoming Tasks (Next 2 Days)
-              </Text>
+              <div className={classes.grayContainer}>
+                <Text fw={"bold"} fz={rem(60)} color={colors.titleText} mt={-16}>
+                  {upcomingTaskRows.length}
+                </Text>
+                <Text
+                  fz="md"
+                  className={classes.label}
+                  color={colors.titleText}
+                  mt={-10}
+                  mb={2}
+                  ml={rem(8)}
+                >
+                  Upcoming Tasks (Next 2 Days)
+                </Text>
+              </div>
               <ScrollArea h={rem(272)}>
                 <Table>
                   <thead>
@@ -617,19 +627,21 @@ const Dashboard: React.FC<OwnProps> = () => {
 
           <Grid.Col md={6} lg={6} xl={6}>
             <Card p="xs" shadow="sm" className={classes.card} my={4} px={"xs"} radius={"md"}>
-              <Text fw={"bold"} fz={rem(60)} color={colors.titleText} mt={-16}>
-                {projectsWithMostClaims.length}
-              </Text>
-              <Text
-                fz="md"
-                className={classes.label}
-                color={colors.titleText}
-                mt={-10}
-                mb={2}
-                ml={rem(8)}
-              >
-                Projects with most claims
-              </Text>
+              <div className={classes.grayContainer}>
+                <Text fw={"bold"} fz={rem(60)} color={colors.titleText} mt={-16}>
+                  {projectsWithMostClaims.length}
+                </Text>
+                <Text
+                  fz="md"
+                  className={classes.label}
+                  color={colors.titleText}
+                  mt={-10}
+                  mb={2}
+                  ml={rem(8)}
+                >
+                  Projects with most claims
+                </Text>
+              </div>
               <ScrollArea h={rem(272)}>
                 <Table>
                   <thead>

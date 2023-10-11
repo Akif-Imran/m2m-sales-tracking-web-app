@@ -16,3 +16,6 @@ root {
 ::-webkit-scrollbar-track {
   background-color: transparent;
 }
+th {
+  vertical-align: top;
+}

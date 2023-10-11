@@ -20,6 +20,7 @@ import {
   IconDots,
   IconFiles,
   IconShoppingBag,
+  IconTrash,
   IconUserPlus,
 } from "@tabler/icons-react";
 import { colors, theme } from "@theme";
@@ -33,6 +34,7 @@ interface OwnProps {
   openFollowUp: () => void;
   openExpense: () => void;
   openPurchaseRequest: () => void;
+  handleDelete: () => void;
 }
 
 const _CompanyCard: React.FC<OwnProps> = ({
@@ -42,6 +44,7 @@ const _CompanyCard: React.FC<OwnProps> = ({
   openFollowUp,
   openExpense,
   openPurchaseRequest,
+  handleDelete,
 }) => {
   const { cx, classes } = useStyles();
   const navigate = useNavigate();
@@ -69,7 +72,6 @@ const _CompanyCard: React.FC<OwnProps> = ({
   const menuStyles = {
     itemLabel: {
       fontSize: theme.fontSize.sm,
-      color: colors.titleText,
     },
   };
   const menuIconStyle = {
@@ -169,7 +171,7 @@ const _CompanyCard: React.FC<OwnProps> = ({
                   </Menu.Item>
                   <Menu.Item
                     c={colors.titleText}
-                    icon={<IconCash {...menuIconStyle} />}
+                    icon={<IconCash size={menuIconStyle.size} />}
                     onClick={(event) => {
                       event.stopPropagation();
                       openExpense();
@@ -187,6 +189,16 @@ const _CompanyCard: React.FC<OwnProps> = ({
                     }}
                   >
                     Reports
+                  </Menu.Item>
+                  <Menu.Item
+                    color="red"
+                    icon={<IconTrash size={menuIconStyle.size} />}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      handleDelete();
+                    }}
+                  >
+                    Delete
                   </Menu.Item>
                 </Menu.Dropdown>
               </Menu>

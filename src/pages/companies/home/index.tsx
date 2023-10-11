@@ -25,7 +25,6 @@ import {
   IconSearch,
   IconTable,
   IconTrash,
-  IconUserPlus,
 } from "@tabler/icons-react";
 import {
   selectCompaniesWithContact,
@@ -51,7 +50,8 @@ const Company: React.FC<OwnProps> = () => {
   // const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { classes: gclasses, theme } = useGStyles();
-  const [viewMode, toggle] = useToggle(["cards", "two-column", "list"]);
+  // const [viewMode, toggle] = useToggle(["cards", "two-column", "list"]);
+  const [viewMode, toggle] = useToggle(["cards", "list"]);
   const [searchQuery, setSearchQuery] = React.useState("");
   const companies = useAppSelector(selectCompaniesWithContact);
   const { data: contacts } = useAppSelector(selectCompanyContact);
@@ -112,16 +112,16 @@ const Company: React.FC<OwnProps> = () => {
   const handleDelete = (id: number) => {
     openDeleteModalHelper({
       theme: theme,
-      title: `Delete Service`,
+      title: `Delete Company`,
       loading: false,
       description: (
         <Text fw={"normal"} fs={"normal"} fz={"sm"} color={colors.titleText}>
-          Are you sure you want to delete this Service? This action is destructive and you will have
+          Are you sure you want to delete this Company? This action is destructive and you will have
           to contact support to restore data.
         </Text>
       ),
       cancelLabel: "Cancel",
-      confirmLabel: "Delete Service",
+      confirmLabel: "Delete Company",
       onConfirm: () => {
         dispatch(deleteCompany(id));
         notify("Delete Company", "Company deleted successfully!", "success");
@@ -177,6 +177,7 @@ const Company: React.FC<OwnProps> = () => {
                   openFollowUp={() => handleOpenFollowUp(company.id)}
                   openExpense={() => handleOpenExpense(company.id)}
                   openPurchaseRequest={() => handleOpenPurchaseRequest(company.id)}
+                  handleDelete={() => handleDelete(company.id)}
                 />
               </Grid.Col>
             );
@@ -225,6 +226,7 @@ const Company: React.FC<OwnProps> = () => {
                 openFollowUp={() => handleOpenFollowUp(company.id)}
                 openExpense={() => handleOpenExpense(company.id)}
                 openPurchaseRequest={() => handleOpenPurchaseRequest(company.id)}
+                handleDelete={() => handleDelete(company.id)}
               />
             );
           }
@@ -309,13 +311,13 @@ const Company: React.FC<OwnProps> = () => {
         >
           Company
         </Button>
-        <Button
+        {/* <Button
           variant="filled"
           rightIcon={<IconUserPlus size={16} />}
           onClick={() => setAddContactModalOpened(true)}
         >
           Contact
-        </Button>
+        </Button> */}
       </Flex>
       {content}
       <_AddCompanyModal

@@ -51,7 +51,8 @@ const Company: React.FC<OwnProps> = () => {
   // const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { classes: gclasses, theme } = useGStyles();
-  const [viewMode, toggle] = useToggle(["cards", "two-column", "list"]);
+  // const [viewMode, toggle] = useToggle(["cards", "two-column", "list"]);
+  const [viewMode, toggle] = useToggle(["cards", "list"]);
   const [searchQuery, setSearchQuery] = React.useState("");
   const companies = useAppSelector(selectCompaniesWithContact);
   const { data: contacts } = useAppSelector(selectCompanyContact);

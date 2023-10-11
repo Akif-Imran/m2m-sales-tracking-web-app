@@ -112,16 +112,16 @@ const Company: React.FC<OwnProps> = () => {
   const handleDelete = (id: number) => {
     openDeleteModalHelper({
       theme: theme,
-      title: `Delete Service`,
+      title: `Delete Company`,
       loading: false,
       description: (
         <Text fw={"normal"} fs={"normal"} fz={"sm"} color={colors.titleText}>
-          Are you sure you want to delete this Service? This action is destructive and you will have
+          Are you sure you want to delete this Company? This action is destructive and you will have
           to contact support to restore data.
         </Text>
       ),
       cancelLabel: "Cancel",
-      confirmLabel: "Delete Service",
+      confirmLabel: "Delete Company",
       onConfirm: () => {
         dispatch(deleteCompany(id));
         notify("Delete Company", "Company deleted successfully!", "success");
@@ -177,6 +177,7 @@ const Company: React.FC<OwnProps> = () => {
                   openFollowUp={() => handleOpenFollowUp(company.id)}
                   openExpense={() => handleOpenExpense(company.id)}
                   openPurchaseRequest={() => handleOpenPurchaseRequest(company.id)}
+                  handleDelete={() => handleDelete(company.id)}
                 />
               </Grid.Col>
             );
@@ -225,6 +226,7 @@ const Company: React.FC<OwnProps> = () => {
                 openFollowUp={() => handleOpenFollowUp(company.id)}
                 openExpense={() => handleOpenExpense(company.id)}
                 openPurchaseRequest={() => handleOpenPurchaseRequest(company.id)}
+                handleDelete={() => handleDelete(company.id)}
               />
             );
           }

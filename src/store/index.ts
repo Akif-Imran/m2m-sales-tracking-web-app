@@ -82,15 +82,18 @@ export const selectTasksCombined = createSelector(
   selectProjects,
   selectUsers,
   selectTasks,
-  (projects, users, tasks) => {
+  selectCompanies,
+  (projects, users, tasks, companies) => {
     return {
       tasks: tasks.data.map((task) => {
         const project = projects.data.find((project) => project.id === task.projectId);
         const user = users.data.find((user) => user.id === task.assigneeId);
+        const company = companies.data.find((company) => company.id === task.companyId);
         return {
           ...task,
           project,
           assignee: user,
+          company,
         };
       }),
     };

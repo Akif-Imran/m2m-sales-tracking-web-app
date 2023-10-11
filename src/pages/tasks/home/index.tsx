@@ -263,8 +263,7 @@ const Tasks: React.FC<OwnProps> = () => {
                 {task.statusName}
               </Badge>
             </td>
-            {/* <td>{task.company?.name}</td> */}
-            <td>company name</td>
+            <td>{task.company?.name || "N/A"}</td>
             <td>{task.project?.name || "N/A"}</td>
             <td>{task.title}</td>
             <td>{task.description}</td>

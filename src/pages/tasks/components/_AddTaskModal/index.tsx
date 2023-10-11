@@ -5,7 +5,12 @@ import { Button, Group, Modal, Select, Stack, TextInput, Textarea, rem } from "@
 import { useFormik } from "formik";
 import { IconCalendar } from "@tabler/icons-react";
 import { notify } from "@utility";
-import { selectRecordsForDropdown, useAppDispatch, useAppSelector } from "@store";
+import {
+  selectProjectWithRecords,
+  selectRecordsForDropdown,
+  useAppDispatch,
+  useAppSelector,
+} from "@store";
 import { addTask } from "@slices";
 import { DateTime } from "luxon";
 import { DateTimePicker } from "@mantine/dates";
@@ -22,14 +27,16 @@ const _AddTaskModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
   const { theme } = useStyles();
   const dispatch = useAppDispatch();
   const [plannedEndDate, setPlannedEndDate] = React.useState(new Date());
-  const { taskStatus, projects, salesPersons, projectManagers } =
-    useAppSelector(selectRecordsForDropdown);
+  const allProjects = useAppSelector(selectProjectWithRecords);
+  const { companies, salesPersons, projectManagers } = useAppSelector(selectRecordsForDropdown);
+  const [projectsList, setProjectList] = React.useState<IDropDownList>([]);
 
   const form = useFormik<ITaskForm>({
     initialValues: {
       statusId: 1,
       statusName: "Pending",
       projectId: 0,
+      companyId: 0,
       title: "",
       description: "",
       assigneeId: 0,
@@ -67,15 +74,20 @@ const _AddTaskModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
     }));
   };
 
-  const handleOnChangeStatus = (value: string | null) => {
+  const handleOnChangeCompany = (value: string | null) => {
     if (!value) return;
-    const typeName = taskStatus.find((status) => status.value === value)?.label;
-    if (!typeName) return;
+    const parsed = parseInt(value);
     form.setValues((prev) => ({
       ...prev,
-      statusId: parseInt(value),
-      statusName: typeName,
+      companyId: parsed,
     }));
+    const project_s = allProjects
+      .filter((project) => project.companyId === parsed)
+      .map((project) => ({
+        value: project.id.toString(),
+        label: project.name,
+      }));
+    setProjectList(project_s);
   };
 
   return (
@@ -92,16 +104,19 @@ const _AddTaskModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
       <Stack>
         <Group grow align="flex-start">
           <Select
+            withinPortal
             required
             withAsterisk={false}
             searchable
-            nothingFound="No Users"
-            label="Assign to"
-            value={form.values.assigneeId.toString()}
-            onChange={handleOnChangeAssignee}
-            data={[...salesPersons, ...projectManagers]}
+            nothingFound="No Status"
+            label="Company"
+            value={form.values.companyId.toString()}
+            onChange={handleOnChangeCompany}
+            data={companies}
           />
+
           <Select
+            withinPortal
             required
             withAsterisk={false}
             searchable
@@ -109,7 +124,7 @@ const _AddTaskModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
             label="Project"
             value={form.values.projectId.toString()}
             onChange={handleOnChangeProject}
-            data={projects}
+            data={projectsList}
           />
         </Group>
         <TextInput
@@ -134,16 +149,18 @@ const _AddTaskModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
         />
         <Group grow align="flex-start">
           <Select
+            withinPortal
             required
             withAsterisk={false}
             searchable
-            nothingFound="No Status"
-            label="Status"
-            value={form.values.statusId.toString()}
-            onChange={handleOnChangeStatus}
-            data={taskStatus}
+            nothingFound="No Users"
+            label="Assign to"
+            value={form.values.assigneeId.toString()}
+            onChange={handleOnChangeAssignee}
+            data={[...salesPersons, ...projectManagers]}
           />
           <DateTimePicker
+            dropdownType="modal"
             required
             withAsterisk={false}
             name="plannedEndDate"

@@ -187,7 +187,7 @@ const Tasks: React.FC<OwnProps> = () => {
       result = result.filter((task) => task.statusId === statusId);
     }
     if (companyId) {
-      // result = result;
+      result = result.filter((task) => task.companyId === companyId);
     }
     if (projectId) {
       result = result.filter((task) => task.projectId === projectId);
@@ -217,6 +217,18 @@ const Tasks: React.FC<OwnProps> = () => {
       return {
         ...prev,
         project: parsed,
+      };
+    });
+  };
+
+  const handleOnChangeCompanyFilter = (value: string | null) => {
+    if (!value) return;
+    const parsed = parseInt(value);
+    setSorting((prev) => {
+      handleSort(prev.status, parsed, prev.project, prev.assignedTo);
+      return {
+        ...prev,
+        company: parsed,
       };
     });
   };
@@ -337,7 +349,20 @@ const Tasks: React.FC<OwnProps> = () => {
                     onChange={handleOnChangeStatusFilter}
                   />
                 </th>
-                <th>Company Name</th>
+                <th>
+                  <Select
+                    maw={rem(256)}
+                    value={sorting.company.toString()}
+                    withinPortal
+                    withAsterisk={false}
+                    label="Company Name"
+                    variant="filled"
+                    size="sm"
+                    placeholder="Pick one"
+                    data={sortingList.companyList}
+                    onChange={handleOnChangeCompanyFilter}
+                  />
+                </th>
                 <th>
                   <Select
                     maw={rem(256)}

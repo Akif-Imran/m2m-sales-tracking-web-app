@@ -114,6 +114,7 @@ interface ITask {
   completedDate: string;
   statusId: number;
   statusName: string;
+  companyId: number;
 }
 interface INotification {
   id: number;

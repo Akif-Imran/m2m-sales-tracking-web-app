@@ -28,7 +28,7 @@ const _AddTaskModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
   const form = useFormik<ITaskForm>({
     initialValues: {
       statusId: 1,
-      statusName: "",
+      statusName: "Pending",
       projectId: 0,
       title: "",
       description: "",
@@ -115,7 +115,7 @@ const _AddTaskModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
         <TextInput
           required
           withAsterisk={false}
-          label="Title"
+          label="Task Title"
           name="title"
           id="title"
           value={form.values.title}

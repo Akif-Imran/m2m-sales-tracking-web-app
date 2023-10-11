@@ -125,17 +125,20 @@ const Tasks: React.FC<OwnProps> = () => {
             <td>{index + 1}</td>
             <td>{task.id}</td>
             <td>
-              {task.assignee?.firstName} {task.assignee?.lastName}
-            </td>
-            <td>
               <Badge variant="filled" color={taskStatusColors[task.statusName]}>
                 {task.statusName}
               </Badge>
             </td>
+            {/* <td>{task.company?.name}</td> */}
+            <td>company name</td>
             <td>{task.project?.name || "N/A"}</td>
             <td>{task.title}</td>
+            <td>{task.description}</td>
             <td>
               {DateTime.fromISO(task.createdDate).toLocal().toFormat(DAY_MM_DD_YYYY_HH_MM_SS_A)}
+            </td>
+            <td>
+              {task.assignee?.firstName} {task.assignee?.lastName}
             </td>
             <td>
               {DateTime.fromISO(task.plannedEndDate).toLocal().toFormat(DAY_MM_DD_YYYY_HH_MM_SS_A)}
@@ -187,20 +190,21 @@ const Tasks: React.FC<OwnProps> = () => {
           <Table border={1} bgcolor={theme.white} withBorder>
             <thead>
               <tr>
-                <th colSpan={4}>Task</th>
+                <th colSpan={3}>Task</th>
+                <th colSpan={1}>Company</th>
                 <th colSpan={1}>Project</th>
-                <th colSpan={4}>Task Details</th>
+                <th colSpan={7}>Task Details</th>
               </tr>
               <tr>
                 <th>#</th>
                 <th>Id</th>
-                <th>Name</th>
                 <th>Status</th>
-
+                <th>Company Name</th>
                 <th>Project Name</th>
-
-                <th>Title</th>
+                <th>Task Title</th>
+                <th>Description</th>
                 <th>Created Date</th>
+                <th>Assigned To</th>
                 <th>Deadline</th>
                 <th>Completed Date</th>
                 <th>Actions</th>

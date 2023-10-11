@@ -25,7 +25,6 @@ import {
   IconSearch,
   IconTable,
   IconTrash,
-  IconUserPlus,
 } from "@tabler/icons-react";
 import {
   selectCompaniesWithContact,
@@ -310,13 +309,13 @@ const Company: React.FC<OwnProps> = () => {
         >
           Company
         </Button>
-        <Button
+        {/* <Button
           variant="filled"
           rightIcon={<IconUserPlus size={16} />}
           onClick={() => setAddContactModalOpened(true)}
         >
           Contact
-        </Button>
+        </Button> */}
       </Flex>
       {content}
       <_AddCompanyModal

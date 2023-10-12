@@ -17,16 +17,19 @@ interface IUser {
 type ILoginUserData = Omit<IUser, "createdAt">;
 
 interface ICompanyContact {
-  id: number;
-  businessCard: string;
+  _id: string;
+  isActive: boolean;
+  company: string;
   name: string;
+  businessCard: string | null;
   designation: string;
   department: string;
   email: string;
-  phone: string;
   mobile: string;
-  primary: boolean;
-  companyId: number;
+  customerId: string;
+  createdBy: string;
+  createdAt: string;
+  __v: number;
 }
 interface ICompany {
   _id: string; //

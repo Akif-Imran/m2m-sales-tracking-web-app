@@ -1,4 +1,5 @@
 import { PayloadAction, SerializedError, createSlice } from "@reduxjs/toolkit";
+import { fetchAllContacts } from "@thunks";
 
 interface State {
   data: ICompanyContact[];
@@ -7,20 +8,7 @@ interface State {
 }
 
 const initialState: State = {
-  data: [
-    {
-      id: 1,
-      name: "Default Contact",
-      businessCard: "",
-      department: "Engineering",
-      designation: "Manager",
-      email: "example.contact@gmail.com",
-      mobile: "+62 756 345987",
-      phone: "+60 123 7653457",
-      primary: true,
-      companyId: 1,
-    },
-  ],
+  data: [],
   isLoading: false,
   error: null,
 };
@@ -29,18 +17,33 @@ const companyContactSlice = createSlice({
   name: "companyContacts",
   initialState: initialState,
   reducers: {
-    addContact: (state, action: PayloadAction<Omit<ICompanyContact, "id">>) => {
-      const id = Date.now();
-      state.data.push({ id, ...action.payload });
+    addContact: (state, action: PayloadAction<ICompanyContact>) => {
+      state.data.push(action.payload);
     },
     updateContact: (state, action: PayloadAction<ICompanyContact>) => {
-      const index = state.data.findIndex((contact) => contact.id === action.payload.id);
+      const index = state.data.findIndex((contact) => contact._id === action.payload._id);
       state.data[index] = action.payload;
     },
-    deleteContact: (state, action: PayloadAction<number>) => {
-      const index = state.data.findIndex((contact) => contact.id === action.payload);
+    deleteContact: (state, action: PayloadAction<string>) => {
+      const index = state.data.findIndex((contact) => contact._id === action.payload);
       state.data.splice(index, 1);
     },
+  },
+  extraReducers: (builder) => {
+    builder.addCase(fetchAllContacts.pending, (state) => {
+      state.isLoading = true;
+    });
+    builder.addCase(fetchAllContacts.rejected, (state, action) => {
+      state.error = action.error;
+      state.isLoading = false;
+    });
+    builder.addCase(fetchAllContacts.fulfilled, (state, action) => {
+      if (action.payload.success) {
+        state.data = action.payload.data;
+      }
+      state.error = null;
+      state.isLoading = false;
+    });
   },
 });
 

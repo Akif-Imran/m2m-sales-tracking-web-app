@@ -29,17 +29,30 @@ interface ICompanyContact {
   companyId: number;
 }
 interface ICompany {
-  id: number;
-  logo: string;
-  name: string;
-  email: string;
-  phone: string;
-  address: string;
-  city: string;
-  state: string;
-  country: string;
-  website: string;
-  primaryContactId: number;
+  _id: string; //
+  isActive: boolean; //
+  company: string; //
+  name: string; //
+  logo: string | null; //
+  address: string; //
+  city: string; //
+  state: string; //
+  country: string; //
+  website: string; //
+  email: string; //
+  phone: string; //
+  __v: number; //
+  // id: number;
+  // logo: string;
+  // name: string;
+  // email: string;
+  // phone: string;
+  // address: string;
+  // city: string;
+  // state: string;
+  // country: string;
+  // website: string;
+  // primaryContactId: number;
 }
 interface IProjectStatus {
   id: number;

@@ -39,8 +39,8 @@ interface OwnProps {
   opened: boolean;
   onClose: () => void;
   title: string;
-  companyId?: number;
-  projectId?: number;
+  companyId?: string;
+  projectId?: string;
 }
 
 interface IFollowUpForm extends Omit<IFollowUp, "id"> {}

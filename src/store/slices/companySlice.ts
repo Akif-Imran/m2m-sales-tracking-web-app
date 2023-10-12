@@ -24,8 +24,8 @@ const companySlice = createSlice({
       const index = state.data.findIndex((company) => company._id === action.payload._id);
       state.data[index] = action.payload;
     },
-    deleteCompany: (state, action: PayloadAction<ICompany>) => {
-      const index = state.data.findIndex((company) => company._id === action.payload._id);
+    deleteCompany: (state, action: PayloadAction<string>) => {
+      const index = state.data.findIndex((company) => company._id === action.payload);
       state.data.splice(index, 1);
     },
     // updatePrimaryContact: (state, action: PayloadAction<IUpdatePrimaryContactPayload>) => {

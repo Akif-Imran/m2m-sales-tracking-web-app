@@ -49,7 +49,7 @@ import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { routes } from "@routes";
 import { DateTime } from "luxon";
 import { DAY_MM_DD_YYYY_HH_MM_SS_A } from "@constants";
-import { selectNotifications, useAppDispatch, useAppSelector } from "@store";
+import { selectNotifications, selectUserTypes, useAppDispatch, useAppSelector } from "@store";
 import { markAsRead } from "@slices";
 
 type ActivePage =
@@ -197,6 +197,7 @@ const _Header = ({ toggleNavbar, opened }: _HeaderProps) => {
     data: notifications,
     isLoading: isFetchingNotifications,
   } = useAppSelector(selectNotifications);
+  const { data: userTypes } = useAppSelector(selectUserTypes);
   const navigate = useNavigate();
   //copies over
   const location = useLocation();
@@ -458,10 +459,11 @@ const _Header = ({ toggleNavbar, opened }: _HeaderProps) => {
                 })}
               >
                 <Group spacing={7}>
-                  <Avatar src="/profile.png" alt={user?.firstName} radius="xl" size={35} />
+                  <Avatar src="/profile.png" alt={user?.name} radius="xl" size={35} />
                   <div>
                     <Text weight={700} size="sm" sx={{ lineHeight: 1 }} mr={3}>
-                      {user?.firstName} {user?.lastName} ({user?.userTypeName})
+                      {user?.name} (
+                      {userTypes.find((ut) => ut.id === user?.userType)?.name || "N/A"})
                     </Text>
                     <Text weight={400} size="sm" sx={{ lineHeight: 1 }} mr={3}>
                       {user?.email}

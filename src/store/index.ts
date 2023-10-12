@@ -135,7 +135,7 @@ export const selectRecordsForDropdown = createSelector(
   ) => {
     return {
       companies: companies.data.map((company) => ({
-        value: company.id.toString(),
+        value: company._id,
         label: company.name,
       })),
       projects: projects.data.map((project) => ({
@@ -179,16 +179,16 @@ export const selectRecordsForDropdown = createSelector(
         label: type.name,
       })),
       salesPersons: users.data
-        .filter((user) => user.userTypeName === "Sales")
+        .filter((user) => user.userType === 2)
         .map((sales) => ({
-          value: sales.id.toString(),
-          label: `${sales.firstName} ${sales.lastName}`,
+          value: sales._id,
+          label: `${sales.name}`,
         })),
       projectManagers: users.data
-        .filter((user) => user.userTypeName === "Engineer")
+        .filter((user) => user.userType === 3)
         .map((engineer) => ({
-          value: engineer.id.toString(),
-          label: `${engineer.firstName} ${engineer.lastName}`,
+          value: engineer._id,
+          label: `${engineer.name}`,
         })),
     };
   }

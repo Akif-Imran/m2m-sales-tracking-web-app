@@ -24,7 +24,7 @@ interface OwnProps {
   opened: boolean;
   onClose: () => void;
   title: string;
-  companyId?: number;
+  companyId?: string;
 }
 interface IContactForm extends Omit<ICompanyContact, "id"> {}
 

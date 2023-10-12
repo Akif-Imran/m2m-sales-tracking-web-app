@@ -13,7 +13,6 @@ interface CreateReq {
     website: string;
     city: string;
     phone: string;
-    joiningDate: string;
   };
 }
 
@@ -36,7 +35,7 @@ export const createCompany = createAsyncThunk("add/company", async (params: Crea
   return response.data;
 });
 
-export const deleteCompany = createAsyncThunk("update/company", async (params: DeleteReq) => {
+export const removeCompany = createAsyncThunk("update/company", async (params: DeleteReq) => {
   const response = await apiDelete<ApiResponse<ICompany>>(
     urls.company.delete(params.id),
     params.token

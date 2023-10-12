@@ -4,25 +4,17 @@ interface IUserAccountType {
   name: string;
 }
 interface IUser {
-  avatar: string;
-  id: number;
-  firstName: string;
-  lastName: string;
-  companyId: number;
+  _id: string;
+  name: string;
   email: string;
   password: string;
-  phone: string;
-  departmentId: number;
-  departmentName: string;
-  designation: string;
-  joiningDate: string;
-  address: string;
-  city: string;
-  country: string;
-  userTypeId: number;
-  userTypeName: string;
+  userType: number;
+  isActive: boolean;
+  company: string;
+  __v: number;
+  createdAt: string;
 }
-type ILoginUserData = IUser;
+type ILoginUserData = Omit<IUser, "createdAt">;
 
 interface ICompanyContact {
   id: number;

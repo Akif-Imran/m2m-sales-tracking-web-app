@@ -101,9 +101,9 @@ export const selectTasksCombined = createSelector(
 );
 export const selectUsersBasedOnType = createSelector(selectUsers, (users) => {
   return {
-    engineers: users.data.filter((user) => user.userTypeName === "Engineer"),
-    sales: users.data.filter((user) => user.userTypeName === "Sales"),
-    admins: users.data.filter((user) => user.userTypeName === "Admin"),
+    engineers: users.data.filter((user) => user.userType === 3),
+    sales: users.data.filter((user) => user.userType === 2),
+    admins: users.data.filter((user) => user.userType === 1),
   };
 });
 export const selectRecordsForDropdown = createSelector(

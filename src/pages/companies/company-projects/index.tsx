@@ -9,6 +9,7 @@ import {
   Divider,
   Flex,
   Grid,
+  Menu,
   ScrollArea,
   Stack,
   Text,
@@ -19,26 +20,40 @@ import {
   selectCompanyContact,
   selectFollowUpsWithRecords,
   selectProjectWithRecords,
+  selectRecordsForDropdown,
+  useAppDispatch,
   useAppSelector,
 } from "@store";
 import { DAY_MM_DD_YYYY, DAY_MM_DD_YYYY_HH_MM_SS_A, projectStatusColors } from "@constants";
 import { useParams } from "react-router-dom";
 import { DateTime } from "luxon";
 import { colors } from "@theme";
-import { IconChevronRight, IconPlus } from "@tabler/icons-react";
+import { IconChevronRight, IconDotsVertical, IconPlus, IconTrashFilled } from "@tabler/icons-react";
 import { _AddContactModal } from "../components";
 import { _AddFollowUpModal } from "../../projects/follow-ups/components";
+import { removeContact } from "@thunks";
+import { useAuthContext } from "@contexts";
+import { notify } from "@utility";
+import { openDeleteModalHelper } from "@helpers";
+import { deleteContact } from "@slices";
 
 interface OwnProps {}
 type ArrayToObj<T extends Array<Record<string, unknown>>> = T extends Array<infer U> ? U : never;
 
 export const CompanyProjects: React.FC<OwnProps> = () => {
-  useStyles();
+  const { theme } = useStyles();
   const { companyId } = useParams();
+  const dispatch = useAppDispatch();
+  const {
+    state: { token },
+  } = useAuthContext();
   const followUpList = useAppSelector(selectFollowUpsWithRecords);
   const projectsList = useAppSelector(selectProjectWithRecords);
+  const { projectStatus: projectStatusList } = useAppSelector(selectRecordsForDropdown);
   const companiesList = useAppSelector(selectCompaniesWithContact);
   const { data: contactsList } = useAppSelector(selectCompanyContact);
+
+  const [isDeletingContact, setIsDeletingContact] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(true);
   const [company, setCompany] = React.useState<ICompany>();
   const [projects, setProjects] = React.useState<typeof projectsList>([]);
@@ -51,24 +66,67 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
 
   React.useEffect(() => {
     if (!companyId) return;
-    const company = companiesList.find((company) => company.id === parseInt(companyId));
-    const project_s = projectsList.filter((project) => project.companyId === parseInt(companyId));
-    const contact_s = contactsList.filter((contact) => contact.companyId === parseInt(companyId));
+    const company = companiesList.find((company) => company._id === companyId);
+    const project_s = projectsList.filter((project) => project.customerId === companyId);
+    const contact_s = contactsList.filter((contact) => contact.customerId === companyId);
     setContacts(contact_s);
     setProjects(project_s);
     setCompany(company);
     if (project_s.length > 0) {
       setSelectedProject(project_s[0]);
-      setFollowUps(followUpList.filter((followUp) => followUp.projectId === project_s[0].id));
+      setFollowUps(followUpList.filter((followUp) => followUp.projectId === project_s[0]._id));
     }
     setIsLoading(false);
   }, [companyId, companiesList, projectsList, contactsList, followUpList]);
 
-  const handleSelectProject = (projectId: number) => {
-    const project = projectsList.find((project) => project.id === projectId);
+  const handleSelectProject = (projectId: string) => {
+    const project = projectsList.find((project) => project._id === projectId);
     setSelectedProject(project);
+    //FIXME - fix this follow project id type
     const followUp_s = followUpList.filter((followUp) => followUp.projectId === projectId);
     setFollowUps(followUp_s);
+  };
+
+  const handleDelete = (id: string) => {
+    openDeleteModalHelper({
+      theme: theme,
+      title: `Delete`,
+      loading: isDeletingContact,
+      description: (
+        <Text fw={"normal"} fs={"normal"} fz={"sm"} color={colors.titleText}>
+          Are you sure you want to delete this Contact? This action is destructive and you will have
+          to contact support to restore data.
+        </Text>
+      ),
+      cancelLabel: "Cancel",
+      confirmLabel: "Delete",
+      onConfirm: () => handleDeleteContact(id),
+      onCancel: () => notify("Delete", "Operation canceled!", "error"),
+    });
+  };
+
+  const handleDeleteContact = (id: string) => {
+    setIsDeletingContact((_prev) => true);
+    dispatch(
+      removeContact({
+        token,
+        id,
+      })
+    )
+      .unwrap()
+      .then((res) => {
+        notify("Delete Contact", res?.message, res.success ? "success" : "error");
+        if (res.success) {
+          dispatch(deleteContact(res.data._id));
+        }
+      })
+      .catch((err) => {
+        console.log("Delete Contact: ", err?.message);
+        notify("Delete Contact", "An error occurred", "error");
+      })
+      .finally(() => {
+        setIsDeletingContact((_prev) => false);
+      });
   };
 
   const titleTextStyle = {
@@ -99,24 +157,27 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
             </Card>
             <ScrollArea type="scroll" h={"96vh"}>
               {projects.map((project) => {
+                const status = projectStatusList.find(
+                  (status) => status.value === project.status.toString()
+                );
                 return (
                   <Card
-                    key={project.id}
+                    key={project._id}
                     shadow="sm"
                     mb={"xs"}
                     px={"sm"}
                     py={"xs"}
                     radius={"md"}
-                    onClick={() => handleSelectProject(project.id)}
+                    onClick={() => handleSelectProject(project._id)}
                   >
                     <Flex direction={"row"} justify={"space-between"} align={"center"}>
                       <Flex direction={"column"}>
                         <Text {...titleTextStyle}>{project.name}</Text>
-                        <Badge variant="filled" color={projectStatusColors[project.statusId]}>
-                          {project.statusName}
+                        <Badge variant="filled" color={projectStatusColors[project.status]}>
+                          {status?.label}
                         </Badge>
                       </Flex>
-                      {selectedProject.id === project.id && (
+                      {selectedProject._id === project._id && (
                         <IconChevronRight size={24} color={colors.titleText} />
                       )}
                     </Flex>
@@ -139,7 +200,7 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
                         <Badge
                           ml={"lg"}
                           variant="filled"
-                          color={projectStatusColors[selectedProject.statusId]}
+                          color={projectStatusColors[selectedProject.status]}
                         >
                           {selectedProject.statusName}
                         </Badge>
@@ -152,14 +213,11 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
                       <Flex direction={"row"} align={"center"} justify={"space-between"}>
                         <Flex direction={"row"} align={"center"} columnGap={"sm"}>
                           <Text {...titleTextStyle}>Type: </Text>
-                          <Text {...bodyTextStyle}>{selectedProject.projectType}</Text>
+                          <Text {...bodyTextStyle}>{selectedProject.type}</Text>
                         </Flex>
                         <Flex direction={"row"} align={"center"} columnGap={"sm"}>
                           <Text {...titleTextStyle}>Salesman: </Text>
-                          <Text {...bodyTextStyle}>
-                            {selectedProject.salesPerson?.firstName}{" "}
-                            {selectedProject.salesPerson?.lastName}
-                          </Text>
+                          <Text {...bodyTextStyle}>{selectedProject.salesPersonValue?.name}</Text>
                         </Flex>
                       </Flex>
                       <Flex direction={"row"} align={"center"} justify={"space-between"}>
@@ -175,7 +233,7 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
                           </Text>
                         </Flex>
                         <Flex direction={"row"} align={"center"} columnGap={"sm"}>
-                          <Text {...titleTextStyle}>Contract: </Text>
+                          <Text {...titleTextStyle}>Contract Date: </Text>
                           <Text {...bodyTextStyle}>
                             {DateTime.fromISO(selectedProject.contractDate).toFormat(
                               DAY_MM_DD_YYYY
@@ -189,7 +247,7 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
                           <Text {...bodyTextStyle}>{selectedProject.quotation}</Text>
                         </Flex>
                         <Flex direction={"row"} align={"center"} columnGap={"sm"}>
-                          <Text {...titleTextStyle}>Delivery: </Text>
+                          <Text {...titleTextStyle}>Delivery Date: </Text>
                           <Text {...bodyTextStyle}>
                             {" "}
                             {DateTime.fromISO(selectedProject.deliveryDate).toFormat(
@@ -227,7 +285,35 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
                         return (
                           <>
                             <Flex direction={"column"} my={"md"}>
-                              <Text {...bodyTextStyle}>{contact?.name}</Text>
+                              <Flex
+                                direction={"row"}
+                                justify={"space-between"}
+                                align={"center"}
+                                columnGap={"sm"}
+                              >
+                                <Text {...bodyTextStyle}>{contact?.name}</Text>
+                                <Menu withinPortal withArrow position="bottom-end">
+                                  <Menu.Target>
+                                    <ActionIcon>
+                                      <IconDotsVertical
+                                        size={16}
+                                        stroke={1.3}
+                                        color={colors.titleText}
+                                      />
+                                    </ActionIcon>
+                                  </Menu.Target>
+                                  <Menu.Dropdown>
+                                    <Menu.Label>Options</Menu.Label>
+                                    <Menu.Item
+                                      color="red"
+                                      icon={<IconTrashFilled stroke={1.3} size={16} />}
+                                      onClick={() => handleDelete(contact._id)}
+                                    >
+                                      Delete
+                                    </Menu.Item>
+                                  </Menu.Dropdown>
+                                </Menu>
+                              </Flex>
                               <Text {...bodyTextStyle}>{contact?.designation}</Text>
                               <Anchor
                                 {...bodyTextStyle}
@@ -237,9 +323,7 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
                               >
                                 {contact?.email}
                               </Anchor>
-                              <Text {...bodyTextStyle}>
-                                {contact?.phone}, {contact?.mobile}
-                              </Text>
+                              <Text {...bodyTextStyle}>{contact?.mobile}</Text>
                             </Flex>
                             <Divider />
                           </>
@@ -329,13 +413,13 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
         <_AddContactModal
           title="Add Contact"
           opened={addContactModalOpened}
-          companyId={company.id}
+          companyId={company._id}
           onClose={() => setAddContactModalOpened(false)}
         />
         <_AddFollowUpModal
           title="Add Follow Up"
           opened={addFollowUpModalOpened}
-          projectId={selectedProject.id}
+          projectId={selectedProject._id}
           onClose={() => setAddFollowUpModalOpened(false)}
         />
       </>

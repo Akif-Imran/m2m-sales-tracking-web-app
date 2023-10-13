@@ -59,31 +59,55 @@ interface ICompany {
 }
 interface IProjectStatus {
   id: number;
+  value: number;
   name: string;
 }
 interface IProject {
-  id: number;
+  createdBy: string;
+  createdAt: string;
+  isActive: true;
+  company: string;
   name: string;
   description: string;
-  projectType: string;
+  type: string;
   value: {
-    currency: string;
     amount: number;
+    currency: string;
+    // _id: string;
   };
   contractDate: string;
   deliveryDate: string;
-  quotation: string;
-  salesPersonId: number;
-  //costing
-  statusId: number;
-  statusName: string;
-  companyId: number; //company
+  quotation: number;
+  salesPerson: string;
+  costing: object | null;
+  status: number;
+  customerId: string;
+  _id: string;
+  __v: number;
+  // deletedAt?: string;
+  //-----old-type--------
+  // id: number;
+  // name: string;
+  // description: string;
+  // projectType: string;
+  // value: {
+  //   currency: string;
+  //   amount: number;
+  // };
+  // contractDate: string;
+  // deliveryDate: string;
+  // quotation: string;
+  // salesPersonId: number;
+  // //costing
+  // statusId: number;
+  // statusName: string;
+  // companyId: number; //company
 }
 interface IFollowUp {
   id: number;
-  projectId: number;
-  contactPersonId: number;
-  followUpPersonId: number;
+  projectId: string;
+  contactPersonId: string;
+  followUpPersonId: string;
   meetingDate: string;
   meetingPlace: string;
   address: string;
@@ -143,7 +167,7 @@ interface IPurchaseRequestStatus {
 }
 interface IPurchaseRequest {
   id: number;
-  requestedById: number; //user id
+  requestedById: string; //user id
   projectId: number;
   itemName: string;
   itemType: string;
@@ -161,7 +185,7 @@ interface IPurchaseRequest {
 
 interface IClaim {
   id: number;
-  requestedById: number; //user id
+  requestedById: string; //user id
   projectId: number;
   itemName: string;
   itemType: string;

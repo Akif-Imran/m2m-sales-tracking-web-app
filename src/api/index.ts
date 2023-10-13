@@ -16,6 +16,7 @@ export const urls = {
     login: `${BASE_USER_URL}/login`,
   },
   user: {
+    list: `${BASE_USER_URL}/getAll`,
     getUserTypes: `${BASE_USER_URL}/getUserTypes`,
     changePassword: `${BASE_USER_URL}/resetPassword`,
     deleteAccount: `${BASE_USER_URL}/deleteAccount`,
@@ -93,6 +94,19 @@ export const apiGet = async <R>(url: string, token: string): Promise<AxiosRespon
 
 export const apiDelete = async <R>(url: string, token: string): Promise<AxiosResponse<R>> => {
   const response = await axios.delete<R>(url, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return response;
+};
+
+export const apiPut = async <R, P>(
+  url: string,
+  token: string,
+  body: P
+): Promise<AxiosResponse<R>> => {
+  const response = await axios.put<R>(url, body, {
     headers: {
       Authorization: `Bearer ${token}`,
     },

@@ -1,7 +1,14 @@
 import { _SocketWrapper } from "@components";
 import { useAuthContext } from "@contexts";
 import { useAppDispatch } from "@store";
-import { fetchAllCompanies, fetchAllContacts, fetchUserTypes } from "@thunks";
+import {
+  fetchAllCompanies,
+  fetchAllContacts,
+  fetchProjectStatuses,
+  fetchProjects,
+  fetchUserTypes,
+  fetchUsers,
+} from "@thunks";
 import React from "react";
 
 export const _DataLoader: React.FC<React.PropsWithChildren> = ({ children }) => {
@@ -17,6 +24,9 @@ export const _DataLoader: React.FC<React.PropsWithChildren> = ({ children }) => 
     dispatch(fetchAllCompanies(token));
     dispatch(fetchUserTypes(token));
     dispatch(fetchAllContacts(token));
+    dispatch(fetchProjectStatuses(token));
+    dispatch(fetchProjects(token));
+    dispatch(fetchUsers(token));
   }, [dispatch, token]);
 
   return (

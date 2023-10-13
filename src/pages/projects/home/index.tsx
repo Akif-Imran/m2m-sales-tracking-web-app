@@ -31,41 +31,43 @@ import { DateTime } from "luxon";
 import { DAY_MM_DD_YYYY, projectStatusColors } from "@constants";
 import { useAuthContext } from "@contexts";
 import { useSearchParams } from "react-router-dom";
+import { removeProject, updateStatusProject } from "@thunks";
 
 interface OwnProps {}
 
 interface ProjectSort {
   statusName: string;
-  salesPersonId: string;
+  salesPerson: string;
   // Add other properties as needed
 }
 
 const Projects: React.FC<OwnProps> = () => {
   useStyles();
   const {
-    state: { user, isAdmin, isHR },
+    state: { user, isAdmin, isHR, token },
   } = useAuthContext();
   const dispatch = useAppDispatch();
   const { classes: gclasses, theme } = useGStyles();
 
   const [searchParams, _setSearchParams] = useSearchParams();
   const modal = searchParams.get("open");
-  console.log("which modal to open", modal);
+
   const [searchQuery, setSearchQuery] = React.useState("");
   const projects = useAppSelector(selectProjectWithRecords);
+  const [isDeleting, setIsDeleting] = React.useState(false);
   const [addProjectModalOpened, setAddProjectModalOpened] = React.useState(modal === "add");
   const [searchedData, setSearchedData] = React.useState<typeof projects>([]);
 
   const { projectStatus: projectStatusList } = useAppSelector(selectRecordsForDropdown);
   const [visible, setVisible] = React.useState<boolean>(false);
   const [selectedStatus, setSelectedStatus] = React.useState<string>();
-  const [selectedProject, setSelectedProject] = React.useState<number>(0);
+  const [selectedProject, setSelectedProject] = React.useState<string>("");
   const [sortOrder, setSortOrder] = React.useState<ProjectSort>({
     statusName: "asc", // Initial sorting order (asc or desc)
-    salesPersonId: "asc",
+    salesPerson: "asc",
   });
 
-  const showUpdateStatusModal = (statusId: number, projectId: number) => {
+  const showUpdateStatusModal = (statusId: number, projectId: string) => {
     setSelectedStatus(statusId.toString());
     setSelectedProject(projectId);
     setVisible(true);
@@ -83,7 +85,7 @@ const Projects: React.FC<OwnProps> = () => {
       const filtered = projects.filter(
         (project) =>
           project.name.toLowerCase().includes(query.toLowerCase()) &&
-          project.salesPersonId === user?.id
+          project.salesPerson === user?._id
       );
       setSearchedData(filtered);
     }
@@ -97,23 +99,27 @@ const Projects: React.FC<OwnProps> = () => {
     // Sort your data based on the selected column
     // For example, if columnName is 'status':
     const sortedData = [...searchedData].sort((a, b) => {
-      const valueA = a[columnName].toString().toLowerCase();
-      const valueB = b[columnName].toString().toLowerCase();
+      const valueA = a[columnName]?.toString().toLowerCase();
+      const valueB = b[columnName]?.toString().toLowerCase();
+      if (!valueA || !valueB) {
+        notify("Sort", "Invalid paramters", "error");
+        return -1;
+      }
       if (sortOrderCopy[columnName] === "asc") {
-        return valueA.localeCompare(valueB);
+        return valueA?.localeCompare(valueB);
       } else {
-        return valueB.localeCompare(valueA);
+        return valueB?.localeCompare(valueA);
       }
     });
 
     setSearchedData(sortedData);
   };
 
-  const handleDelete = (id: number) => {
+  const handleDelete = (id: string) => {
     openDeleteModalHelper({
       theme: theme,
       title: `Delete Project`,
-      loading: false,
+      loading: isDeleting,
       description: (
         <Text fw={"normal"} fs={"normal"} fz={"sm"} color={colors.titleText}>
           Are you sure you want to delete this project? This action is destructive and you will have
@@ -123,21 +129,70 @@ const Projects: React.FC<OwnProps> = () => {
       cancelLabel: "Cancel",
       confirmLabel: "Delete Project",
       onConfirm: () => {
-        dispatch(deleteProject(id));
+        setIsDeleting((_prev) => true);
+        dispatch(
+          removeProject({
+            token,
+            id,
+          })
+        )
+          .unwrap()
+          .then((res) => {
+            if (res.success) {
+              dispatch(deleteProject(res.data._id));
+            }
+          })
+          .catch((err) => {
+            console.log("Delete project: ", err?.message);
+            notify("Delete Project", "An error occurred", "error");
+          })
+          .finally(() => {
+            setIsDeleting((_prev) => false);
+          });
+
         notify("Delete Project", "Project deleted successfully!", "success");
       },
       onCancel: () => notify("Delete Project", "Operation canceled!", "error"),
     });
   };
 
+  const handleOnChangeStatus = (value: string | null) => {
+    if (!value) {
+      notify("Update Project Status", "Invalid status value", "error");
+      return;
+    }
+
+    dispatch(
+      updateStatusProject({
+        token,
+        id: selectedProject,
+        body: {
+          status: parseInt(value),
+        },
+      })
+    )
+      .unwrap()
+      .then((res) => {
+        notify("Project Status", res?.message, res.success ? "success" : "error");
+        if (res.success) {
+          dispatch(updateProjectStatus(res.data));
+          hideUpdateStatusModal();
+        }
+      })
+      .catch((err) => {
+        console.log("Update Project Status: ", err?.message);
+        notify("Project Status", "An error occurred", "error");
+      });
+  };
+
   React.useEffect(() => {
     if (isAdmin || isHR) {
       setSearchedData(projects);
     } else {
-      const filtered = projects.filter((project) => project.salesPersonId === user?.id);
+      const filtered = projects.filter((project) => project.salesPerson === user?._id);
       setSearchedData(filtered);
     }
-  }, [isAdmin, isHR, projects, user?.id]);
+  }, [isAdmin, isHR, projects, user?._id]);
 
   // React.useEffect(() => {
   //   if (modal === "add") {
@@ -161,24 +216,21 @@ const Projects: React.FC<OwnProps> = () => {
             maximumFractionDigits: 2,
           }).format(project.value.amount);
           return (
-            <tr key={project.id}>
+            <tr key={project._id}>
               <td>{index + 1}</td>
-              <td>{project.id}</td>
               <td>{project.name}</td>
               <td>{project.description}</td>
               <td>
-                <Badge variant="filled" color={projectStatusColors[project.statusId]}>
+                <Badge variant="filled" color={projectStatusColors[project.status]}>
                   {project.statusName}
                 </Badge>
               </td>
-              <td>{project.projectType}</td>
+              <td>{project.type}</td>
               <td>{value}</td>
               <td>{DateTime.fromISO(project.contractDate).toLocal().toFormat(DAY_MM_DD_YYYY)}</td>
               <td>{DateTime.fromISO(project.deliveryDate).toLocal().toFormat(DAY_MM_DD_YYYY)}</td>
               <td>{project.quotation}</td>
-              <td>
-                {project?.salesPerson?.firstName || "N/A"} {project?.salesPerson?.lastName || "N/A"}
-              </td>
+              <td>{project?.salesPersonValue?.name || "N/A"}</td>
               <td>{project?.company?.name || "N/A"}</td>
               <td>
                 {isAdmin ? (
@@ -186,11 +238,11 @@ const Projects: React.FC<OwnProps> = () => {
                     <ActionIcon
                       color="gray"
                       size={"sm"}
-                      onClick={() => showUpdateStatusModal(project.statusId, project.id)}
+                      onClick={() => showUpdateStatusModal(project.status, project._id)}
                     >
                       <IconRotateClockwise2 />
                     </ActionIcon>
-                    <ActionIcon color="red" size={"sm"} onClick={() => handleDelete(project.id)}>
+                    <ActionIcon color="red" size={"sm"} onClick={() => handleDelete(project._id)}>
                       <IconTrash />
                     </ActionIcon>
                   </Group>
@@ -232,13 +284,12 @@ const Projects: React.FC<OwnProps> = () => {
           <Table border={1} bgcolor={theme.white} withBorder>
             <thead>
               <tr>
-                <th colSpan={5}>Project</th>
+                <th colSpan={4}>Project</th>
                 <th colSpan={6}>Project Details</th>
                 <th colSpan={1}>Company</th>
               </tr>
               <tr>
                 <th>#</th>
-                <th>Id</th>
                 <th>Name</th>
                 <th>Description</th>
                 <th onClick={() => sortData("statusName")}>
@@ -249,8 +300,8 @@ const Projects: React.FC<OwnProps> = () => {
                 <th>Contract Date</th>
                 <th>Delivery Date</th>
                 <th>Quotation</th>
-                <th onClick={() => sortData("salesPersonId")}>
-                  Sales Person {sortOrder.salesPersonId === "asc" ? "▲" : "▼"}
+                <th onClick={() => sortData("salesPerson")}>
+                  Sales Person {sortOrder.salesPerson === "asc" ? "▲" : "▼"}
                 </th>
                 <th>Customer Name</th>
                 <th>Actions</th>
@@ -280,22 +331,7 @@ const Projects: React.FC<OwnProps> = () => {
           value={selectedStatus}
           name="userFilter"
           defaultValue="7"
-          onChange={(value) => {
-            if (!value) {
-              notify("Update Project Status", "Invalid status value", "error");
-              return;
-            }
-            const typeName = projectStatusList.find((status) => status.value === value)?.label;
-            if (!typeName) return;
-            dispatch(
-              updateProjectStatus({
-                projectId: selectedProject,
-                statusId: parseInt(value),
-                statusName: typeName,
-              })
-            );
-            hideUpdateStatusModal();
-          }}
+          onChange={handleOnChangeStatus}
         >
           <div className={gclasses.radioContainer}>
             {projectStatusList.map((value) => {

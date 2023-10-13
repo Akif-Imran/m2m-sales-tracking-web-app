@@ -66,9 +66,9 @@ const _AddFollowUpModal: React.FC<OwnProps> = ({
 
   const form = useFormik<IFollowUpForm>({
     initialValues: {
-      contactPersonId: 0,
-      projectId: 0,
-      followUpPersonId: user!.id,
+      contactPersonId: "",
+      projectId: "",
+      followUpPersonId: user!._id,
       meetingDate: DateTime.now().toFormat(YYYY_MM_DD_HH_MM_SS_A),
       meetingPlace: "",
       address: "",
@@ -130,12 +130,12 @@ const _AddFollowUpModal: React.FC<OwnProps> = ({
 
   React.useEffect(() => {
     if (!form.values.projectId) return;
-    const project = projects.find((project) => project.id === form.values.projectId);
+    const project = projects.find((project) => project._id === form.values.projectId);
     const compContacts = contacts.data
-      .filter((contact) => contact.companyId === project?.companyId)
+      .filter((contact) => contact.customerId === project?.customerId)
       .map((contact) => ({
         label: contact.name,
-        value: contact.id.toString(),
+        value: contact._id,
       }));
     setContactList(compContacts);
   }, [contacts.data, form.values.projectId, projects]);
@@ -143,10 +143,10 @@ const _AddFollowUpModal: React.FC<OwnProps> = ({
   React.useEffect(() => {
     if (!companyId) return;
     const project_s = projects
-      .filter((project) => project.companyId === companyId)
+      .filter((project) => project.customerId === companyId)
       .map((project) => ({
         label: project.name,
-        value: project.id.toString(),
+        value: project._id,
       }));
     setCompanyProjectsList(project_s);
   }, [companyId, projects]);
@@ -195,7 +195,7 @@ const _AddFollowUpModal: React.FC<OwnProps> = ({
                   value={form.values.projectId.toString()}
                   onChange={(value) => {
                     if (!value) return;
-                    form.setValues((prev) => ({ ...prev, projectId: parseInt(value) }));
+                    form.setValues((prev) => ({ ...prev, projectId: value }));
                   }}
                   data={companyId ? companyProjectList : projectsList}
                 />
@@ -210,7 +210,7 @@ const _AddFollowUpModal: React.FC<OwnProps> = ({
                   value={form.values.contactPersonId.toString()}
                   onChange={(value) => {
                     if (!value) return;
-                    form.setValues((prev) => ({ ...prev, contactPersonId: parseInt(value) }));
+                    form.setValues((prev) => ({ ...prev, contactPersonId: value }));
                   }}
                   data={contactList}
                 />

@@ -43,7 +43,7 @@ export const _AddClaimModal: React.FC<OwnProps> = ({ onClose, opened, title }) =
       },
       qty: 0,
       remarks: "",
-      requestedById: user!.id,
+      requestedById: user!._id,
       statusId: 1,
       statusName: "",
       warranty: "",

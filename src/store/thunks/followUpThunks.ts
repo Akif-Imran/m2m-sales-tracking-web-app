@@ -15,9 +15,16 @@ interface CreateReq {
     city: string;
     meetingAgenda: string;
     meetingSummary: string;
-    nextMeetingPlace: string;
-    nextMeetingDate: string;
-    nextMeetingAgenda: string;
+    nextMeetingPlace?: string;
+    nextMeetingDate?: string;
+    nextMeetingAgenda?: string;
+    expenseType?: string;
+    expenseName?: string;
+    expensePrice?: {
+      amount: number;
+      currency: string;
+    };
+    expenseDocument?: null | string;
   };
 }
 export const createFollowUp = createAsyncThunk("create/followup", async (params: CreateReq) => {
@@ -26,4 +33,5 @@ export const createFollowUp = createAsyncThunk("create/followup", async (params:
     params.token,
     params.followUp
   );
+  return response.data;
 });

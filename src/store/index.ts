@@ -193,16 +193,7 @@ export const selectRecordsForDropdown = createSelector(
     };
   }
 );
-export const selectCompaniesWithContact = createSelector(
-  selectCompanies,
-  selectCompanyContact,
-  (companies, contacts) => {
-    return companies.data.map((company) => {
-      const contact = contacts.data.find((contact) => contact._id === company.primaryContactId);
-      return { ...company, contact };
-    });
-  }
-);
+
 export const selectProjectWithRecords = createSelector(
   selectProjects,
   selectCompanies,
@@ -264,8 +255,8 @@ export const selectClaimsWithRecords = createSelector(
   selectProjects,
   (claims, users, suppliers, projects) => {
     return claims.data.map((request) => {
-      const requestByPerson = users.data.find((user) => user.id === request.requestedById);
-      const project = projects.data.find((project) => project.id === request.projectId);
+      const requestByPerson = users.data.find((user) => user._id === request.requestedById);
+      const project = projects.data.find((project) => project._id === request.projectId);
       const supplier = suppliers.data.find((supplier) => supplier.id === request.supplierId);
       return {
         ...request,
@@ -282,7 +273,7 @@ export const selectLeavesWithRecords = createSelector(
   selectLeaves,
   (users, leaves) => {
     return leaves.data.map((leave) => {
-      const requestByPerson = users.data.find((user) => user.id === leave.requestedById);
+      const requestByPerson = users.data.find((user) => user._id === leave.requestedById);
       return {
         ...leave,
         requestByPerson,

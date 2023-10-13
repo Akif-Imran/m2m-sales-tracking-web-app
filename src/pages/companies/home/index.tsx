@@ -22,7 +22,7 @@ import {
   IconTable,
   IconTrash,
 } from "@tabler/icons-react";
-import { selectCompaniesWithContact, useAppDispatch, useAppSelector } from "@store";
+import { selectCompanies, useAppDispatch, useAppSelector } from "@store";
 import { colors } from "@theme";
 import { _AddCompanyModal, _AddContactModal, _CompanyCard } from "../components";
 import { openDeleteModalHelper } from "@helpers";
@@ -48,7 +48,7 @@ const Company: React.FC<OwnProps> = () => {
   // const [viewMode, toggle] = useToggle(["cards", "two-column", "list"]);
   const [viewMode, toggle] = useToggle(["cards", "list"]);
   const [searchQuery, setSearchQuery] = React.useState("");
-  const companies = useAppSelector(selectCompaniesWithContact);
+  const { data: companies } = useAppSelector(selectCompanies);
   const [isDeleting, setIsDeleting] = React.useState(false);
 
   const [addCompanyModalOpened, setAddCompanyModalOpened] = React.useState(false);

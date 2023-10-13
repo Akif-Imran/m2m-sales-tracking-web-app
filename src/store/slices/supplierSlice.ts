@@ -7,19 +7,7 @@ interface State {
 }
 
 const initialState: State = {
-  data: [
-    {
-      id: 1,
-      name: "Supplier 1",
-      email: "supplier1@example.com",
-      phone: "+62 987 1234567",
-      address: " Taman Padi Emas, Jalan Alor Mengkudu",
-      city: "Alor Setar",
-      state: "Kedah",
-      country: "Malaysia",
-      websiteURL: "https://www.supplier1.com",
-    },
-  ],
+  data: [],
   isLoading: false,
   error: null,
 };
@@ -28,16 +16,15 @@ const supplierSlice = createSlice({
   name: "supplier",
   initialState: initialState,
   reducers: {
-    addSupplier: (state, action: PayloadAction<Omit<ISupplier, "id">>) => {
-      const id = Date.now();
-      state.data.push({ id, ...action.payload });
+    addSupplier: (state, action: PayloadAction<ISupplier>) => {
+      state.data.push(action.payload);
     },
     updateSupplier: (state, action: PayloadAction<ISupplier>) => {
-      const index = state.data.findIndex((supplier) => supplier.id === action.payload.id);
+      const index = state.data.findIndex((supplier) => supplier._id === action.payload._id);
       state.data[index] = action.payload;
     },
-    deleteSupplier: (state, action: PayloadAction<number>) => {
-      const index = state.data.findIndex((supplier) => supplier.id === action.payload);
+    deleteSupplier: (state, action: PayloadAction<string>) => {
+      const index = state.data.findIndex((supplier) => supplier._id === action.payload);
       state.data.splice(index, 1);
     },
   },

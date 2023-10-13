@@ -34,6 +34,8 @@ import { notify } from "@utility";
 import { DateTimePicker } from "@mantine/dates";
 import { addFollowUp } from "@slices";
 import { colors } from "@theme";
+import * as yup from "yup";
+import { createFollowUp } from "@thunks";
 
 interface OwnProps {
   opened: boolean;
@@ -43,7 +45,35 @@ interface OwnProps {
   projectId?: string;
 }
 
-interface IFollowUpForm extends Omit<IFollowUp, "id"> {}
+interface IFollowUpForm
+  extends Omit<IFollowUp, "_id" | "__v" | "createdBy" | "createdAt" | "isActive" | "company"> {}
+
+const schema: yup.ObjectSchema<IFollowUpForm> = yup.object().shape({
+  contactId: yup.string().required("Who is the meeting with?  is required"),
+  projectId: yup.string().required("Project is required"),
+  meetingDate: yup.string().required("Meeting date is required"),
+  meetingPlace: yup.string().required("Meeting place is required"),
+  address: yup.string().required("Address is required"),
+  city: yup.string().required("City is required"),
+  state: yup.string().required("State is required"),
+  country: yup.string().required("Country is required"),
+  meetingAgenda: yup.string().required("Meeting agenda is required"),
+  meetingSummary: yup.string().required("Meeting summary is required"),
+  nextMeetingPlace: yup.string().optional(),
+  nextMeetingDate: yup.string().optional(),
+  nextMeetingAgenda: yup.string().optional(),
+  expenseName: yup.string().optional(),
+  expenseType: yup.string().optional(),
+  expensePrice: yup
+    .object()
+    .shape({
+      amount: yup.number().required("Expense amount is required"),
+      currency: yup.string().required("Currency is required"),
+    })
+    .optional(),
+  expenseDocument: yup.string().nullable(),
+  customerId: yup.string().required("Customer is required"),
+});
 
 const _AddFollowUpModal: React.FC<OwnProps> = ({
   title,
@@ -55,20 +85,22 @@ const _AddFollowUpModal: React.FC<OwnProps> = ({
   const { theme } = useStyles();
   const { classes: gclasses } = useGStyles();
   const {
-    state: { user },
+    state: { token },
   } = useAuthContext();
   const dispatch = useAppDispatch();
   const projects = useAppSelector(selectProjectWithRecords);
-  const { projects: projectsList } = useAppSelector(selectRecordsForDropdown);
+  const { projects: projectsList, companies: companiesList } =
+    useAppSelector(selectRecordsForDropdown);
   const contacts = useAppSelector(selectCompanyContact);
+
+  const [isCreating, setIsCreating] = React.useState(false);
   const [contactList, setContactList] = React.useState<IDropDownList>([]);
   const [companyProjectList, setCompanyProjectsList] = React.useState<IDropDownList>([]);
 
   const form = useFormik<IFollowUpForm>({
     initialValues: {
-      contactPersonId: "",
+      contactId: "",
       projectId: "",
-      followUpPersonId: user!._id,
       meetingDate: DateTime.now().toFormat(YYYY_MM_DD_HH_MM_SS_A),
       meetingPlace: "",
       address: "",
@@ -77,26 +109,43 @@ const _AddFollowUpModal: React.FC<OwnProps> = ({
       country: "",
       meetingAgenda: "",
       meetingSummary: "",
-      nextFollowUp: {
-        place: "",
-        meetingDate: DateTime.now().toFormat(YYYY_MM_DD_HH_MM_SS_A),
-        meetingAgenda: "",
+      nextMeetingPlace: "",
+      nextMeetingDate: DateTime.now().toFormat(YYYY_MM_DD_HH_MM_SS_A),
+      nextMeetingAgenda: "",
+      expenseName: "",
+      expenseType: "",
+      expensePrice: {
+        amount: 0,
+        currency: "MYR",
       },
-      expenses: {
-        name: "",
-        type: "",
-        amount: {
-          amount: 0,
-          currency: "MYR",
-        },
-        receipt: "", //image
-      },
+      expenseDocument: "",
+      customerId: companyId || "",
     },
+    validationSchema: schema,
     onSubmit(values, helpers) {
       console.log(values);
-      dispatch(addFollowUp(values));
-      helpers.resetForm();
-      onClose();
+      setIsCreating((_prev) => true);
+      dispatch(
+        createFollowUp({
+          token,
+          followUp: values,
+        })
+      )
+        .unwrap()
+        .then((res) => {
+          if (res.success) {
+            dispatch(addFollowUp(res.data));
+            helpers.resetForm();
+            onClose();
+          }
+        })
+        .catch((err) => {
+          console.log("Add Follow: ", err?.message);
+          notify("Add Follow Up", "An error occurred", "error");
+        })
+        .finally(() => {
+          setIsCreating((_prev) => false);
+        });
     },
   });
 
@@ -109,7 +158,7 @@ const _AddFollowUpModal: React.FC<OwnProps> = ({
     reader.onload = (e) => {
       const dataUri = e?.target?.result as string;
       if (dataUri) {
-        form.setValues((prev) => ({ ...prev, expenses: { ...prev.expenses, receipt: dataUri } }));
+        form.setValues((prev) => ({ ...prev, expenseDocument: dataUri }));
       }
     };
     reader.readAsDataURL(file);
@@ -119,8 +168,30 @@ const _AddFollowUpModal: React.FC<OwnProps> = ({
     if (!value) return;
     form.setValues((prev) => ({
       ...prev,
-      expenses: { ...prev.expenses, amount: { ...prev.expenses.amount, currency: value } },
+      expensePrice: {
+        amount: prev.expensePrice?.amount || 0,
+        currency: value,
+      },
     }));
+  };
+
+  const handleOnChangeCompany = (value: string | null) => {
+    if (!value) return;
+    form.setValues((prev) => ({ ...prev, customerId: value }));
+    const project_s = projects
+      .filter((project) => project.customerId === value)
+      .map((project) => ({
+        label: project.name,
+        value: project._id,
+      }));
+    const contact_s = contacts.data
+      .filter((contact) => contact.customerId === value)
+      .map((contact) => ({
+        label: contact.name,
+        value: contact._id,
+      }));
+    setCompanyProjectsList(project_s);
+    setContactList(contact_s);
   };
 
   const handleCancel = () => {
@@ -128,34 +199,46 @@ const _AddFollowUpModal: React.FC<OwnProps> = ({
     onClose();
   };
 
-  React.useEffect(() => {
-    if (!form.values.projectId) return;
-    const project = projects.find((project) => project._id === form.values.projectId);
-    const compContacts = contacts.data
-      .filter((contact) => contact.customerId === project?.customerId)
-      .map((contact) => ({
-        label: contact.name,
-        value: contact._id,
-      }));
-    setContactList(compContacts);
-  }, [contacts.data, form.values.projectId, projects]);
+  const setProjectAndContactsBasedOnCompany = React.useCallback(
+    (companyId: string) => {
+      const project_s = projects
+        .filter((project) => project.customerId === companyId)
+        .map((project) => ({
+          label: project.name,
+          value: project._id,
+        }));
+      const contact_s = contacts.data
+        .filter((contact) => contact.customerId === companyId)
+        .map((contact) => ({
+          label: contact.name,
+          value: contact._id,
+        }));
+      setContactList(contact_s);
+      setCompanyProjectsList(project_s);
+    },
+    [contacts.data, projects]
+  );
 
   React.useEffect(() => {
-    if (!companyId) return;
-    const project_s = projects
-      .filter((project) => project.customerId === companyId)
-      .map((project) => ({
-        label: project.name,
-        value: project._id,
-      }));
-    setCompanyProjectsList(project_s);
-  }, [companyId, projects]);
+    if (!form.values.customerId) return;
+    setProjectAndContactsBasedOnCompany(form.values.customerId);
+  }, [form.values.customerId, setProjectAndContactsBasedOnCompany]);
+
+  React.useEffect(() => {
+    if (!companyId) {
+      setCompanyProjectsList(projectsList);
+      return;
+    }
+    form.setValues((prev) => ({ ...prev, customerId: companyId }));
+    setProjectAndContactsBasedOnCompany(companyId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [companyId, opened, setProjectAndContactsBasedOnCompany]);
 
   React.useEffect(() => {
     if (!projectId) return;
     form.setValues((prev) => ({ ...prev, projectId: projectId }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [projectId]);
+  }, [projectId, opened]);
 
   return (
     <Modal
@@ -183,6 +266,23 @@ const _AddFollowUpModal: React.FC<OwnProps> = ({
         <Grid.Col span={12}>
           <Card shadow="sm" mb={"xs"} px={"sm"} py={"xs"} radius={"md"}>
             <Stack spacing={"xs"}>
+              <Select
+                required
+                searchable
+                withAsterisk={false}
+                label="Company"
+                placeholder="Select a company"
+                allowDeselect={false}
+                nothingFound="No company found"
+                value={form.values.customerId}
+                data={companiesList}
+                onChange={handleOnChangeCompany}
+                error={
+                  form.errors.customerId && form.touched.customerId
+                    ? `${form.errors.customerId}`
+                    : null
+                }
+              />
               <Group grow align="flex-start">
                 <Select
                   required
@@ -192,12 +292,17 @@ const _AddFollowUpModal: React.FC<OwnProps> = ({
                   placeholder="Select a project"
                   allowDeselect={false}
                   nothingFound="No projects found"
-                  value={form.values.projectId.toString()}
+                  value={form.values.projectId}
+                  data={companyProjectList}
                   onChange={(value) => {
                     if (!value) return;
                     form.setValues((prev) => ({ ...prev, projectId: value }));
                   }}
-                  data={companyId ? companyProjectList : projectsList}
+                  error={
+                    form.errors.projectId && form.touched.projectId
+                      ? `${form.errors.projectId}`
+                      : null
+                  }
                 />
                 <Select
                   required
@@ -207,12 +312,17 @@ const _AddFollowUpModal: React.FC<OwnProps> = ({
                   placeholder="Select contact"
                   allowDeselect={false}
                   nothingFound="No contacts found"
-                  value={form.values.contactPersonId.toString()}
+                  value={form.values.contactId}
+                  data={contactList}
                   onChange={(value) => {
                     if (!value) return;
-                    form.setValues((prev) => ({ ...prev, contactPersonId: value }));
+                    form.setValues((prev) => ({ ...prev, contactId: value }));
                   }}
-                  data={contactList}
+                  error={
+                    form.errors.contactId && form.touched.contactId
+                      ? `${form.errors.contactId}`
+                      : null
+                  }
                 />
               </Group>
               <Group grow align="flex-start">
@@ -234,6 +344,11 @@ const _AddFollowUpModal: React.FC<OwnProps> = ({
                       meetingDate: date?.toISOString(),
                     }));
                   }}
+                  error={
+                    form.errors.meetingDate && form.touched.meetingDate
+                      ? `${form.errors.meetingDate}`
+                      : null
+                  }
                 />
                 <TextInput
                   required
@@ -244,6 +359,11 @@ const _AddFollowUpModal: React.FC<OwnProps> = ({
                   value={form.values.meetingPlace}
                   onChange={form.handleChange}
                   onBlur={form.handleBlur}
+                  error={
+                    form.errors.meetingPlace && form.touched.meetingPlace
+                      ? `${form.errors.meetingPlace}`
+                      : null
+                  }
                 />
               </Group>
               <TextInput
@@ -255,6 +375,9 @@ const _AddFollowUpModal: React.FC<OwnProps> = ({
                 value={form.values.address}
                 onChange={form.handleChange}
                 onBlur={form.handleBlur}
+                error={
+                  form.errors.address && form.touched.address ? `${form.errors.address}` : null
+                }
               />
               <Group grow align="flex-start">
                 <TextInput
@@ -266,6 +389,7 @@ const _AddFollowUpModal: React.FC<OwnProps> = ({
                   value={form.values.city}
                   onChange={form.handleChange}
                   onBlur={form.handleBlur}
+                  error={form.errors.city && form.touched.city ? `${form.errors.city}` : null}
                 />
                 <TextInput
                   required
@@ -276,6 +400,7 @@ const _AddFollowUpModal: React.FC<OwnProps> = ({
                   value={form.values.state}
                   onChange={form.handleChange}
                   onBlur={form.handleBlur}
+                  error={form.errors.state && form.touched.state ? `${form.errors.state}` : null}
                 />
                 <TextInput
                   required
@@ -286,6 +411,9 @@ const _AddFollowUpModal: React.FC<OwnProps> = ({
                   value={form.values.country}
                   onChange={form.handleChange}
                   onBlur={form.handleBlur}
+                  error={
+                    form.errors.country && form.touched.country ? `${form.errors.country}` : null
+                  }
                 />
               </Group>
               <Textarea
@@ -296,6 +424,11 @@ const _AddFollowUpModal: React.FC<OwnProps> = ({
                 value={form.values.meetingAgenda}
                 onChange={form.handleChange}
                 onBlur={form.handleBlur}
+                error={
+                  form.errors.meetingAgenda && form.touched.meetingAgenda
+                    ? `${form.errors.meetingAgenda}`
+                    : null
+                }
               />
               <Textarea
                 rows={5}
@@ -305,6 +438,11 @@ const _AddFollowUpModal: React.FC<OwnProps> = ({
                 value={form.values.meetingSummary}
                 onChange={form.handleChange}
                 onBlur={form.handleBlur}
+                error={
+                  form.errors.meetingSummary && form.touched.meetingSummary
+                    ? `${form.errors.meetingSummary}`
+                    : null
+                }
               />
             </Stack>
           </Card>
@@ -320,11 +458,16 @@ const _AddFollowUpModal: React.FC<OwnProps> = ({
                   required
                   withAsterisk={false}
                   label="Place"
-                  name="nextFollowUp.place"
-                  id="nextFollowUp.place"
-                  value={form.values.nextFollowUp.place}
+                  name="nextMeetingPlace"
+                  id="nextMeetingPlace"
+                  value={form.values.nextMeetingPlace}
                   onChange={form.handleChange}
                   onBlur={form.handleBlur}
+                  error={
+                    form.errors.nextMeetingPlace && form.touched.nextMeetingPlace
+                      ? `${form.errors.nextMeetingPlace}`
+                      : null
+                  }
                 />
                 <DateTimePicker
                   required
@@ -334,29 +477,36 @@ const _AddFollowUpModal: React.FC<OwnProps> = ({
                   valueFormat="YYYY-MM-DD hh:mm A"
                   clearable={false}
                   placeholder="Pick date and time"
-                  name="nextFollowUp.meetingDate"
-                  id="nextFollowUp.meetingDate"
+                  name="nextMeetingDate"
+                  id="nextMeetingDate"
                   onBlur={form.handleBlur}
                   onChange={(date) => {
                     if (!date) return;
                     form.setValues((prev) => ({
                       ...prev,
-                      nextFollowUp: {
-                        ...prev.nextFollowUp,
-                        meetingDate: date?.toISOString(),
-                      },
+                      nextMeetingDate: date?.toISOString(),
                     }));
                   }}
+                  error={
+                    form.errors.nextMeetingDate && form.touched.nextMeetingDate
+                      ? `${form.errors.nextMeetingDate}`
+                      : null
+                  }
                 />
               </Group>
               <Textarea
                 rows={5}
                 label="Agenda"
-                name="nextFollowUp.meetingAgenda"
-                id="nextFollowUp.meetingAgenda"
-                value={form.values.nextFollowUp.meetingAgenda}
+                name="nextMeetingAgenda"
+                id="nextMeetingAgenda"
+                value={form.values.nextMeetingAgenda}
                 onChange={form.handleChange}
                 onBlur={form.handleBlur}
+                error={
+                  form.errors.nextMeetingAgenda && form.touched.nextMeetingAgenda
+                    ? `${form.errors.nextMeetingAgenda}`
+                    : null
+                }
               />
             </Card>
             <Card shadow="sm" mb={"xs"} px={"sm"} py={"xs"} radius={"md"}>
@@ -364,8 +514,8 @@ const _AddFollowUpModal: React.FC<OwnProps> = ({
                 Expense / Claim
               </Text>
               <Flex direction={"column"} align={"center"} justify={"flex-end"}>
-                {form.values.expenses.receipt ? (
-                  <Avatar src={form.values.expenses.receipt} radius={"md"} size={rem(170)} />
+                {form.values.expenseDocument ? (
+                  <Avatar src={form.values.expenseDocument} radius={"md"} size={rem(170)} />
                 ) : (
                   <div
                     style={{
@@ -397,31 +547,41 @@ const _AddFollowUpModal: React.FC<OwnProps> = ({
                 required
                 withAsterisk={false}
                 label="Name"
-                name="expenses.name"
-                id="expenses.name"
-                value={form.values.expenses.name}
+                name="expenseName"
+                id="expenseName"
+                value={form.values.expenseName}
                 onChange={form.handleChange}
                 onBlur={form.handleBlur}
+                error={
+                  form.errors.expenseName && form.touched.expenseName
+                    ? `${form.errors.expenseName}`
+                    : null
+                }
               />
               <Group grow align="flex-start">
                 <TextInput
                   required
                   withAsterisk={false}
                   label="Type"
-                  name="expenses.type"
-                  id="expenses.type"
-                  value={form.values.expenses.type}
+                  name="expenseType"
+                  id="expenseType"
+                  value={form.values.expenseType}
                   onChange={form.handleChange}
                   onBlur={form.handleBlur}
+                  error={
+                    form.errors.expenseType && form.touched.expenseType
+                      ? `${form.errors.expenseType}`
+                      : null
+                  }
                 />
                 <TextInput
                   required
                   withAsterisk={false}
                   label="Amount"
-                  name="expenses.amount.amount"
-                  id="expenses.amount.amount"
+                  name="expensePrice.amount"
+                  id="expensePrice.amount"
                   type="number"
-                  value={form.values.expenses.amount.amount.toString()}
+                  value={form.values.expensePrice?.amount}
                   onChange={form.handleChange}
                   onBlur={form.handleBlur}
                   rightSectionWidth={rem(88)}
@@ -433,10 +593,15 @@ const _AddFollowUpModal: React.FC<OwnProps> = ({
                       radius={"xl"}
                       variant="unstyled"
                       nothingFound="No such currency"
-                      value={form.values.expenses.amount.currency}
+                      value={form.values.expensePrice?.currency}
                       onChange={handleOnChangeValueCurrency}
                       data={currencyList}
                     />
+                  }
+                  error={
+                    form.errors.meetingPlace && form.touched.meetingPlace
+                      ? `${form.errors.meetingPlace}`
+                      : null
                   }
                 />
               </Group>
@@ -445,7 +610,12 @@ const _AddFollowUpModal: React.FC<OwnProps> = ({
                 <Button variant="outline" onClick={handleCancel} size="xs">
                   Cancel
                 </Button>
-                <Button variant="filled" onClick={() => form.handleSubmit()} size="xs">
+                <Button
+                  variant="filled"
+                  onClick={() => form.handleSubmit()}
+                  size="xs"
+                  loading={isCreating}
+                >
                   Save
                 </Button>
               </Group>

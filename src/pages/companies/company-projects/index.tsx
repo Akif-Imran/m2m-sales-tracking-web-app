@@ -16,7 +16,7 @@ import {
   rem,
 } from "@mantine/core";
 import {
-  selectCompaniesWithContact,
+  selectCompanies,
   selectCompanyContact,
   selectFollowUpsWithRecords,
   selectProjectWithRecords,
@@ -43,6 +43,7 @@ type ArrayToObj<T extends Array<Record<string, unknown>>> = T extends Array<infe
 export const CompanyProjects: React.FC<OwnProps> = () => {
   const { theme } = useStyles();
   const { companyId } = useParams();
+  console.log(companyId);
   const dispatch = useAppDispatch();
   const {
     state: { token },
@@ -50,7 +51,7 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
   const followUpList = useAppSelector(selectFollowUpsWithRecords);
   const projectsList = useAppSelector(selectProjectWithRecords);
   const { projectStatus: projectStatusList } = useAppSelector(selectRecordsForDropdown);
-  const companiesList = useAppSelector(selectCompaniesWithContact);
+  const { data: companiesList } = useAppSelector(selectCompanies);
   const { data: contactsList } = useAppSelector(selectCompanyContact);
 
   const [isDeletingContact, setIsDeletingContact] = React.useState(false);
@@ -351,12 +352,14 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
                   </Flex>
                   <Divider color={colors.borderColor} mb={rem(8)} />
                   {followUps.map((followUp) => {
-                    const value = Intl.NumberFormat("en-US", {
-                      style: "currency",
-                      currency: followUp.expenses.amount.currency,
-                      maximumFractionDigits: 2,
-                      minimumFractionDigits: 2,
-                    }).format(followUp.expenses.amount.amount);
+                    const value = followUp?.expensePrice
+                      ? Intl.NumberFormat("en-US", {
+                          style: "currency",
+                          currency: followUp.expensePrice.currency,
+                          maximumFractionDigits: 2,
+                          minimumFractionDigits: 2,
+                        }).format(followUp.expensePrice.amount)
+                      : "N/A";
 
                     return (
                       <Flex direction={"column"} my={"md"}>
@@ -420,6 +423,7 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
           title="Add Follow Up"
           opened={addFollowUpModalOpened}
           projectId={selectedProject._id}
+          companyId={company._id}
           onClose={() => setAddFollowUpModalOpened(false)}
         />
       </>

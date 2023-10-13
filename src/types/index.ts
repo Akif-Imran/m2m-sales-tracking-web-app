@@ -104,32 +104,60 @@ interface IProject {
   // companyId: number; //company
 }
 interface IFollowUp {
-  id: number;
+  _id: string;
   projectId: string;
-  contactPersonId: string;
-  followUpPersonId: string;
+  customerId: string;
+  contactId: string;
   meetingDate: string;
   meetingPlace: string;
   address: string;
-  city: string;
   state: string;
   country: string;
+  city: string;
   meetingAgenda: string;
   meetingSummary: string;
-  nextFollowUp: {
-    place: string;
-    meetingDate: string;
-    meetingAgenda: string;
+  nextMeetingPlace?: string;
+  nextMeetingDate?: string;
+  nextMeetingAgenda?: string;
+  expenseType?: string;
+  expenseName?: string;
+  expensePrice?: {
+    amount: number;
+    currency: string;
   };
-  expenses: {
-    type: string;
-    name: string;
-    amount: {
-      currency: string;
-      amount: number;
-    };
-    receipt: string;
-  };
+  expenseDocument?: null | string;
+  createdBy: string;
+  createdAt: string;
+  isActive: boolean;
+  company: string;
+  __v: number;
+  //--------------------
+  // id: number;
+  // projectId: string;
+  // contactPersonId: string;
+  // followUpPersonId: string;
+  // meetingDate: string;
+  // meetingPlace: string;
+  // address: string;
+  // city: string;
+  // state: string;
+  // country: string;
+  // meetingAgenda: string;
+  // meetingSummary: string;
+  // nextFollowUp: {
+  //   place: string;
+  //   meetingDate: string;
+  //   meetingAgenda: string;
+  // };
+  // expenses: {
+  //   type: string;
+  //   name: string;
+  //   amount: {
+  //     currency: string;
+  //     amount: number;
+  //   };
+  //   receipt: string;
+  // };
 }
 interface ITaskStatus {
   id: number;
@@ -201,15 +229,20 @@ interface IClaim {
   statusName: string;
 }
 interface ISupplier {
-  id: number;
+  createdBy: string;
+  createdAt: string;
+  isActive: boolean;
+  company: string;
   name: string;
+  businessCard: string;
+  designation: string;
+  department: string;
+  website: string;
   email: string;
-  phone: string;
-  address: string;
-  city: string;
-  state: string;
-  country: string;
-  websiteURL: string;
+  mobile: string;
+  customerId: string;
+  _id: string;
+  __v: number;
 }
 interface ILeaveType {
   id: number;

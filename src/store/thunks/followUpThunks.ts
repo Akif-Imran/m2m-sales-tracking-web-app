@@ -45,6 +45,7 @@ interface ByIdReq {
 }
 
 export const createFollowUp = createAsyncThunk("followup/create", async (params: CreateReq) => {
+  delete params.followUp.expenseDocument;
   const response = await apiPost<ApiResponse<IFollowUp>, typeof params.followUp>(
     urls.followUp.create,
     params.token,

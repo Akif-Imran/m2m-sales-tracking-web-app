@@ -143,7 +143,7 @@ export const selectRecordsForDropdown = createSelector(
         label: project.name,
       })),
       suppliers: suppliers.data.map((supplier) => ({
-        value: supplier.id.toString(),
+        value: supplier._id,
         label: supplier.name,
       })),
       departments: departments.data.map((department) => ({
@@ -221,10 +221,8 @@ export const selectFollowUpsWithRecords = createSelector(
   (followups, projects, contacts, users) => {
     return followups.data.map((followup) => {
       const project = projects.data.find((project) => project._id === followup.projectId);
-      const followUpPerson = users.data.find((user) => user._id === followup.followUpPersonId);
-      const contactPerson = contacts.data.find(
-        (contact) => contact._id === followup.contactPersonId
-      );
+      const followUpPerson = users.data.find((user) => user._id === followup.createdBy);
+      const contactPerson = contacts.data.find((contact) => contact._id === followup.contactId);
       return { ...followup, project, contactPerson, followUpPerson };
     });
   }
@@ -236,9 +234,9 @@ export const selectPurchaseRequestsWithRecords = createSelector(
   selectProjects,
   (requests, users, suppliers, projects) => {
     return requests.data.map((request) => {
-      const requestByPerson = users.data.find((user) => user.id === request.requestedById);
-      const project = projects.data.find((project) => project.id === request.projectId);
-      const supplier = suppliers.data.find((supplier) => supplier.id === request.supplierId);
+      const requestByPerson = users.data.find((user) => user._id === request.requestedById);
+      const project = projects.data.find((project) => project._id === request.projectId);
+      const supplier = suppliers.data.find((supplier) => supplier._id === request.supplierId);
       return {
         ...request,
         requestByPerson,
@@ -257,7 +255,7 @@ export const selectClaimsWithRecords = createSelector(
     return claims.data.map((request) => {
       const requestByPerson = users.data.find((user) => user._id === request.requestedById);
       const project = projects.data.find((project) => project._id === request.projectId);
-      const supplier = suppliers.data.find((supplier) => supplier.id === request.supplierId);
+      const supplier = suppliers.data.find((supplier) => supplier._id === request.supplierId);
       return {
         ...request,
         requestByPerson,

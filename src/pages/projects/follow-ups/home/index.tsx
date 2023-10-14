@@ -100,7 +100,6 @@ export const FollowUps: React.FC<OwnProps> = () => {
           .finally(() => {
             setIsDeleting((_prev) => false);
           });
-        notify("Delete Follow Up", "Follow Up deleted successfully!", "success");
       },
       onCancel: () => notify("Delete Follow Up", "Operation canceled!", "error"),
     });

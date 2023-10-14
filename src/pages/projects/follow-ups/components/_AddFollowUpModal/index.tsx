@@ -4,6 +4,7 @@ import {
   Avatar,
   Button,
   Card,
+  Checkbox,
   FileButton,
   Flex,
   Grid,
@@ -46,7 +47,10 @@ interface OwnProps {
 }
 
 interface IFollowUpForm
-  extends Omit<IFollowUp, "_id" | "__v" | "createdBy" | "createdAt" | "isActive" | "company"> {}
+  extends Omit<IFollowUp, "_id" | "__v" | "createdBy" | "createdAt" | "isActive" | "company"> {
+  hasNextMeeting: boolean;
+  hasExpense: boolean;
+}
 
 const schema: yup.ObjectSchema<IFollowUpForm> = yup.object().shape({
   contactId: yup.string().required("Who is the meeting with?  is required"),
@@ -59,19 +63,51 @@ const schema: yup.ObjectSchema<IFollowUpForm> = yup.object().shape({
   country: yup.string().required("Country is required"),
   meetingAgenda: yup.string().required("Meeting agenda is required"),
   meetingSummary: yup.string().required("Meeting summary is required"),
-  nextMeetingPlace: yup.string().optional(),
-  nextMeetingDate: yup.string().optional(),
-  nextMeetingAgenda: yup.string().optional(),
-  expenseName: yup.string().optional(),
-  expenseType: yup.string().optional(),
+  hasNextMeeting: yup.boolean().required(),
+  nextMeetingPlace: yup.string().when(["hasNextMeeting"], {
+    is: true,
+    then: (schema) => schema.required("Next meeting place is required"),
+    otherwise: (schema) => schema.optional(),
+  }),
+  nextMeetingAgenda: yup.string().when(["hasNextMeeting"], {
+    is: true,
+    then: (schema) => schema.required("Next meeting agenda is required"),
+    otherwise: (schema) => schema.optional(),
+  }),
+  nextMeetingDate: yup.string().when(["hasNextMeeting"], {
+    is: true,
+    then: (schema) => schema.required("Next meeting date is required"),
+    otherwise: (schema) => schema.optional(),
+  }),
+  hasExpense: yup.boolean().required(),
+  expenseName: yup.string().when(["hasExpense"], {
+    is: true,
+    then: (schema) => schema.required("Expense name is required"),
+    otherwise: (schema) => schema.optional(),
+  }),
+  expenseType: yup.string().when(["hasExpense"], {
+    is: true,
+    then: (schema) => schema.required("Expense type is required"),
+    otherwise: (schema) => schema.optional(),
+  }),
   expensePrice: yup
-    .object()
-    .shape({
+    .object({
       amount: yup.number().required("Expense amount is required"),
       currency: yup.string().required("Currency is required"),
     })
-    .optional(),
-  expenseDocument: yup.string().nullable(),
+    .when(["hasExpense"], {
+      is: true,
+      then: (schema) => schema.required("amount and currency  is required"),
+      otherwise: (schema) => schema.optional(),
+    }),
+  expenseDocument: yup
+    .string()
+    .nullable()
+    .when(["hasExpense"], {
+      is: true,
+      then: (schema) => schema.required("Name is required"),
+      otherwise: (schema) => schema.optional(),
+    }),
   customerId: yup.string().required("Customer is required"),
 });
 
@@ -109,9 +145,11 @@ const _AddFollowUpModal: React.FC<OwnProps> = ({
       country: "",
       meetingAgenda: "",
       meetingSummary: "",
+      hasNextMeeting: false,
       nextMeetingPlace: "",
-      nextMeetingDate: DateTime.now().toFormat(YYYY_MM_DD_HH_MM_SS_A),
+      nextMeetingDate: "",
       nextMeetingAgenda: "",
+      hasExpense: false,
       expenseName: "",
       expenseType: "",
       expensePrice: {
@@ -192,6 +230,16 @@ const _AddFollowUpModal: React.FC<OwnProps> = ({
       }));
     setCompanyProjectsList(project_s);
     setContactList(contact_s);
+  };
+
+  const handleOnChangeHasNext = (value: boolean) => {
+    console.log(value);
+    form.setValues((prev) => ({ ...prev, hasNextMeeting: value }));
+  };
+
+  const handleOnChangeHasExpense = (value: boolean) => {
+    console.log(value);
+    form.setValues((prev) => ({ ...prev, hasExpense: value }));
   };
 
   const handleCancel = () => {
@@ -450,9 +498,15 @@ const _AddFollowUpModal: React.FC<OwnProps> = ({
         <Grid.Col span={12}>
           <Stack spacing={"xs"}>
             <Card shadow="sm" mb={"xs"} px={"sm"} py={"xs"} radius={"md"}>
-              <Text size={"xl"} underline>
-                Next Visit
-              </Text>
+              <Flex direction={"row"} justify={"flex-start"} align={"center"}>
+                <Checkbox
+                  checked={form.values.hasNextMeeting}
+                  onChange={(e) => handleOnChangeHasNext(e?.currentTarget?.checked)}
+                />
+                <Text fw={700} size={"xl"} ml={"xs"} color={colors.titleText}>
+                  Next Visit
+                </Text>
+              </Flex>
               <Group grow align="flex-start">
                 <TextInput
                   required
@@ -462,6 +516,7 @@ const _AddFollowUpModal: React.FC<OwnProps> = ({
                   id="nextMeetingPlace"
                   value={form.values.nextMeetingPlace}
                   onChange={form.handleChange}
+                  disabled={!form.values.hasNextMeeting}
                   onBlur={form.handleBlur}
                   error={
                     form.errors.nextMeetingPlace && form.touched.nextMeetingPlace
@@ -487,6 +542,7 @@ const _AddFollowUpModal: React.FC<OwnProps> = ({
                       nextMeetingDate: date?.toISOString(),
                     }));
                   }}
+                  disabled={!form.values.hasNextMeeting}
                   error={
                     form.errors.nextMeetingDate && form.touched.nextMeetingDate
                       ? `${form.errors.nextMeetingDate}`
@@ -502,6 +558,7 @@ const _AddFollowUpModal: React.FC<OwnProps> = ({
                 value={form.values.nextMeetingAgenda}
                 onChange={form.handleChange}
                 onBlur={form.handleBlur}
+                disabled={!form.values.hasNextMeeting}
                 error={
                   form.errors.nextMeetingAgenda && form.touched.nextMeetingAgenda
                     ? `${form.errors.nextMeetingAgenda}`
@@ -510,9 +567,15 @@ const _AddFollowUpModal: React.FC<OwnProps> = ({
               />
             </Card>
             <Card shadow="sm" mb={"xs"} px={"sm"} py={"xs"} radius={"md"}>
-              <Text size={"xl"} underline>
-                Expense / Claim
-              </Text>
+              <Flex direction={"row"} justify={"flex-start"} align={"center"}>
+                <Checkbox
+                  checked={form.values.hasExpense}
+                  onChange={(e) => handleOnChangeHasExpense(e?.currentTarget?.checked)}
+                />
+                <Text fw={700} size={"xl"} color={colors.titleText} ml={"xs"}>
+                  Expense / Claim
+                </Text>
+              </Flex>
               <Flex direction={"column"} align={"center"} justify={"flex-end"}>
                 {form.values.expenseDocument ? (
                   <Avatar src={form.values.expenseDocument} radius={"md"} size={rem(170)} />
@@ -534,6 +597,7 @@ const _AddFollowUpModal: React.FC<OwnProps> = ({
                         variant="filled"
                         color={theme.primaryColor}
                         {...props}
+                        disabled={!form.values.hasExpense}
                         rightIcon={<IconUpload size={16} color={theme.white} stroke={1.5} />}
                       >
                         Receipt
@@ -552,6 +616,7 @@ const _AddFollowUpModal: React.FC<OwnProps> = ({
                 value={form.values.expenseName}
                 onChange={form.handleChange}
                 onBlur={form.handleBlur}
+                disabled={!form.values.hasExpense}
                 error={
                   form.errors.expenseName && form.touched.expenseName
                     ? `${form.errors.expenseName}`
@@ -568,6 +633,7 @@ const _AddFollowUpModal: React.FC<OwnProps> = ({
                   value={form.values.expenseType}
                   onChange={form.handleChange}
                   onBlur={form.handleBlur}
+                  disabled={!form.values.hasExpense}
                   error={
                     form.errors.expenseType && form.touched.expenseType
                       ? `${form.errors.expenseType}`
@@ -584,6 +650,7 @@ const _AddFollowUpModal: React.FC<OwnProps> = ({
                   value={form.values.expensePrice?.amount}
                   onChange={form.handleChange}
                   onBlur={form.handleBlur}
+                  disabled={!form.values.hasExpense}
                   rightSectionWidth={rem(88)}
                   rightSection={
                     <Select
@@ -599,8 +666,8 @@ const _AddFollowUpModal: React.FC<OwnProps> = ({
                     />
                   }
                   error={
-                    form.errors.meetingPlace && form.touched.meetingPlace
-                      ? `${form.errors.meetingPlace}`
+                    form.errors.expensePrice && form.touched.expensePrice
+                      ? `${form.errors.expensePrice}`
                       : null
                   }
                 />

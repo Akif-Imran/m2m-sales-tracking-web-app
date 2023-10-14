@@ -23,13 +23,14 @@ import { deleteFollowUp } from "@slices";
 import { DAY_MM_DD_YYYY_HH_MM_SS_A } from "@constants";
 import { DateTime } from "luxon";
 import { _AddFollowUpModal } from "../components";
+import { removeFollowUp } from "@thunks";
 
 interface OwnProps {}
 
 export const FollowUps: React.FC<OwnProps> = () => {
   useStyles();
   const {
-    state: { isAdmin, user },
+    state: { isAdmin, user, token },
   } = useAuthContext();
   const dispatch = useAppDispatch();
   const { classes: gclasses, theme } = useGStyles();
@@ -38,16 +39,16 @@ export const FollowUps: React.FC<OwnProps> = () => {
   const followups = useAppSelector(selectFollowUpsWithRecords);
   const [addFollowUpModalOpened, setAddFollowUpModalOpened] = React.useState(false);
   const [searchedData, setSearchedData] = React.useState<typeof followups>([]);
+  const [isDeleting, setIsDeleting] = React.useState(false);
 
   const onChangeSearch = (query: string) => {
     setSearchQuery(query);
-    if (user?.userTypeName === "Admin") {
+    if (isAdmin) {
       const filtered = followups.filter(
         (followup) =>
           followup.project?.name.toLowerCase().includes(query.toLowerCase()) ||
           followup.contactPerson?.name.toLowerCase().includes(query.toLowerCase()) ||
-          followup.followUpPerson?.firstName.toLowerCase().includes(query.toLowerCase()) ||
-          followup.followUpPerson?.lastName.toLowerCase().includes(query.toLowerCase()) ||
+          followup.followUpPerson?.name.toLowerCase().includes(query.toLowerCase()) ||
           followup.meetingPlace?.toLowerCase().includes(query.toLowerCase())
       );
       setSearchedData(filtered);
@@ -56,20 +57,19 @@ export const FollowUps: React.FC<OwnProps> = () => {
         (followup) =>
           (followup.project?.name.toLowerCase().includes(query.toLowerCase()) ||
             followup.contactPerson?.name.toLowerCase().includes(query.toLowerCase()) ||
-            followup.followUpPerson?.firstName.toLowerCase().includes(query.toLowerCase()) ||
-            followup.followUpPerson?.lastName.toLowerCase().includes(query.toLowerCase()) ||
+            followup.followUpPerson?.name.toLowerCase().includes(query.toLowerCase()) ||
             followup.meetingPlace?.toLowerCase().includes(query.toLowerCase())) &&
-          followup.followUpPersonId === user?.id
+          followup.followUpPerson?._id === user?._id
       );
       setSearchedData(filtered);
     }
   };
 
-  const handleDelete = (id: number) => {
+  const handleDelete = (id: string) => {
     openDeleteModalHelper({
       theme: theme,
       title: `Delete Follow Up`,
-      loading: false,
+      loading: isDeleting,
       description: (
         <Text fw={"normal"} fs={"normal"} fz={"sm"} color={colors.titleText}>
           Are you sure you want to delete this Follow Up? This action is destructive and you will
@@ -79,7 +79,27 @@ export const FollowUps: React.FC<OwnProps> = () => {
       cancelLabel: "Cancel",
       confirmLabel: "Delete Follow Up",
       onConfirm: () => {
-        dispatch(deleteFollowUp(id));
+        setIsDeleting((_prev) => true);
+        dispatch(
+          removeFollowUp({
+            token,
+            id,
+          })
+        )
+          .unwrap()
+          .then((res) => {
+            notify("Delete Follow Up", res?.message, res?.success ? "success" : "error");
+            if (res.success) {
+              dispatch(deleteFollowUp(res.data?._id));
+            }
+          })
+          .catch((err) => {
+            console.log("Delete Follow Up:", err?.message);
+            notify("Delete Follow Up", "An error occurred", "error");
+          })
+          .finally(() => {
+            setIsDeleting((_prev) => false);
+          });
         notify("Delete Follow Up", "Follow Up deleted successfully!", "success");
       },
       onCancel: () => notify("Delete Follow Up", "Operation canceled!", "error"),
@@ -87,13 +107,13 @@ export const FollowUps: React.FC<OwnProps> = () => {
   };
 
   React.useEffect(() => {
-    if (user?.userTypeName === "Admin") {
+    if (isAdmin) {
       setSearchedData(followups);
     } else {
-      const filtered = followups.filter((followup) => followup.followUpPersonId === user?.id);
+      const filtered = followups.filter((followup) => followup.createdBy === user?._id);
       setSearchedData(filtered);
     }
-  }, [followups, user]);
+  }, [followups, isAdmin, user]);
 
   const rows =
     searchedData.length === 0 ? (
@@ -105,15 +125,16 @@ export const FollowUps: React.FC<OwnProps> = () => {
     ) : (
       <>
         {searchedData.map((followup, index) => {
-          const value = Intl.NumberFormat("en-US", {
-            style: "currency",
-            currency: followup.expenses.amount.currency,
-            maximumFractionDigits: 2,
-          }).format(followup.expenses.amount.amount);
+          const value = followup.expensePrice
+            ? Intl.NumberFormat("en-US", {
+                style: "currency",
+                currency: followup.expensePrice?.currency,
+                maximumFractionDigits: 2,
+              }).format(followup.expensePrice?.amount)
+            : "N/A";
           return (
-            <tr key={followup.id}>
+            <tr key={followup._id}>
               <td>{index + 1}</td>
-              <td>{followup.id}</td>
               <td>{followup.project?.name}</td>
               <td>{followup.contactPerson?.name}</td>
               <td>
@@ -129,24 +150,30 @@ export const FollowUps: React.FC<OwnProps> = () => {
               <td>{followup.meetingAgenda}</td>
               <td>{followup.meetingSummary}</td>
               {/* next follow up */}
-              <td>{followup.nextFollowUp.place}</td>
+              <td>{followup?.nextMeetingPlace}</td>
               <td>
-                {DateTime.fromISO(followup.nextFollowUp.meetingDate)
-                  .toLocal()
-                  .toFormat(DAY_MM_DD_YYYY_HH_MM_SS_A)}
+                {followup?.nextMeetingDate
+                  ? DateTime.fromISO(followup?.nextMeetingDate)
+                      .toLocal()
+                      .toFormat(DAY_MM_DD_YYYY_HH_MM_SS_A)
+                  : "N/A"}
               </td>
-              <td>{followup.nextFollowUp.meetingAgenda}</td>
+              <td>{followup?.nextMeetingAgenda}</td>
               {/* claims on this follow up */}
-              <td>{followup.expenses.type}</td>
-              <td>{followup.expenses.name}</td>
+              <td>{followup?.expenseType}</td>
+              <td>{followup?.expenseName}</td>
               <td>{value}</td>
               <td>
-                <Avatar src={followup.expenses.receipt} size={50} radius={"xs"} />
+                {followup?.expenseDocument ? (
+                  <Avatar src={followup?.expenseDocument} size={50} radius={"xs"} />
+                ) : (
+                  "N/A"
+                )}
               </td>
               <td>
                 {isAdmin ? (
                   <Group>
-                    <ActionIcon color="red" size={"sm"} onClick={() => handleDelete(followup.id)}>
+                    <ActionIcon color="red" size={"sm"} onClick={() => handleDelete(followup._id)}>
                       <IconTrash />
                     </ActionIcon>
                   </Group>
@@ -193,7 +220,6 @@ export const FollowUps: React.FC<OwnProps> = () => {
               </tr>
               <tr>
                 <th>#</th>
-                <th>Id</th>
                 <th>Lead/Project</th>
                 <th>Meeting With</th>
                 <th>Meeting Date/Time</th>

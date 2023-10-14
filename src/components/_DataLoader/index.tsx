@@ -4,6 +4,7 @@ import { useAppDispatch } from "@store";
 import {
   fetchAllCompanies,
   fetchAllContacts,
+  fetchFollowUps,
   fetchProjectStatuses,
   fetchProjects,
   fetchSuppliers,
@@ -29,6 +30,7 @@ export const _DataLoader: React.FC<React.PropsWithChildren> = ({ children }) => 
     dispatch(fetchProjects(token));
     dispatch(fetchUsers(token));
     dispatch(fetchSuppliers(token));
+    dispatch(fetchFollowUps(token));
   }, [dispatch, token]);
 
   return (

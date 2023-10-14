@@ -8,7 +8,28 @@ interface State {
 }
 
 const initialState: State = {
-  data: [],
+  data: [
+    {
+      createdBy: "65258520a7816043f5b0cf47",
+      createdAt: "2023-10-14T13:03:16.715Z",
+      isActive: true,
+      company: "65258520a7816043f5b0cf45",
+      name: "Default Supplier Demo",
+      businessCard: "Some info",
+      designation: "Manager",
+      department: "Support",
+      email: "example@email.com",
+      mobile: "2344",
+      address: "this is the address",
+      city: "Kuala Lumpur",
+      state: "Selangor",
+      country: "Malaysia",
+      website: "https://www.abc.com",
+      customerId: "652506a266869aaf01825588",
+      _id: "652a9194b107af6cea0d604f",
+      __v: 0,
+    },
+  ],
   isLoading: false,
   error: null,
 };

@@ -216,7 +216,7 @@ const Dashboard: React.FC<OwnProps> = () => {
 
   React.useEffect(() => {
     const inProcess = projects
-      .filter((project) => project.statusId === 3)
+      .filter((project) => project.status === 4)
       .map((project) => {
         const delivery = DateTime.fromISO(project.deliveryDate);
         const remainingDays = delivery.diff(DateTime.now()).as("days");
@@ -240,12 +240,13 @@ const Dashboard: React.FC<OwnProps> = () => {
 
     const follows = followUps.map((followUp) => ({
       title: `Meeting: ${followUp.contactPerson?.name || ""}`,
-      start: followUp.nextFollowUp.meetingDate,
-      end: followUp.nextFollowUp.meetingDate,
+      start: followUp.nextMeetingDate,
+      end: followUp.nextMeetingDate,
       allDay: true,
       backgroundColor: theme.colors[theme.primaryColor][6],
       borderColor: theme.colors[theme.primaryColor][6],
     }));
+    //@ts-expect-error the type works
     setCalendarTasks(tsk.concat(follows));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tasks, followUps]);

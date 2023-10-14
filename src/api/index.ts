@@ -8,6 +8,8 @@ export const BASE_CUSTOMER_URL = `${BASE_URL}/customer`;
 export const BASE_CONTACT_URL = `${BASE_URL}/contact`;
 export const BASE_PROJECT_URL = `${BASE_URL}/project`;
 export const BASE_FOLLOW_UP_URL = `${BASE_URL}/followup`;
+export const BASE_CLAIM_URL = `${BASE_URL}/claim`;
+export const BASE_PURCHASE_REQUEST_URL = `${BASE_URL}/purchase-request`;
 export const BASE_SUPPLIER_URL = `${BASE_URL}/supplier`;
 export const BASE_REPORT_URL = `${BASE_URL}/app_reports`;
 export const MALAYSIA_ZONE = "Asia/Kuala_Lumpur";
@@ -52,6 +54,22 @@ export const urls = {
     delete: (id: string) => `${BASE_FOLLOW_UP_URL}/delete/${id}`,
     getById: (id: string) => `${BASE_FOLLOW_UP_URL}/getById/${id}`,
   },
+  claims: {
+    list: `${BASE_CLAIM_URL}/getAll`,
+    create: `${BASE_CLAIM_URL}/create`,
+    update: (id: string) => `${BASE_CLAIM_URL}/update/${id}`,
+    delete: (id: string) => `${BASE_CLAIM_URL}/delete/${id}`,
+    getById: (id: string) => `${BASE_CLAIM_URL}/getById/${id}`,
+    statusList: `${BASE_CLAIM_URL}/getStatusList`,
+    updateStatus: (id: string) => `${BASE_CLAIM_URL}/changeStatus/${id}`,
+  },
+  purchaseRequest: {
+    list: `${BASE_PURCHASE_REQUEST_URL}/getAll`,
+    create: `${BASE_PURCHASE_REQUEST_URL}/create`,
+    update: (id: string) => `${BASE_PURCHASE_REQUEST_URL}/update/${id}`,
+    delete: (id: string) => `${BASE_PURCHASE_REQUEST_URL}/delete/${id}`,
+    getById: (id: string) => `${BASE_PURCHASE_REQUEST_URL}/getById/${id}`,
+  },
   supplier: {
     list: `${BASE_SUPPLIER_URL}/getAll`,
     create: `${BASE_SUPPLIER_URL}/create`,
@@ -66,6 +84,7 @@ export const urls = {
     list: `${BASE_URL}/notifications`,
   },
 };
+
 export const events = {
   authenticated: "authenticated",
   crash: "crash",

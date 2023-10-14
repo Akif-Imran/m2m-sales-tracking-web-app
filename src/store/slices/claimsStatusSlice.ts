@@ -1,18 +1,14 @@
 import { SerializedError, createSlice } from "@reduxjs/toolkit";
 
 interface State {
-  data: IPurchaseRequestStatus[];
+  data: IClaimStatus[];
   isLoading: boolean;
   error: null | SerializedError;
 }
 
 const initialState: State = {
-  data: [
-    { id: 1, name: "Pending" },
-    { id: 2, name: "Approved" },
-    { id: 3, name: "Rejected" },
-    { id: 4, name: "KIV" },
-  ],
+  data: [],
+  //TODO - status list should have pending state as well and that would be the default state when claim is created
   isLoading: false,
   error: null,
 };

@@ -210,6 +210,10 @@ interface IPurchaseRequest {
   statusId: number;
   statusName: string;
 }
+interface IClaimStatus {
+  name: string;
+  id: number;
+}
 
 interface IClaim {
   id: number;

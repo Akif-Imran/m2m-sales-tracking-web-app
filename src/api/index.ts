@@ -8,6 +8,7 @@ export const BASE_CUSTOMER_URL = `${BASE_URL}/customer`;
 export const BASE_CONTACT_URL = `${BASE_URL}/contact`;
 export const BASE_PROJECT_URL = `${BASE_URL}/project`;
 export const BASE_FOLLOW_UP_URL = `${BASE_URL}/followup`;
+export const BASE_SUPPLIER_URL = `${BASE_URL}/supplier`;
 export const BASE_REPORT_URL = `${BASE_URL}/app_reports`;
 export const MALAYSIA_ZONE = "Asia/Kuala_Lumpur";
 
@@ -50,6 +51,13 @@ export const urls = {
     update: (id: string) => `${BASE_FOLLOW_UP_URL}/update/${id}`,
     delete: (id: string) => `${BASE_FOLLOW_UP_URL}/delete/${id}`,
     getById: (id: string) => `${BASE_FOLLOW_UP_URL}/getById/${id}`,
+  },
+  supplier: {
+    list: `${BASE_SUPPLIER_URL}/getAll`,
+    create: `${BASE_SUPPLIER_URL}/create`,
+    update: (id: string) => `${BASE_SUPPLIER_URL}/update/${id}`,
+    delete: (id: string) => `${BASE_SUPPLIER_URL}/delete/${id}`,
+    getById: (id: string) => `${BASE_SUPPLIER_URL}/getById/${id}`,
   },
   dashboard: {
     counts: `${BASE_URL}/app_dashboard`,

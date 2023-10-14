@@ -1,4 +1,5 @@
 import { PayloadAction, SerializedError, createSlice } from "@reduxjs/toolkit";
+import { createSupplier, fetchSuppliers } from "@thunks";
 
 interface State {
   data: ISupplier[];
@@ -19,7 +20,7 @@ const supplierSlice = createSlice({
     addSupplier: (state, action: PayloadAction<ISupplier>) => {
       state.data.push(action.payload);
     },
-    updateSupplier: (state, action: PayloadAction<ISupplier>) => {
+    modifySupplier: (state, action: PayloadAction<ISupplier>) => {
       const index = state.data.findIndex((supplier) => supplier._id === action.payload._id);
       state.data[index] = action.payload;
     },
@@ -28,8 +29,30 @@ const supplierSlice = createSlice({
       state.data.splice(index, 1);
     },
   },
+  extraReducers: (builder) => {
+    builder.addCase(fetchSuppliers.pending, (state) => {
+      state.isLoading = true;
+    });
+    builder.addCase(fetchSuppliers.rejected, (state, action) => {
+      state.error = action.error;
+      state.isLoading = false;
+    });
+    builder.addCase(fetchSuppliers.fulfilled, (state, action) => {
+      if (action.payload.success) {
+        state.data = action.payload.data;
+      }
+      state.error = null;
+      state.isLoading = false;
+    });
+
+    builder.addCase(createSupplier.fulfilled, (state, action) => {
+      if (action.payload.success) {
+        state.data.push(action.payload.data);
+      }
+    });
+  },
 });
 
 export { supplierSlice };
-export const { addSupplier, deleteSupplier, updateSupplier } = supplierSlice.actions;
+export const { addSupplier, deleteSupplier, modifySupplier } = supplierSlice.actions;
 export const supplierReducer = supplierSlice.reducer;

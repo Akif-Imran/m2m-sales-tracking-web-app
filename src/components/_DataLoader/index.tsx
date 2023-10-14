@@ -6,6 +6,7 @@ import {
   fetchAllContacts,
   fetchProjectStatuses,
   fetchProjects,
+  fetchSuppliers,
   fetchUserTypes,
   fetchUsers,
 } from "@thunks";
@@ -27,6 +28,7 @@ export const _DataLoader: React.FC<React.PropsWithChildren> = ({ children }) => 
     dispatch(fetchProjectStatuses(token));
     dispatch(fetchProjects(token));
     dispatch(fetchUsers(token));
+    dispatch(fetchSuppliers(token));
   }, [dispatch, token]);
 
   return (

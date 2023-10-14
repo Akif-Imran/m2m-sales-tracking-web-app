@@ -234,13 +234,13 @@ interface ISupplier {
   isActive: boolean;
   company: string;
   name: string;
-  businessCard: string;
-  designation: string;
-  department: string;
-  website: string;
   email: string;
   mobile: string;
-  customerId: string;
+  address: string;
+  city: string;
+  state: string;
+  country: string;
+  website: string;
   _id: string;
   __v: number;
 }

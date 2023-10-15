@@ -24,7 +24,8 @@ export const projectStatusColors: Record<number, string> = {
   2: "yellow",
   3: "orange",
   4: "blue",
-  5: "green",
+  5: "cyan",
+  6: "green",
 };
 
 export const userStatusColors: Record<number, string> = {

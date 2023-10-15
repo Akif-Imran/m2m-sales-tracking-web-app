@@ -86,9 +86,9 @@ export const selectTasksCombined = createSelector(
   (projects, users, tasks, companies) => {
     return {
       tasks: tasks.data.map((task) => {
-        const project = projects.data.find((project) => project.id === task.projectId);
-        const user = users.data.find((user) => user.id === task.assigneeId);
-        const company = companies.data.find((company) => company.id === task.companyId);
+        const project = projects.data.find((project) => project._id === task.projectId);
+        const user = users.data.find((user) => user._id === task.assigneeId);
+        const company = companies.data.find((company) => company._id === task.companyId);
         return {
           ...task,
           project,
@@ -101,9 +101,9 @@ export const selectTasksCombined = createSelector(
 );
 export const selectUsersBasedOnType = createSelector(selectUsers, (users) => {
   return {
-    engineers: users.data.filter((user) => user.userTypeName === "Engineer"),
-    sales: users.data.filter((user) => user.userTypeName === "Sales"),
-    admins: users.data.filter((user) => user.userTypeName === "Admin"),
+    engineers: users.data.filter((user) => user.userType === 3),
+    sales: users.data.filter((user) => user.userType === 2),
+    admins: users.data.filter((user) => user.userType === 1),
   };
 });
 export const selectRecordsForDropdown = createSelector(
@@ -135,15 +135,15 @@ export const selectRecordsForDropdown = createSelector(
   ) => {
     return {
       companies: companies.data.map((company) => ({
-        value: company.id.toString(),
+        value: company._id,
         label: company.name,
       })),
       projects: projects.data.map((project) => ({
-        value: project.id.toString(),
+        value: project._id,
         label: project.name,
       })),
       suppliers: suppliers.data.map((supplier) => ({
-        value: supplier.id.toString(),
+        value: supplier._id,
         label: supplier.name,
       })),
       departments: departments.data.map((department) => ({
@@ -156,7 +156,7 @@ export const selectRecordsForDropdown = createSelector(
       })),
       projectStatus: projectStatus.data.map((status) => ({
         value: status.id.toString(),
-        label: status.name,
+        label: `${status.name} (${status.value}%)`,
       })),
       taskStatus: taskStatus.data.map((status) => ({
         value: status.id.toString(),
@@ -179,42 +179,36 @@ export const selectRecordsForDropdown = createSelector(
         label: type.name,
       })),
       salesPersons: users.data
-        .filter((user) => user.userTypeName === "Sales")
+        .filter((user) => user.userType === 2)
         .map((sales) => ({
-          value: sales.id.toString(),
-          label: `${sales.firstName} ${sales.lastName}`,
+          value: sales._id,
+          label: `${sales.name}`,
         })),
       projectManagers: users.data
-        .filter((user) => user.userTypeName === "Engineer")
+        .filter((user) => user.userType === 3)
         .map((engineer) => ({
-          value: engineer.id.toString(),
-          label: `${engineer.firstName} ${engineer.lastName}`,
+          value: engineer._id,
+          label: `${engineer.name}`,
         })),
     };
   }
 );
-export const selectCompaniesWithContact = createSelector(
-  selectCompanies,
-  selectCompanyContact,
-  (companies, contacts) => {
-    return companies.data.map((company) => {
-      const contact = contacts.data.find((contact) => contact.id === company.primaryContactId);
-      return { ...company, contact };
-    });
-  }
-);
+
 export const selectProjectWithRecords = createSelector(
   selectProjects,
   selectCompanies,
   selectUsers,
-  (projects, companies, users) => {
+  selectProjectStatusList,
+  (projects, companies, users, statuses) => {
     return projects.data.map((project) => {
-      const company = companies.data.find((company) => company.id === project.companyId);
-      const salesPerson = users.data.find((user) => user.id === project.salesPersonId);
+      const company = companies.data.find((company) => company._id === project.customerId);
+      const salesPerson = users.data.find((user) => user._id === project.salesPerson);
+      const status = statuses.data.find((status) => status.id === project.status);
       return {
         ...project,
         company: company,
-        salesPerson: salesPerson,
+        salesPersonValue: salesPerson,
+        statusName: `${status?.name} (${status?.value}%)`,
       };
     });
   }
@@ -226,11 +220,9 @@ export const selectFollowUpsWithRecords = createSelector(
   selectUsers,
   (followups, projects, contacts, users) => {
     return followups.data.map((followup) => {
-      const project = projects.data.find((project) => project.id === followup.projectId);
-      const followUpPerson = users.data.find((user) => user.id === followup.followUpPersonId);
-      const contactPerson = contacts.data.find(
-        (contact) => contact.id === followup.contactPersonId
-      );
+      const project = projects.data.find((project) => project._id === followup.projectId);
+      const followUpPerson = users.data.find((user) => user._id === followup.createdBy);
+      const contactPerson = contacts.data.find((contact) => contact._id === followup.contactId);
       return { ...followup, project, contactPerson, followUpPerson };
     });
   }
@@ -242,9 +234,9 @@ export const selectPurchaseRequestsWithRecords = createSelector(
   selectProjects,
   (requests, users, suppliers, projects) => {
     return requests.data.map((request) => {
-      const requestByPerson = users.data.find((user) => user.id === request.requestedById);
-      const project = projects.data.find((project) => project.id === request.projectId);
-      const supplier = suppliers.data.find((supplier) => supplier.id === request.supplierId);
+      const requestByPerson = users.data.find((user) => user._id === request.createdBy);
+      const project = projects.data.find((project) => project._id === request.projectId);
+      const supplier = suppliers.data.find((supplier) => supplier._id === request.supplierId);
       return {
         ...request,
         requestByPerson,
@@ -259,16 +251,19 @@ export const selectClaimsWithRecords = createSelector(
   selectUsers,
   selectSuppliers,
   selectProjects,
-  (claims, users, suppliers, projects) => {
+  selectClaimsStatusList,
+  (claims, users, suppliers, projects, statuses) => {
     return claims.data.map((request) => {
-      const requestByPerson = users.data.find((user) => user.id === request.requestedById);
-      const project = projects.data.find((project) => project.id === request.projectId);
-      const supplier = suppliers.data.find((supplier) => supplier.id === request.supplierId);
+      const requestByPerson = users.data.find((user) => user._id === request.createdBy);
+      const project = projects.data.find((project) => project._id === request.projectId);
+      const supplier = suppliers.data.find((supplier) => supplier._id === request.supplierId);
+      const statusName = statuses.data.find((status) => status.id === request.status)?.name;
       return {
         ...request,
         requestByPerson,
         project,
         supplier,
+        statusName,
       };
     });
   }
@@ -279,7 +274,7 @@ export const selectLeavesWithRecords = createSelector(
   selectLeaves,
   (users, leaves) => {
     return leaves.data.map((leave) => {
-      const requestByPerson = users.data.find((user) => user.id === leave.requestedById);
+      const requestByPerson = users.data.find((user) => user._id === leave.requestedById);
       return {
         ...leave,
         requestByPerson,

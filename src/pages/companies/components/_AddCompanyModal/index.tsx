@@ -19,36 +19,77 @@ import { IconUpload } from "@tabler/icons-react";
 import { notify } from "@utility";
 import { useAppDispatch } from "@store";
 import { addCompany } from "@slices";
+import { createCompany } from "@thunks";
+import { useAuthContext } from "@contexts";
+import * as yup from "yup";
 
 interface OwnProps {
   opened: boolean;
   onClose: () => void;
   title: string;
 }
-interface ICompanyForm extends Omit<ICompany, "id"> {}
+interface ICompanyForm extends Omit<ICompany, "_id" | "__v" | "company" | "isActive" | "logo"> {
+  logo?: string;
+}
+
+const schema: yup.ObjectSchema<ICompanyForm> = yup.object().shape({
+  name: yup.string().required("Company name is required"),
+  email: yup.string().email("Invalid email").required("Email is required"),
+  logo: yup.string().optional(),
+  address: yup.string().required("Address is required"),
+  state: yup.string().required("State is required"),
+  country: yup.string().required("Country is required"),
+  website: yup.string().url().required("Website is required"),
+  city: yup.string().required("City is required"),
+  phone: yup.string().required("Phone number is required"),
+});
 
 const _AddCompanyModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
   const { theme, classes } = useStyles();
+  const {
+    state: { token },
+  } = useAuthContext();
   const dispatch = useAppDispatch();
+  const [isCreating, setIsCreating] = React.useState(false);
 
   const company = useFormik<ICompanyForm>({
     initialValues: {
-      logo: "",
       name: "",
-      state: "",
-      website: "",
       email: "",
-      phone: "",
+      logo: "",
       address: "",
-      city: "",
+      state: "",
       country: "",
-      primaryContactId: 0,
+      website: "",
+      city: "",
+      phone: "",
     },
+    validationSchema: schema,
     onSubmit(values, helpers) {
       console.log(values);
-      dispatch(addCompany(values));
-      helpers.resetForm();
-      onClose();
+      setIsCreating(true);
+      dispatch(
+        createCompany({
+          token,
+          company: values,
+        })
+      )
+        .unwrap()
+        .then((res) => {
+          notify("Company", res?.message, res.success ? "success" : "error");
+          if (res.success) {
+            dispatch(addCompany(res.data));
+            helpers.resetForm();
+            onClose();
+          }
+        })
+        .catch((err) => {
+          console.log("Add Company: ", err?.message);
+          notify("Company", "An error occurred", "error");
+        })
+        .finally(() => {
+          setIsCreating(false);
+        });
     },
   });
 
@@ -118,6 +159,7 @@ const _AddCompanyModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
                 value={company.values.name}
                 onChange={company.handleChange}
                 onBlur={company.handleBlur}
+                error={company.errors.name && company.touched.name ? company.errors.name : ""}
               />
               <Group grow align="flex-start">
                 <TextInput
@@ -129,6 +171,7 @@ const _AddCompanyModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
                   value={company.values.email}
                   onChange={company.handleChange}
                   onBlur={company.handleBlur}
+                  error={company.errors.email && company.touched.email ? company.errors.email : ""}
                 />
                 <TextInput
                   required
@@ -139,6 +182,7 @@ const _AddCompanyModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
                   value={company.values.phone}
                   onChange={company.handleChange}
                   onBlur={company.handleBlur}
+                  error={company.errors.phone && company.touched.phone ? company.errors.phone : ""}
                 />
               </Group>
               <TextInput
@@ -150,6 +194,9 @@ const _AddCompanyModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
                 value={company.values.address}
                 onChange={company.handleChange}
                 onBlur={company.handleBlur}
+                error={
+                  company.errors.address && company.touched.address ? company.errors.address : ""
+                }
               />
               <Group grow align="flex-start">
                 <TextInput
@@ -161,6 +208,7 @@ const _AddCompanyModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
                   value={company.values.city}
                   onChange={company.handleChange}
                   onBlur={company.handleBlur}
+                  error={company.errors.city && company.touched.city ? company.errors.city : ""}
                 />
                 <TextInput
                   required
@@ -171,6 +219,7 @@ const _AddCompanyModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
                   value={company.values.state}
                   onChange={company.handleChange}
                   onBlur={company.handleBlur}
+                  error={company.errors.state && company.touched.state ? company.errors.state : ""}
                 />
               </Group>
 
@@ -184,6 +233,9 @@ const _AddCompanyModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
                   value={company.values.country}
                   onChange={company.handleChange}
                   onBlur={company.handleBlur}
+                  error={
+                    company.errors.country && company.touched.country ? company.errors.country : ""
+                  }
                 />
                 <TextInput
                   required
@@ -191,9 +243,13 @@ const _AddCompanyModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
                   label="Website URL"
                   name="website"
                   id="website"
+                  placeholder="https://www.example.com"
                   value={company.values.website}
                   onChange={company.handleChange}
                   onBlur={company.handleBlur}
+                  error={
+                    company.errors.website && company.touched.website ? company.errors.website : ""
+                  }
                 />
               </Group>
 
@@ -201,7 +257,12 @@ const _AddCompanyModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
                 <Button variant="outline" onClick={handleCancel} size="xs">
                   Cancel
                 </Button>
-                <Button variant="filled" onClick={() => company.handleSubmit()} size="xs">
+                <Button
+                  size="xs"
+                  variant="filled"
+                  loading={isCreating}
+                  onClick={() => company.handleSubmit()}
+                >
                   Save
                 </Button>
               </Group>

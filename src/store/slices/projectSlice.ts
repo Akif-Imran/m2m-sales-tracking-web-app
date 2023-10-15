@@ -1,32 +1,14 @@
 import { PayloadAction, SerializedError, createSlice } from "@reduxjs/toolkit";
+import { fetchProjects } from "../thunks/projectThunks";
 
 interface State {
   data: IProject[];
   isLoading: boolean;
   error: null | SerializedError;
 }
-type UpdateStatus = { projectId: number; statusId: number; statusName: string };
 
 const initialState: State = {
-  data: [
-    {
-      id: 1,
-      companyId: 1,
-      contractDate: "2023-10-05",
-      deliveryDate: "2023-10-25",
-      description: "description",
-      name: "DATABASE_REMOTE_URL",
-      projectType: "Sales",
-      quotation: "IGJ8GWG2",
-      salesPersonId: 2,
-      statusId: 1,
-      statusName: "Follow up added (10%)",
-      value: {
-        amount: 15000,
-        currency: "MYR",
-      },
-    },
-  ],
+  data: [],
   isLoading: false,
   error: null,
 };
@@ -35,23 +17,37 @@ const projectSlice = createSlice({
   name: "project",
   initialState: initialState,
   reducers: {
-    addProject: (state, action: PayloadAction<Omit<IProject, "id">>) => {
-      const id = Date.now();
-      state.data.push({ id, ...action.payload });
+    addProject: (state, action: PayloadAction<IProject>) => {
+      state.data.push(action.payload);
     },
     updateProject: (state, action: PayloadAction<IProject>) => {
-      const index = state.data.findIndex((contact) => contact.id === action.payload.id);
+      const index = state.data.findIndex((project) => project._id === action.payload._id);
       state.data[index] = action.payload;
     },
-    updateProjectStatus: (state, action: PayloadAction<UpdateStatus>) => {
-      const index = state.data.findIndex((project) => project.id === action.payload.projectId);
-      state.data[index].statusId = action.payload.statusId;
-      state.data[index].statusName = action.payload.statusName;
+    updateProjectStatus: (state, action: PayloadAction<IProject>) => {
+      const index = state.data.findIndex((project) => project._id === action.payload._id);
+      state.data[index].status = action.payload.status;
     },
-    deleteProject: (state, action: PayloadAction<number>) => {
-      const index = state.data.findIndex((contact) => contact.id === action.payload);
+    deleteProject: (state, action: PayloadAction<string>) => {
+      const index = state.data.findIndex((contact) => contact._id === action.payload);
       state.data.splice(index, 1);
     },
+  },
+  extraReducers: (builder) => {
+    builder.addCase(fetchProjects.pending, (state) => {
+      state.isLoading = true;
+    });
+    builder.addCase(fetchProjects.rejected, (state, action) => {
+      state.error = action.error;
+      state.isLoading = false;
+    });
+    builder.addCase(fetchProjects.fulfilled, (state, action) => {
+      if (action.payload.success) {
+        state.data = action.payload.data;
+      }
+      state.error = null;
+      state.isLoading = false;
+    });
   },
 });
 

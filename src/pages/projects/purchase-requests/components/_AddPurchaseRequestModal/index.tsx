@@ -15,7 +15,7 @@ interface OwnProps {
   opened: boolean;
   onClose: () => void;
   title: string;
-  companyId?: number;
+  companyId?: string;
 }
 interface IRequestForm extends Omit<IPurchaseRequest, "id"> {}
 
@@ -33,8 +33,8 @@ export const _AddPurchaseRequestModal: React.FC<OwnProps> = ({ onClose, opened, 
 
   const form = useFormik<IRequestForm>({
     initialValues: {
-      projectId: 0,
-      supplierId: 0,
+      projectId: "",
+      supplierId: "",
       itemName: "",
       itemType: "",
       price: {
@@ -43,7 +43,7 @@ export const _AddPurchaseRequestModal: React.FC<OwnProps> = ({ onClose, opened, 
       },
       qty: 0,
       remarks: "",
-      requestedById: user!.id,
+      requestedById: user!._id,
       statusId: 1,
       statusName: "",
       warranty: "",

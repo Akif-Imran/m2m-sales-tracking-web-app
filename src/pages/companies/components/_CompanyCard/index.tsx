@@ -185,7 +185,7 @@ const _CompanyCard: React.FC<OwnProps> = ({
                     icon={<IconFiles {...menuIconStyle} />}
                     onClick={(event) => {
                       event.stopPropagation();
-                      handleNavigate(routes.reports.list_nav(item.id.toString()));
+                      handleNavigate(routes.reports.list_nav(item._id));
                     }}
                   >
                     Reports
@@ -221,7 +221,7 @@ const _CompanyCard: React.FC<OwnProps> = ({
                   className={cx(classes.bottomButton, classes.rightAlign, classes.noPadding)}
                   onClick={(event) => {
                     event.stopPropagation();
-                    navigate(routes.company.project_nav(item.id.toString()));
+                    navigate(routes.company.project_nav(item._id));
                   }}
                 >
                   <IconCaretRightFilled

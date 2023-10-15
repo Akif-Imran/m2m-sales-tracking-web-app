@@ -1,11 +1,11 @@
 import { PayloadAction, SerializedError, createSlice } from "@reduxjs/toolkit";
+import { fetchClaim } from "@thunks";
 
 interface State {
   data: IClaim[];
   isLoading: boolean;
   error: null | SerializedError;
 }
-type UpdateStatus = { claimId: number; statusId: number; statusName: string };
 
 const initialState: State = {
   data: [],
@@ -17,26 +17,41 @@ const claimsSlice = createSlice({
   name: "claims",
   initialState: initialState,
   reducers: {
-    addClaim: (state, action: PayloadAction<Omit<IClaim, "id">>) => {
-      const id = Date.now();
-      state.data.push({ id, ...action.payload });
+    addClaim: (state, action: PayloadAction<IClaim>) => {
+      console.log("addClaim payload", action.payload);
+      state.data.push(action.payload);
     },
-    updateClaim: (state, action: PayloadAction<IClaim>) => {
-      const index = state.data.findIndex((claim) => claim.id === action.payload.id);
+    modifyClaim: (state, action: PayloadAction<IClaim>) => {
+      const index = state.data.findIndex((claim) => claim._id === action.payload._id);
       state.data[index] = action.payload;
     },
-    updateClaimStatus: (state, action: PayloadAction<UpdateStatus>) => {
-      const index = state.data.findIndex((claim) => claim.id === action.payload.claimId);
-      state.data[index].statusId = action.payload.statusId;
-      state.data[index].statusName = action.payload.statusName;
+    updateClaimStatus: (state, action: PayloadAction<IClaim>) => {
+      const index = state.data.findIndex((claim) => claim._id === action.payload._id);
+      state.data[index].status = action.payload.status;
     },
-    deleteClaim: (state, action: PayloadAction<number>) => {
-      const index = state.data.findIndex((claim) => claim.id === action.payload);
+    deleteClaim: (state, action: PayloadAction<string>) => {
+      const index = state.data.findIndex((claim) => claim._id === action.payload);
       state.data.splice(index, 1);
     },
+  },
+  extraReducers: (builder) => {
+    builder.addCase(fetchClaim.pending, (state) => {
+      state.isLoading = true;
+    });
+    builder.addCase(fetchClaim.rejected, (state, action) => {
+      state.error = action.error;
+      state.isLoading = false;
+    });
+    builder.addCase(fetchClaim.fulfilled, (state, action) => {
+      if (action.payload.success) {
+        state.data = action.payload.data;
+      }
+      state.error = null;
+      state.isLoading = false;
+    });
   },
 });
 
 export { claimsSlice };
-export const { addClaim, deleteClaim, updateClaim, updateClaimStatus } = claimsSlice.actions;
+export const { addClaim, deleteClaim, modifyClaim, updateClaimStatus } = claimsSlice.actions;
 export const claimsReducer = claimsSlice.reducer;

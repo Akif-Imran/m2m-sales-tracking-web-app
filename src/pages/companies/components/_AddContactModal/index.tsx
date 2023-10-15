@@ -19,38 +19,80 @@ import { notify } from "@utility";
 import { selectRecordsForDropdown, useAppDispatch, useAppSelector } from "@store";
 import { addContact } from "@slices";
 import { IconUpload } from "@tabler/icons-react";
+import { createContact } from "@thunks";
+import { useAuthContext } from "@contexts";
+import * as yup from "yup";
 
 interface OwnProps {
   opened: boolean;
   onClose: () => void;
   title: string;
-  companyId?: number;
+  companyId?: string;
 }
-interface IContactForm extends Omit<ICompanyContact, "id"> {}
+interface IContactForm
+  extends Omit<
+    ICompanyContact,
+    "_id" | "__v" | "createdBy" | "createdAt" | "company" | "isActive"
+  > {}
+
+const schema: yup.ObjectSchema<IContactForm> = yup.object().shape({
+  name: yup.string().required("Name is required"),
+  email: yup.string().email("Invalid email").required("Email is required"),
+  businessCard: yup.string().required("Business card is required").nullable(),
+  designation: yup.string().required("Designation is required"),
+  department: yup.string().required("Department is required"),
+  mobile: yup.string().required("Mobile number is required"),
+  customerId: yup.string().required("Company is required"),
+});
 
 const _AddContactModal: React.FC<OwnProps> = ({ opened, onClose, title, companyId }) => {
   const { theme, classes } = useStyles();
   const dispatch = useAppDispatch();
+  const {
+    state: { token },
+  } = useAuthContext();
   const { companies: companiesList } = useAppSelector(selectRecordsForDropdown);
+  const [isCreating, setIsCreating] = React.useState(false);
 
   const form = useFormik<IContactForm>({
     initialValues: {
-      businessCard: "",
       name: "",
+      email: "",
+      businessCard: "",
       designation: "",
       department: "",
-      email: "",
-      phone: "",
       mobile: "",
-      primary: false,
-      companyId: 0,
+      customerId: companyId || "",
     },
+    validationSchema: schema,
     onSubmit(values, helpers) {
       console.log(values);
-      dispatch(addContact(values));
-      notify("Add Contact", "Contact added successfully", "success");
-      helpers.resetForm();
-      onClose();
+      setIsCreating((_prev) => true);
+      dispatch(
+        createContact({
+          token,
+          contact: {
+            ...values,
+            businessCard: values.businessCard || "",
+          },
+        })
+      )
+        .unwrap()
+        .then((res) => {
+          notify("Contact", res?.message, res.success ? "success" : "error");
+          if (res.success) {
+            dispatch(addContact(res.data));
+            helpers.resetForm();
+            onClose();
+          }
+        })
+        .catch((err) => {
+          console.log(err?.message);
+          notify("Contact", "An error occurred", "error");
+        })
+        .finally(() => {
+          setIsCreating((_prev) => false);
+        });
     },
   });
 
@@ -76,7 +118,7 @@ const _AddContactModal: React.FC<OwnProps> = ({ opened, onClose, title, companyI
 
   React.useEffect(() => {
     if (companyId) {
-      form.setValues((prev) => ({ ...prev, companyId }));
+      form.setValues((prev) => ({ ...prev, customerId: companyId }));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [companyId]);
@@ -121,12 +163,12 @@ const _AddContactModal: React.FC<OwnProps> = ({ opened, onClose, title, companyI
           searchable
           nothingFound="No Companies"
           label="Company"
-          value={form.values.companyId.toString()}
+          value={form.values.customerId}
+          data={companiesList}
           onChange={(value) => {
             if (!value) return;
-            form.setValues((prev) => ({ ...prev, companyId: parseInt(value) }));
+            form.setValues((prev) => ({ ...prev, customerId: value }));
           }}
-          data={companiesList}
         />
         <Divider label="Contact" labelPosition="center" />
         <TextInput
@@ -138,6 +180,7 @@ const _AddContactModal: React.FC<OwnProps> = ({ opened, onClose, title, companyI
           value={form.values.name}
           onChange={form.handleChange}
           onBlur={form.handleBlur}
+          error={form.errors.name && form.touched.name ? form.errors.name : ""}
         />
         <TextInput
           required
@@ -148,6 +191,7 @@ const _AddContactModal: React.FC<OwnProps> = ({ opened, onClose, title, companyI
           value={form.values.email}
           onChange={form.handleChange}
           onBlur={form.handleBlur}
+          error={form.errors.email && form.touched.email ? form.errors.email : ""}
         />
         <Group grow align="flex-start">
           <TextInput
@@ -159,6 +203,9 @@ const _AddContactModal: React.FC<OwnProps> = ({ opened, onClose, title, companyI
             value={form.values.designation}
             onChange={form.handleChange}
             onBlur={form.handleBlur}
+            error={
+              form.errors.designation && form.touched.designation ? form.errors.designation : ""
+            }
           />
           <TextInput
             required
@@ -169,6 +216,7 @@ const _AddContactModal: React.FC<OwnProps> = ({ opened, onClose, title, companyI
             value={form.values.department}
             onChange={form.handleChange}
             onBlur={form.handleBlur}
+            error={form.errors.department && form.touched.department ? form.errors.department : ""}
           />
         </Group>
 
@@ -183,17 +231,7 @@ const _AddContactModal: React.FC<OwnProps> = ({ opened, onClose, title, companyI
             value={form.values.mobile}
             onChange={form.handleChange}
             onBlur={form.handleBlur}
-          />
-          <TextInput
-            required
-            withAsterisk={false}
-            label="Phone"
-            name="phone"
-            id="phone"
-            placeholder="+XX XXX XXXXXXX"
-            value={form.values.phone}
-            onChange={form.handleChange}
-            onBlur={form.handleBlur}
+            error={form.errors.mobile && form.touched.mobile ? form.errors.mobile : ""}
           />
         </Group>
 
@@ -201,7 +239,12 @@ const _AddContactModal: React.FC<OwnProps> = ({ opened, onClose, title, companyI
           <Button variant="outline" onClick={handleCancel} size="xs">
             Cancel
           </Button>
-          <Button variant="filled" onClick={() => form.handleSubmit()} size="xs">
+          <Button
+            size="xs"
+            variant="filled"
+            loading={isCreating}
+            onClick={() => form.handleSubmit()}
+          >
             Save
           </Button>
         </Group>

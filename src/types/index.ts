@@ -4,100 +4,160 @@ interface IUserAccountType {
   name: string;
 }
 interface IUser {
-  avatar: string;
-  id: number;
-  firstName: string;
-  lastName: string;
-  companyId: number;
+  _id: string;
+  name: string;
   email: string;
   password: string;
-  phone: string;
-  departmentId: number;
-  departmentName: string;
-  designation: string;
-  joiningDate: string;
-  address: string;
-  city: string;
-  country: string;
-  userTypeId: number;
-  userTypeName: string;
+  userType: number;
+  isActive: boolean;
+  company: string;
+  __v: number;
+  createdAt: string;
 }
-type ILoginUserData = IUser;
+type ILoginUserData = Omit<IUser, "createdAt">;
 
 interface ICompanyContact {
-  id: number;
-  businessCard: string;
+  _id: string;
+  isActive: boolean;
+  company: string;
   name: string;
+  businessCard: string | null;
   designation: string;
   department: string;
   email: string;
-  phone: string;
   mobile: string;
-  primary: boolean;
-  companyId: number;
+  customerId: string;
+  createdBy: string;
+  createdAt: string;
+  __v: number;
 }
 interface ICompany {
-  id: number;
-  logo: string;
-  name: string;
-  email: string;
-  phone: string;
-  address: string;
-  city: string;
-  state: string;
-  country: string;
-  website: string;
-  primaryContactId: number;
+  _id: string; //
+  isActive: boolean; //
+  company: string; //
+  name: string; //
+  logo: string | null; //
+  address: string; //
+  city: string; //
+  state: string; //
+  country: string; //
+  website: string; //
+  email: string; //
+  phone: string; //
+  __v: number; //
+  // id: number;
+  // logo: string;
+  // name: string;
+  // email: string;
+  // phone: string;
+  // address: string;
+  // city: string;
+  // state: string;
+  // country: string;
+  // website: string;
+  // primaryContactId: number;
 }
 interface IProjectStatus {
   id: number;
+  value: number;
   name: string;
 }
 interface IProject {
-  id: number;
+  createdBy: string;
+  createdAt: string;
+  isActive: true;
+  company: string;
   name: string;
   description: string;
-  projectType: string;
+  type: string;
   value: {
-    currency: string;
     amount: number;
+    currency: string;
+    // _id: string;
   };
   contractDate: string;
   deliveryDate: string;
-  quotation: string;
-  salesPersonId: number;
-  //costing
-  statusId: number;
-  statusName: string;
-  companyId: number; //company
+  quotation: number;
+  salesPerson: string;
+  costing: object | null;
+  status: number;
+  customerId: string;
+  _id: string;
+  __v: number;
+  // deletedAt?: string;
+  //-----old-type--------
+  // id: number;
+  // name: string;
+  // description: string;
+  // projectType: string;
+  // value: {
+  //   currency: string;
+  //   amount: number;
+  // };
+  // contractDate: string;
+  // deliveryDate: string;
+  // quotation: string;
+  // salesPersonId: number;
+  // //costing
+  // statusId: number;
+  // statusName: string;
+  // companyId: number; //company
 }
 interface IFollowUp {
-  id: number;
-  projectId: number;
-  contactPersonId: number;
-  followUpPersonId: number;
+  _id: string;
+  projectId: string;
+  customerId: string;
+  contactId: string;
   meetingDate: string;
   meetingPlace: string;
   address: string;
-  city: string;
   state: string;
   country: string;
+  city: string;
   meetingAgenda: string;
   meetingSummary: string;
-  nextFollowUp: {
-    place: string;
-    meetingDate: string;
-    meetingAgenda: string;
+  nextMeetingPlace?: string;
+  nextMeetingDate?: string;
+  nextMeetingAgenda?: string;
+  expenseType?: string;
+  expenseName?: string;
+  expensePrice?: {
+    amount: number;
+    currency: string;
   };
-  expenses: {
-    type: string;
-    name: string;
-    amount: {
-      currency: string;
-      amount: number;
-    };
-    receipt: string;
-  };
+  expenseDocument?: null | string;
+  createdBy: string;
+  createdAt: string;
+  isActive: boolean;
+  company: string;
+  __v: number;
+  //--------------------
+  // id: number;
+  // projectId: string;
+  // contactPersonId: string;
+  // followUpPersonId: string;
+  // meetingDate: string;
+  // meetingPlace: string;
+  // address: string;
+  // city: string;
+  // state: string;
+  // country: string;
+  // meetingAgenda: string;
+  // meetingSummary: string;
+  // nextFollowUp: {
+  //   place: string;
+  //   meetingDate: string;
+  //   meetingAgenda: string;
+  // };
+  // expenses: {
+  //   type: string;
+  //   name: string;
+  //   amount: {
+  //     currency: string;
+  //     amount: number;
+  //   };
+  //   receipt: string;
+  // };
 }
 interface ITaskStatus {
   id: number;
@@ -134,50 +194,113 @@ interface IPurchaseRequestStatus {
   name: string;
 }
 interface IPurchaseRequest {
-  id: number;
-  requestedById: number; //user id
-  projectId: number;
-  itemName: string;
-  itemType: string;
-  warranty: string; //date
-  qty: number;
-  supplierId: number;
-  price: {
-    amount: number;
-    currency: string;
-  };
-  remarks: string;
-  statusId: number;
-  statusName: string;
-}
-
-interface IClaim {
-  id: number;
-  requestedById: number; //user id
-  projectId: number;
+  _id: string;
+  createdBy: string;
+  createdAt: string;
+  isActive: boolean;
+  company: string;
+  projectId:
+    | string
+    | {
+        _id: string;
+      };
+  supplierId:
+    | string
+    | {
+        _id: string;
+      };
   itemName: string;
   itemType: string;
   warranty: string;
-  qty: number;
-  supplierId: number;
+  quantity: number;
   price: {
     amount: number;
     currency: string;
   };
   remarks: string;
-  statusId: number;
-  statusName: string;
+  status: number;
+  customerId: string;
+  __v: number;
+  // id: number;
+  // requestedById: string; //user id
+  // projectId: number;
+  // itemName: string;
+  // itemType: string;
+  // warranty: string; //date
+  // qty: number;
+  // supplierId: number;
+  // price: {
+  //   amount: number;
+  //   currency: string;
+  // };
+  // remarks: string;
+  // statusId: number;
+  // statusName: string;
+}
+interface IClaimStatus {
+  name: string;
+  id: number;
+}
+
+interface IClaim {
+  _id: string;
+  createdBy: string;
+  createdAt: string;
+  isActive: true;
+  company: string;
+  customerId: string;
+  projectId:
+    | string
+    | {
+        _id: string;
+      };
+  supplierId:
+    | string
+    | {
+        _id: string;
+      };
+  itemName: string;
+  itemType: string;
+  warranty: string;
+  quantity: number;
+  price: {
+    amount: number;
+    currency: string;
+  };
+  remarks: string;
+  status: number;
+  __v: number;
+  // id: number;
+  // requestedById: string; //user id
+  // projectId: number;
+  // itemName: string;
+  // itemType: string;
+  // warranty: string;
+  // qty: number;
+  // supplierId: number;
+  // price: {
+  //   amount: number;
+  //   currency: string;
+  // };
+  // remarks: string;
+  // statusId: number;
+  // statusName: string;
 }
 interface ISupplier {
-  id: number;
+  createdBy: string;
+  createdAt: string;
+  isActive: boolean;
+  company: string;
   name: string;
   email: string;
-  phone: string;
+  mobile: string;
   address: string;
   city: string;
   state: string;
   country: string;
-  websiteURL: string;
+  website: string;
+  _id: string;
+  __v: number;
 }
 interface ILeaveType {
   id: number;

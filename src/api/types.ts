@@ -5,21 +5,17 @@ type MessageResponse = {
 type FailedResponse = {
   success: false;
   message: string;
+  data: null;
 };
 
-type SuccessResponse<T, Key> = Key extends "data"
-  ? {
-      success: true;
-      data: T;
-      message?: string;
-    }
-  : {
-      success: true;
-      result: T;
-      message?: string;
-    };
+type SuccessResponse<T> = {
+  statusCode: number;
+  message?: string;
+  success: true;
+  data: T;
+};
 
-type ApiResponse<T, Key = "data"> = FailedResponse | SuccessResponse<T, Key>;
+type ApiResponse<T> = FailedResponse | SuccessResponse<T>;
 
 type ListResponse<T> = {
   count: number;

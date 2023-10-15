@@ -5,62 +5,135 @@ import { DATE_FORMAT_YYYY_MM_DD, modalOverlayPropsHelper } from "@helpers";
 import { DatePickerInput, DateValue } from "@mantine/dates";
 import { useFormik } from "formik";
 import { useAuthContext } from "@contexts";
-import { selectRecordsForDropdown, useAppDispatch, useAppSelector } from "@store";
+import { selectProjects, selectRecordsForDropdown, useAppDispatch, useAppSelector } from "@store";
 import { addClaim } from "@slices";
 import { IconCalendar } from "@tabler/icons-react";
 import { currencyList } from "@constants";
 import { colors } from "@theme";
+import * as yup from "yup";
+import { createClaim } from "@thunks";
+import { notify } from "@utility";
 
 interface OwnProps {
   opened: boolean;
   onClose: () => void;
   title: string;
-  companyId?: number;
+  companyId?: string;
 }
-interface IRequestForm extends Omit<IClaim, "id"> {}
+interface IRequestForm
+  extends Omit<
+    IClaim,
+    | "_id"
+    | "__v"
+    | "createdAt"
+    | "createdBy"
+    | "isActive"
+    | "company"
+    | "projectId"
+    | "supplierId"
+    | "customerId"
+  > {
+  projectId: string;
+  supplierId: string;
+  customerId: string;
+}
 
-export const _AddClaimModal: React.FC<OwnProps> = ({ onClose, opened, title }) => {
+const schema: yup.ObjectSchema<IRequestForm> = yup.object().shape({
+  customerId: yup.string().required("Company is required"),
+  projectId: yup.string().required("Project is required"),
+  supplierId: yup.string().required("Supplier is required"),
+  itemName: yup.string().required("Item name is required"),
+  itemType: yup.string().required("Item type is required"),
+  warranty: yup.string().required("Warranty is required"),
+  price: yup.object().shape({
+    amount: yup.number().required("Price is required"),
+    currency: yup.string().required("Currency is required"),
+  }),
+  quantity: yup.number().required("Quantity is required"),
+  remarks: yup.string().required("Remarks is required"),
+  status: yup.number().required("Status is required"),
+});
+
+export const _AddClaimModal: React.FC<OwnProps> = ({ onClose, opened, title, companyId }) => {
   const { theme } = useStyles();
   const {
-    state: { user },
+    state: { token },
   } = useAuthContext();
   const dispatch = useAppDispatch();
+  const [isCreating, setIsCreating] = React.useState(false);
   const {
     suppliers: suppliersList,
-    projects: projectsList,
+    companies: companiesList,
     purchaseRequestStatus: purchaseRequestStatusList,
   } = useAppSelector(selectRecordsForDropdown);
+  const { data: projects } = useAppSelector(selectProjects);
+  const [projectsList, setProjectsList] = React.useState<IDropDownList>([]);
 
   const form = useFormik<IRequestForm>({
     initialValues: {
-      projectId: 0,
-      supplierId: 0,
+      projectId: "",
+      customerId: "",
+      supplierId: "",
       itemName: "",
       itemType: "",
+      warranty: "",
       price: {
         amount: 0,
         currency: "MYR",
       },
-      qty: 0,
+      quantity: 0,
       remarks: "",
-      requestedById: user!.id,
-      statusId: 1,
-      statusName: "",
-      warranty: "",
+      status: 1,
     },
+    validationSchema: schema,
     onSubmit: (values, helpers) => {
       console.log(values);
-      dispatch(addClaim(values));
-      helpers.resetForm();
-      onClose();
+      setIsCreating((_prev) => true);
+      dispatch(
+        createClaim({
+          token,
+          claim: values,
+        })
+      )
+        .unwrap()
+        .then((res) => {
+          notify("Claim", res?.message, res.success ? "success" : "error");
+          if (res.success) {
+            dispatch(addClaim(res.data));
+            helpers.resetForm();
+            onClose();
+          }
+        })
+        .catch((err) => {
+          console.log("Add Claim: ", err?.message);
+          notify("Claim", "An error occurred", "error");
+        })
+        .finally(() => {
+          setIsCreating((_prev) => false);
+        });
     },
   });
+
+  const handleOnChangeCompany = (value: string | null) => {
+    if (!value) return;
+    form.setValues((prev) => ({
+      ...prev,
+      customerId: value,
+    }));
+    const project_s = projects
+      .filter((project) => project.customerId === value)
+      .map((project) => ({
+        value: project._id,
+        label: project.name,
+      }));
+    setProjectsList(project_s);
+  };
 
   const handleOnChangeProject = (value: string | null) => {
     if (!value) return;
     form.setValues((prev) => ({
       ...prev,
-      projectId: parseInt(value),
+      projectId: value,
     }));
   };
 
@@ -68,7 +141,7 @@ export const _AddClaimModal: React.FC<OwnProps> = ({ onClose, opened, title }) =
     if (!value) return;
     form.setValues((prev) => ({
       ...prev,
-      supplierId: parseInt(value),
+      supplierId: value,
     }));
   };
 
@@ -95,8 +168,7 @@ export const _AddClaimModal: React.FC<OwnProps> = ({ onClose, opened, title }) =
     if (!typeName) return;
     form.setValues((prev) => ({
       ...prev,
-      statusId: parseInt(value),
-      statusName: typeName,
+      status: parseInt(value),
     }));
   };
 
@@ -104,6 +176,17 @@ export const _AddClaimModal: React.FC<OwnProps> = ({ onClose, opened, title }) =
     form.resetForm();
     onClose();
   };
+
+  React.useEffect(() => {
+    if (!companyId) return;
+    const project_s = projects
+      .filter((project) => project.customerId === companyId)
+      .map((project) => ({
+        value: project._id,
+        label: project.name,
+      }));
+    setProjectsList(project_s);
+  }, [companyId, opened, projects]);
 
   return (
     <Modal
@@ -119,26 +202,51 @@ export const _AddClaimModal: React.FC<OwnProps> = ({ onClose, opened, title }) =
       <Grid>
         <Grid.Col span={12}>
           <Stack>
+            <Select
+              required
+              withAsterisk={false}
+              searchable
+              nothingFound="No company found"
+              label="Company"
+              value={form.values.customerId}
+              onChange={handleOnChangeCompany}
+              data={companiesList}
+              error={
+                form.errors.customerId && form.touched.customerId
+                  ? `${form.errors.customerId}`
+                  : null
+              }
+            />
             <Group grow align="flex-start">
               <Select
                 required
                 withAsterisk={false}
                 searchable
-                nothingFound="No Project Found"
+                nothingFound="No project found"
                 label="Project"
-                value={form.values.projectId.toString()}
+                value={form.values.projectId}
                 onChange={handleOnChangeProject}
                 data={projectsList}
+                error={
+                  form.errors.projectId && form.touched.projectId
+                    ? `${form.errors.projectId}`
+                    : null
+                }
               />
               <Select
                 required
                 withAsterisk={false}
                 searchable
-                nothingFound="No suppliers"
+                nothingFound="No suppliers found"
                 label="Supplier"
-                value={form.values.supplierId.toString()}
+                value={form.values.supplierId}
                 onChange={handleOnChangeSupplier}
                 data={suppliersList}
+                error={
+                  form.errors.supplierId && form.touched.supplierId
+                    ? `${form.errors.supplierId}`
+                    : null
+                }
               />
             </Group>
             <TextInput
@@ -150,6 +258,9 @@ export const _AddClaimModal: React.FC<OwnProps> = ({ onClose, opened, title }) =
               value={form.values.itemName}
               onChange={form.handleChange}
               onBlur={form.handleBlur}
+              error={
+                form.errors.itemName && form.touched.itemName ? `${form.errors.itemName}` : null
+              }
             />
             <Group grow align="flex-start">
               <TextInput
@@ -161,9 +272,13 @@ export const _AddClaimModal: React.FC<OwnProps> = ({ onClose, opened, title }) =
                 value={form.values.itemType}
                 onChange={form.handleChange}
                 onBlur={form.handleBlur}
+                error={
+                  form.errors.itemType && form.touched.itemType ? `${form.errors.itemType}` : null
+                }
               />
               <DatePickerInput
                 required
+                dropdownType="modal"
                 withAsterisk={false}
                 placeholder="Select Warranty Date"
                 name="warranty"
@@ -173,7 +288,7 @@ export const _AddClaimModal: React.FC<OwnProps> = ({ onClose, opened, title }) =
                 onChange={handleOnChangeWarrantyDate}
                 icon={<IconCalendar size={16} stroke={1.5} color={colors.titleText} />}
                 error={
-                  form.touched.warranty && form.errors.warranty ? `${form.errors.warranty}` : null
+                  form.errors.warranty && form.touched.warranty ? `${form.errors.warranty}` : null
                 }
               />
             </Group>
@@ -182,12 +297,15 @@ export const _AddClaimModal: React.FC<OwnProps> = ({ onClose, opened, title }) =
                 required
                 withAsterisk={false}
                 label="Quantity"
-                name="qty"
-                id="qty"
+                name="quantity"
+                id="quantity"
                 type="number"
-                value={form.values.qty}
+                value={form.values.quantity}
                 onChange={form.handleChange}
                 onBlur={form.handleBlur}
+                error={
+                  form.errors.quantity && form.touched.quantity ? `${form.errors.quantity}` : null
+                }
               />
               <TextInput
                 required
@@ -213,6 +331,11 @@ export const _AddClaimModal: React.FC<OwnProps> = ({ onClose, opened, title }) =
                     data={currencyList}
                   />
                 }
+                error={
+                  form.errors.price?.amount && form.touched.price?.amount
+                    ? `${form.errors.price?.amount}`
+                    : null
+                }
               />
             </Group>
             <Select
@@ -221,9 +344,10 @@ export const _AddClaimModal: React.FC<OwnProps> = ({ onClose, opened, title }) =
               searchable
               nothingFound="No status"
               label="Status"
-              value={form.values.statusId.toString()}
+              value={form.values.status.toString()}
               onChange={handleOnChangeStatus}
               data={purchaseRequestStatusList}
+              error={form.errors.status && form.touched.status ? `${form.errors.status}` : null}
             />
             <Textarea
               minRows={5}
@@ -234,6 +358,7 @@ export const _AddClaimModal: React.FC<OwnProps> = ({ onClose, opened, title }) =
               value={form.values.remarks}
               onChange={form.handleChange}
               onBlur={form.handleBlur}
+              error={form.errors.remarks && form.touched.remarks ? `${form.errors.remarks}` : null}
             />
           </Stack>
 
@@ -241,7 +366,12 @@ export const _AddClaimModal: React.FC<OwnProps> = ({ onClose, opened, title }) =
             <Button variant="outline" onClick={handleCancel} size="xs">
               Cancel
             </Button>
-            <Button variant="filled" onClick={() => form.handleSubmit()} size="xs">
+            <Button
+              size="xs"
+              variant="filled"
+              loading={isCreating}
+              onClick={() => form.handleSubmit()}
+            >
               Save
             </Button>
           </Group>

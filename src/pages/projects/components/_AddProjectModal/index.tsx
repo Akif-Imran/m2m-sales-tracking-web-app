@@ -9,17 +9,47 @@ import { addProject } from "@slices";
 import { DateTime } from "luxon";
 import { DatePickerInput, DateValue } from "@mantine/dates";
 import { colors } from "@theme";
+import { createProject } from "@thunks";
+import { useAuthContext } from "@contexts";
+import { notify } from "@utility";
+import { currencyList } from "@constants";
+import * as yup from "yup";
 
 interface OwnProps {
   opened: boolean;
   onClose: () => void;
   title: string;
 }
-interface IProjectForm extends Omit<IProject, "id"> {}
+interface IProjectForm
+  extends Omit<
+    IProject,
+    "_id" | "__v" | "company" | "createdAt" | "createdBy" | "isActive" | "updatedAt" | "deletedAt"
+  > {}
+
+const schema: yup.ObjectSchema<IProjectForm> = yup.object().shape({
+  name: yup.string().required("Project name is required"),
+  description: yup.string().required("Project description is required"),
+  type: yup.string().required("Project type is required"),
+  costing: yup.object().nullable(),
+  value: yup.object().shape({
+    amount: yup.number().required("Value is required"),
+    currency: yup.string().required("Currency is required"),
+  }),
+  contractDate: yup.string().required("Contract date is required"),
+  deliveryDate: yup.string().required("Delivery date is required"),
+  quotation: yup.number().required("Quotation is required"),
+  salesPerson: yup.string().required("Sales person is required"),
+  status: yup.number().required("Status is required"),
+  customerId: yup.string().required("Customer is required"),
+});
 
 const _AddProjectModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
   const { theme } = useStyles();
   const dispatch = useAppDispatch();
+  const {
+    state: { token },
+  } = useAuthContext();
+  const [isCreating, setIsCreating] = React.useState(false);
   const [contractDate, setContractDate] = React.useState(new Date());
   const [deliveryDate, setDeliveryDate] = React.useState(new Date());
   const {
@@ -27,34 +57,50 @@ const _AddProjectModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
     salesPersons: salesPersonsList,
     projectStatus: projectStatusList,
   } = useAppSelector(selectRecordsForDropdown);
-  const currencyList = [
-    { label: "MYR", value: "MYR" },
-    { label: "USD", value: "USD" },
-    { label: "CAD", value: "CAD" },
-  ];
 
   const form = useFormik<IProjectForm>({
     initialValues: {
       name: "",
       description: "",
-      projectType: "",
+      type: "",
+      costing: null,
       value: {
         amount: 0,
         currency: "MYR",
       },
       contractDate: DateTime.now().toFormat("yyyy-MM-dd"),
       deliveryDate: DateTime.now().toFormat("yyyy-MM-dd"),
-      quotation: "",
-      salesPersonId: 0,
-      statusId: 0,
-      statusName: "",
-      companyId: 0,
+      quotation: 0,
+      salesPerson: "",
+      status: 0,
+      customerId: "",
     },
+    validationSchema: schema,
     onSubmit(values, helpers) {
       console.log(values);
-      dispatch(addProject(values));
-      helpers.resetForm();
-      onClose();
+      setIsCreating((_prev) => true);
+      dispatch(
+        createProject({
+          token,
+          project: values,
+        })
+      )
+        .unwrap()
+        .then((res) => {
+          notify("Project", res.message, res.success ? "success" : "error");
+          if (res.success) {
+            dispatch(addProject(res.data));
+            helpers.resetForm();
+            onClose();
+          }
+        })
+        .catch((err) => {
+          console.log("Add Project: ", err?.message);
+          notify("Project", "An error occurred", "error");
+        })
+        .finally(() => {
+          setIsCreating((_prev) => false);
+        });
     },
   });
 
@@ -67,7 +113,7 @@ const _AddProjectModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
     if (!value) return;
     form.setValues((prev) => ({
       ...prev,
-      companyId: parseInt(value),
+      customerId: value,
     }));
   };
 
@@ -77,8 +123,7 @@ const _AddProjectModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
     if (!typeName) return;
     form.setValues((prev) => ({
       ...prev,
-      statusId: parseInt(value),
-      statusName: typeName,
+      status: parseInt(value),
     }));
   };
 
@@ -114,7 +159,7 @@ const _AddProjectModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
     if (!value) return;
     form.setValues((prev) => ({
       ...prev,
-      salesPersonId: parseInt(value),
+      salesPerson: value,
     }));
   };
 
@@ -141,6 +186,7 @@ const _AddProjectModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
               value={form.values.name}
               onChange={form.handleChange}
               onBlur={form.handleBlur}
+              error={form.touched.name && form.errors.name ? `${form.errors.name}` : null}
             />
             <Textarea
               minRows={5}
@@ -151,17 +197,23 @@ const _AddProjectModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
               value={form.values.description}
               onChange={form.handleChange}
               onBlur={form.handleBlur}
+              error={
+                form.touched.description && form.errors.description
+                  ? `${form.errors.description}`
+                  : null
+              }
             />
             <Group grow align="flex-start">
               <TextInput
                 required
                 withAsterisk={false}
                 label="Project Type"
-                name="projectType"
-                id="projectType"
-                value={form.values.projectType}
+                name="type"
+                id="type"
+                value={form.values.type}
                 onChange={form.handleChange}
                 onBlur={form.handleBlur}
+                error={form.touched.type && form.errors.type ? `${form.errors.type}` : null}
               />
               <TextInput
                 required
@@ -186,6 +238,11 @@ const _AddProjectModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
                     onChange={handleOnChangeValueCurrency}
                     data={currencyList}
                   />
+                }
+                error={
+                  form.touched?.value?.amount && form.errors?.value?.amount
+                    ? `${form.errors?.value?.amount}`
+                    : null
                 }
               />
             </Group>
@@ -232,9 +289,15 @@ const _AddProjectModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
                 label="Quotation"
                 name="quotation"
                 id="quotation"
+                type="number"
                 value={form.values.quotation}
                 onChange={form.handleChange}
                 onBlur={form.handleBlur}
+                error={
+                  form.touched.quotation && form.errors.quotation
+                    ? `${form.errors.quotation}`
+                    : null
+                }
               />
               <Select
                 required
@@ -242,9 +305,14 @@ const _AddProjectModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
                 searchable
                 nothingFound="No Sales Persons"
                 label="Sales Person"
-                value={form.values.salesPersonId.toString()}
+                value={form.values.salesPerson}
                 onChange={handleOnChangeSalesPerson}
                 data={salesPersonsList}
+                error={
+                  form.touched.salesPerson && form.errors.salesPerson
+                    ? `${form.errors.salesPerson}`
+                    : null
+                }
               />
             </Group>
             <Select
@@ -253,9 +321,14 @@ const _AddProjectModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
               searchable
               nothingFound="No Companies"
               label="Company"
-              value={form.values.companyId.toString()}
+              value={form.values.customerId}
               onChange={handleOnChangeCompany}
               data={companiesList}
+              error={
+                form.touched.customerId && form.errors.customerId
+                  ? `${form.errors.customerId}`
+                  : null
+              }
             />
             <Select
               required
@@ -263,16 +336,22 @@ const _AddProjectModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
               searchable
               nothingFound="No Such Status"
               label="Project Status"
-              value={form.values.statusId.toString()}
+              value={form.values.status.toString()}
               onChange={handleOnChangeStatus}
               data={projectStatusList}
+              error={form.touched.status && form.errors.status ? `${form.errors.status}` : null}
             />
 
             <Group align="flex-end" position="right" mt={rem(32)}>
               <Button variant="outline" onClick={handleCancel} size="xs">
                 Cancel
               </Button>
-              <Button variant="filled" onClick={() => form.handleSubmit()} size="xs">
+              <Button
+                size="xs"
+                variant="filled"
+                loading={isCreating}
+                onClick={() => form.handleSubmit()}
+              >
                 Save
               </Button>
             </Group>

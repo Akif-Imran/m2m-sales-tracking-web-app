@@ -5,7 +5,7 @@ import TopBarProgress from "react-topbar-progress-indicator";
 import { notify } from "@utility";
 
 import * as authHelpers from "./AuthHelpers";
-import { selectUsers, useAppSelector } from "@store";
+import { apiLogin } from "@services";
 
 /* interface UserContextType {
   isAuthorized: boolean;
@@ -161,10 +161,10 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
         ...state,
         token: action.payload.token,
         user: action.payload.user,
-        isAdmin: action.payload.user.userTypeName === "Admin",
-        isSales: action.payload.user.userTypeName === "Sales",
-        isHR: action.payload.user.userTypeName === "HR",
-        isEngineer: action.payload.user.userTypeName === "Engineer",
+        isAdmin: action.payload.user.userType === 1,
+        isSales: action.payload.user.userType === 2,
+        isHR: action.payload.user.userType === 4,
+        isEngineer: action.payload.user.userType === 3,
         isAuthorized: true,
         isLoading: false,
       };
@@ -174,10 +174,10 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
         ...action.payload,
         isLoading: false,
         isAuthorized: true,
-        isAdmin: action.payload.user.userTypeName === "Admin",
-        isSales: action.payload.user.userTypeName === "Sales",
-        isHR: action.payload.user.userTypeName === "HR",
-        isEngineer: action.payload.user.userTypeName === "Engineer",
+        isAdmin: action.payload.user.userType === 1,
+        isSales: action.payload.user.userType === 2,
+        isHR: action.payload.user.userType === 4,
+        isEngineer: action.payload.user.userType === 3,
       };
     default:
       return state;
@@ -198,7 +198,6 @@ const initAuthState: AuthState = {
 const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
   const [state, dispatch] = React.useReducer(authReducer, initAuthState);
   const [showSplashScreen, setShowSplashScreen] = useState(true);
-  const { data: users } = useAppSelector(selectUsers);
 
   React.useEffect(() => {
     (async () => {
@@ -234,34 +233,38 @@ const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
 
   const logout = React.useCallback(() => dispatch({ type: "LOGOUT" }), []);
 
-  const login = React.useCallback(
-    (email: string, password: string, save: boolean) => {
-      dispatch({ type: "LOAD_START" });
-      const user = users.find((user) => user.email === email && user.password === password);
-      if (!user) {
-        notify("Login", "Invalid username or password", "error");
-        dispatch({ type: "LOAD_STOP" });
-        return;
-      } else {
-        if (save) {
-          authHelpers.setAuth({ token: "", user: user }).then(() => {
+  const login = React.useCallback((email: string, password: string, save: boolean) => {
+    dispatch({ type: "LOAD_START" });
+    apiLogin({ email, password })
+      .then((res) => {
+        if (!res.success) {
+          notify("Login", res.message, "error");
+          dispatch({ type: "LOAD_STOP" });
+          return;
+        } else {
+          if (save) {
+            authHelpers.setAuth({ token: res.token, user: res.data }).then(() => {
+              dispatch({
+                type: "LOGIN",
+                payload: { user: res.data, save: true, token: res.token },
+              });
+            });
+          } else {
             dispatch({
               type: "LOGIN",
-              payload: { user: user, save: true, token: "" },
+              payload: { user: res.data, save: false, token: res.token },
             });
-          });
-        } else {
-          dispatch({
-            type: "LOGIN",
-            payload: { user: user, save: false, token: "" },
-          });
+          }
         }
-      }
-
-      dispatch({ type: "LOAD_STOP" });
-    },
-    [users]
-  );
+      })
+      .catch((err) => {
+        console.log("Login error: ", err?.message);
+        notify("Login", "An error occurred", "error");
+      })
+      .finally(() => {
+        dispatch({ type: "LOAD_STOP" });
+      });
+  }, []);
 
   const value = React.useMemo(() => ({ state, login, logout }), [state, login, logout]);
 

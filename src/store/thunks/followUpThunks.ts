@@ -71,12 +71,12 @@ export const removeFollowUp = createAsyncThunk("followup/delete", async (params:
   return response.data;
 });
 
-export const fetchFollowUps = createAsyncThunk("fetch/followups", async (token: string) => {
+export const fetchFollowUps = createAsyncThunk("followup/fetch", async (token: string) => {
   const response = await apiGet<ApiResponse<IFollowUp[]>>(urls.followUp.list, token);
   return response.data;
 });
 
-export const getFollowUpById = createAsyncThunk("get/followup", async (params: ByIdReq) => {
+export const getFollowUpById = createAsyncThunk("followup/get", async (params: ByIdReq) => {
   const response = await apiGet<ApiResponse<IFollowUp>>(
     urls.followUp.getById(params.id),
     params.token

@@ -1,11 +1,11 @@
 import { PayloadAction, SerializedError, createSlice } from "@reduxjs/toolkit";
+import { fetchPurchaseRequests } from "../thunks/purchaseRequestThunks";
 
 interface State {
   data: IPurchaseRequest[];
   isLoading: boolean;
   error: null | SerializedError;
 }
-type UpdateStatus = { purchaseRequestId: number; statusId: number; statusName: string };
 
 const initialState: State = {
   data: [],
@@ -18,24 +18,37 @@ const purchaseRequestSlice = createSlice({
   initialState: initialState,
   reducers: {
     addPurchaseRequest: (state, action: PayloadAction<Omit<IPurchaseRequest, "id">>) => {
-      const id = Date.now();
-      state.data.push({ id, ...action.payload });
+      console.log("addPurchaseRequest payload", action.payload);
+      state.data.push(action.payload);
     },
     updatePurchaseRequest: (state, action: PayloadAction<IPurchaseRequest>) => {
-      const index = state.data.findIndex((contact) => contact.id === action.payload.id);
+      const index = state.data.findIndex((request) => request._id === action.payload._id);
       state.data[index] = action.payload;
     },
-    updatePurchaseRequestStatus: (state, action: PayloadAction<UpdateStatus>) => {
-      const index = state.data.findIndex(
-        (project) => project.id === action.payload.purchaseRequestId
-      );
-      state.data[index].statusId = action.payload.statusId;
-      state.data[index].statusName = action.payload.statusName;
+    updatePurchaseRequestStatus: (state, action: PayloadAction<IPurchaseRequest>) => {
+      const index = state.data.findIndex((request) => request._id === action.payload._id);
+      state.data[index] = action.payload;
     },
-    deletePurchaseRequest: (state, action: PayloadAction<number>) => {
-      const index = state.data.findIndex((contact) => contact.id === action.payload);
+    deletePurchaseRequest: (state, action: PayloadAction<string>) => {
+      const index = state.data.findIndex((contact) => contact._id === action.payload);
       state.data.splice(index, 1);
     },
+  },
+  extraReducers: (builder) => {
+    builder.addCase(fetchPurchaseRequests.pending, (state) => {
+      state.isLoading = true;
+    });
+    builder.addCase(fetchPurchaseRequests.rejected, (state, action) => {
+      state.error = action.error;
+      state.isLoading = false;
+    });
+    builder.addCase(fetchPurchaseRequests.fulfilled, (state, action) => {
+      if (action.payload.success) {
+        state.data = action.payload.data;
+      }
+      state.error = null;
+      state.isLoading = false;
+    });
   },
 });
 

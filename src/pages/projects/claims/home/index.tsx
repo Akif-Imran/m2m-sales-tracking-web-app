@@ -30,13 +30,14 @@ import {
   useAppDispatch,
   useAppSelector,
 } from "@store";
+import { removeClaim, updateStatusClaim } from "@thunks";
 
 interface OwnProps {}
 
 export const Claims: React.FC<OwnProps> = () => {
   useStyles();
   const {
-    state: { isAdmin, isHR, user },
+    state: { isAdmin, isHR, user, token },
   } = useAuthContext();
   const dispatch = useAppDispatch();
   const { classes: gclasses, theme } = useGStyles();
@@ -48,7 +49,7 @@ export const Claims: React.FC<OwnProps> = () => {
   const [searchedData, setSearchedData] = React.useState<typeof claims>([]);
   const [visible, setVisible] = React.useState<boolean>(false);
   const [selectedStatus, setSelectedStatus] = React.useState<string>("1");
-  const [selectedClaim, setSelectedClaim] = React.useState<number>(0);
+  const [selectedClaim, setSelectedClaim] = React.useState<string>("");
 
   const onChangeSearch = (query: string) => {
     setSearchQuery(query);
@@ -57,8 +58,7 @@ export const Claims: React.FC<OwnProps> = () => {
         (request) =>
           request.project?.name.toLowerCase().includes(query.toLowerCase()) ||
           request.supplier?.name?.toLowerCase().includes(query.toLowerCase()) ||
-          request.requestByPerson?.firstName.toLowerCase().includes(query.toLowerCase()) ||
-          request.requestByPerson?.lastName.toLowerCase().includes(query.toLowerCase()) ||
+          request.requestByPerson?.name.toLowerCase().includes(query.toLowerCase()) ||
           request.itemName?.toLowerCase().includes(query.toLowerCase())
       );
       setSearchedData(filtered);
@@ -67,23 +67,22 @@ export const Claims: React.FC<OwnProps> = () => {
         (followup) =>
           (followup.project?.name.toLowerCase().includes(query.toLowerCase()) ||
             followup.supplier?.name.toLowerCase().includes(query.toLowerCase()) ||
-            followup.requestByPerson?.firstName.toLowerCase().includes(query.toLowerCase()) ||
-            followup.requestByPerson?.lastName.toLowerCase().includes(query.toLowerCase()) ||
+            followup.requestByPerson?.name.toLowerCase().includes(query.toLowerCase()) ||
             followup.itemName?.toLowerCase().includes(query.toLowerCase())) &&
-          followup.requestByPerson === user?.id
+          followup.requestByPerson === user?._id
       );
       setSearchedData(filtered);
     }
   };
 
-  const showUpdateStatusModal = (statusId: number, requestId: number) => {
+  const showUpdateStatusModal = (statusId: number, requestId: string) => {
     setSelectedStatus(statusId.toString());
     setSelectedClaim(requestId);
     setVisible(true);
   };
   const hideUpdateStatusModal = () => setVisible(false);
 
-  const handleDelete = (id: number) => {
+  const handleDelete = (id: string) => {
     openDeleteModalHelper({
       theme: theme,
       title: `Delete Claim`,
@@ -97,6 +96,23 @@ export const Claims: React.FC<OwnProps> = () => {
       cancelLabel: "Cancel",
       confirmLabel: "Delete Claim",
       onConfirm: () => {
+        dispatch(
+          removeClaim({
+            token,
+            id,
+          })
+        )
+          .unwrap()
+          .then((res) => {
+            notify("Delete Claim", res?.message, res.success ? "success" : "error");
+            if (res.success) {
+              dispatch(deleteClaim(res.data._id));
+            }
+          })
+          .catch((err) => {
+            console.log("Delete Claim: ", err?.message);
+            notify("Delete Claim", "An error occurred", "error");
+          });
         dispatch(deleteClaim(id));
         notify("Delete Claim", "Claim deleted successfully!", "success");
       },
@@ -104,14 +120,42 @@ export const Claims: React.FC<OwnProps> = () => {
     });
   };
 
+  const handleUpdateStatus = (value: string) => {
+    if (!value) {
+      notify("Update Claim Status", "Invalid status value", "error");
+      return;
+    }
+    dispatch(
+      updateStatusClaim({
+        token,
+        id: selectedClaim,
+        body: {
+          status: parseInt(value),
+        },
+      })
+    )
+      .unwrap()
+      .then((res) => {
+        notify("Update Claim Status", res?.message, res.success ? "success" : "error");
+        if (res.success) {
+          dispatch(updateClaimStatus(res.data));
+          hideUpdateStatusModal();
+        }
+      })
+      .catch((err) => {
+        console.log("Update Claim Status: ", err?.message);
+        notify("Update Claim Status", "An error occurred", "error");
+      });
+  };
+
   React.useEffect(() => {
     if (isAdmin || isHR) {
       setSearchedData(claims);
     } else {
-      const filtered = claims.filter((followup) => followup.requestedById === user?.id);
+      const filtered = claims.filter((followup) => followup.requestByPerson?._id === user?._id);
       setSearchedData(filtered);
     }
-  }, [claims, isAdmin, isHR, user?.id]);
+  }, [claims, isAdmin, isHR, user?._id]);
 
   const rows =
     searchedData.length === 0 ? (
@@ -129,25 +173,22 @@ export const Claims: React.FC<OwnProps> = () => {
             maximumFractionDigits: 2,
           }).format(request.price.amount);
           return (
-            <tr key={request.id}>
+            <tr key={request._id}>
               <td>{index + 1}</td>
-              <td>{request.id}</td>
               <td>{request.itemName}</td>
               <td>{request.itemType}</td>
               <td>
                 {" "}
-                <Badge variant="filled" color={claimStatusColors[request.statusId]}>
-                  {request.statusName}
+                <Badge variant="filled" color={claimStatusColors[request.status]}>
+                  {request?.statusName}
                 </Badge>
               </td>
               <td>{request.project?.name}</td>
-              <td>
-                {request.requestByPerson?.firstName} {request.requestByPerson?.lastName}
-              </td>
+              <td>{request.requestByPerson?.name}</td>
               <td>
                 {DateTime.fromISO(request.warranty).toLocal().toFormat(DAY_MM_DD_YYYY_HH_MM_SS_A)}
               </td>
-              <td>{request.qty}</td>
+              <td>{request.quantity}</td>
               <td>{request.supplier?.name}</td>
               <td>{value}</td>
               <td>{request.remarks}</td>
@@ -157,13 +198,13 @@ export const Claims: React.FC<OwnProps> = () => {
                     <ActionIcon
                       color="gray"
                       size={"sm"}
-                      onClick={() => showUpdateStatusModal(request.statusId, request.id)}
+                      onClick={() => showUpdateStatusModal(request.status, request._id)}
                     >
                       <IconRotateClockwise2 />
                     </ActionIcon>
                   )}
                   {isAdmin && (
-                    <ActionIcon color="red" size={"sm"} onClick={() => handleDelete(request.id)}>
+                    <ActionIcon color="red" size={"sm"} onClick={() => handleDelete(request._id)}>
                       <IconTrash />
                     </ActionIcon>
                   )}
@@ -243,26 +284,7 @@ export const Claims: React.FC<OwnProps> = () => {
         withOverlay
         overlayProps={modalOverlayPropsHelper(theme)}
       >
-        <Radio.Group
-          value={selectedStatus}
-          name="userFilter"
-          onChange={(value) => {
-            if (!value) {
-              notify("Update Claim Status", "Invalid status value", "error");
-              return;
-            }
-            const typeName = claimsStatus.find((status) => status.value === value)?.label;
-            if (!typeName) return;
-            dispatch(
-              updateClaimStatus({
-                claimId: selectedClaim,
-                statusId: parseInt(value),
-                statusName: typeName,
-              })
-            );
-            hideUpdateStatusModal();
-          }}
-        >
+        <Radio.Group value={selectedStatus} name="Update Status" onChange={handleUpdateStatus}>
           <div className={gclasses.radioContainer}>
             {claimsStatus.map((value) => {
               return <Radio value={value.value} label={value.label} key={value.value} />;

@@ -3,10 +3,14 @@ import { useAuthContext } from "@contexts";
 import { useAppDispatch } from "@store";
 import {
   fetchAllCompanies,
-  fetchAllContacts,
+  fetchClaim,
+  fetchClaimStatuses,
+  fetchContacts,
   fetchFollowUps,
   fetchProjectStatuses,
   fetchProjects,
+  fetchPurchaseRequestStatuses,
+  fetchPurchaseRequests,
   fetchSuppliers,
   fetchUserTypes,
   fetchUsers,
@@ -25,12 +29,16 @@ export const _DataLoader: React.FC<React.PropsWithChildren> = ({ children }) => 
     }
     dispatch(fetchAllCompanies(token));
     dispatch(fetchUserTypes(token));
-    dispatch(fetchAllContacts(token));
+    dispatch(fetchContacts(token));
     dispatch(fetchProjectStatuses(token));
     dispatch(fetchProjects(token));
     dispatch(fetchUsers(token));
     dispatch(fetchSuppliers(token));
     dispatch(fetchFollowUps(token));
+    dispatch(fetchClaim(token));
+    dispatch(fetchClaimStatuses(token));
+    dispatch(fetchPurchaseRequests(token));
+    dispatch(fetchPurchaseRequestStatuses(token));
   }, [dispatch, token]);
 
   return (

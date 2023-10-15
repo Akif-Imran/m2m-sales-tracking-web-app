@@ -234,7 +234,7 @@ export const selectPurchaseRequestsWithRecords = createSelector(
   selectProjects,
   (requests, users, suppliers, projects) => {
     return requests.data.map((request) => {
-      const requestByPerson = users.data.find((user) => user._id === request.requestedById);
+      const requestByPerson = users.data.find((user) => user._id === request.createdBy);
       const project = projects.data.find((project) => project._id === request.projectId);
       const supplier = suppliers.data.find((supplier) => supplier._id === request.supplierId);
       return {
@@ -251,16 +251,19 @@ export const selectClaimsWithRecords = createSelector(
   selectUsers,
   selectSuppliers,
   selectProjects,
-  (claims, users, suppliers, projects) => {
+  selectClaimsStatusList,
+  (claims, users, suppliers, projects, statuses) => {
     return claims.data.map((request) => {
-      const requestByPerson = users.data.find((user) => user._id === request.requestedById);
+      const requestByPerson = users.data.find((user) => user._id === request.createdBy);
       const project = projects.data.find((project) => project._id === request.projectId);
       const supplier = suppliers.data.find((supplier) => supplier._id === request.supplierId);
+      const statusName = statuses.data.find((status) => status.id === request.status)?.name;
       return {
         ...request,
         requestByPerson,
         project,
         supplier,
+        statusName,
       };
     });
   }

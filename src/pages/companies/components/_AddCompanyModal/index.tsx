@@ -28,12 +28,14 @@ interface OwnProps {
   onClose: () => void;
   title: string;
 }
-interface ICompanyForm extends Omit<ICompany, "_id" | "__v" | "company" | "isActive"> {}
+interface ICompanyForm extends Omit<ICompany, "_id" | "__v" | "company" | "isActive" | "logo"> {
+  logo?: string;
+}
 
-const companySchema: yup.ObjectSchema<ICompanyForm> = yup.object().shape({
+const schema: yup.ObjectSchema<ICompanyForm> = yup.object().shape({
   name: yup.string().required("Company name is required"),
   email: yup.string().email("Invalid email").required("Email is required"),
-  logo: yup.string().required(),
+  logo: yup.string().optional(),
   address: yup.string().required("Address is required"),
   state: yup.string().required("State is required"),
   country: yup.string().required("Country is required"),
@@ -62,7 +64,7 @@ const _AddCompanyModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
       city: "",
       phone: "",
     },
-    validationSchema: companySchema,
+    validationSchema: schema,
     onSubmit(values, helpers) {
       console.log(values);
       setIsCreating(true);

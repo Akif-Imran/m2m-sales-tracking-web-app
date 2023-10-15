@@ -1,5 +1,5 @@
 import { PayloadAction, SerializedError, createSlice } from "@reduxjs/toolkit";
-import { fetchAllContacts } from "@thunks";
+import { fetchContacts } from "@thunks";
 
 interface State {
   data: ICompanyContact[];
@@ -30,14 +30,14 @@ const companyContactSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    builder.addCase(fetchAllContacts.pending, (state) => {
+    builder.addCase(fetchContacts.pending, (state) => {
       state.isLoading = true;
     });
-    builder.addCase(fetchAllContacts.rejected, (state, action) => {
+    builder.addCase(fetchContacts.rejected, (state, action) => {
       state.error = action.error;
       state.isLoading = false;
     });
-    builder.addCase(fetchAllContacts.fulfilled, (state, action) => {
+    builder.addCase(fetchContacts.fulfilled, (state, action) => {
       if (action.payload.success) {
         state.data = action.payload.data;
       }

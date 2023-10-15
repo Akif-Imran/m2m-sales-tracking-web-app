@@ -194,21 +194,48 @@ interface IPurchaseRequestStatus {
   name: string;
 }
 interface IPurchaseRequest {
-  id: number;
-  requestedById: string; //user id
-  projectId: number;
+  _id: string;
+  createdBy: string;
+  createdAt: string;
+  isActive: boolean;
+  company: string;
+  projectId:
+    | string
+    | {
+        _id: string;
+      };
+  supplierId:
+    | string
+    | {
+        _id: string;
+      };
   itemName: string;
   itemType: string;
-  warranty: string; //date
-  qty: number;
-  supplierId: number;
+  warranty: string;
+  quantity: number;
   price: {
     amount: number;
     currency: string;
   };
   remarks: string;
-  statusId: number;
-  statusName: string;
+  status: number;
+  customerId: string;
+  __v: number;
+  // id: number;
+  // requestedById: string; //user id
+  // projectId: number;
+  // itemName: string;
+  // itemType: string;
+  // warranty: string; //date
+  // qty: number;
+  // supplierId: number;
+  // price: {
+  //   amount: number;
+  //   currency: string;
+  // };
+  // remarks: string;
+  // statusId: number;
+  // statusName: string;
 }
 interface IClaimStatus {
   name: string;
@@ -216,21 +243,48 @@ interface IClaimStatus {
 }
 
 interface IClaim {
-  id: number;
-  requestedById: string; //user id
-  projectId: number;
+  _id: string;
+  createdBy: string;
+  createdAt: string;
+  isActive: true;
+  company: string;
+  customerId: string;
+  projectId:
+    | string
+    | {
+        _id: string;
+      };
+  supplierId:
+    | string
+    | {
+        _id: string;
+      };
   itemName: string;
   itemType: string;
   warranty: string;
-  qty: number;
-  supplierId: number;
+  quantity: number;
   price: {
     amount: number;
     currency: string;
   };
   remarks: string;
-  statusId: number;
-  statusName: string;
+  status: number;
+  __v: number;
+  // id: number;
+  // requestedById: string; //user id
+  // projectId: number;
+  // itemName: string;
+  // itemType: string;
+  // warranty: string;
+  // qty: number;
+  // supplierId: number;
+  // price: {
+  //   amount: number;
+  //   currency: string;
+  // };
+  // remarks: string;
+  // statusId: number;
+  // statusName: string;
 }
 interface ISupplier {
   createdBy: string;

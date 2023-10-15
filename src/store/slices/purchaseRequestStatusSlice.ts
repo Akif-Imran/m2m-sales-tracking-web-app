@@ -1,4 +1,5 @@
 import { SerializedError, createSlice } from "@reduxjs/toolkit";
+import { fetchPurchaseRequestStatuses } from "@thunks";
 
 interface State {
   data: IPurchaseRequestStatus[];
@@ -7,12 +8,7 @@ interface State {
 }
 
 const initialState: State = {
-  data: [
-    { id: 1, name: "Pending" },
-    { id: 2, name: "Approved" },
-    { id: 3, name: "Rejected" },
-    { id: 4, name: "KIV" },
-  ],
+  data: [],
   isLoading: false,
   error: null,
 };
@@ -21,6 +17,22 @@ const purchaseRequestStatusSlice = createSlice({
   name: "purchaseRequestStatusList",
   initialState: initialState,
   reducers: {},
+  extraReducers: (builder) => {
+    builder.addCase(fetchPurchaseRequestStatuses.pending, (state) => {
+      state.isLoading = true;
+    });
+    builder.addCase(fetchPurchaseRequestStatuses.rejected, (state, action) => {
+      state.error = action.error;
+      state.isLoading = false;
+    });
+    builder.addCase(fetchPurchaseRequestStatuses.fulfilled, (state, action) => {
+      if (action.payload.success) {
+        state.data = action.payload.data;
+      }
+      state.error = null;
+      state.isLoading = false;
+    });
+  },
 });
 
 export { purchaseRequestStatusSlice };

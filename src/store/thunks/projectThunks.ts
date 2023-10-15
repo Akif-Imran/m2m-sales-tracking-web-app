@@ -38,7 +38,7 @@ interface ByIdReq {
   id: string;
 }
 
-export const createProject = createAsyncThunk("create/project", async (params: CreateReq) => {
+export const createProject = createAsyncThunk("project/create", async (params: CreateReq) => {
   const response = await apiPost<ApiResponse<IProject>, typeof params.project>(
     urls.project.create,
     params.token,
@@ -47,11 +47,16 @@ export const createProject = createAsyncThunk("create/project", async (params: C
   return response.data;
 });
 
-export const removeProject = createAsyncThunk("update/project", async (params: DeleteReq) => {
+export const removeProject = createAsyncThunk("project/update", async (params: DeleteReq) => {
   const response = await apiDelete<ApiResponse<IProject>>(
     urls.project.delete(params.id),
     params.token
   );
+  return response.data;
+});
+
+export const fetchProjects = createAsyncThunk("project/fetch", async (token: string) => {
+  const response = await apiGet<ApiResponse<IProject[]>>(urls.project.list, token);
   return response.data;
 });
 
@@ -67,11 +72,6 @@ export const updateStatusProject = createAsyncThunk(
   }
 );
 
-export const fetchProjects = createAsyncThunk("fetch/project", async (token: string) => {
-  const response = await apiGet<ApiResponse<IProject[]>>(urls.project.list, token);
-  return response.data;
-});
-
 export const fetchProjectStatuses = createAsyncThunk(
   "fetch/status/project",
   async (token: string) => {
@@ -80,7 +80,7 @@ export const fetchProjectStatuses = createAsyncThunk(
   }
 );
 
-export const getProjectById = createAsyncThunk("get/project", async (params: ByIdReq) => {
+export const getProjectById = createAsyncThunk("project/get", async (params: ByIdReq) => {
   const response = await apiGet<ApiResponse<IProject>>(
     urls.project.getById(params.id),
     params.token

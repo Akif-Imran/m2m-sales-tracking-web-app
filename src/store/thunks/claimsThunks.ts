@@ -14,7 +14,7 @@ interface BaseRecord {
     currency: string;
   };
   remarks: string;
-  status: string;
+  status: number;
 }
 interface CreateReq {
   token: string;

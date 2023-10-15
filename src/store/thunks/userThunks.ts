@@ -6,7 +6,7 @@ export const fetchUserTypes = createAsyncThunk("userTypes/fetch", async (token: 
   return response.data;
 });
 
-export const fetchUsers = createAsyncThunk("fetch/users", async (token: string) => {
+export const fetchUsers = createAsyncThunk("user/fetch", async (token: string) => {
   const response = await apiGet<ApiResponse<IUser[]>>(urls.user.list, token);
   return response.data;
 });

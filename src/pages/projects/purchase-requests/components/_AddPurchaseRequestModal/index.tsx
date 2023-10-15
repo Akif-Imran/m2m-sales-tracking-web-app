@@ -33,8 +33,8 @@ export const _AddPurchaseRequestModal: React.FC<OwnProps> = ({ onClose, opened, 
 
   const form = useFormik<IRequestForm>({
     initialValues: {
-      projectId: 0,
-      supplierId: 0,
+      projectId: "",
+      supplierId: "",
       itemName: "",
       itemType: "",
       price: {

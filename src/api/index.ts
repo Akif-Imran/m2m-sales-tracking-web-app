@@ -60,7 +60,7 @@ export const urls = {
     update: (id: string) => `${BASE_CLAIM_URL}/update/${id}`,
     delete: (id: string) => `${BASE_CLAIM_URL}/delete/${id}`,
     getById: (id: string) => `${BASE_CLAIM_URL}/getById/${id}`,
-    statusList: `${BASE_CLAIM_URL}/getStatusList`,
+    statusList: `${BASE_URL}/getStatusList`,
     updateStatus: (id: string) => `${BASE_CLAIM_URL}/changeStatus/${id}`,
   },
   purchaseRequest: {
@@ -69,6 +69,8 @@ export const urls = {
     update: (id: string) => `${BASE_PURCHASE_REQUEST_URL}/update/${id}`,
     delete: (id: string) => `${BASE_PURCHASE_REQUEST_URL}/delete/${id}`,
     getById: (id: string) => `${BASE_PURCHASE_REQUEST_URL}/getById/${id}`,
+    statusList: `${BASE_URL}/getStatusList`,
+    updateStatus: (id: string) => `${BASE_CLAIM_URL}/changeStatus/${id}`,
   },
   supplier: {
     list: `${BASE_SUPPLIER_URL}/getAll`,

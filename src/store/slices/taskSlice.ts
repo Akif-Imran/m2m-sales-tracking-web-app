@@ -26,7 +26,7 @@ const taskSlice = createSlice({
       const id = Date.now();
       state.data.push({ id, ...action.payload });
     },
-    updateTask: (state, action: PayloadAction<ITask>) => {
+    modifyTask: (state, action: PayloadAction<ITask>) => {
       const index = state.data.findIndex((task) => task.id === action.payload.id);
       state.data[index] = action.payload;
     },
@@ -34,7 +34,7 @@ const taskSlice = createSlice({
       const index = state.data.findIndex((task) => task.id === action.payload);
       state.data.splice(index, 1);
     },
-    updateTaskStatus: (state, action: PayloadAction<UpdateTaskStatus>) => {
+    modifyTaskStatus: (state, action: PayloadAction<UpdateTaskStatus>) => {
       const index = state.data.findIndex((task) => task.id === action.payload.taskId);
       state.data[index].statusId = action.payload.statusId;
       state.data[index].statusName = action.payload.statusName;
@@ -45,8 +45,9 @@ const taskSlice = createSlice({
       }
     },
   },
+  extraReducers: (builder) => {},
 });
 
 export { taskSlice };
-export const { addTask, deleteTask, updateTask, updateTaskStatus } = taskSlice.actions;
+export const { addTask, deleteTask, modifyTask, modifyTaskStatus } = taskSlice.actions;
 export const taskReducer = taskSlice.reducer;

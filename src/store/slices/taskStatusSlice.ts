@@ -7,11 +7,7 @@ interface State {
 }
 
 const initialState: State = {
-  data: [
-    { id: 1, name: "Pending" },
-    { id: 2, name: "Accepted" },
-    { id: 5, name: "Completed" },
-  ],
+  data: [],
   isLoading: false,
   error: null,
 };
@@ -20,6 +16,7 @@ const taskStatusSlice = createSlice({
   name: "taskStatusList",
   initialState: initialState,
   reducers: {},
+  extraReducers: (builder) => {},
 });
 
 export { taskStatusSlice };

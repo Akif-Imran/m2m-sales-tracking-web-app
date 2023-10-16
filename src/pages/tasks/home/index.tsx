@@ -35,7 +35,7 @@ import { DateTime } from "luxon";
 import { DAY_MM_DD_YYYY_HH_MM_SS_A, taskStatusColors } from "@constants";
 import { modalOverlayPropsHelper, openDeleteModalHelper } from "@helpers";
 import { notify } from "@utility";
-import { deleteTask, updateTaskStatus } from "@slices";
+import { deleteTask, modifyTaskStatus } from "@slices";
 import { _AddTaskModal } from "../components";
 import { useAuthContext } from "@contexts";
 
@@ -431,7 +431,7 @@ const Tasks: React.FC<OwnProps> = () => {
             const typeName = taskStatusList.find((status) => status.value === value)?.label;
             if (!typeName) return;
             dispatch(
-              updateTaskStatus({
+              modifyTaskStatus({
                 taskId: selectedTask,
                 statusId: parseInt(value),
                 statusName: typeName,

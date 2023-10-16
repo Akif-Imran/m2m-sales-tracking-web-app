@@ -10,6 +10,8 @@ export const BASE_PROJECT_URL = `${BASE_URL}/project`;
 export const BASE_FOLLOW_UP_URL = `${BASE_URL}/followup`;
 export const BASE_CLAIM_URL = `${BASE_URL}/claim`;
 export const BASE_PURCHASE_REQUEST_URL = `${BASE_URL}/purchase-request`;
+export const BASE_TASK_URL = `${BASE_URL}/task`;
+export const BASE_LEAVE_APPLICATION_URL = `${BASE_URL}/leave-application`;
 export const BASE_SUPPLIER_URL = `${BASE_URL}/supplier`;
 export const BASE_REPORT_URL = `${BASE_URL}/app_reports`;
 export const MALAYSIA_ZONE = "Asia/Kuala_Lumpur";
@@ -71,6 +73,24 @@ export const urls = {
     getById: (id: string) => `${BASE_PURCHASE_REQUEST_URL}/getById/${id}`,
     statusList: `${BASE_URL}/getStatusList`,
     updateStatus: (id: string) => `${BASE_PURCHASE_REQUEST_URL}/changeStatus/${id}`,
+  },
+  task: {
+    list: `${BASE_TASK_URL}/getAll`,
+    create: `${BASE_TASK_URL}/create`,
+    update: (id: string) => `${BASE_TASK_URL}/update/${id}`,
+    delete: (id: string) => `${BASE_TASK_URL}/delete/${id}`,
+    getById: (id: string) => `${BASE_TASK_URL}/getById/${id}`,
+    statusList: `${BASE_TASK_URL}/getTaskStatusList`,
+    updateStatus: (id: string) => `${BASE_TASK_URL}/changeStatus/${id}`,
+  },
+  leave: {
+    list: `${BASE_LEAVE_APPLICATION_URL}/getAll`,
+    create: `${BASE_LEAVE_APPLICATION_URL}/create`,
+    update: (id: string) => `${BASE_LEAVE_APPLICATION_URL}/update/${id}`,
+    delete: (id: string) => `${BASE_LEAVE_APPLICATION_URL}/delete/${id}`,
+    getById: (id: string) => `${BASE_LEAVE_APPLICATION_URL}/getById/${id}`,
+    statusList: `${BASE_URL}/getStatusList`,
+    updateStatus: (id: string) => `${BASE_LEAVE_APPLICATION_URL}/changeStatus/${id}`,
   },
   supplier: {
     list: `${BASE_SUPPLIER_URL}/getAll`,

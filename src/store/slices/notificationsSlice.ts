@@ -6,7 +6,7 @@ import { addFollowUp } from "./followUpSlice";
 import { addLeave, updateLeaveStatus } from "./leaveApplicationSlice";
 import { addProject, updateProjectStatus } from "./projectSlice";
 import { updatePurchaseRequestStatus } from "./purchaseRequestSlice";
-import { updateTaskStatus } from "./taskSlice";
+import { modifyTaskStatus } from "./taskSlice";
 
 interface State {
   isLoading: boolean;
@@ -124,7 +124,7 @@ const notificationSlice = createSlice({
       });
       state.count = state.count + 1;
     });
-    builder.addCase(updateTaskStatus, (state, action) => {
+    builder.addCase(modifyTaskStatus, (state, action) => {
       state.data.push({
         id: Date.now(),
         isRead: false,

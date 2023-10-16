@@ -5,11 +5,13 @@ import { DATE_FORMAT_YYYY_MM_DD, modalOverlayPropsHelper } from "@helpers";
 import { DatePickerInput, DateValue } from "@mantine/dates";
 import { useFormik } from "formik";
 import { useAuthContext } from "@contexts";
-import { selectRecordsForDropdown, useAppDispatch, useAppSelector } from "@store";
+import { selectProjects, selectRecordsForDropdown, useAppDispatch, useAppSelector } from "@store";
 import { addPurchaseRequest } from "@slices";
 import { IconCalendar } from "@tabler/icons-react";
 import { currencyList } from "@constants";
 import { colors } from "@theme";
+import { createPurchaseRequest } from "@thunks";
+import { notify } from "@utility";
 
 interface OwnProps {
   opened: boolean;
@@ -17,50 +19,96 @@ interface OwnProps {
   title: string;
   companyId?: string;
 }
-interface IRequestForm extends Omit<IPurchaseRequest, "id"> {}
+interface IRequestForm
+  extends Omit<
+    IPurchaseRequest,
+    "_id" | "__v" | "createdBy" | "createdAt" | "company" | "isActive"
+  > {}
 
-export const _AddPurchaseRequestModal: React.FC<OwnProps> = ({ onClose, opened, title }) => {
+export const _AddPurchaseRequestModal: React.FC<OwnProps> = ({
+  onClose,
+  opened,
+  title,
+  companyId,
+}) => {
   const { theme } = useStyles();
   const {
-    state: { user },
+    state: { token },
   } = useAuthContext();
   const dispatch = useAppDispatch();
   const {
+    companies,
     suppliers: suppliersList,
-    projects: projectsList,
     purchaseRequestStatus: purchaseRequestStatusList,
   } = useAppSelector(selectRecordsForDropdown);
+  const { data: projects } = useAppSelector(selectProjects);
+  const [isCreating, setIsCreating] = React.useState(false);
+  const [projectsList, setProjectsList] = React.useState<IDropDownList>([]);
 
   const form = useFormik<IRequestForm>({
     initialValues: {
       projectId: "",
       supplierId: "",
+      customerId: "",
       itemName: "",
       itemType: "",
+      warranty: "",
       price: {
         amount: 0,
         currency: "MYR",
       },
-      qty: 0,
+      quantity: 0,
       remarks: "",
-      requestedById: user!._id,
-      statusId: 1,
-      statusName: "",
-      warranty: "",
+      status: 1,
     },
     onSubmit: (values, helpers) => {
       console.log(values);
-      dispatch(addPurchaseRequest(values));
-      helpers.resetForm();
-      onClose();
+      setIsCreating((_prev) => true);
+      dispatch(
+        createPurchaseRequest({
+          token,
+          purchase: values,
+        })
+      )
+        .unwrap()
+        .then((res) => {
+          notify("Purchase Request", res?.message, res.success ? "success" : "error");
+          if (res.success) {
+            dispatch(addPurchaseRequest(res.data));
+            helpers.resetForm();
+            onClose();
+          }
+        })
+        .catch((err) => {
+          console.log("Add Purchase Request: ", err?.message);
+          notify("Purchase Request", "An error occurred", "error");
+        })
+        .finally(() => {
+          setIsCreating((_prev) => false);
+        });
     },
   });
+
+  const handleOnChangeCompany = (value: string | null) => {
+    if (!value) return;
+    form.setValues((prev) => ({
+      ...prev,
+      customerId: value,
+    }));
+    const project_s = projects
+      .filter((project) => project.customerId === value)
+      .map((project) => ({
+        label: project.name,
+        value: project._id,
+      }));
+    setProjectsList(project_s);
+  };
 
   const handleOnChangeProject = (value: string | null) => {
     if (!value) return;
     form.setValues((prev) => ({
       ...prev,
-      projectId: parseInt(value),
+      projectId: value,
     }));
   };
 
@@ -68,7 +116,7 @@ export const _AddPurchaseRequestModal: React.FC<OwnProps> = ({ onClose, opened, 
     if (!value) return;
     form.setValues((prev) => ({
       ...prev,
-      supplierId: parseInt(value),
+      supplierId: value,
     }));
   };
 
@@ -91,12 +139,9 @@ export const _AddPurchaseRequestModal: React.FC<OwnProps> = ({ onClose, opened, 
 
   const handleOnChangeStatus = (value: string | null) => {
     if (!value) return;
-    const typeName = purchaseRequestStatusList.find((status) => status.value === value)?.label;
-    if (!typeName) return;
     form.setValues((prev) => ({
       ...prev,
-      statusId: parseInt(value),
-      statusName: typeName,
+      status: parseInt(value),
     }));
   };
 
@@ -104,6 +149,17 @@ export const _AddPurchaseRequestModal: React.FC<OwnProps> = ({ onClose, opened, 
     form.resetForm();
     onClose();
   };
+
+  React.useEffect(() => {
+    if (!companyId) return;
+    const project_s = projects
+      .filter((project) => project.customerId === companyId)
+      .map((project) => ({
+        label: project.name,
+        value: project._id,
+      }));
+    setProjectsList(project_s);
+  }, [companyId, projects, opened]);
 
   return (
     <Modal
@@ -119,6 +175,16 @@ export const _AddPurchaseRequestModal: React.FC<OwnProps> = ({ onClose, opened, 
       <Grid>
         <Grid.Col span={12}>
           <Stack>
+            <Select
+              required
+              withAsterisk={false}
+              searchable
+              nothingFound="No company found"
+              label="Company"
+              value={form.values.customerId}
+              onChange={handleOnChangeCompany}
+              data={companies}
+            />
             <Group grow align="flex-start">
               <Select
                 required
@@ -182,10 +248,10 @@ export const _AddPurchaseRequestModal: React.FC<OwnProps> = ({ onClose, opened, 
                 required
                 withAsterisk={false}
                 label="Quantity"
-                name="qty"
-                id="qty"
+                name="quantity"
+                id="quantity"
                 type="number"
-                value={form.values.qty}
+                value={form.values.quantity}
                 onChange={form.handleChange}
                 onBlur={form.handleBlur}
               />
@@ -221,7 +287,7 @@ export const _AddPurchaseRequestModal: React.FC<OwnProps> = ({ onClose, opened, 
               searchable
               nothingFound="No status"
               label="Status"
-              value={form.values.statusId.toString()}
+              value={form.values.status.toString()}
               onChange={handleOnChangeStatus}
               data={purchaseRequestStatusList}
             />
@@ -241,7 +307,12 @@ export const _AddPurchaseRequestModal: React.FC<OwnProps> = ({ onClose, opened, 
             <Button variant="outline" onClick={handleCancel} size="xs">
               Cancel
             </Button>
-            <Button variant="filled" onClick={() => form.handleSubmit()} size="xs">
+            <Button
+              size="xs"
+              variant="filled"
+              loading={isCreating}
+              onClick={() => form.handleSubmit()}
+            >
               Save
             </Button>
           </Group>

@@ -9,7 +9,10 @@ interface BaseRecord {
   itemType: string;
   quantity: number;
   warranty: string;
-  price: number;
+  price: {
+    amount: number;
+    currency: string;
+  };
   remarks: string;
   status: number;
 }

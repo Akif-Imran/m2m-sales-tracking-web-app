@@ -70,7 +70,7 @@ export const urls = {
     delete: (id: string) => `${BASE_PURCHASE_REQUEST_URL}/delete/${id}`,
     getById: (id: string) => `${BASE_PURCHASE_REQUEST_URL}/getById/${id}`,
     statusList: `${BASE_URL}/getStatusList`,
-    updateStatus: (id: string) => `${BASE_CLAIM_URL}/changeStatus/${id}`,
+    updateStatus: (id: string) => `${BASE_PURCHASE_REQUEST_URL}/changeStatus/${id}`,
   },
   supplier: {
     list: `${BASE_SUPPLIER_URL}/getAll`,

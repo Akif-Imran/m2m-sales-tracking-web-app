@@ -199,16 +199,8 @@ interface IPurchaseRequest {
   createdAt: string;
   isActive: boolean;
   company: string;
-  projectId:
-    | string
-    | {
-        _id: string;
-      };
-  supplierId:
-    | string
-    | {
-        _id: string;
-      };
+  projectId: string;
+  supplierId: string;
   itemName: string;
   itemType: string;
   warranty: string;

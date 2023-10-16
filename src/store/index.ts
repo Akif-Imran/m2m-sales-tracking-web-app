@@ -232,16 +232,19 @@ export const selectPurchaseRequestsWithRecords = createSelector(
   selectUsers,
   selectSuppliers,
   selectProjects,
-  (requests, users, suppliers, projects) => {
+  selectPurchaseRequestsStatusList,
+  (requests, users, suppliers, projects, statuses) => {
     return requests.data.map((request) => {
       const requestByPerson = users.data.find((user) => user._id === request.createdBy);
       const project = projects.data.find((project) => project._id === request.projectId);
       const supplier = suppliers.data.find((supplier) => supplier._id === request.supplierId);
+      const statusName = statuses.data.find((status) => status.id === request.status)?.name;
       return {
         ...request,
         requestByPerson,
         project,
         supplier,
+        statusName,
       };
     });
   }

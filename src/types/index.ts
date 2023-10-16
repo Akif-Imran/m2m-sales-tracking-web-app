@@ -249,16 +249,8 @@ interface IClaim {
   isActive: true;
   company: string;
   customerId: string;
-  projectId:
-    | string
-    | {
-        _id: string;
-      };
-  supplierId:
-    | string
-    | {
-        _id: string;
-      };
+  projectId: string;
+  supplierId: string;
   itemName: string;
   itemType: string;
   warranty: string;

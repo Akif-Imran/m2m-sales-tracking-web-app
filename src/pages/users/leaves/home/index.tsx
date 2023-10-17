@@ -137,6 +137,7 @@ export const LeaveApplications: React.FC<OwnProps> = () => {
                   {leave.statusName}
                 </Badge>
               </td>
+              <td>{leave.requestByPerson?.name || "N/A"}</td>
               <td>
                 <Badge variant="filled" color={leavesTypeColors[leave.type]}>
                   {leave.type}
@@ -194,6 +195,7 @@ export const LeaveApplications: React.FC<OwnProps> = () => {
             <thead>
               <tr>
                 <th colSpan={4}>Leave</th>
+                <th colSpan={1}>Person</th>
                 <th colSpan={6}>Details</th>
               </tr>
               <tr>
@@ -201,6 +203,8 @@ export const LeaveApplications: React.FC<OwnProps> = () => {
                 <th>Proof</th>
                 <th>Name</th>
                 <th>Status</th>
+
+                <th>Requested By</th>
 
                 <th>Type</th>
                 <th>Start Date</th>

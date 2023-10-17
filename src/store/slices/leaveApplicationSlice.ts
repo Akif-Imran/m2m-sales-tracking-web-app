@@ -1,11 +1,11 @@
 import { PayloadAction, SerializedError, createSlice } from "@reduxjs/toolkit";
+import { fetchLeaves } from "@thunks";
 
 interface State {
   data: ILeaveApplication[];
   isLoading: boolean;
   error: null | SerializedError;
 }
-type UpdateStatus = { leaveId: number; statusId: number; statusName: string; remarks: string };
 
 const initialState: State = {
   data: [],
@@ -17,24 +17,37 @@ const leaveApplicationSlice = createSlice({
   name: "leaves",
   initialState: initialState,
   reducers: {
-    addLeave: (state, action: PayloadAction<Omit<ILeaveApplication, "id">>) => {
-      const id = Date.now();
-      state.data.push({ id, ...action.payload });
+    addLeave: (state, action: PayloadAction<ILeaveApplication>) => {
+      state.data.push(action.payload);
     },
     updateLeave: (state, action: PayloadAction<ILeaveApplication>) => {
-      const index = state.data.findIndex((contact) => contact.id === action.payload.id);
+      const index = state.data.findIndex((leave) => leave._id === action.payload._id);
       state.data[index] = action.payload;
     },
-    updateLeaveStatus: (state, action: PayloadAction<UpdateStatus>) => {
-      const index = state.data.findIndex((project) => project.id === action.payload.leaveId);
-      state.data[index].statusId = action.payload.statusId;
-      state.data[index].statusName = action.payload.statusName;
-      state.data[index].remarks = action.payload.remarks;
+    updateLeaveStatus: (state, action: PayloadAction<ILeaveApplication>) => {
+      const index = state.data.findIndex((leave) => leave._id === action.payload._id);
+      state.data[index] = action.payload;
     },
-    deleteLeave: (state, action: PayloadAction<number>) => {
-      const index = state.data.findIndex((contact) => contact.id === action.payload);
+    deleteLeave: (state, action: PayloadAction<string>) => {
+      const index = state.data.findIndex((leave) => leave._id === action.payload);
       state.data.splice(index, 1);
     },
+  },
+  extraReducers: (builder) => {
+    builder.addCase(fetchLeaves.pending, (state) => {
+      state.isLoading = true;
+    });
+    builder.addCase(fetchLeaves.rejected, (state, action) => {
+      state.error = action.error;
+      state.isLoading = true;
+    });
+    builder.addCase(fetchLeaves.fulfilled, (state, action) => {
+      if (action.payload.success) {
+        state.data = action.payload.data;
+      }
+      state.error = null;
+      state.isLoading = true;
+    });
   },
 });
 

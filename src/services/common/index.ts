@@ -1,9 +1,13 @@
-import { apiGet, urls } from "@api";
+import { urls } from "@api";
+import axios from "axios";
 
-export const getDashCounts = async (token: string) => {
-  const response = await apiGet<DashCountsResponse>(
-    urls.dashboard.counts,
-    token
-  );
+export const uploadFile = async (token: string, file: File) => {
+  const form = new FormData();
+  form.append("file", file, file?.name);
+  const response = await axios.postForm<FileUploadResponse>(urls.uploadFile.upload, form, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
   return response.data;
 };

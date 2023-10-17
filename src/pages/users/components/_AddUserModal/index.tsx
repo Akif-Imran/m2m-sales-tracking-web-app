@@ -23,43 +23,79 @@ import { selectRecordsForDropdown, useAppDispatch, useAppSelector } from "@store
 import { addUser } from "@slices";
 import { DatePickerInput, DateValue } from "@mantine/dates";
 import { colors } from "@theme";
+import { createUser } from "@thunks";
+import { useAuthContext } from "@contexts";
+import { uploadFile } from "@services";
 
 interface OwnProps {
   opened: boolean;
   onClose: () => void;
   title: string;
 }
-interface IUserForm extends Omit<IUser, "id"> {}
+interface IUserForm extends Omit<IUser, "_id" | "__v" | "isActive" | "createdAt" | "company"> {
+  picture: string;
+  hasPicture: boolean;
+}
 
 const _AddUserModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
   const { theme, classes } = useStyles();
-  const { companies, departments, userTypes } = useAppSelector(selectRecordsForDropdown);
+  const {
+    state: { token },
+  } = useAuthContext();
+  const { userTypes } = useAppSelector(selectRecordsForDropdown);
   const dispatch = useAppDispatch();
+  const [isCreating, setIsCreating] = React.useState(false);
+  const [file, setFile] = React.useState<File>({} as File);
 
   const form = useFormik<IUserForm>({
     initialValues: {
-      avatar: "", //
+      picture: "", //
+      hasPicture: false,
+      department: "",
       designation: "",
       joiningDate: "",
-      firstName: "", //
-      lastName: "", //
+      name: "", //
       email: "", //
       password: "", //
-      phone: "", //
-      address: "", //
-      city: "", //
-      country: "", //
-      companyId: 0, //
-      departmentId: 0,
-      departmentName: "",
-      userTypeId: 0,
-      userTypeName: "",
+      mobile: "", //
+      userType: 2,
     },
-    onSubmit(values, helpers) {
+    onSubmit: async (values, helpers) => {
       console.log(values);
-      dispatch(addUser(values));
-      helpers.resetForm();
-      onClose();
+      setIsCreating((_prev) => true);
+      if (values.hasPicture) {
+        const res = await uploadFile(token, file);
+        console.log("User Image Upload: ", res);
+        if (res.statusCode === 200 || res.statusCode === 201) {
+          values.picture = res.data;
+        } else {
+          setIsCreating((_prev) => false);
+          notify("Add User", res?.message, "error");
+          return;
+        }
+      }
+      dispatch(
+        createUser({
+          token,
+          user: values,
+        })
+      )
+        .unwrap()
+        .then((res) => {
+          notify("Add User", res?.message, res.success ? "success" : "error");
+          if (res.success) {
+            dispatch(addUser(res.data));
+            helpers.resetForm();
+            onClose();
+          }
+        })
+        .catch((err) => {
+          console.log("Add User: ", err?.message);
+          notify("Add User", "An error occurred", "error");
+        })
+        .finally(() => {
+          setIsCreating((_prev) => false);
+        });
     },
   });
 
@@ -68,11 +104,12 @@ const _AddUserModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
       notify("Image Upload", "Vehicle image not uploaded", "error");
       return;
     }
+    setFile(file);
     const reader = new FileReader();
     reader.onload = (e) => {
       const dataUri = e?.target?.result as string;
       if (dataUri) {
-        form.setValues((prev) => ({ ...prev, avatar: dataUri }));
+        form.setValues((prev) => ({ ...prev, picture: dataUri, hasPicture: true }));
       }
     };
     reader.readAsDataURL(file);
@@ -81,6 +118,7 @@ const _AddUserModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
   };
 
   const handleCancel = () => {
+    setIsCreating((_prev) => false);
     form.resetForm();
     onClose();
   };
@@ -90,19 +128,7 @@ const _AddUserModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
     if (!typeName) return;
     form.setValues((prev) => ({
       ...prev,
-      userTypeId: parseInt(value),
-      userTypeName: typeName,
-    }));
-  };
-
-  const handleOnChangeDepartment = (value: string | null) => {
-    if (!value) return;
-    const typeName = departments.find((type) => type.value === value)?.label;
-    if (!typeName) return;
-    form.setValues((prev) => ({
-      ...prev,
-      departmentId: parseInt(value),
-      departmentName: typeName,
+      userType: parseInt(value),
     }));
   };
 
@@ -127,8 +153,8 @@ const _AddUserModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
     >
       <Stack>
         <Flex direction={"column"} align={"center"} justify={"flex-end"}>
-          {form.values.avatar ? (
-            <Avatar src={form.values.avatar} radius={rem(250)} size={rem(170)} />
+          {form.values.picture ? (
+            <Avatar src={form.values.picture} radius={rem(250)} size={rem(170)} />
           ) : (
             <Avatar src={"/user.png"} radius={rem(250)} size={rem(170)} />
           )}
@@ -156,20 +182,10 @@ const _AddUserModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
                 <TextInput
                   required
                   withAsterisk={false}
-                  label="First Name"
-                  name="firstName"
-                  id="firstName"
-                  value={form.values.firstName}
-                  onChange={form.handleChange}
-                  onBlur={form.handleBlur}
-                />
-                <TextInput
-                  required
-                  withAsterisk={false}
-                  label="Last Name"
-                  name="lastName"
-                  id="lastName"
-                  value={form.values.lastName}
+                  label="Name"
+                  name="name"
+                  id="name"
+                  value={form.values.name}
                   onChange={form.handleChange}
                   onBlur={form.handleBlur}
                 />
@@ -201,34 +217,24 @@ const _AddUserModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
                 <TextInput
                   required
                   withAsterisk={false}
-                  label="City"
-                  name="city"
-                  id="city"
-                  value={form.values.city}
+                  label="Designation"
+                  name="designation"
+                  id="designation"
+                  value={form.values.designation}
                   onChange={form.handleChange}
                   onBlur={form.handleBlur}
                 />
                 <TextInput
                   required
                   withAsterisk={false}
-                  label="Country"
-                  name="country"
-                  id="country"
-                  value={form.values.country}
+                  label="Department"
+                  name="department"
+                  id="department"
+                  value={form.values.department}
                   onChange={form.handleChange}
                   onBlur={form.handleBlur}
                 />
               </Group>
-              <TextInput
-                required
-                withAsterisk={false}
-                label="Address"
-                name="address"
-                id="address"
-                value={form.values.address}
-                onChange={form.handleChange}
-                onBlur={form.handleBlur}
-              />
             </Stack>
           </Grid.Col>
 
@@ -237,55 +243,21 @@ const _AddUserModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
           <Grid.Col span={12}>
             <Stack spacing={"xs"}>
               <Divider label="More Details" labelPosition="center" />
-              <TextInput
-                required
-                withAsterisk={false}
-                placeholder="+XX XXX XXXXXXX"
-                label="Mobile No."
-                name="phone"
-                id="phone"
-                value={form.values.phone}
-                onChange={form.handleChange}
-                onBlur={form.handleBlur}
-              />
               <Group grow align="flex-start">
-                <Select
+                <TextInput
                   required
                   withAsterisk={false}
-                  searchable
-                  nothingFound="No Companies"
-                  label="Company"
-                  value={form.values.companyId.toString()}
-                  onChange={(value) => {
-                    if (!value) return;
-                    form.setValues((prev) => ({ ...prev, companyId: parseInt(value) }));
-                  }}
-                  data={companies}
+                  placeholder="+XX XXX XXXXXXX"
+                  label="Mobile No."
+                  name="mobile"
+                  id="mobile"
+                  value={form.values.mobile}
+                  onChange={form.handleChange}
+                  onBlur={form.handleBlur}
                 />
-                <Select
-                  required
-                  withAsterisk={false}
-                  searchable
-                  nothingFound="No Departments"
-                  label="Department"
-                  value={form.values.departmentId.toString()}
-                  onChange={handleOnChangeDepartment}
-                  data={departments}
-                />
-              </Group>
-              <Select
-                required
-                withAsterisk={false}
-                searchable
-                nothingFound="No Such User Type"
-                label="User Type"
-                value={form.values.userTypeId.toString()}
-                onChange={handleOnChangeUserType}
-                data={userTypes}
-              />
-              <Group grow align="flex-start">
                 <DatePickerInput
                   required
+                  dropdownType="modal"
                   withAsterisk={false}
                   placeholder="Joining Date"
                   name="joiningDate"
@@ -300,23 +272,28 @@ const _AddUserModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
                       : null
                   }
                 />
-                <TextInput
-                  required
-                  withAsterisk={false}
-                  label="Designation"
-                  name="designation"
-                  id="designation"
-                  value={form.values.designation}
-                  onChange={form.handleChange}
-                  onBlur={form.handleBlur}
-                />
               </Group>
+              <Select
+                required
+                withAsterisk={false}
+                searchable
+                nothingFound="No Such User Type"
+                label="User Type"
+                value={form.values.userType.toString()}
+                onChange={handleOnChangeUserType}
+                data={userTypes}
+              />
 
               <Group align="flex-end" position="right" mt={rem(32)}>
                 <Button variant="outline" onClick={handleCancel} size="xs">
                   Cancel
                 </Button>
-                <Button variant="filled" onClick={() => form.handleSubmit()} size="xs">
+                <Button
+                  size="xs"
+                  variant="filled"
+                  loading={isCreating}
+                  onClick={() => form.handleSubmit()}
+                >
                   Save
                 </Button>
               </Group>

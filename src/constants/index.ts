@@ -52,15 +52,15 @@ export const leavesStatusColors: Record<number, string> = {
   2: "green",
   3: "orange",
 };
-export const leavesTypeColors: Record<number, string> = {
-  1: "green",
-  2: "red",
+export const leavesTypeColors: Record<string, string> = {
+  Unpaid: "green",
+  Paid: "red",
 };
 
-export const taskStatusColors: Record<string, string> = {
-  Pending: "red",
-  Accepted: "blue",
-  Completed: "green",
+export const taskStatusColors: Record<number, string> = {
+  1: "red",
+  2: "blue",
+  3: "green",
 };
 
 export enum DriverFilters {

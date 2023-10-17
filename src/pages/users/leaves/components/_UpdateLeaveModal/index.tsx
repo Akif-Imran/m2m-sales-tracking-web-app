@@ -1,8 +1,10 @@
+import { useAuthContext } from "@contexts";
 import { useGStyles } from "@global-styles";
 import { modalOverlayPropsHelper } from "@helpers";
 import { Modal, ScrollArea, Stack, Radio, Textarea, Group, rem, Button } from "@mantine/core";
 import { updateLeaveStatus } from "@slices";
 import { selectRecordsForDropdown, useAppDispatch, useAppSelector } from "@store";
+import { updateLeave } from "@thunks";
 import { notify } from "@utility";
 import { useFormik } from "formik";
 import React from "react";
@@ -12,10 +14,10 @@ interface OwnProps {
   onClose: () => void;
   title: string;
   statusId: number;
-  leaveId: number;
+  leaveId: string;
 }
 interface IForm {
-  leaveId: number;
+  leaveId: string;
   statusId: number;
   statusName: string;
   remarks: string;
@@ -24,7 +26,11 @@ interface IForm {
 const _UpdateLeaveModal: React.FC<OwnProps> = ({ onClose, opened, title, leaveId, statusId }) => {
   const { theme, classes: gclasses } = useGStyles();
   const dispatch = useAppDispatch();
+  const {
+    state: { token },
+  } = useAuthContext();
   const { leaveStatus } = useAppSelector(selectRecordsForDropdown);
+  const [isCreating, setIsCreating] = React.useState(false);
 
   console.log(statusId, leaveId);
 
@@ -37,9 +43,33 @@ const _UpdateLeaveModal: React.FC<OwnProps> = ({ onClose, opened, title, leaveId
     },
     onSubmit: (values, helpers) => {
       console.log(values);
-      dispatch(updateLeaveStatus(values));
-      helpers.resetForm();
-      onClose();
+      setIsCreating((_prev) => true);
+      dispatch(
+        updateLeave({
+          id: values.leaveId,
+          token,
+          leave: {
+            status: values.statusId,
+            remarks: values.remarks,
+          },
+        })
+      )
+        .unwrap()
+        .then((res) => {
+          notify("Update Leave", res?.message, res?.success ? "success" : "error");
+          if (res.success) {
+            dispatch(updateLeaveStatus(res.data));
+            helpers.resetForm();
+            onClose();
+          }
+        })
+        .catch((err) => {
+          console.log("Update Leave", err?.message);
+          notify("Update Leave", "An error occurred", "error");
+        })
+        .finally(() => {
+          setIsCreating((_prev) => false);
+        });
     },
   });
   const handleOnChangeStatus = (value: string) => {
@@ -108,7 +138,12 @@ const _UpdateLeaveModal: React.FC<OwnProps> = ({ onClose, opened, title, leaveId
           <Button variant="outline" onClick={handleCancel} size="xs">
             Cancel
           </Button>
-          <Button variant="filled" onClick={() => form.handleSubmit()} size="xs">
+          <Button
+            size="xs"
+            variant="filled"
+            loading={isCreating}
+            onClick={() => form.handleSubmit()}
+          >
             Save
           </Button>
         </Group>

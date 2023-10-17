@@ -12,3 +12,16 @@ interface DashCounts {
   faulty: number;
 }
 type DashCountsResponse = ApiResponse<DashCounts>;
+
+type FileUploadResponse =
+  | {
+      statusCode: 200 | 201;
+      message: string;
+      data: string;
+      success: true;
+    }
+  | {
+      statusCode: 400 | 500;
+      message: string;
+      error: string;
+    };

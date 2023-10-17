@@ -136,8 +136,8 @@ const TaskReport: React.FC<OwnProps> = () => {
         {records.map((item, index) => (
           <tr key={index}>
             <td>{item.title}</td>
-            <td>{item.statusName}</td>
-            <td>{DateTime.fromISO(item.plannedEndDate).toFormat(DAY_MM_DD_YYYY_HH_MM_SS_A)}</td>
+            <td>{item.status}</td>
+            <td>{DateTime.fromISO(item.completionDeadline).toFormat(DAY_MM_DD_YYYY_HH_MM_SS_A)}</td>
             <td>{item.description}</td>
           </tr>
         ))}

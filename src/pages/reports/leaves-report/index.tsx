@@ -138,8 +138,8 @@ const LeavesReport: React.FC<OwnProps> = () => {
               <td>{start.toFormat(DAY_MM_DD_YYYY_HH_MM_SS_A)}</td>
               <td>{end.toFormat(DAY_MM_DD_YYYY_HH_MM_SS_A)}</td>
               <td>{end.diff(start).toFormat("hh:mm:ss")}</td>
-              <td>{item.typeName}</td>
-              <td>{item.statusName}</td>
+              <td>{item.type}</td>
+              <td>{item.status}</td>
               <td>{item.reason}</td>
               <td>{item.remarks}</td>
             </tr>

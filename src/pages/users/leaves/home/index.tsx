@@ -24,6 +24,7 @@ import { DAY_MM_DD_YYYY, leavesStatusColors, leavesTypeColors } from "@constants
 import { colors } from "@theme";
 import { _AddLeaveModal, _UpdateLeaveModal } from "../components";
 import { useAuthContext } from "@contexts";
+import { BASE_URL } from "@api";
 
 interface OwnProps {}
 
@@ -41,15 +42,15 @@ export const LeaveApplications: React.FC<OwnProps> = () => {
 
   const [updateStatusValues, setUpdateStatusValues] = React.useState<{
     statusId: number;
-    leaveId: number;
+    leaveId: string;
     visible: boolean;
   }>({
-    leaveId: 0,
     statusId: 0,
+    leaveId: "",
     visible: false,
   });
 
-  const showUpdateStatusModal = (statusId: number, leaveId: number) => {
+  const showUpdateStatusModal = (statusId: number, leaveId: string) => {
     setUpdateStatusValues((prev) => ({
       ...prev,
       statusId: statusId,
@@ -66,8 +67,8 @@ export const LeaveApplications: React.FC<OwnProps> = () => {
       const filtered = leaves.filter(
         (leave) =>
           leave.name.toLowerCase().includes(query.toLocaleLowerCase()) ||
-          leave.typeName.toLowerCase().includes(query.toLocaleLowerCase()) ||
-          leave.statusName.toLowerCase().includes(query.toLocaleLowerCase()) ||
+          leave.type.toLowerCase().includes(query.toLocaleLowerCase()) ||
+          leave?.statusName?.toLowerCase().includes(query.toLocaleLowerCase()) ||
           leave.remarks.toLowerCase().includes(query.toLocaleLowerCase()) ||
           leave.reason.toLowerCase().includes(query.toLocaleLowerCase())
       );
@@ -76,11 +77,11 @@ export const LeaveApplications: React.FC<OwnProps> = () => {
       const filtered = leaves.filter(
         (leave) =>
           (leave.name.toLowerCase().includes(query.toLocaleLowerCase()) ||
-            leave.typeName.toLowerCase().includes(query.toLocaleLowerCase()) ||
-            leave.statusName.toLowerCase().includes(query.toLocaleLowerCase()) ||
+            leave.type.toLowerCase().includes(query.toLocaleLowerCase()) ||
+            leave?.statusName?.toLowerCase().includes(query.toLocaleLowerCase()) ||
             leave.remarks.toLowerCase().includes(query.toLocaleLowerCase()) ||
             leave.reason.toLowerCase().includes(query.toLocaleLowerCase())) &&
-          leave.requestedById === user?.id
+          leave.createdBy === user?._id
       );
       setSearchedData(filtered);
     }
@@ -90,7 +91,7 @@ export const LeaveApplications: React.FC<OwnProps> = () => {
     setSearchedData(leaves);
   }, [leaves]);
 
-  const handleDelete = (id: number) => {
+  const handleDelete = (id: string) => {
     openDeleteModalHelper({
       theme: theme,
       title: `Delete Leave`,
@@ -122,40 +123,43 @@ export const LeaveApplications: React.FC<OwnProps> = () => {
       <>
         {searchedData.map((leave, index) => {
           return (
-            <tr key={leave.id}>
+            <tr key={leave._id}>
               <td>{index + 1}</td>
-              <td>{leave.id}</td>
               <td>
-                <Avatar src={leave.proof ? leave.proof : "/user.png"} size={50} />
+                <Avatar
+                  src={leave.document ? `${BASE_URL}\\${leave.document}` : "/user.png"}
+                  size={50}
+                />
               </td>
               <td>{leave.name}</td>
               <td>
-                <Badge variant="filled" color={leavesStatusColors[leave.statusId]}>
+                <Badge variant="filled" color={leavesStatusColors[leave.status]}>
                   {leave.statusName}
                 </Badge>
               </td>
+              <td>{leave.requestByPerson?.name || "N/A"}</td>
               <td>
-                <Badge variant="filled" color={leavesTypeColors[leave.typeId]}>
-                  {leave.typeName}
+                <Badge variant="filled" color={leavesTypeColors[leave.type]}>
+                  {leave.type}
                 </Badge>
               </td>
               <td>{DateTime.fromISO(leave.startDate).toFormat(DAY_MM_DD_YYYY)}</td>
               <td>{DateTime.fromISO(leave.endDate).toFormat(DAY_MM_DD_YYYY)}</td>
               <td>{leave.reason}</td>
-              <td>{leave.remarks}</td>
+              <td>{leave?.remarks || "N/A"}</td>
               <td>
                 <Group>
-                  {isHR && (
+                  {(isHR || isAdmin) && (
                     <ActionIcon
                       color="gray"
                       size={"sm"}
-                      onClick={() => showUpdateStatusModal(leave.statusId, leave.id)}
+                      onClick={() => showUpdateStatusModal(leave.status, leave._id)}
                     >
                       <IconRotateClockwise2 />
                     </ActionIcon>
                   )}
                   {isAdmin && (
-                    <ActionIcon color="red" size={"sm"} onClick={() => handleDelete(leave.id)}>
+                    <ActionIcon color="red" size={"sm"} onClick={() => handleDelete(leave._id)}>
                       <IconTrash />
                     </ActionIcon>
                   )}
@@ -190,15 +194,17 @@ export const LeaveApplications: React.FC<OwnProps> = () => {
           <Table border={1} bgcolor={theme.white} withBorder>
             <thead>
               <tr>
-                <th colSpan={5}>Leave</th>
+                <th colSpan={4}>Leave</th>
+                <th colSpan={1}>Person</th>
                 <th colSpan={6}>Details</th>
               </tr>
               <tr>
                 <th>#</th>
-                <th>Id</th>
                 <th>Proof</th>
                 <th>Name</th>
                 <th>Status</th>
+
+                <th>Requested By</th>
 
                 <th>Type</th>
                 <th>Start Date</th>
@@ -212,11 +218,13 @@ export const LeaveApplications: React.FC<OwnProps> = () => {
           </Table>
         </ScrollArea>
       </ScrollArea>
+
       <_AddLeaveModal
         title="Add Leave Application"
         opened={addUserModalOpened}
         onClose={() => setAddUserModalOpened(false)}
       />
+
       <_UpdateLeaveModal
         title="Update Leave Application"
         opened={updateStatusValues.visible}

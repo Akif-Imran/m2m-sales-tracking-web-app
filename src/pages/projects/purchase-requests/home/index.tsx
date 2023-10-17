@@ -30,16 +30,17 @@ import {
 import { useAuthContext } from "@contexts";
 import { useGStyles } from "@global-styles";
 import { DateTime } from "luxon";
+import { removePurchaseRequest, updateStatusPurchaseRequest } from "@thunks";
 
 interface OwnProps {}
 
 export const PurchaseRequests: React.FC<OwnProps> = () => {
   useStyles();
   const {
-    state: { isAdmin, isHR, user },
+    state: { isAdmin, isHR, user, token },
   } = useAuthContext();
   const dispatch = useAppDispatch();
-  const { classes: gclasses, theme } = useGStyles();
+  const { classes: gClasses, theme } = useGStyles();
   const { purchaseRequestStatus } = useAppSelector(selectRecordsForDropdown);
 
   const [searchQuery, setSearchQuery] = React.useState("");
@@ -48,7 +49,7 @@ export const PurchaseRequests: React.FC<OwnProps> = () => {
   const [searchedData, setSearchedData] = React.useState<typeof requests>([]);
   const [visible, setVisible] = React.useState<boolean>(false);
   const [selectedStatus, setSelectedStatus] = React.useState<string>();
-  const [selectedRequest, setSelectedRequest] = React.useState<number>(0);
+  const [selectedRequest, setSelectedRequest] = React.useState<string>("");
 
   const onChangeSearch = (query: string) => {
     setSearchQuery(query);
@@ -57,8 +58,7 @@ export const PurchaseRequests: React.FC<OwnProps> = () => {
         (request) =>
           request.project?.name.toLowerCase().includes(query.toLowerCase()) ||
           request.supplier?.name?.toLowerCase().includes(query.toLowerCase()) ||
-          request.requestByPerson?.firstName.toLowerCase().includes(query.toLowerCase()) ||
-          request.requestByPerson?.lastName.toLowerCase().includes(query.toLowerCase()) ||
+          request.requestByPerson?.name.toLowerCase().includes(query.toLowerCase()) ||
           request.itemName?.toLowerCase().includes(query.toLowerCase())
       );
       setSearchedData(filtered);
@@ -67,23 +67,22 @@ export const PurchaseRequests: React.FC<OwnProps> = () => {
         (followup) =>
           (followup.project?.name.toLowerCase().includes(query.toLowerCase()) ||
             followup.supplier?.name.toLowerCase().includes(query.toLowerCase()) ||
-            followup.requestByPerson?.firstName.toLowerCase().includes(query.toLowerCase()) ||
-            followup.requestByPerson?.lastName.toLowerCase().includes(query.toLowerCase()) ||
+            followup.requestByPerson?.name.toLowerCase().includes(query.toLowerCase()) ||
             followup.itemName?.toLowerCase().includes(query.toLowerCase())) &&
-          followup.requestByPerson === user?.id
+          followup.requestByPerson === user?._id
       );
       setSearchedData(filtered);
     }
   };
 
-  const showUpdateStatusModal = (statusId: number, requestId: number) => {
+  const showUpdateStatusModal = (statusId: number, requestId: string) => {
     setSelectedStatus(statusId.toString());
     setSelectedRequest(requestId);
     setVisible(true);
   };
   const hideUpdateStatusModal = () => setVisible(false);
 
-  const handleDelete = (id: number) => {
+  const handleDelete = (id: string) => {
     openDeleteModalHelper({
       theme: theme,
       title: `Delete Purchase Request`,
@@ -97,21 +96,64 @@ export const PurchaseRequests: React.FC<OwnProps> = () => {
       cancelLabel: "Cancel",
       confirmLabel: "Delete Purchase Request",
       onConfirm: () => {
-        dispatch(deletePurchaseRequest(id));
-        notify("Delete Purchase Request", "Purchase Request deleted successfully!", "success");
+        dispatch(
+          removePurchaseRequest({
+            token,
+            id,
+          })
+        )
+          .unwrap()
+          .then((res) => {
+            notify("Delete Purchase Request", res?.message, res?.success ? "success" : "error");
+            if (res.success) {
+              dispatch(deletePurchaseRequest(id));
+            }
+          })
+          .catch((err) => {
+            console.log("Delete Purchase Request: ", err?.message);
+            notify("Delete Purchase Request", "An error occurred", "error");
+          });
       },
       onCancel: () => notify("Delete Purchase Request", "Operation canceled!", "error"),
     });
+  };
+
+  const handleOnChangeStatus = (value: string | null) => {
+    if (!value) {
+      notify("Update Purchase Request Status", "Invalid status value", "error");
+      return;
+    }
+    dispatch(
+      updateStatusPurchaseRequest({
+        id: selectedRequest,
+        token,
+        body: {
+          status: parseInt(value),
+        },
+      })
+    )
+      .unwrap()
+      .then((res) => {
+        notify("Update Purchase Request Status", res?.message, res?.success ? "success" : "error");
+        if (res.success) {
+          dispatch(updatePurchaseRequestStatus(res.data));
+          hideUpdateStatusModal();
+        }
+      })
+      .catch((err) => {
+        console.log("Update Purchase Request Status: ", err?.message);
+        notify("Update Purchase Request Status", "An error occurred", "error");
+      });
   };
 
   React.useEffect(() => {
     if (isAdmin || isHR) {
       setSearchedData(requests);
     } else {
-      const filtered = requests.filter((followup) => followup.requestedById === user?.id);
+      const filtered = requests.filter((req) => req.createdBy === user?._id);
       setSearchedData(filtered);
     }
-  }, [requests, isAdmin, isHR, user?.id]);
+  }, [requests, isAdmin, isHR, user?._id]);
 
   const rows =
     searchedData.length === 0 ? (
@@ -129,25 +171,22 @@ export const PurchaseRequests: React.FC<OwnProps> = () => {
             maximumFractionDigits: 2,
           }).format(request.price.amount);
           return (
-            <tr key={request.id}>
+            <tr key={request._id}>
               <td>{index + 1}</td>
-              <td>{request.id}</td>
               <td>{request.itemName}</td>
               <td>{request.itemType}</td>
               <td>
                 {" "}
-                <Badge variant="filled" color={purchaseRequestStatusColors[request.statusId]}>
+                <Badge variant="filled" color={purchaseRequestStatusColors[request.status]}>
                   {request.statusName}
                 </Badge>
               </td>
               <td>{request.project?.name}</td>
-              <td>
-                {request.requestByPerson?.firstName} {request.requestByPerson?.lastName}
-              </td>
+              <td>{request.requestByPerson?.name}</td>
               <td>
                 {DateTime.fromISO(request.warranty).toLocal().toFormat(DAY_MM_DD_YYYY_HH_MM_SS_A)}
               </td>
-              <td>{request.qty}</td>
+              <td>{request.quantity}</td>
               <td>{request.supplier?.name}</td>
               <td>{value}</td>
               <td>{request.remarks}</td>
@@ -157,13 +196,13 @@ export const PurchaseRequests: React.FC<OwnProps> = () => {
                     <ActionIcon
                       color="gray"
                       size={"sm"}
-                      onClick={() => showUpdateStatusModal(request.statusId, request.id)}
+                      onClick={() => showUpdateStatusModal(request.status, request._id)}
                     >
                       <IconRotateClockwise2 />
                     </ActionIcon>
                   )}
                   {isAdmin && (
-                    <ActionIcon color="red" size={"sm"} onClick={() => handleDelete(request.id)}>
+                    <ActionIcon color="red" size={"sm"} onClick={() => handleDelete(request._id)}>
                       <IconTrash />
                     </ActionIcon>
                   )}
@@ -176,10 +215,10 @@ export const PurchaseRequests: React.FC<OwnProps> = () => {
     );
   return (
     <Stack spacing={"xs"}>
-      <Flex gap={"md"} className={gclasses.searchContainer}>
+      <Flex gap={"md"} className={gClasses.searchContainer}>
         <TextInput
           value={searchQuery}
-          className={gclasses.searchInput}
+          className={gClasses.searchInput}
           placeholder="Search by any field"
           icon={<IconSearch size={16} />}
           onChange={(e) => onChangeSearch(e.target?.value)}
@@ -247,24 +286,9 @@ export const PurchaseRequests: React.FC<OwnProps> = () => {
           value={selectedStatus}
           name="userFilter"
           defaultValue="7"
-          onChange={(value) => {
-            if (!value) {
-              notify("Update Purchase Request Status", "Invalid status value", "error");
-              return;
-            }
-            const typeName = purchaseRequestStatus.find((status) => status.value === value)?.label;
-            if (!typeName) return;
-            dispatch(
-              updatePurchaseRequestStatus({
-                purchaseRequestId: selectedRequest,
-                statusId: parseInt(value),
-                statusName: typeName,
-              })
-            );
-            hideUpdateStatusModal();
-          }}
+          onChange={handleOnChangeStatus}
         >
-          <div className={gclasses.radioContainer}>
+          <div className={gClasses.radioContainer}>
             {purchaseRequestStatus.map((value) => {
               return <Radio value={value.value} label={value.label} key={value.value} />;
             })}

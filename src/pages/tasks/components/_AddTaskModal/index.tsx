@@ -15,41 +15,64 @@ import { addTask } from "@slices";
 import { DateTime } from "luxon";
 import { DateTimePicker } from "@mantine/dates";
 import { colors } from "@theme";
+import { createTask } from "@thunks";
+import { useAuthContext } from "@contexts";
 
 interface OwnProps {
   opened: boolean;
   onClose: () => void;
   title: string;
 }
-interface ITaskForm extends Omit<ITask, "id"> {}
+interface ITaskForm
+  extends Omit<ITask, "_id" | "__v" | "company" | "isActive" | "createdBy" | "createdAt"> {}
 
 const _AddTaskModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
   const { theme } = useStyles();
   const dispatch = useAppDispatch();
+  const {
+    state: { token },
+  } = useAuthContext();
   const [plannedEndDate, setPlannedEndDate] = React.useState(new Date());
   const allProjects = useAppSelector(selectProjectWithRecords);
   const { companies, salesPersons, projectManagers } = useAppSelector(selectRecordsForDropdown);
   const [projectsList, setProjectList] = React.useState<IDropDownList>([]);
+  const [isCreating, setIsCreating] = React.useState(false);
 
   const form = useFormik<ITaskForm>({
     initialValues: {
-      statusId: 1,
-      statusName: "Pending",
-      projectId: 0,
-      companyId: 0,
+      projectId: "",
+      customerId: "",
       title: "",
       description: "",
-      assigneeId: 0,
-      createdDate: new Date().toUTCString(),
-      plannedEndDate: DateTime.now().toISO() || "",
-      completedDate: "",
+      assignedTo: "",
+      completionDeadline: DateTime.now().toISO() || "",
+      status: 1,
     },
     onSubmit(values, helpers) {
       console.log(values);
-      dispatch(addTask({ ...values, createdDate: DateTime.now().toISO() || "" }));
-      notify("Add Task", "Task added successfully", "success");
-      helpers.resetForm();
-      onClose();
+      setIsCreating((_prev) => true);
+      dispatch(
+        createTask({
+          token,
+          task: values,
+        })
+      )
+        .unwrap()
+        .then((res) => {
+          notify("Add Task", res?.message, res.success ? "success" : "error");
+          if (res.success) {
+            dispatch(addTask(res.data));
+            helpers.resetForm();
+            onClose();
+          }
+        })
+        .catch((err) => {
+          console.log("Add Task: ", err?.message);
+          notify("Add Task", "An error occurred", "error");
+        })
+        .finally(() => {
+          setIsCreating((_prev) => false);
+        });
     },
   });
 
@@ -62,7 +85,7 @@ const _AddTaskModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
     if (!value) return;
     form.setValues((prev) => ({
       ...prev,
-      projectId: parseInt(value),
+      projectId: value,
     }));
   };
 
@@ -70,21 +93,20 @@ const _AddTaskModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
     if (!value) return;
     form.setValues((prev) => ({
       ...prev,
-      assigneeId: parseInt(value),
+      assignedTo: value,
     }));
   };
 
   const handleOnChangeCompany = (value: string | null) => {
     if (!value) return;
-    const parsed = parseInt(value);
     form.setValues((prev) => ({
       ...prev,
-      companyId: parsed,
+      customerId: value,
     }));
     const project_s = allProjects
-      .filter((project) => project.companyId === parsed)
+      .filter((project) => project.customerId === value)
       .map((project) => ({
-        value: project.id.toString(),
+        value: project._id,
         label: project.name,
       }));
     setProjectList(project_s);
@@ -110,7 +132,7 @@ const _AddTaskModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
             searchable
             nothingFound="No Status"
             label="Company"
-            value={form.values.companyId.toString()}
+            value={form.values.customerId}
             onChange={handleOnChangeCompany}
             data={companies}
           />
@@ -155,8 +177,9 @@ const _AddTaskModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
             searchable
             nothingFound="No Users"
             label="Assign to"
-            value={form.values.assigneeId.toString()}
+            value={form.values.assignedTo}
             onChange={handleOnChangeAssignee}
+            //TODO - might need a fix to include all users
             data={[...salesPersons, ...projectManagers]}
           />
           <DateTimePicker
@@ -173,13 +196,13 @@ const _AddTaskModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
                 setPlannedEndDate(value);
                 form.setValues((prev) => ({
                   ...prev,
-                  plannedEndDate: DATE_FORMAT_YYYY_MM_DD_HH_MM_SS(value),
+                  completionDeadline: DATE_FORMAT_YYYY_MM_DD_HH_MM_SS(value),
                 }));
               }
             }}
             error={
-              form.touched.plannedEndDate && form.errors.plannedEndDate
-                ? `${form.errors.plannedEndDate}`
+              form.touched.completionDeadline && form.errors.completionDeadline
+                ? `${form.errors.completionDeadline}`
                 : null
             }
             icon={<IconCalendar size={16} stroke={1.5} color={colors.titleText} />}
@@ -190,7 +213,12 @@ const _AddTaskModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
           <Button variant="outline" onClick={handleCancel} size="xs">
             Cancel
           </Button>
-          <Button variant="filled" onClick={() => form.handleSubmit()} size="xs">
+          <Button
+            variant="filled"
+            onClick={() => form.handleSubmit()}
+            size="xs"
+            loading={isCreating}
+          >
             Assign
           </Button>
         </Group>

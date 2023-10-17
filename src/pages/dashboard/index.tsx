@@ -232,8 +232,8 @@ const Dashboard: React.FC<OwnProps> = () => {
   React.useEffect(() => {
     const tsk = tasks.map((task) => ({
       title: task.title,
-      start: task.createdDate,
-      end: task.plannedEndDate,
+      start: task.createdAt,
+      end: task.completionDeadline,
       backgroundColor: theme.colors[theme.primaryColor][6],
       borderColor: theme.colors[theme.primaryColor][6],
     }));

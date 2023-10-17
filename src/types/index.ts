@@ -4,15 +4,20 @@ interface IUserAccountType {
   name: string;
 }
 interface IUser {
-  _id: string;
-  name: string;
-  email: string;
-  password: string;
-  userType: number;
-  isActive: boolean;
-  company: string;
-  __v: number;
-  createdAt: string;
+  _id: string; //
+  name: string; //
+  email: string; //
+  designation: string; //
+  department: string; //
+  mobile: string; //
+  joiningDate: string; //
+  password: string; //
+  userType: number; //
+  picture?: string;
+  isActive: boolean; //
+  company: string; //
+  __v: number; //
+  createdAt: string; //
 }
 type ILoginUserData = Omit<IUser, "createdAt">;
 
@@ -164,17 +169,19 @@ interface ITaskStatus {
   name: string;
 }
 interface ITask {
-  id: number;
-  projectId: number;
-  assigneeId: number;
+  _id: string;
+  createdBy: string;
+  createdAt: string;
+  isActive: true;
+  company: string;
+  assignedTo: string;
+  projectId: string;
   title: string;
   description: string;
-  createdDate: string;
-  plannedEndDate: string;
-  completedDate: string;
-  statusId: number;
-  statusName: string;
-  companyId: number;
+  completionDeadline: string;
+  status: number;
+  customerId: string;
+  __v: number;
 }
 interface INotification {
   id: number;
@@ -199,16 +206,8 @@ interface IPurchaseRequest {
   createdAt: string;
   isActive: boolean;
   company: string;
-  projectId:
-    | string
-    | {
-        _id: string;
-      };
-  supplierId:
-    | string
-    | {
-        _id: string;
-      };
+  projectId: string;
+  supplierId: string;
   itemName: string;
   itemType: string;
   warranty: string;
@@ -249,16 +248,8 @@ interface IClaim {
   isActive: true;
   company: string;
   customerId: string;
-  projectId:
-    | string
-    | {
-        _id: string;
-      };
-  supplierId:
-    | string
-    | {
-        _id: string;
-      };
+  projectId: string;
+  supplierId: string;
   itemName: string;
   itemType: string;
   warranty: string;
@@ -312,16 +303,18 @@ interface ILeaveStatus {
 }
 
 interface ILeaveApplication {
-  id: number;
-  requestedById: number; //user id
+  _id: string;
+  createdBy: string;
+  createdAt: string;
+  isActive: boolean;
+  company: string;
   name: string;
-  typeId: number;
-  typeName: string;
+  type: string;
   reason: string;
   remarks: string;
   startDate: string;
   endDate: string;
-  proof: string; //img
-  statusId: number;
-  statusName: string;
+  document: null | string;
+  status: number;
+  __v: 0;
 }

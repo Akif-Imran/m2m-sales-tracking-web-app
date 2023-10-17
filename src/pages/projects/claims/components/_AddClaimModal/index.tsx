@@ -21,22 +21,7 @@ interface OwnProps {
   companyId?: string;
 }
 interface IRequestForm
-  extends Omit<
-    IClaim,
-    | "_id"
-    | "__v"
-    | "createdAt"
-    | "createdBy"
-    | "isActive"
-    | "company"
-    | "projectId"
-    | "supplierId"
-    | "customerId"
-  > {
-  projectId: string;
-  supplierId: string;
-  customerId: string;
-}
+  extends Omit<IClaim, "_id" | "__v" | "createdAt" | "createdBy" | "isActive" | "company"> {}
 
 const schema: yup.ObjectSchema<IRequestForm> = yup.object().shape({
   customerId: yup.string().required("Company is required"),

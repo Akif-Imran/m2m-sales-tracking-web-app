@@ -83,17 +83,20 @@ export const selectTasksCombined = createSelector(
   selectUsers,
   selectTasks,
   selectCompanies,
-  (projects, users, tasks, companies) => {
+  selectTaskStatusList,
+  (projects, users, tasks, companies, statuses) => {
     return {
       tasks: tasks.data.map((task) => {
         const project = projects.data.find((project) => project._id === task.projectId);
-        const user = users.data.find((user) => user._id === task.assigneeId);
-        const company = companies.data.find((company) => company._id === task.companyId);
+        const user = users.data.find((user) => user._id === task.assignedTo);
+        const company = companies.data.find((company) => company._id === task.customerId);
+        const statusName = statuses.data.find((status) => status.id === task.status)?.name;
         return {
           ...task,
           project,
           assignee: user,
           company,
+          statusName,
         };
       }),
     };
@@ -175,7 +178,7 @@ export const selectRecordsForDropdown = createSelector(
         label: status.name,
       })),
       leaveTypes: leaveTypes.data.map((type) => ({
-        value: type.id.toString(),
+        value: type.name,
         label: type.name,
       })),
       salesPersons: users.data
@@ -232,16 +235,19 @@ export const selectPurchaseRequestsWithRecords = createSelector(
   selectUsers,
   selectSuppliers,
   selectProjects,
-  (requests, users, suppliers, projects) => {
+  selectPurchaseRequestsStatusList,
+  (requests, users, suppliers, projects, statuses) => {
     return requests.data.map((request) => {
       const requestByPerson = users.data.find((user) => user._id === request.createdBy);
       const project = projects.data.find((project) => project._id === request.projectId);
       const supplier = suppliers.data.find((supplier) => supplier._id === request.supplierId);
+      const statusName = statuses.data.find((status) => status.id === request.status)?.name;
       return {
         ...request,
         requestByPerson,
         project,
         supplier,
+        statusName,
       };
     });
   }
@@ -269,15 +275,29 @@ export const selectClaimsWithRecords = createSelector(
   }
 );
 
+export const selectUserWithRecords = createSelector(
+  selectUsers,
+  selectUserTypes,
+  (users, types) => {
+    return users.data.map((user) => {
+      const userType = types.data.find((type) => type.id === user.userType);
+      return { ...user, userTypeName: userType?.name };
+    });
+  }
+);
+
 export const selectLeavesWithRecords = createSelector(
   selectUsers,
   selectLeaves,
-  (users, leaves) => {
+  selectLeaveStatusList,
+  (users, leaves, statuses) => {
     return leaves.data.map((leave) => {
-      const requestByPerson = users.data.find((user) => user._id === leave.requestedById);
+      const requestByPerson = users.data.find((user) => user._id === leave.createdBy);
+      const statusName = statuses.data.find((status) => status.id === leave.status)?.name;
       return {
         ...leave,
         requestByPerson,
+        statusName,
       };
     });
   }

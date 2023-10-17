@@ -272,6 +272,17 @@ export const selectClaimsWithRecords = createSelector(
   }
 );
 
+export const selectUserWithRecords = createSelector(
+  selectUsers,
+  selectUserTypes,
+  (users, types) => {
+    return users.data.map((user) => {
+      const userType = types.data.find((type) => type.id === user.userType);
+      return { ...user, userTypeName: userType?.name };
+    });
+  }
+);
+
 export const selectLeavesWithRecords = createSelector(
   selectUsers,
   selectLeaves,

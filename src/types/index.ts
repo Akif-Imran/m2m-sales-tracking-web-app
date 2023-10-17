@@ -4,15 +4,20 @@ interface IUserAccountType {
   name: string;
 }
 interface IUser {
-  _id: string;
-  name: string;
-  email: string;
-  password: string;
-  userType: number;
-  isActive: boolean;
-  company: string;
-  __v: number;
-  createdAt: string;
+  _id: string; //
+  name: string; //
+  email: string; //
+  designation: string; //
+  department: string; //
+  mobile: string; //
+  joiningDate: string; //
+  password: string; //
+  userType: number; //
+  picture?: string;
+  isActive: boolean; //
+  company: string; //
+  __v: number; //
+  createdAt: string; //
 }
 type ILoginUserData = Omit<IUser, "createdAt">;
 

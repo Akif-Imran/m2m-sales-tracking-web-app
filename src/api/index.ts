@@ -22,6 +22,10 @@ export const urls = {
   },
   user: {
     list: `${BASE_USER_URL}/getAll`,
+    create: `${BASE_USER_URL}/create`,
+    update: (id: string) => `${BASE_USER_URL}/update/${id}`,
+    delete: (id: string) => `${BASE_USER_URL}/delete/${id}`,
+    getById: (id: string) => `${BASE_USER_URL}/getById/${id}`,
     getUserTypes: `${BASE_USER_URL}/getUserTypes`,
     changePassword: `${BASE_USER_URL}/resetPassword`,
     deleteAccount: `${BASE_USER_URL}/deleteAccount`,
@@ -98,6 +102,9 @@ export const urls = {
     update: (id: string) => `${BASE_SUPPLIER_URL}/update/${id}`,
     delete: (id: string) => `${BASE_SUPPLIER_URL}/delete/${id}`,
     getById: (id: string) => `${BASE_SUPPLIER_URL}/getById/${id}`,
+  },
+  uploadFile: {
+    upload: `${BASE_URL}/uploadFiles`,
   },
   dashboard: {
     counts: `${BASE_URL}/app_dashboard`,

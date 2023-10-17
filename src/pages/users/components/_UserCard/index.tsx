@@ -3,9 +3,12 @@ import { useStyles } from "./styles";
 import { Anchor, Avatar, Badge, Card, Flex, Text, rem } from "@mantine/core";
 import { colors } from "@theme";
 import { userStatusColors } from "@constants";
+import { BASE_URL } from "@api";
 
 interface OwnProps {
-  item: IUser;
+  item: IUser & {
+    userTypeName: string | undefined;
+  };
   onClick?: () => void;
 }
 
@@ -19,10 +22,8 @@ const _UserCard: React.FC<OwnProps> = ({ item, onClick }) => {
       alignItems: "center",
     },
     image: {
-      filter: `invert(33%) sepia(65%) saturate(0%) hue-rotate(253deg) brightness(98%) contrast(88%)`,
+      // filter: `invert(33%) sepia(65%) saturate(0%) hue-rotate(253deg) brightness(98%) contrast(88%)`,
       objectFit: "contain",
-      width: rem(64),
-      height: rem(64),
     },
   };
 
@@ -31,14 +32,14 @@ const _UserCard: React.FC<OwnProps> = ({ item, onClick }) => {
       <div className={classes.imageWithInfoContainer}>
         <div className={classes.machineImageContainer}>
           <Avatar
-            src={item?.avatar ? `${item?.avatar}` : "/user.png"}
-            radius={item?.avatar ? rem(250) : rem(250)}
+            src={item?.picture ? `${BASE_URL}\\${item?.picture}` : "/user.png"}
+            radius={item?.picture ? rem(250) : rem(250)}
             size={"xl"}
             //@ts-expect-error style works
-            styles={item?.avatar ? undefined : noImageStyle}
+            styles={item?.picture ? undefined : noImageStyle}
           />
-          <Badge variant="filled" color={userStatusColors[item.userTypeId]}>
-            {item.userTypeName}
+          <Badge variant="filled" color={userStatusColors[item.userType]} mt={"xs"}>
+            {item.userTypeName?.split("/")[0]}
           </Badge>
         </div>
         <div className={classes.infoContainer}>
@@ -46,22 +47,49 @@ const _UserCard: React.FC<OwnProps> = ({ item, onClick }) => {
             <div className={classes.textWithIconButton}>
               <Flex direction={"row"} align={"center"} justify={"space-between"}>
                 <Text fw={"bold"} fs={"normal"} fz={"md"} color={colors.titleText}>
-                  {item?.firstName} {item?.lastName}
+                  {item?.name}
                 </Text>
               </Flex>
             </div>
-            <Text fw={"normal"} fs={"normal"} fz={"sm"} color={colors.titleText}>
-              {item?.phone || "N/A"}
-            </Text>
-            <Text fw={"normal"} fs={"normal"} fz={"sm"} color={colors.titleText}>
-              {item?.designation || "N/A"}
-            </Text>
-            <Text fw={"normal"} fs={"normal"} fz={"sm"} color={colors.titleText}>
-              {item?.departmentName || "N/A"}
-            </Text>
-            <Anchor href={`mailto:${item?.email}`} underline={true} target="_blank" c={"blue"}>
-              {item?.email || "N/A"}
-            </Anchor>
+            <Flex direction={"row"} align={"center"} justify={"flex-start"}>
+              <Text fw={700} color={colors.titleText} mr={"xs"} fz={"sm"}>
+                Email:
+              </Text>
+              <Anchor
+                href={`mailto:${item?.email}`}
+                underline={true}
+                target="_blank"
+                c={"blue"}
+                fz={"sm"}
+              >
+                {item?.email || "N/A"}
+              </Anchor>
+            </Flex>
+            <Flex direction={"row"} align={"center"} justify={"flex-start"}>
+              <Text fw={700} color={colors.titleText} mr={"xs"} fz={"sm"}>
+                Mobile No.
+              </Text>
+              <Text color={colors.titleText} fz={"sm"}>
+                {item?.mobile || "N/A"}
+              </Text>
+            </Flex>
+            <Flex direction={"row"} align={"center"} justify={"flex-start"}>
+              <Text fw={700} color={colors.titleText} mr={"xs"} fz={"sm"}>
+                Designation:
+              </Text>
+              <Text color={colors.titleText} fz={"sm"}>
+                {item?.designation || "N/A"}
+              </Text>
+            </Flex>
+            <Flex direction={"row"} align={"center"} justify={"flex-start"}>
+              <Text fw={700} color={colors.titleText} mr={"xs"} fz={"sm"}>
+                Department:
+              </Text>
+              <Text color={colors.titleText} fz={"sm"}>
+                {item?.department || "N/A"}
+              </Text>
+            </Flex>
+
             {/* <Anchor href={item?.website} underline={true} target="_blank" c={"blue"}>
               {item?.website || "N/A"}
             </Anchor> */}

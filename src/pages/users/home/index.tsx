@@ -16,7 +16,7 @@ import {
 import { IconId, IconPlus, IconSearch, IconTable, IconTrash } from "@tabler/icons-react";
 import { colors } from "@theme";
 import { openDeleteModalHelper } from "@helpers";
-import { selectCompanies, selectUsers, useAppDispatch, useAppSelector } from "@store";
+import { selectUserWithRecords, useAppDispatch, useAppSelector } from "@store";
 import { useGStyles } from "../../../styles";
 import { deleteUser } from "@slices";
 import { notify } from "@utility";
@@ -24,6 +24,7 @@ import { _AddUserModal, _UserCard } from "../components";
 import { DateTime } from "luxon";
 import { DAY_MM_DD_YYYY } from "@constants";
 import { useToggle } from "@mantine/hooks";
+import { BASE_URL } from "@api";
 
 interface OwnProps {}
 
@@ -34,16 +35,13 @@ const Users: React.FC<OwnProps> = () => {
   const [viewMode, toggle] = useToggle(["cards", "list"]);
   const [searchQuery, setSearchQuery] = React.useState("");
   const [addUserModalOpened, setAddUserModalOpened] = React.useState(false);
-  const [searchedData, setSearchedData] = React.useState<IUser[]>([]);
-  const { data: companies } = useAppSelector(selectCompanies);
-  const { data: users } = useAppSelector(selectUsers);
+  const users = useAppSelector(selectUserWithRecords);
+  const [searchedData, setSearchedData] = React.useState<typeof users>([]);
 
   const onChangeSearch = (query: string) => {
     setSearchQuery(query);
-    const filtered = users.filter(
-      (user) =>
-        user.firstName.toLowerCase().includes(query.toLocaleLowerCase()) ||
-        user.lastName.toLowerCase().includes(query.toLocaleLowerCase())
+    const filtered = users.filter((user) =>
+      user.name.toLowerCase().includes(query.toLocaleLowerCase())
     );
     setSearchedData(filtered);
   };
@@ -52,7 +50,7 @@ const Users: React.FC<OwnProps> = () => {
     setSearchedData(users);
   }, [users]);
 
-  const handleDelete = (id: number) => {
+  const handleDelete = (id: string) => {
     openDeleteModalHelper({
       theme: theme,
       title: `Delete User`,
@@ -90,38 +88,33 @@ const Users: React.FC<OwnProps> = () => {
     ) : (
       <>
         {searchedData.map((user, index) => {
-          const company = companies.find((company) => company.id === user.companyId);
           if (viewMode === "cards") {
             return (
-              <Grid.Col span={4} key={user.id}>
+              <Grid.Col span={4} key={user._id}>
                 <_UserCard item={user} />
               </Grid.Col>
             );
           } else {
             return (
-              <tr key={user.id}>
+              <tr key={user._id}>
                 <td>{index + 1}</td>
                 <td>
-                  <Avatar src={user.avatar ? user.avatar : "/user.png"} size={50} />
+                  <Avatar
+                    src={user?.picture ? `${BASE_URL}\\${user.picture}` : "/user.png"}
+                    size={50}
+                  />
                 </td>
-                <td>{user.id}</td>
-                <td>
-                  {user.firstName} {user.lastName}
-                </td>
-                <td>{company?.name || "N/A"}</td>
+                <td>{user.name}</td>
                 <td>{user.email}</td>
                 <td>{user.password}</td>
-                <td>{user.phone}</td>
-                <td>{user.departmentName}</td>
+                <td>{user.mobile}</td>
+                <td>{user.department}</td>
                 <td>{user.designation}</td>
                 <td>{DateTime.fromISO(user.joiningDate).toFormat(DAY_MM_DD_YYYY)}</td>
                 <td>{user.userTypeName}</td>
-                <td>{user.address}</td>
-                <td>{user.city}</td>
-                <td>{user.country}</td>
                 <td>
                   <Group>
-                    <ActionIcon color="red" size={"sm"} onClick={() => handleDelete(user.id)}>
+                    <ActionIcon color="red" size={"sm"} onClick={() => handleDelete(user._id)}>
                       <IconTrash />
                     </ActionIcon>
                   </Group>
@@ -143,16 +136,13 @@ const Users: React.FC<OwnProps> = () => {
           <Table border={1} bgcolor={theme.white} withBorder>
             <thead>
               <tr>
-                <th colSpan={4}>User</th>
-                <th colSpan={1}>Company</th>
-                <th colSpan={8}>User Details</th>
+                <th colSpan={3}>User</th>
+                <th colSpan={7}>User Details</th>
+                <th colSpan={1}>Action</th>
               </tr>
               <tr>
                 <th>#</th>
                 <th>Avatar</th>
-                <th>Id</th>
-                <th>Name</th>
-
                 <th>Name</th>
 
                 <th>Email</th>
@@ -162,9 +152,6 @@ const Users: React.FC<OwnProps> = () => {
                 <th>Designation</th>
                 <th>Joining Date</th>
                 <th>User Type</th>
-                <th>Address</th>
-                <th>City</th>
-                <th>Country</th>
                 <th>Actions</th>
               </tr>
             </thead>

@@ -136,8 +136,8 @@ const ProjectPerformanceReport: React.FC<OwnProps> = () => {
         {records.map((item, index) => (
           <tr key={index}>
             <td>{item.name}</td>
-            <td>{item.projectType}</td>
-            <td>{item.statusName}</td>
+            <td>{item.type}</td>
+            <td>{item.status}</td>
             <td>{DateTime.fromISO(item.contractDate).toFormat(DAY_MM_DD_YYYY_HH_MM_SS_A)}</td>
             <td>{DateTime.fromISO(item.deliveryDate).toFormat(DAY_MM_DD_YYYY_HH_MM_SS_A)}</td>
             <td>{item.value.amount}</td>

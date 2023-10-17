@@ -139,9 +139,9 @@ const PurchaseRequestReport: React.FC<OwnProps> = () => {
         {records.map((item, index) => (
           <tr key={index}>
             <td>{item.itemName}</td>
-            <td>{item.statusName}</td>
+            <td>{item.status}</td>
             <td>{item.itemType}</td>
-            <td>{item.qty}</td>
+            <td>{item.quantity}</td>
             <td>{DateTime.fromISO(item.warranty).toFormat(DAY_MM_DD_YYYY_HH_MM_SS_A)}</td>
             <td>{item.price.amount}</td>
             <td>{item.remarks}</td>

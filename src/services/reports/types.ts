@@ -13,7 +13,7 @@ interface IHistoryReport {
   gps_time: string;
   createdAt: string;
 }
-type GetHistoryReportResponse = ApiResponse<IHistoryReport[], "result">;
+type GetHistoryReportResponse = ApiResponse<IHistoryReport[]>;
 
 type GetIgnitionReportRequest = {
   IMEI: string;
@@ -41,4 +41,4 @@ interface IIgnitionReport {
   __v: number;
 }
 
-type GetIgnitionReportResponse = ApiResponse<IIgnitionReport[], "result">;
+type GetIgnitionReportResponse = ApiResponse<IIgnitionReport[]>;

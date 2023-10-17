@@ -5,9 +5,9 @@ interface BaseReq {
   name: string;
   type: string;
   reason: string;
-  remarks: string;
   startDate: string;
   endDate: string;
+  status: number;
   document: null | string;
 }
 interface CreateReq {
@@ -17,7 +17,7 @@ interface CreateReq {
 interface UpdateReq {
   id: string;
   token: string;
-  leave: BaseReq;
+  leave: Partial<BaseReq> & { remarks: string };
 }
 
 interface DeleteReq {
@@ -43,8 +43,8 @@ export const fetchLeaveStatuses = createAsyncThunk("leave/status/fetch", async (
   return response.data;
 });
 
-export const fetchLeave = createAsyncThunk("leave/fetch", async (token: string) => {
-  const response = await apiGet<ApiResponse<ILeaveApplication>>(urls.leave.list, token);
+export const fetchLeaves = createAsyncThunk("leave/fetch", async (token: string) => {
+  const response = await apiGet<ApiResponse<ILeaveApplication[]>>(urls.leave.list, token);
   return response.data;
 });
 

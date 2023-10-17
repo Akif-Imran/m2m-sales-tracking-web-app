@@ -68,6 +68,10 @@ const _AddUserModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
         console.log("User Image Upload: ", res);
         if (res.statusCode === 200 || res.statusCode === 201) {
           values.picture = res.data;
+        } else {
+          setIsCreating((_prev) => false);
+          notify("Add User", res?.message, "error");
+          return;
         }
       }
       dispatch(

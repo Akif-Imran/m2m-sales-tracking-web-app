@@ -175,7 +175,7 @@ export const selectRecordsForDropdown = createSelector(
         label: status.name,
       })),
       leaveTypes: leaveTypes.data.map((type) => ({
-        value: type.id.toString(),
+        value: type.name,
         label: type.name,
       })),
       salesPersons: users.data
@@ -286,12 +286,15 @@ export const selectUserWithRecords = createSelector(
 export const selectLeavesWithRecords = createSelector(
   selectUsers,
   selectLeaves,
-  (users, leaves) => {
+  selectLeaveStatusList,
+  (users, leaves, statuses) => {
     return leaves.data.map((leave) => {
-      const requestByPerson = users.data.find((user) => user._id === leave.requestedById);
+      const requestByPerson = users.data.find((user) => user._id === leave.createdBy);
+      const statusName = statuses.data.find((status) => status.id === leave.status)?.name;
       return {
         ...leave,
         requestByPerson,
+        statusName,
       };
     });
   }

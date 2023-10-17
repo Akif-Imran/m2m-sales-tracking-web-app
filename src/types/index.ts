@@ -301,16 +301,18 @@ interface ILeaveStatus {
 }
 
 interface ILeaveApplication {
-  id: number;
-  requestedById: number; //user id
+  _id: string;
+  createdBy: string;
+  createdAt: string;
+  isActive: boolean;
+  company: string;
   name: string;
-  typeId: number;
-  typeName: string;
+  type: string;
   reason: string;
   remarks: string;
   startDate: string;
   endDate: string;
-  proof: string; //img
-  statusId: number;
-  statusName: string;
+  document: null | string;
+  status: number;
+  __v: 0;
 }

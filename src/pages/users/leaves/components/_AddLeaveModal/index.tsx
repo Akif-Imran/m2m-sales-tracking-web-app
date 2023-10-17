@@ -1,7 +1,6 @@
 import React from "react";
 import { useStyles } from "./styles";
 import { selectRecordsForDropdown, useAppDispatch, useAppSelector } from "@store";
-import { addLeave } from "@slices";
 import { useFormik } from "formik";
 import { useAuthContext } from "@contexts";
 import {
@@ -23,6 +22,10 @@ import { IconCalendar, IconUpload } from "@tabler/icons-react";
 import { notify } from "@utility";
 import { DatePickerInput, DateValue } from "@mantine/dates";
 import { colors } from "@theme";
+import { createLeave } from "@thunks";
+import { addLeave } from "@slices";
+import { uploadFile } from "@services";
+import * as yup from "yup";
 
 interface OwnProps {
   opened: boolean;
@@ -30,37 +33,84 @@ interface OwnProps {
   title: string;
 }
 
-interface ILeaveForm extends Omit<ILeaveApplication, "id"> {}
+interface ILeaveForm
+  extends Omit<
+    ILeaveApplication,
+    "_id" | "__v" | "isActive" | "createdBy" | "createdAt" | "company" | "remarks"
+  > {
+  hasDocument: boolean;
+}
+
+const schema: yup.ObjectSchema<ILeaveForm> = yup.object().shape({
+  document: yup.string().required("Type is required").nullable(),
+  hasDocument: yup.boolean().required("Type is required"),
+  name: yup.string().required("Name is required"),
+  reason: yup.string().required("Reason is required"),
+  startDate: yup.string().required("Start Date is required"),
+  endDate: yup.string().required("End Date is required"),
+  status: yup.number().required("Status is required").min(1).max(3),
+  type: yup.string().required("Type is required"),
+});
 
 const _AddLeaveModal: React.FC<OwnProps> = ({ onClose, opened, title }) => {
   const { theme } = useStyles();
   const { classes: gclasses } = useGStyles();
   const {
-    state: { user },
+    state: { token },
   } = useAuthContext();
   const { leaveStatus, leaveTypes } = useAppSelector(selectRecordsForDropdown);
   const leaveStatusList = leaveStatus.filter((status) => status.label === "Pending");
   const dispatch = useAppDispatch();
+  const [isCreating, setIsCreating] = React.useState(false);
+  const [file, setFile] = React.useState<File>({} as File);
 
   const form = useFormik<ILeaveForm>({
     initialValues: {
-      proof: "",
+      document: "",
+      hasDocument: false,
       name: "",
       reason: "",
       startDate: "",
       endDate: "",
-      remarks: "",
-      requestedById: user!.id,
-      statusId: 1,
-      statusName: "Pending",
-      typeId: 1,
-      typeName: "Paid",
+      status: 1,
+      type: "Paid",
     },
-    onSubmit(values, helpers) {
+    validationSchema: schema,
+    onSubmit: async (values, helpers) => {
       console.log(values);
-      dispatch(addLeave(values));
-      helpers.resetForm();
-      onClose();
+      setIsCreating((_prev) => true);
+      if (values.hasDocument) {
+        const res = await uploadFile(token, file);
+        if (res.statusCode === 200 || res.statusCode === 201) {
+          values.document = res.data;
+        } else {
+          setIsCreating((_prev) => false);
+          notify("Add Leave", res?.message, "error");
+          return;
+        }
+      }
+      dispatch(
+        createLeave({
+          token,
+          leave: values,
+        })
+      )
+        .unwrap()
+        .then((res) => {
+          notify("Add Leave", res?.message, res?.success ? "success" : "error");
+          if (res.success) {
+            dispatch(addLeave(res.data));
+            helpers.resetForm();
+            onClose();
+          }
+        })
+        .catch((err) => {
+          console.log("Add leave: ", err?.message);
+          notify("Add Leave", "An error occurred", "error");
+        })
+        .finally(() => {
+          setIsCreating((_prev) => false);
+        });
     },
   });
 
@@ -69,33 +119,34 @@ const _AddLeaveModal: React.FC<OwnProps> = ({ onClose, opened, title }) => {
       notify("Proof Upload", "Proof image not uploaded", "error");
       return;
     }
+    setFile((_prev) => file);
     const reader = new FileReader();
     reader.onload = (e) => {
       const dataUri = e?.target?.result as string;
       if (dataUri) {
-        form.setValues((prev) => ({ ...prev, proof: dataUri }));
+        form.setValues((prev) => ({ ...prev, document: dataUri, hasDocument: true }));
       }
     };
     reader.readAsDataURL(file);
   };
+
   const handleOnChangeType = (value: string | null) => {
     if (!value) return;
     const typeName = leaveTypes.find((type) => type.value === value)?.label;
     if (!typeName) return;
     form.setValues((prev) => ({
       ...prev,
-      typeId: parseInt(value),
-      typeName: typeName,
+      type: typeName,
     }));
   };
+
   const handleOnChangeStatus = (value: string | null) => {
     if (!value) return;
     const typeName = leaveStatus.find((type) => type.value === value)?.label;
     if (!typeName) return;
     form.setValues((prev) => ({
       ...prev,
-      statusId: parseInt(value),
-      statusName: typeName,
+      status: parseInt(value),
     }));
   };
 
@@ -134,8 +185,8 @@ const _AddLeaveModal: React.FC<OwnProps> = ({ onClose, opened, title }) => {
     >
       <Stack>
         <Flex direction={"column"} align={"center"} justify={"flex-end"}>
-          {form.values.proof ? (
-            <Avatar src={form.values.proof} radius={"md"} size={rem(170)} />
+          {form.values.document ? (
+            <Avatar src={`${form.values.document}`} radius={"md"} size={rem(170)} />
           ) : (
             <Avatar src={"/user.png"} radius={rem(250)} size={rem(170)} />
           )}
@@ -164,6 +215,7 @@ const _AddLeaveModal: React.FC<OwnProps> = ({ onClose, opened, title }) => {
           value={form.values.name}
           onChange={form.handleChange}
           onBlur={form.handleBlur}
+          error={form.touched.name && form.errors.name ? `${form.errors.name}` : null}
         />
         <Group grow align="flex-start">
           <Select
@@ -172,9 +224,10 @@ const _AddLeaveModal: React.FC<OwnProps> = ({ onClose, opened, title }) => {
             searchable
             nothingFound="No such type"
             label="Type"
-            value={form.values.typeId.toString()}
+            value={form.values.type}
             onChange={handleOnChangeType}
             data={leaveTypes}
+            error={form.touched.type && form.errors.type ? `${form.errors.type}` : null}
           />
           <Select
             required
@@ -182,9 +235,10 @@ const _AddLeaveModal: React.FC<OwnProps> = ({ onClose, opened, title }) => {
             searchable
             nothingFound="No such status"
             label="Status"
-            value={form.values.statusId.toString()}
+            value={form.values.status.toString()}
             onChange={handleOnChangeStatus}
             data={leaveStatusList}
+            error={form.touched.status && form.errors.status ? `${form.errors.status}` : null}
           />
         </Group>
         <Group grow align="flex-start">
@@ -192,9 +246,9 @@ const _AddLeaveModal: React.FC<OwnProps> = ({ onClose, opened, title }) => {
             required
             withAsterisk={false}
             placeholder="Select Start Date"
-            name="warranty"
-            id="warranty"
-            label="Warranty"
+            name="startDate"
+            id="startDate"
+            label="Start Date"
             onBlur={form.handleBlur}
             onChange={handleOnChangeStartDate}
             icon={<IconCalendar size={16} stroke={1.5} color={colors.titleText} />}
@@ -224,12 +278,18 @@ const _AddLeaveModal: React.FC<OwnProps> = ({ onClose, opened, title }) => {
           value={form.values.reason}
           onChange={form.handleChange}
           onBlur={form.handleBlur}
+          error={form.touched.reason && form.errors.reason ? `${form.errors.reason}` : null}
         />
         <Group align="flex-end" position="right" mt={rem(32)}>
           <Button variant="outline" onClick={handleCancel} size="xs">
             Cancel
           </Button>
-          <Button variant="filled" onClick={() => form.handleSubmit()} size="xs">
+          <Button
+            size="xs"
+            variant="filled"
+            loading={isCreating}
+            onClick={() => form.handleSubmit()}
+          >
             Save
           </Button>
         </Group>

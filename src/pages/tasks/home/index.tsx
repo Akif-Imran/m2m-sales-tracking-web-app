@@ -38,14 +38,15 @@ import { notify } from "@utility";
 import { deleteTask, modifyTaskStatus } from "@slices";
 import { _AddTaskModal } from "../components";
 import { useAuthContext } from "@contexts";
+import { removeTask, updateStatusTask } from "@thunks";
 
 interface OwnProps {}
 
 interface State {
   status: number;
-  company: number;
-  project: number;
-  assignedTo: number;
+  company: string;
+  project: string;
+  assignedTo: string;
 }
 interface ListState {
   statusList: IDropDownList;
@@ -56,9 +57,9 @@ interface ListState {
 
 const sortingInitialState: State = {
   status: 0,
-  company: 0,
-  project: 0,
-  assignedTo: 0,
+  company: "0",
+  project: "0",
+  assignedTo: "0",
 };
 const sortingListInitialState: ListState = {
   statusList: [],
@@ -70,7 +71,7 @@ const sortingListInitialState: ListState = {
 const Tasks: React.FC<OwnProps> = () => {
   useStyles();
   const {
-    state: { user, isAdmin, isSales },
+    state: { user, isAdmin, isSales, token },
   } = useAuthContext();
   const dispatch = useAppDispatch();
   const { classes: gclasses, theme } = useGStyles();
@@ -89,12 +90,12 @@ const Tasks: React.FC<OwnProps> = () => {
 
   const [visible, setVisible] = React.useState<boolean>(false);
   const [selectedStatus, setSelectedStatus] = React.useState<string>();
-  const [selectedTask, setSelectedTask] = React.useState<number>(0);
+  const [selectedTask, setSelectedTask] = React.useState<string>("");
 
   const [sorting, setSorting] = React.useState<State>(sortingInitialState);
   const [sortingList, setSortingList] = React.useState<ListState>(sortingListInitialState);
 
-  const showUpdateStatusModal = (taskId: number) => {
+  const showUpdateStatusModal = (taskId: string) => {
     setSelectedTask(taskId);
     setVisible(true);
   };
@@ -102,36 +103,34 @@ const Tasks: React.FC<OwnProps> = () => {
 
   const onChangeSearch = (query: string) => {
     setSearchQuery(query);
-    if (user?.userTypeName === "Admin") {
+    if (isAdmin) {
       const filtered = tasks.filter(
         (task) =>
-          task.assignee?.firstName.toLowerCase().includes(query.toLowerCase()) ||
-          task.assignee?.lastName.toLowerCase().includes(query.toLowerCase()) ||
-          task.statusName.toLowerCase().includes(query.toLowerCase()) ||
+          task.assignee?.name.toLowerCase().includes(query.toLowerCase()) ||
+          task?.statusName?.toLowerCase().includes(query.toLowerCase()) ||
           task.title.toLowerCase().includes(query.toLowerCase())
       );
       setSearchedData(filtered);
     } else {
       const filtered = tasks.filter(
         (task) =>
-          (task.assignee?.firstName.toLowerCase().includes(query.toLowerCase()) ||
-            task.assignee?.lastName.toLowerCase().includes(query.toLowerCase()) ||
-            task.statusName.toLowerCase().includes(query.toLowerCase()) ||
+          (task.assignee?.name.toLowerCase().includes(query.toLowerCase()) ||
+            task?.statusName?.toLowerCase().includes(query.toLowerCase()) ||
             task.title.toLowerCase().includes(query.toLowerCase())) &&
-          task.assigneeId === user?.id
+          task.assignedTo === user?._id
       );
       setSearchedData(filtered);
     }
   };
 
   React.useEffect(() => {
-    if (user?.userTypeName === "Admin") {
+    if (isAdmin) {
       setSearchedData(tasks);
     } else {
-      const filtered = tasks.filter((task) => task.assigneeId === user?.id);
+      const filtered = tasks.filter((task) => task.assignedTo === user?._id);
       setSearchedData(filtered);
     }
-  }, [tasks, user]);
+  }, [tasks, user, isAdmin]);
 
   React.useEffect(() => {
     setSortingList((_prev) => {
@@ -144,7 +143,7 @@ const Tasks: React.FC<OwnProps> = () => {
     });
   }, [taskStatusList, companies, projects, projectManagers, salesPersons]);
 
-  const handleDelete = (id: number) => {
+  const handleDelete = (id: string) => {
     openDeleteModalHelper({
       theme: theme,
       title: `Delete Task`,
@@ -158,18 +157,33 @@ const Tasks: React.FC<OwnProps> = () => {
       cancelLabel: "Cancel",
       confirmLabel: "Delete Task",
       onConfirm: () => {
-        dispatch(deleteTask(id));
-        notify("Delete Task", "Task deleted successfully!", "success");
+        dispatch(
+          removeTask({
+            id,
+            token,
+          })
+        )
+          .unwrap()
+          .then((res) => {
+            notify("Delete Task", res?.message, res.success ? "success" : "error");
+            if (res.success) {
+              dispatch(deleteTask(id));
+            }
+          })
+          .catch((err) => {
+            console.log("Remove Task: ", err?.message);
+            notify("Delete Task", "An error occurred", "error");
+          });
       },
       onCancel: () => notify("Delete Task", "Operation canceled!", "error"),
     });
   };
 
   const clearSort = () => {
-    if (user?.userTypeName === "Admin") {
+    if (isAdmin) {
       setSearchedData(tasks);
     } else {
-      const filtered = tasks.filter((task) => task.assigneeId === user?.id);
+      const filtered = tasks.filter((task) => task.assignedTo === user?._id);
       setSearchedData(filtered);
     }
     setSorting(sortingInitialState);
@@ -177,23 +191,25 @@ const Tasks: React.FC<OwnProps> = () => {
 
   const handleSort = async (
     statusId: number,
-    companyId: number,
-    projectId: number,
-    assignedToId: number
+    companyId: string,
+    projectId: string,
+    assignedToId: string
   ) => {
     console.log(statusId, companyId, projectId, assignedToId);
     let result = tasks;
     if (statusId) {
-      result = result.filter((task) => task.statusId === statusId);
+      result = result.filter((task) => task.status === statusId);
     }
     if (companyId) {
-      result = result.filter((task) => task.companyId === companyId);
+      result = result.filter((task) => (companyId === "0" ? true : task.customerId === companyId));
     }
     if (projectId) {
-      result = result.filter((task) => task.projectId === projectId);
+      result = result.filter((task) => (projectId === "0" ? true : task.projectId === projectId));
     }
     if (assignedToId) {
-      result = result.filter((task) => task.assigneeId === assignedToId);
+      result = result.filter((task) =>
+        assignedToId === "0" ? true : task.assignedTo === assignedToId
+      );
     }
     setSearchedData(result);
   };
@@ -211,38 +227,66 @@ const Tasks: React.FC<OwnProps> = () => {
   };
   const handleOnChangeProjectFilter = (value: string | null) => {
     if (!value) return;
-    const parsed = parseInt(value);
     setSorting((prev) => {
-      handleSort(prev.status, prev.company, parsed, prev.assignedTo);
+      handleSort(prev.status, prev.company, value, prev.assignedTo);
       return {
         ...prev,
-        project: parsed,
+        project: value,
       };
     });
   };
 
   const handleOnChangeCompanyFilter = (value: string | null) => {
     if (!value) return;
-    const parsed = parseInt(value);
     setSorting((prev) => {
-      handleSort(prev.status, parsed, prev.project, prev.assignedTo);
+      handleSort(prev.status, value, prev.project, prev.assignedTo);
       return {
         ...prev,
-        company: parsed,
+        company: value,
       };
     });
   };
 
   const handleOnChangeAssigneeFilter = (value: string | null) => {
     if (!value) return;
-    const parsed = parseInt(value);
     setSorting((prev) => {
-      handleSort(prev.status, prev.company, prev.project, parsed);
+      handleSort(prev.status, prev.company, prev.project, value);
       return {
         ...prev,
-        assignedTo: parsed,
+        assignedTo: value,
       };
     });
+  };
+
+  const handleOnChangeStatus = (value: null | string) => {
+    if (!value) {
+      notify("Update Task Status", "Invalid status value", "error");
+      return;
+    }
+    setSelectedStatus(value);
+    const typeName = taskStatusList.find((status) => status.value === value)?.label;
+    if (!typeName) return;
+    dispatch(
+      updateStatusTask({
+        id: selectedTask,
+        token,
+        body: {
+          status: parseInt(value),
+        },
+      })
+    )
+      .unwrap()
+      .then((res) => {
+        notify("Update Task Status", res?.message, res.success ? "success" : "error");
+        if (res.success) {
+          dispatch(modifyTaskStatus(res.data));
+          hideUpdateStatusModal();
+        }
+      })
+      .catch((err) => {
+        console.log("Update Task Status: ", err?.message);
+        notify("Update Task Status", "An error occurred", "error");
+      });
   };
 
   const rows =
@@ -255,11 +299,10 @@ const Tasks: React.FC<OwnProps> = () => {
     ) : (
       <>
         {searchedData.map((task, index) => (
-          <tr key={task.id}>
+          <tr key={task._id}>
             <td>{index + 1}</td>
-            <td>{task.id}</td>
             <td>
-              <Badge variant="filled" color={taskStatusColors[task.statusName]}>
+              <Badge variant="filled" color={taskStatusColors[task.status]}>
                 {task.statusName}
               </Badge>
             </td>
@@ -268,26 +311,30 @@ const Tasks: React.FC<OwnProps> = () => {
             <td>{task.title}</td>
             <td>{task.description}</td>
             <td>
-              {DateTime.fromISO(task.createdDate).toLocal().toFormat(DAY_MM_DD_YYYY_HH_MM_SS_A)}
+              {DateTime.fromISO(task.createdAt).toLocal().toFormat(DAY_MM_DD_YYYY_HH_MM_SS_A)}
             </td>
+            <td>{task.assignee?.name}</td>
             <td>
-              {task.assignee?.firstName} {task.assignee?.lastName}
+              {DateTime.fromISO(task.completionDeadline)
+                .toLocal()
+                .toFormat(DAY_MM_DD_YYYY_HH_MM_SS_A)}
             </td>
-            <td>
-              {DateTime.fromISO(task.plannedEndDate).toLocal().toFormat(DAY_MM_DD_YYYY_HH_MM_SS_A)}
-            </td>
-            <td>
+            {/* <td>
               {task.completedDate
                 ? DateTime.fromISO(task.completedDate).toLocal().toFormat(DAY_MM_DD_YYYY_HH_MM_SS_A)
                 : "N/A"}
-            </td>
+            </td> */}
             <td>
               <Group>
-                <ActionIcon color="gray" size={"sm"} onClick={() => showUpdateStatusModal(task.id)}>
+                <ActionIcon
+                  color="gray"
+                  size={"sm"}
+                  onClick={() => showUpdateStatusModal(task._id)}
+                >
                   <IconRotateClockwise2 />
                 </ActionIcon>
                 {isAdmin && (
-                  <ActionIcon color="red" size={"sm"} onClick={() => handleDelete(task.id)}>
+                  <ActionIcon color="red" size={"sm"} onClick={() => handleDelete(task._id)}>
                     <IconTrash />
                   </ActionIcon>
                 )}
@@ -326,14 +373,14 @@ const Tasks: React.FC<OwnProps> = () => {
           <Table border={1} bgcolor={theme.white} withBorder>
             <thead>
               <tr>
-                <th colSpan={3}>Task</th>
+                <th colSpan={2}>Task</th>
                 <th colSpan={1}>Company</th>
                 <th colSpan={1}>Project</th>
-                <th colSpan={7}>Task Details</th>
+                <th colSpan={5}>Task Details</th>
+                <th colSpan={1}>Action</th>
               </tr>
               <tr>
                 <th>#</th>
-                <th>Id</th>
                 <th>
                   <Select
                     maw={rem(128)}
@@ -351,7 +398,7 @@ const Tasks: React.FC<OwnProps> = () => {
                 <th>
                   <Select
                     maw={rem(256)}
-                    value={sorting.company.toString()}
+                    value={sorting.company}
                     withinPortal
                     withAsterisk={false}
                     label="Company Name"
@@ -394,7 +441,7 @@ const Tasks: React.FC<OwnProps> = () => {
                   />
                 </th>
                 <th>Deadline</th>
-                <th>Completed Date</th>
+                {/* <th>Completed Date</th> */}
                 <th>Actions</th>
               </tr>
             </thead>
@@ -422,24 +469,7 @@ const Tasks: React.FC<OwnProps> = () => {
           value={selectedStatus}
           name="userFilter"
           defaultValue="7"
-          onChange={(value) => {
-            if (!value) {
-              notify("Update Task Status", "Invalid status value", "error");
-              return;
-            }
-            setSelectedStatus(value);
-            const typeName = taskStatusList.find((status) => status.value === value)?.label;
-            if (!typeName) return;
-            dispatch(
-              modifyTaskStatus({
-                taskId: selectedTask,
-                statusId: parseInt(value),
-                statusName: typeName,
-              })
-            );
-            notify("Update Task Status", "Task status updated successfully!", "success");
-            hideUpdateStatusModal();
-          }}
+          onChange={handleOnChangeStatus}
         >
           <div className={gclasses.radioContainer}>
             {taskStatusList

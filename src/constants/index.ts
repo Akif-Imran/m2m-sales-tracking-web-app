@@ -57,10 +57,10 @@ export const leavesTypeColors: Record<string, string> = {
   Paid: "red",
 };
 
-export const taskStatusColors: Record<string, string> = {
-  Pending: "red",
-  Accepted: "blue",
-  Completed: "green",
+export const taskStatusColors: Record<number, string> = {
+  1: "red",
+  2: "blue",
+  3: "green",
 };
 
 export enum DriverFilters {

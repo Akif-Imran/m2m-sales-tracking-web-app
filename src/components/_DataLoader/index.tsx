@@ -14,6 +14,8 @@ import {
   fetchPurchaseRequestStatuses,
   fetchPurchaseRequests,
   fetchSuppliers,
+  fetchTaskStatuses,
+  fetchTasks,
   fetchUserTypes,
   fetchUsers,
 } from "@thunks";
@@ -43,6 +45,8 @@ export const _DataLoader: React.FC<React.PropsWithChildren> = ({ children }) => 
     dispatch(fetchPurchaseRequestStatuses(token));
     dispatch(fetchLeaves(token));
     dispatch(fetchLeaveStatuses(token));
+    dispatch(fetchTasks(token));
+    dispatch(fetchTaskStatuses(token));
   }, [dispatch, token]);
 
   return (

@@ -169,17 +169,19 @@ interface ITaskStatus {
   name: string;
 }
 interface ITask {
-  id: number;
-  projectId: number;
-  assigneeId: number;
+  _id: string;
+  createdBy: string;
+  createdAt: string;
+  isActive: true;
+  company: string;
+  assignedTo: string;
+  projectId: string;
   title: string;
   description: string;
-  createdDate: string;
-  plannedEndDate: string;
-  completedDate: string;
-  statusId: number;
-  statusName: string;
-  companyId: number;
+  completionDeadline: string;
+  status: number;
+  customerId: string;
+  __v: number;
 }
 interface INotification {
   id: number;

@@ -83,17 +83,20 @@ export const selectTasksCombined = createSelector(
   selectUsers,
   selectTasks,
   selectCompanies,
-  (projects, users, tasks, companies) => {
+  selectTaskStatusList,
+  (projects, users, tasks, companies, statuses) => {
     return {
       tasks: tasks.data.map((task) => {
         const project = projects.data.find((project) => project._id === task.projectId);
-        const user = users.data.find((user) => user._id === task.assigneeId);
-        const company = companies.data.find((company) => company._id === task.companyId);
+        const user = users.data.find((user) => user._id === task.assignedTo);
+        const company = companies.data.find((company) => company._id === task.customerId);
+        const statusName = statuses.data.find((status) => status.id === task.status)?.name;
         return {
           ...task,
           project,
           assignee: user,
           company,
+          statusName,
         };
       }),
     };

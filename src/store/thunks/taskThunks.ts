@@ -44,7 +44,7 @@ export const fetchTaskStatuses = createAsyncThunk("task/status/fetch", async (to
 });
 
 export const fetchTasks = createAsyncThunk("task/fetch", async (token: string) => {
-  const response = await apiGet<ApiResponse<ITask>>(urls.task.list, token);
+  const response = await apiGet<ApiResponse<ITask[]>>(urls.task.list, token);
   return response.data;
 });
 

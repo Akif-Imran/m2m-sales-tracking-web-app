@@ -146,7 +146,7 @@ export const LeaveApplications: React.FC<OwnProps> = () => {
               <td>{DateTime.fromISO(leave.startDate).toFormat(DAY_MM_DD_YYYY)}</td>
               <td>{DateTime.fromISO(leave.endDate).toFormat(DAY_MM_DD_YYYY)}</td>
               <td>{leave.reason}</td>
-              <td>{leave.remarks}</td>
+              <td>{leave?.remarks || "N/A"}</td>
               <td>
                 <Group>
                   {(isHR || isAdmin) && (

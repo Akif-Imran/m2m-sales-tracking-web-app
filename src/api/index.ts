@@ -1,8 +1,8 @@
 import type { AxiosResponse } from "axios";
 import axios from "axios";
 
-// export const BASE_URL = "http://www.sealtracking.com:7075";
-export const BASE_URL = "http://3.1.140.231:7075";
+export const BASE_URL = "http://www.sealtracking.com:7075";
+// export const BASE_URL = "http://3.1.140.231:7075";
 export const BASE_USER_URL = `${BASE_URL}/user`;
 export const BASE_CUSTOMER_URL = `${BASE_URL}/customer`;
 export const BASE_CONTACT_URL = `${BASE_URL}/contact`;

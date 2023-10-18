@@ -82,10 +82,11 @@ const _AddSupplierModal: React.FC<OwnProps> = (props) => {
         token,
         supplier: {
           ...values,
-          businessCard: "remove",
-          designation: "remove",
-          department: "remove",
-          customerId: "remove",
+          businessCard: "na",
+          designation: "na",
+          department: "na",
+          //TODO - stupid things - remove
+          customerId: "652506a266869aaf01825588",
         },
       })
     )
@@ -114,10 +115,11 @@ const _AddSupplierModal: React.FC<OwnProps> = (props) => {
         id: props.record?._id || "",
         supplier: {
           ...values,
-          businessCard: "remove",
-          designation: "remove",
-          department: "remove",
-          customerId: "remove",
+          businessCard: "na",
+          designation: "na",
+          department: "na",
+          //TODO - stupid things - remove
+          customerId: "652506a266869aaf01825588",
         },
       })
     )

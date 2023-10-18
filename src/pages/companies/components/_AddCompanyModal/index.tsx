@@ -22,6 +22,7 @@ import { addCompany } from "@slices";
 import { createCompany } from "@thunks";
 import { useAuthContext } from "@contexts";
 import * as yup from "yup";
+import { uploadFile } from "@services";
 
 interface OwnProps {
   opened: boolean;
@@ -30,12 +31,14 @@ interface OwnProps {
 }
 interface ICompanyForm extends Omit<ICompany, "_id" | "__v" | "company" | "isActive" | "logo"> {
   logo?: string;
+  hasLogo: boolean;
 }
 
 const schema: yup.ObjectSchema<ICompanyForm> = yup.object().shape({
   name: yup.string().required("Company name is required"),
   email: yup.string().email("Invalid email").required("Email is required"),
   logo: yup.string().optional(),
+  hasLogo: yup.boolean().required(),
   address: yup.string().required("Address is required"),
   state: yup.string().required("State is required"),
   country: yup.string().required("Country is required"),
@@ -51,12 +54,14 @@ const _AddCompanyModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
   } = useAuthContext();
   const dispatch = useAppDispatch();
   const [isCreating, setIsCreating] = React.useState(false);
+  const [file, setFile] = React.useState<File>({} as File);
 
   const company = useFormik<ICompanyForm>({
     initialValues: {
       name: "",
       email: "",
       logo: "",
+      hasLogo: false,
       address: "",
       state: "",
       country: "",
@@ -65,9 +70,19 @@ const _AddCompanyModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
       phone: "",
     },
     validationSchema: schema,
-    onSubmit(values, helpers) {
+    onSubmit: async (values, helpers) => {
       console.log(values);
       setIsCreating(true);
+      if (values.hasLogo) {
+        const res = await uploadFile(token, file);
+        if (res.statusCode === 200 || res.statusCode === 201) {
+          values.logo = res.data;
+        } else {
+          setIsCreating((_prev) => false);
+          notify("Add User", res?.message, "error");
+          return;
+        }
+      }
       dispatch(
         createCompany({
           token,
@@ -98,11 +113,12 @@ const _AddCompanyModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
       notify("Image Upload", "Company logo not uploaded", "error");
       return;
     }
+    setFile(file);
     const reader = new FileReader();
     reader.onload = (e) => {
       const dataUri = e?.target?.result as string;
       if (dataUri) {
-        company.setValues((prev) => ({ ...prev, logo: dataUri }));
+        company.setValues((prev) => ({ ...prev, logo: dataUri, hasLogo: true }));
       }
     };
     reader.readAsDataURL(file);

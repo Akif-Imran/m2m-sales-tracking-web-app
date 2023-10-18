@@ -12,7 +12,6 @@ import {
   Table,
   Text,
   TextInput,
-  rem,
 } from "@mantine/core";
 import { useGStyles } from "../../../styles";
 import {

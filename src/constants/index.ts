@@ -73,9 +73,9 @@ export enum ActivityFilters {
 }
 
 export const currencyList = [
-  { value: "USD", label: "USD" },
   { value: "MYR", label: "MYR" },
-  { value: "CAD", label: "CAD" },
+  // { value: "USD", label: "USD" },
+  // { value: "CAD", label: "CAD" },
 ];
 
 export const monthsList = [

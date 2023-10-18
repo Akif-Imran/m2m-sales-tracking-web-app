@@ -31,6 +31,9 @@ const _UpdateLeaveModal: React.FC<OwnProps> = ({ onClose, opened, title, leaveId
   } = useAuthContext();
   const { leaveStatus } = useAppSelector(selectRecordsForDropdown);
   const [isCreating, setIsCreating] = React.useState(false);
+  const leave = useAppSelector((state) =>
+    state.leaves.data.find((leave) => leave._id === leaveId)
+  )!;
 
   console.log(statusId, leaveId);
 
@@ -44,11 +47,16 @@ const _UpdateLeaveModal: React.FC<OwnProps> = ({ onClose, opened, title, leaveId
     onSubmit: (values, helpers) => {
       console.log(values);
       setIsCreating((_prev) => true);
+      const { name, type, startDate, endDate } = leave;
       dispatch(
         updateLeave({
           id: values.leaveId,
           token,
           leave: {
+            name,
+            type,
+            startDate,
+            endDate,
             status: values.statusId,
             remarks: values.remarks,
           },
@@ -72,6 +80,7 @@ const _UpdateLeaveModal: React.FC<OwnProps> = ({ onClose, opened, title, leaveId
         });
     },
   });
+
   const handleOnChangeStatus = (value: string) => {
     if (!value) {
       notify("Update Purchase Request Status", "Invalid status value", "error");

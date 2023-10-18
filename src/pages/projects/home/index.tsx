@@ -44,7 +44,7 @@ interface ProjectSort {
 const Projects: React.FC<OwnProps> = () => {
   useStyles();
   const {
-    state: { user, isAdmin, isHR, token },
+    state: { isAdmin, token },
   } = useAuthContext();
   const dispatch = useAppDispatch();
   const { classes: gclasses, theme } = useGStyles();
@@ -76,19 +76,10 @@ const Projects: React.FC<OwnProps> = () => {
 
   const onChangeSearch = (query: string) => {
     setSearchQuery(query);
-    if (isAdmin || isHR) {
-      const filtered = projects.filter((project) =>
-        project.name.toLowerCase().includes(query.toLowerCase())
-      );
-      setSearchedData(filtered);
-    } else {
-      const filtered = projects.filter(
-        (project) =>
-          project.name.toLowerCase().includes(query.toLowerCase()) &&
-          project.salesPerson === user?._id
-      );
-      setSearchedData(filtered);
-    }
+    const filtered = projects.filter((project) =>
+      project.name.toLowerCase().includes(query.toLowerCase())
+    );
+    setSearchedData(filtered);
   };
 
   const sortData = (columnName: keyof ProjectSort) => {
@@ -161,7 +152,6 @@ const Projects: React.FC<OwnProps> = () => {
       notify("Update Project Status", "Invalid status value", "error");
       return;
     }
-
     dispatch(
       updateStatusProject({
         token,
@@ -186,13 +176,8 @@ const Projects: React.FC<OwnProps> = () => {
   };
 
   React.useEffect(() => {
-    if (isAdmin || isHR) {
-      setSearchedData(projects);
-    } else {
-      const filtered = projects.filter((project) => project.salesPerson === user?._id);
-      setSearchedData(filtered);
-    }
-  }, [isAdmin, isHR, projects, user?._id]);
+    setSearchedData(projects);
+  }, [projects]);
 
   // React.useEffect(() => {
   //   if (modal === "add") {

@@ -16,28 +16,54 @@ import {
   TextInput,
   rem,
 } from "@mantine/core";
-import { useFormik } from "formik";
+import { FormikHelpers, useFormik } from "formik";
 import { IconCalendar, IconUpload } from "@tabler/icons-react";
 import { notify } from "@utility";
 import { selectRecordsForDropdown, useAppDispatch, useAppSelector } from "@store";
-import { addUser } from "@slices";
+import { addUser, modifyUser } from "@slices";
 import { DatePickerInput, DateValue } from "@mantine/dates";
 import { colors } from "@theme";
-import { createUser } from "@thunks";
+import { createUser, updateUser } from "@thunks";
 import { useAuthContext } from "@contexts";
 import { uploadFile } from "@services";
+import * as yup from "yup";
+import { BASE_URL } from "@api";
 
-interface OwnProps {
-  opened: boolean;
-  onClose: () => void;
-  title: string;
-}
+type OwnProps =
+  | {
+      opened: boolean;
+      onClose: () => void;
+      title: string;
+      mode: "add";
+      record: undefined;
+    }
+  | {
+      opened: boolean;
+      onClose: () => void;
+      title: string;
+      mode: "edit";
+      record: IUser;
+    };
 interface IUserForm extends Omit<IUser, "_id" | "__v" | "isActive" | "createdAt" | "company"> {
-  picture: string;
+  picture?: string;
   hasPicture: boolean;
 }
 
-const _AddUserModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
+const schema: yup.ObjectSchema<IUserForm> = yup.object().shape({
+  picture: yup.string().optional(), //
+  hasPicture: yup.boolean().required(),
+  department: yup.string().required("Department is required"),
+  designation: yup.string().required("Designation is required"),
+  joiningDate: yup.string().required("Joining Date is required"),
+  name: yup.string().required("Name is required"), //
+  email: yup.string().required("Email is required"), //
+  password: yup.string().required("Password is required"), //
+  mobile: yup.string().required("Mobile is required"), //
+  userType: yup.number().required("User Type is required"),
+});
+
+const _AddUserModal: React.FC<OwnProps> = (props) => {
+  const { opened, onClose, title, mode = "add" } = props;
   const { theme, classes } = useStyles();
   const {
     state: { token },
@@ -49,55 +75,102 @@ const _AddUserModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
 
   const form = useFormik<IUserForm>({
     initialValues: {
-      picture: "", //
+      picture: mode === "edit" ? props.record?.picture || "" : "", //
       hasPicture: false,
-      department: "",
-      designation: "",
-      joiningDate: "",
-      name: "", //
-      email: "", //
-      password: "", //
-      mobile: "", //
-      userType: 2,
+      department: mode === "edit" ? props.record?.department || "" : "",
+      designation: mode === "edit" ? props.record?.designation || "" : "",
+      joiningDate: mode === "edit" ? props.record?.joiningDate || "" : "",
+      name: mode === "edit" ? props.record?.name || "" : "", //
+      email: mode === "edit" ? props.record?.email || "" : "", //
+      password: mode === "edit" ? props.record?.password || "" : "", //
+      mobile: mode === "edit" ? props.record?.mobile || "" : "", //
+      userType: mode === "edit" ? props.record?.userType || 2 : 2,
     },
+    validationSchema: schema,
     onSubmit: async (values, helpers) => {
       console.log(values);
-      setIsCreating((_prev) => true);
-      if (values.hasPicture) {
-        const res = await uploadFile(token, file);
-        console.log("User Image Upload: ", res);
-        if (res.statusCode === 200 || res.statusCode === 201) {
-          values.picture = res.data;
-        } else {
-          setIsCreating((_prev) => false);
-          notify("Add User", res?.message, "error");
-          return;
-        }
+      if (mode === "add") {
+        handleAdd(values, helpers);
+      } else {
+        handleUpdate(values, helpers);
       }
-      dispatch(
-        createUser({
-          token,
-          user: values,
-        })
-      )
-        .unwrap()
-        .then((res) => {
-          notify("Add User", res?.message, res.success ? "success" : "error");
-          if (res.success) {
-            dispatch(addUser(res.data));
-            helpers.resetForm();
-            onClose();
-          }
-        })
-        .catch((err) => {
-          console.log("Add User: ", err?.message);
-          notify("Add User", "An error occurred", "error");
-        })
-        .finally(() => {
-          setIsCreating((_prev) => false);
-        });
     },
   });
+
+  const handleAdd = async (values: IUserForm, helpers: FormikHelpers<IUserForm>) => {
+    setIsCreating((_prev) => true);
+    if (values.hasPicture) {
+      const res = await uploadFile(token, file);
+      console.log("User Image Upload: ", res);
+      if (res.statusCode === 200 || res.statusCode === 201) {
+        values.picture = res.data;
+      } else {
+        setIsCreating((_prev) => false);
+        notify("Add User", res?.message, "error");
+        return;
+      }
+    }
+    dispatch(
+      createUser({
+        token,
+        user: values,
+      })
+    )
+      .unwrap()
+      .then((res) => {
+        notify("Add User", res?.message, res.success ? "success" : "error");
+        if (res.success) {
+          dispatch(addUser(res.data));
+          helpers.resetForm();
+          onClose();
+        }
+      })
+      .catch((err) => {
+        console.log("Add User: ", err?.message);
+        notify("Add User", "An error occurred", "error");
+      })
+      .finally(() => {
+        setIsCreating((_prev) => false);
+      });
+  };
+
+  const handleUpdate = async (values: IUserForm, helpers: FormikHelpers<IUserForm>) => {
+    setIsCreating((_prev) => true);
+    if (values.hasPicture) {
+      const res = await uploadFile(token, file);
+      console.log("User Image Upload: ", res);
+      if (res.statusCode === 200 || res.statusCode === 201) {
+        values.picture = res.data;
+      } else {
+        setIsCreating((_prev) => false);
+        notify("Add User", res?.message, "error");
+        return;
+      }
+    }
+    dispatch(
+      updateUser({
+        id: props.record?._id || "",
+        token,
+        user: values,
+      })
+    )
+      .unwrap()
+      .then((res) => {
+        notify("Update User", res?.message, res.success ? "success" : "error");
+        if (res.success) {
+          dispatch(modifyUser(res.data));
+          helpers.resetForm();
+          onClose();
+        }
+      })
+      .catch((err) => {
+        console.log("Update User: ", err?.message);
+        notify("Update User", "An error occurred", "error");
+      })
+      .finally(() => {
+        setIsCreating((_prev) => false);
+      });
+  };
 
   const handleFileChange = (file: File) => {
     if (file === null) {
@@ -141,6 +214,24 @@ const _AddUserModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
     }
   };
 
+  React.useEffect(() => {
+    if (mode === "edit" && !props.record) return;
+    form.setValues((prev) => ({
+      ...prev,
+      picture: mode === "edit" ? props.record?.picture || "" : "", //
+      hasPicture: false,
+      department: mode === "edit" ? props.record?.department || "" : "",
+      designation: mode === "edit" ? props.record?.designation || "" : "",
+      joiningDate: mode === "edit" ? props.record?.joiningDate || "" : "",
+      name: mode === "edit" ? props.record?.name || "" : "", //
+      email: mode === "edit" ? props.record?.email || "" : "", //
+      password: mode === "edit" ? props.record?.password || "" : "", //
+      mobile: mode === "edit" ? props.record?.mobile || "" : "", //
+      userType: mode === "edit" ? props.record?.userType || 2 : 2,
+    }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [props.record, mode, opened]);
+
   return (
     <Modal
       size="xl"
@@ -154,7 +245,15 @@ const _AddUserModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
       <Stack>
         <Flex direction={"column"} align={"center"} justify={"flex-end"}>
           {form.values.picture ? (
-            <Avatar src={form.values.picture} radius={rem(250)} size={rem(170)} />
+            <Avatar
+              src={
+                mode === "edit" && !form.values.hasPicture
+                  ? `${BASE_URL}\\${form.values.picture}`
+                  : form.values.picture
+              }
+              radius={rem(250)}
+              size={rem(170)}
+            />
           ) : (
             <Avatar src={"/user.png"} radius={rem(250)} size={rem(170)} />
           )}
@@ -266,6 +365,7 @@ const _AddUserModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
                   onBlur={form.handleBlur}
                   onChange={handleOnChangeJoiningDate}
                   icon={<IconCalendar size={16} stroke={1.5} color={colors.titleText} />}
+                  defaultValue={new Date(form.values.joiningDate)}
                   error={
                     form.touched.joiningDate && form.errors.joiningDate
                       ? `${form.errors.joiningDate}`

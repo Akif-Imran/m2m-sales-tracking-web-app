@@ -17,22 +17,23 @@ import {
 import { useStyles } from "./styles";
 import { useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
-import { useAuthContext } from "@contexts";
 import { routes } from "@routes";
 import { IconArrowLeft } from "@tabler/icons-react";
 import { colors } from "@theme";
 import * as yup from "yup";
 import "./index.css";
+import { createAccount } from "@services";
+import { notify } from "@utility";
 
 interface IForm {
-  companyName: string;
+  name: string;
   email: string;
   password: string;
   confirmPassword: string;
 }
 
 const registerSchema: yup.ObjectSchema<IForm> = yup.object().shape({
-  companyName: yup.string().min(3).max(60).required("Company name is required!"),
+  name: yup.string().min(3).max(60).required("Name is required!"),
   email: yup.string().email("Must be valid email!").required("Email is required!"),
   password: yup.string().min(2, "Too short!").required("Password is required!"),
   confirmPassword: yup
@@ -47,28 +48,43 @@ const OTPSchema = yup.object().shape({
 
 const Register: React.FC = () => {
   const { classes, theme } = useStyles();
+  const [isRegistering, setIsRegistering] = React.useState(false);
   const [_rememberMe, _setRememberMe] = React.useState(true);
-  const [showRegister, setShowRegister] = React.useState(true);
+  const [showRegister, _setShowRegister] = React.useState(true);
   const [_requestId, _setRequestId] = React.useState("");
-  const {
-    // login,
-    state: { isLoading, isAuthorized },
-  } = useAuthContext();
   const navigate = useNavigate();
   // const location = useLocation();
-  const redirectPath = routes.dashboard.home;
+  // const redirectPath = routes.dashboard.home;
 
   const form = useFormik<IForm>({
     initialValues: {
-      companyName: "",
+      name: "",
       email: "",
       password: "",
       confirmPassword: "",
     },
     onSubmit: (values, _helpers) => {
       console.log("onSubmit for login", values);
-      // navigate(routes.auth.verify_otp);
-      setShowRegister((_prev) => false);
+      setIsRegistering((_prev) => true);
+      createAccount({
+        name: values.name,
+        email: values.email,
+        password: values.password,
+      })
+        .then((res) => {
+          notify("Register", res?.message, res?.success ? "success" : "error");
+          if (res.success) {
+            navigate(routes.auth.login);
+          }
+        })
+        .catch((err) => {
+          console.log("Register: ", err?.message);
+          notify("Register", "Something went wrong!", "error");
+        })
+        .finally(() => {
+          setIsRegistering((_prev) => false);
+        });
+      // setShowRegister((_prev) => false);
     },
     validationSchema: registerSchema,
   });
@@ -84,10 +100,10 @@ const Register: React.FC = () => {
     validationSchema: OTPSchema,
   });
 
-  React.useEffect(() => {
-    if (isAuthorized) navigate(redirectPath, { replace: true });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isAuthorized]);
+  // React.useEffect(() => {
+  //   if (isAuthorized) navigate(redirectPath, { replace: true });
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [isAuthorized]);
 
   const inputStyle = {
     label: {
@@ -129,14 +145,14 @@ const Register: React.FC = () => {
               <TextInput
                 required
                 withAsterisk={false}
-                label="Company Name"
+                label="Name"
                 placeholder="John Doe"
-                id="companyName"
-                name="companyName"
-                error={form.touched.companyName && form.errors.companyName}
+                id="name"
+                name="name"
                 onChange={form.handleChange}
-                value={form.values.companyName}
+                value={form.values.name}
                 styles={inputStyle}
+                error={form.touched.name && form.errors.name ? `${form.errors.name}` : null}
               />
               <TextInput
                 required
@@ -145,10 +161,10 @@ const Register: React.FC = () => {
                 placeholder="you@m2m.com"
                 id="email"
                 name="email"
-                error={form.touched.email && form.errors.email}
                 onChange={form.handleChange}
                 value={form.values.email}
                 styles={inputStyle}
+                error={form.touched.email && form.errors.email ? `${form.errors.email}` : null}
               />
               <PasswordInput
                 required
@@ -157,10 +173,12 @@ const Register: React.FC = () => {
                 placeholder="Your password"
                 id="password"
                 name="password"
-                error={form.touched.password && form.errors.password}
                 onChange={form.handleChange}
                 value={form.values.password}
                 styles={inputStyle}
+                error={
+                  form.touched.password && form.errors.password ? `${form.errors.password}` : null
+                }
               />
               <PasswordInput
                 required
@@ -169,15 +187,19 @@ const Register: React.FC = () => {
                 placeholder="Your password"
                 id="confirmPassword"
                 name="confirmPassword"
-                error={form.touched.confirmPassword && form.errors.confirmPassword}
                 onChange={form.handleChange}
                 value={form.values.confirmPassword}
                 styles={inputStyle}
+                error={
+                  form.touched.confirmPassword && form.errors.confirmPassword
+                    ? `${form.errors.confirmPassword}`
+                    : null
+                }
               />
               <Button
                 fullWidth
                 mt="xl"
-                loading={isLoading}
+                loading={isRegistering}
                 loaderPosition="right"
                 onClick={() => form.handleSubmit()}
               >
@@ -221,10 +243,7 @@ const Register: React.FC = () => {
                   <Box ml={5}>Back to the login page</Box>
                 </Center>
               </Anchor>
-              <Button
-                className={classes.control}
-                onClick={() => otp_form.handleSubmit()}
-              >
+              <Button className={classes.control} onClick={() => otp_form.handleSubmit()}>
                 Verify
               </Button>
             </Group>

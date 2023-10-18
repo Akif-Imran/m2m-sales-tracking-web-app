@@ -35,6 +35,7 @@ import { _AddPurchaseRequestModal } from "../../projects/purchase-requests/compo
 import { Outlet } from "react-router-dom";
 import { removeCompany } from "@thunks";
 import { useAuthContext } from "@contexts";
+import { BASE_URL } from "@api";
 
 interface OwnProps {}
 
@@ -125,6 +126,18 @@ const Company: React.FC<OwnProps> = () => {
     setAddPurchaseReqModalOpened(true);
   };
 
+  const noImageStyle = {
+    root: {
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    image: {
+      filter: `invert(33%) sepia(65%) saturate(0%) hue-rotate(253deg) brightness(98%) contrast(88%)`,
+      objectFit: "contain",
+    },
+  };
+
   let icon: JSX.Element;
   if (viewMode === "cards") {
     icon = <IconId size={22} color={colors.white} />;
@@ -162,7 +175,12 @@ const Company: React.FC<OwnProps> = () => {
               <tr key={company._id}>
                 <td>{index + 1}</td>
                 <td>
-                  <Avatar src={company.logo} size={50} />
+                  <Avatar
+                    src={company?.logo ? `${BASE_URL}\\${company?.logo}` : "/company.png"}
+                    size={50}
+                    //@ts-expect-error style works
+                    styles={company?.logo ? undefined : noImageStyle}
+                  />
                 </td>
                 <td>{company.name}</td>
                 <td>{company.email}</td>

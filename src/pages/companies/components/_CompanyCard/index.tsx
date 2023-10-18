@@ -17,7 +17,7 @@ import {
   IconCalendarPlus,
   IconCaretRightFilled,
   IconCash,
-  IconDots,
+  IconDotsVertical,
   IconFiles,
   IconShoppingBag,
   IconTrash,
@@ -26,6 +26,7 @@ import {
 import { colors, theme } from "@theme";
 import { useNavigate } from "react-router-dom";
 import { routes } from "@routes";
+import { BASE_URL } from "@api";
 
 interface OwnProps {
   onClick?: (e?: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
@@ -85,7 +86,7 @@ const _CompanyCard: React.FC<OwnProps> = ({
       <div className={classes.imageWithInfoContainer}>
         <div className={classes.machineImageContainer}>
           <Avatar
-            src={item?.logo ? `${item?.logo}` : "/company.png"}
+            src={item?.logo ? `${BASE_URL}\\${item?.logo}` : "/company.png"}
             radius={item?.logo ? rem(250) : rem(250)}
             size={"xl"}
             //@ts-expect-error style works
@@ -119,7 +120,7 @@ const _CompanyCard: React.FC<OwnProps> = ({
               >
                 <Menu.Target>
                   <ActionIcon>
-                    <IconDots {...menuIconStyle} size={22} />
+                    <IconDotsVertical color={colors.titleText} />
                   </ActionIcon>
                 </Menu.Target>
                 <Menu.Dropdown>

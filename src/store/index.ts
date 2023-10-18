@@ -212,6 +212,7 @@ export const selectProjectWithRecords = createSelector(
         company: company,
         salesPersonValue: salesPerson,
         statusName: `${status?.name} (${status?.value}%)`,
+        completionPercentage: status?.value,
       };
     });
   }

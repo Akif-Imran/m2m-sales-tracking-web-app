@@ -1,18 +1,22 @@
 import React from "react";
 import { useStyles } from "./styles";
-import { Anchor, Avatar, Badge, Card, Flex, Text, rem } from "@mantine/core";
-import { colors } from "@theme";
+import { ActionIcon, Anchor, Avatar, Badge, Card, Flex, Menu, Text, rem } from "@mantine/core";
+import { colors, theme } from "@theme";
 import { userStatusColors } from "@constants";
 import { BASE_URL } from "@api";
+import { IconDotsVertical, IconEdit, IconTrash } from "@tabler/icons-react";
 
+type CardUser = IUser & {
+  userTypeName: string | undefined;
+};
 interface OwnProps {
-  item: IUser & {
-    userTypeName: string | undefined;
-  };
+  item: CardUser;
   onClick?: () => void;
+  handleDelete: (id: string) => void;
+  setForEdit: (user: IUser) => void;
 }
 
-const _UserCard: React.FC<OwnProps> = ({ item, onClick }) => {
+const _UserCard: React.FC<OwnProps> = ({ item, onClick, handleDelete, setForEdit }) => {
   const { classes } = useStyles();
 
   const noImageStyle = {
@@ -25,6 +29,17 @@ const _UserCard: React.FC<OwnProps> = ({ item, onClick }) => {
       // filter: `invert(33%) sepia(65%) saturate(0%) hue-rotate(253deg) brightness(98%) contrast(88%)`,
       objectFit: "contain",
     },
+  };
+
+  const menuStyles = {
+    itemLabel: {
+      fontSize: theme.fontSize.sm,
+    },
+  };
+  const menuIconStyle = {
+    stroke: 1.3,
+    size: 16,
+    color: colors.titleText,
   };
 
   return (
@@ -50,6 +65,43 @@ const _UserCard: React.FC<OwnProps> = ({ item, onClick }) => {
                   {item?.name}
                 </Text>
               </Flex>
+              <Menu
+                withArrow
+                shadow="md"
+                withinPortal
+                width={rem(180)}
+                styles={menuStyles}
+                position="bottom-start"
+              >
+                <Menu.Target>
+                  <ActionIcon>
+                    <IconDotsVertical color={colors.titleText} />
+                  </ActionIcon>
+                </Menu.Target>
+                <Menu.Dropdown>
+                  <Menu.Label>Options</Menu.Label>
+                  <Menu.Item
+                    c={colors.titleText}
+                    icon={<IconEdit {...menuIconStyle} />}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      setForEdit(item);
+                    }}
+                  >
+                    Edit
+                  </Menu.Item>
+                  <Menu.Item
+                    color="red"
+                    icon={<IconTrash size={menuIconStyle.size} />}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      handleDelete(item._id);
+                    }}
+                  >
+                    Delete
+                  </Menu.Item>
+                </Menu.Dropdown>
+              </Menu>
             </div>
             <Flex direction={"row"} align={"center"} justify={"flex-start"}>
               <Text fw={700} color={colors.titleText} mr={"xs"} fz={"sm"}>

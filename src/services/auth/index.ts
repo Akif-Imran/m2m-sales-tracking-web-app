@@ -5,6 +5,14 @@ export const apiLogin = async (body: LoginRequest) => {
   const resData = response.data;
   return resData;
 };
+export const createAccount = async (body: CreateAccountRequest) => {
+  const response = await apiPost<MessageResponse, CreateAccountRequest>(
+    urls.auth.createAccount,
+    "",
+    body
+  );
+  return response.data;
+};
 
 export const changePassword = async (token: string, body: ChangePasswordRequest) => {
   const response = await apiPost<ChangePasswordResponse, ChangePasswordRequest>(

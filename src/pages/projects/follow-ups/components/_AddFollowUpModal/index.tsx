@@ -37,6 +37,7 @@ import { addFollowUp } from "@slices";
 import { colors } from "@theme";
 import * as yup from "yup";
 import { createFollowUp } from "@thunks";
+import { uploadFile } from "@services";
 
 interface OwnProps {
   opened: boolean;
@@ -130,6 +131,7 @@ const _AddFollowUpModal: React.FC<OwnProps> = ({
   const contacts = useAppSelector(selectCompanyContact);
 
   const [isCreating, setIsCreating] = React.useState(false);
+  const [file, setFile] = React.useState<File>({} as File);
   const [contactList, setContactList] = React.useState<IDropDownList>([]);
   const [companyProjectList, setCompanyProjectsList] = React.useState<IDropDownList>([]);
 
@@ -160,9 +162,20 @@ const _AddFollowUpModal: React.FC<OwnProps> = ({
       customerId: companyId || "",
     },
     validationSchema: schema,
-    onSubmit(values, helpers) {
+    onSubmit: async (values, helpers) => {
       console.log(values);
       setIsCreating((_prev) => true);
+      if (values.hasExpense) {
+        const res = await uploadFile(token, file);
+        console.log("Follow Up Image Upload: ", res);
+        if (res.statusCode === 200 || res.statusCode === 201) {
+          values.expenseDocument = res.data;
+        } else {
+          setIsCreating((_prev) => false);
+          notify("Add Follow Up", res?.message, "error");
+          return;
+        }
+      }
       dispatch(
         createFollowUp({
           token,
@@ -192,11 +205,12 @@ const _AddFollowUpModal: React.FC<OwnProps> = ({
       notify("Image Upload", "Company logo not uploaded", "error");
       return;
     }
+    setFile(file);
     const reader = new FileReader();
     reader.onload = (e) => {
       const dataUri = e?.target?.result as string;
       if (dataUri) {
-        form.setValues((prev) => ({ ...prev, expenseDocument: dataUri }));
+        form.setValues((prev) => ({ ...prev, expenseDocument: dataUri, hasExpense: true }));
       }
     };
     reader.readAsDataURL(file);

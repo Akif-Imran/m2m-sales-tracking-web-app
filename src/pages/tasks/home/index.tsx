@@ -103,34 +103,18 @@ const Tasks: React.FC<OwnProps> = () => {
 
   const onChangeSearch = (query: string) => {
     setSearchQuery(query);
-    if (isAdmin) {
-      const filtered = tasks.filter(
-        (task) =>
-          task.assignee?.name.toLowerCase().includes(query.toLowerCase()) ||
-          task?.statusName?.toLowerCase().includes(query.toLowerCase()) ||
-          task.title.toLowerCase().includes(query.toLowerCase())
-      );
-      setSearchedData(filtered);
-    } else {
-      const filtered = tasks.filter(
-        (task) =>
-          (task.assignee?.name.toLowerCase().includes(query.toLowerCase()) ||
-            task?.statusName?.toLowerCase().includes(query.toLowerCase()) ||
-            task.title.toLowerCase().includes(query.toLowerCase())) &&
-          task.assignedTo === user?._id
-      );
-      setSearchedData(filtered);
-    }
+    const filtered = tasks.filter(
+      (task) =>
+        task.assignee?.name.toLowerCase().includes(query.toLowerCase()) ||
+        task?.statusName?.toLowerCase().includes(query.toLowerCase()) ||
+        task.title.toLowerCase().includes(query.toLowerCase())
+    );
+    setSearchedData(filtered);
   };
 
   React.useEffect(() => {
-    if (isAdmin) {
-      setSearchedData(tasks);
-    } else {
-      const filtered = tasks.filter((task) => task.assignedTo === user?._id);
-      setSearchedData(filtered);
-    }
-  }, [tasks, user, isAdmin]);
+    setSearchedData(tasks);
+  }, [tasks]);
 
   React.useEffect(() => {
     setSortingList((_prev) => {

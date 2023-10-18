@@ -12,10 +12,10 @@ interface CreateReq {
     state: string;
     country: string;
     website: string;
-    businessCard: "remove";
-    designation: "remove";
-    department: "remove";
-    customerId: "remove";
+    businessCard: "na";
+    designation: "na";
+    department: "na";
+    customerId: "652506a266869aaf01825588";
   };
 }
 
@@ -31,10 +31,10 @@ interface UpdateReq {
     state: string;
     country: string;
     website: string;
-    businessCard: "remove";
-    designation: "remove";
-    department: "remove";
-    customerId: "remove";
+    businessCard: "na";
+    designation: "na";
+    department: "na";
+    customerId: "652506a266869aaf01825588";
   };
 }
 

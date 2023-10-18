@@ -19,6 +19,7 @@ export const MALAYSIA_ZONE = "Asia/Kuala_Lumpur";
 export const urls = {
   auth: {
     login: `${BASE_USER_URL}/login`,
+    createAccount: `${BASE_USER_URL}/createAccount`,
   },
   user: {
     list: `${BASE_USER_URL}/getAll`,

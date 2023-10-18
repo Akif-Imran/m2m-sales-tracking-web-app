@@ -17,7 +17,7 @@ import {
   IconCalendarPlus,
   IconCaretRightFilled,
   IconCash,
-  IconDots,
+  IconDotsVertical,
   IconFiles,
   IconShoppingBag,
   IconTrash,
@@ -119,7 +119,7 @@ const _CompanyCard: React.FC<OwnProps> = ({
               >
                 <Menu.Target>
                   <ActionIcon>
-                    <IconDots {...menuIconStyle} size={22} />
+                    <IconDotsVertical color={colors.titleText} />
                   </ActionIcon>
                 </Menu.Target>
                 <Menu.Dropdown>

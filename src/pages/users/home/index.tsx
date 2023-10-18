@@ -35,8 +35,15 @@ const Users: React.FC<OwnProps> = () => {
   const [viewMode, toggle] = useToggle(["cards", "list"]);
   const [searchQuery, setSearchQuery] = React.useState("");
   const [addUserModalOpened, setAddUserModalOpened] = React.useState(false);
+  const [editUserModalOpened, setEditUserModalOpened] = React.useState(false);
   const users = useAppSelector(selectUserWithRecords);
   const [searchedData, setSearchedData] = React.useState<typeof users>([]);
+  const [selectedUser, setSelectedUser] = React.useState<IUser>({} as IUser);
+
+  const handleEditUser = React.useCallback((user: IUser) => {
+    setSelectedUser(user);
+    setEditUserModalOpened(true);
+  }, []);
 
   const onChangeSearch = (query: string) => {
     setSearchQuery(query);
@@ -91,7 +98,7 @@ const Users: React.FC<OwnProps> = () => {
           if (viewMode === "cards") {
             return (
               <Grid.Col span={4} key={user._id}>
-                <_UserCard item={user} />
+                <_UserCard item={user} handleDelete={handleDelete} setForEdit={handleEditUser} />
               </Grid.Col>
             );
           } else {
@@ -225,9 +232,18 @@ const Users: React.FC<OwnProps> = () => {
       </ScrollArea> */}
       {content}
       <_AddUserModal
+        mode="add"
         title="Add User"
+        record={undefined}
         opened={addUserModalOpened}
         onClose={() => setAddUserModalOpened(false)}
+      />
+      <_AddUserModal
+        mode="edit"
+        title="Update User"
+        record={selectedUser}
+        opened={editUserModalOpened}
+        onClose={() => setEditUserModalOpened(false)}
       />
     </Stack>
   );

@@ -37,7 +37,7 @@ interface OwnProps {}
 export const Claims: React.FC<OwnProps> = () => {
   useStyles();
   const {
-    state: { isAdmin, isHR, user, token },
+    state: { isAdmin, isHR, token },
   } = useAuthContext();
   const dispatch = useAppDispatch();
   const { classes: gclasses, theme } = useGStyles();
@@ -53,26 +53,14 @@ export const Claims: React.FC<OwnProps> = () => {
 
   const onChangeSearch = (query: string) => {
     setSearchQuery(query);
-    if (isAdmin || isHR) {
-      const filtered = claims.filter(
-        (request) =>
-          request.project?.name.toLowerCase().includes(query.toLowerCase()) ||
-          request.supplier?.name?.toLowerCase().includes(query.toLowerCase()) ||
-          request.requestByPerson?.name.toLowerCase().includes(query.toLowerCase()) ||
-          request.itemName?.toLowerCase().includes(query.toLowerCase())
-      );
-      setSearchedData(filtered);
-    } else {
-      const filtered = claims.filter(
-        (followup) =>
-          (followup.project?.name.toLowerCase().includes(query.toLowerCase()) ||
-            followup.supplier?.name.toLowerCase().includes(query.toLowerCase()) ||
-            followup.requestByPerson?.name.toLowerCase().includes(query.toLowerCase()) ||
-            followup.itemName?.toLowerCase().includes(query.toLowerCase())) &&
-          followup.requestByPerson === user?._id
-      );
-      setSearchedData(filtered);
-    }
+    const filtered = claims.filter(
+      (request) =>
+        request.project?.name.toLowerCase().includes(query.toLowerCase()) ||
+        request.supplier?.name?.toLowerCase().includes(query.toLowerCase()) ||
+        request.requestByPerson?.name.toLowerCase().includes(query.toLowerCase()) ||
+        request.itemName?.toLowerCase().includes(query.toLowerCase())
+    );
+    setSearchedData(filtered);
   };
 
   const showUpdateStatusModal = (statusId: number, requestId: string) => {
@@ -149,13 +137,8 @@ export const Claims: React.FC<OwnProps> = () => {
   };
 
   React.useEffect(() => {
-    if (isAdmin || isHR) {
-      setSearchedData(claims);
-    } else {
-      const filtered = claims.filter((followup) => followup.requestByPerson?._id === user?._id);
-      setSearchedData(filtered);
-    }
-  }, [claims, isAdmin, isHR, user?._id]);
+    setSearchedData(claims);
+  }, [claims]);
 
   const rows =
     searchedData.length === 0 ? (
@@ -194,7 +177,7 @@ export const Claims: React.FC<OwnProps> = () => {
               <td>{request.remarks}</td>
               <td>
                 <Group>
-                  {isHR && (
+                  {(isHR || isAdmin) && (
                     <ActionIcon
                       color="gray"
                       size={"sm"}

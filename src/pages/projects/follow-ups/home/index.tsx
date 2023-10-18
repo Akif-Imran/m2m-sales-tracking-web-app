@@ -31,7 +31,7 @@ interface OwnProps {}
 export const FollowUps: React.FC<OwnProps> = () => {
   useStyles();
   const {
-    state: { isAdmin, user, token },
+    state: { isAdmin, token },
   } = useAuthContext();
   const dispatch = useAppDispatch();
   const { classes: gclasses, theme } = useGStyles();
@@ -95,13 +95,8 @@ export const FollowUps: React.FC<OwnProps> = () => {
   };
 
   React.useEffect(() => {
-    if (isAdmin) {
-      setSearchedData(followups);
-    } else {
-      const filtered = followups.filter((followup) => followup.createdBy === user?._id);
-      setSearchedData(filtered);
-    }
-  }, [followups, isAdmin, user]);
+    setSearchedData(followups);
+  }, [followups]);
 
   const rows =
     searchedData.length === 0 ? (

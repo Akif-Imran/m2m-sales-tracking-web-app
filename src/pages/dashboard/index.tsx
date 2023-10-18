@@ -18,16 +18,21 @@ import { Chart, GoogleChartOptions } from "react-google-charts";
 import { IconCalendar, IconGraph } from "@tabler/icons-react";
 import { useToggle } from "@mantine/hooks";
 import { DateTime } from "luxon";
-import { DAY_MM_DD_YYYY_HH_MM_SS_A } from "@constants";
+import { DAY_MM_DD_YYYY, DAY_MM_DD_YYYY_HH_MM_SS_A } from "@constants";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 
 import {
+  selectCompanies,
+  selectCompanyContact,
   selectFollowUpsWithRecords,
+  selectProjectStatusList,
   selectProjectWithRecords,
   selectTasksCombined,
   useAppSelector,
 } from "@store";
+import { apiGet, urls } from "@api";
+import { useAuthContext } from "@contexts";
 
 interface OwnProps {}
 interface ChartData {
@@ -37,43 +42,52 @@ interface ChartData {
 
 const Dashboard: React.FC<OwnProps> = () => {
   const { classes, theme } = useStyles();
+  const {
+    state: { token },
+  } = useAuthContext();
   // const [isFetching, setIsFetching] = React.useState(false);
   const { tasks } = useAppSelector(selectTasksCombined);
   const followUps = useAppSelector(selectFollowUpsWithRecords);
   const projects = useAppSelector(selectProjectWithRecords);
+  const { data: projectStatusList } = useAppSelector(selectProjectStatusList);
+  const { data: companies } = useAppSelector(selectCompanies);
+  const { data: contacts } = useAppSelector(selectCompanyContact);
   const [calendarLoading, setIsCalendarLoading] = React.useState<boolean>(true);
   const [projectCounts, setProjectsCounts] = React.useState<ChartData>();
   const [projectValueCounts, setProjectValueCounts] = React.useState<ChartData>();
   const [projectTargetCounts, setProjectTargetCounts] = React.useState<ChartData>();
   const [projectValueTargetCounts, setProjectValueTargetCounts] = React.useState<ChartData>();
   const [calendarTasks, setCalendarTasks] = React.useState<ICalendarEvent[]>([]);
-  const [projectsInProcess, setProjectInProcess] = useState<
+
+  const [projectsUnderDev, setProjectsUnderDev] = useState<
     { name: string; dueDate: string; timeRemaining: string }[]
   >([]);
-  const [projectsWithMostClaims, _setProjectsWithMostClaims] = React.useState([
-    { name: "Project 1", claims: 8, totalCost: { amount: 18000, currency: "MYR" } },
-  ]);
+
+  const [projectsWithMostClaims, setProjectsWithMostClaims] = React.useState<
+    { project: string; claimsCount: number }[]
+  >([]);
+
   const [mostFollowedUpLeadWithExpenses, _setMostFollowedUpLeadWithExpenses] = useState([
     { name: "Project 1", followUpCount: 8, expenses: { amount: 15000, currency: "MYR" } },
   ]);
-  const [projectOverDue, _setProjectOverDue] = useState([
-    { name: "HYCO", dueDate: "2023-08-23T15:00:00.000Z" },
-    { name: "HIKKO", dueDate: "2023-09-01T12:00:00.000Z" },
-  ]);
-  const [pendingTasks, _setPendingTasks] = useState([
-    { name: "Jason", task: "Repair AAV", dueDate: "2023-08-22T20:00:00.000Z" },
-  ]);
+
+  const [projectOverDue, setProjectOverDue] = useState<
+    { name: string; dueDate: string; delay: number }[]
+  >([]);
+
+  const [pendingTasks, setPendingTasks] = useState<
+    { name: string; taskTitle: string; dueDate: string }[]
+  >([{ name: "Jason", taskTitle: "Repair AAV", dueDate: "2023-08-22T20:00:00.000Z" }]);
+
   const [todayActivities, _setTodayActivities] = useState([
     { name: "Repair AAV (2F)", type: "Task", dueDate: DateTime.now().plus({ hours: 1.5 }) },
     { name: "Meet Json Brow", type: "Follow Up", dueDate: DateTime.now().plus({ hours: 3.5 }) },
   ]);
-  const [upcomingTasks, _setUpcomingTasks] = useState([
-    {
-      name: "Alice Smith",
-      task: "Meeting with ABC's CTO",
-      dueDate: DateTime.now().plus({ days: 2 }),
-    },
-  ]);
+
+  const [upcomingTasks, setUpcomingTasks] = useState<
+    { name: string; taskTitle: string; dueDate: string }[]
+  >([]);
+
   const [value, toggle] = useToggle(["by value", "by project"]);
 
   const options: GoogleChartOptions = {
@@ -147,29 +161,40 @@ const Dashboard: React.FC<OwnProps> = () => {
   console.log(tasks);
 
   const drawProjectCharts = React.useCallback(() => {
-    const projectsLegends = [
+    const projectsLegends: (string | number)[][] = [
       ["Vehicle Status", "Counts"],
-      [`Quotation (${47})`, 47],
-      [`Follow Up (${376})`, 376],
-      [`Completed (${200})`, 200],
-      [`In Development (${13})`, 13],
+      // [`Quotation (${47})`, 47], // example of data
     ];
-    setProjectsCounts({
-      data: projectsLegends,
-      total: 636,
+    const valueLegends: (string | number)[][] = [
+      ["Project", "Value"],
+      // [`RM (${6000}) Quotation`, 6000],// example of data
+    ];
+    let totalValue = 0;
+    projectStatusList.forEach((value) => {
+      const counts = projects.filter((project) => project.status === value.id);
+      const cateValue = counts.reduce((acc, cur) => acc + cur.value.amount, 0);
+
+      totalValue += cateValue;
+      const convertedValue = Intl.NumberFormat("en-US", {
+        currency: "MYR",
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+        style: "currency",
+      }).format(cateValue);
+
+      valueLegends.push([`${value.name} (${convertedValue})`, cateValue]);
+      projectsLegends.push([`${value.name} (${counts.length})`, counts.length]);
     });
     //------driver counts------
-    const valueLegends = [
-      ["Project", "Value"],
-      [`RM (${6000}) Quotation`, 6000],
-      [`RM (${24000}) Completed`, 24000],
-      [`RM (${98000}) In Development`, 98000],
-    ];
     setProjectValueCounts({
       data: valueLegends,
-      total: 128000,
+      total: totalValue,
     });
-  }, []);
+    setProjectsCounts({
+      data: projectsLegends,
+      total: projects.length,
+    });
+  }, [projectStatusList, projects]);
 
   React.useEffect(() => {
     // const targetChart = [
@@ -216,18 +241,61 @@ const Dashboard: React.FC<OwnProps> = () => {
 
   React.useEffect(() => {
     const inProcess = projects
-      .filter((project) => project.status === 4)
+      .filter((project) => project.status >= 4 && project.status < 6)
       .map((project) => {
         const delivery = DateTime.fromISO(project.deliveryDate);
         const remainingDays = delivery.diff(DateTime.now()).as("days");
         return {
           name: project.name,
           dueDate: delivery.toFormat(DAY_MM_DD_YYYY_HH_MM_SS_A),
-          timeRemaining: `${remainingDays} days`,
+          timeRemaining: `${remainingDays.toFixed(2)} days`,
         };
       });
-    setProjectInProcess(inProcess);
+    setProjectsUnderDev(inProcess);
   }, [projects]);
+
+  React.useEffect(() => {
+    const overDueProjects = projects
+      .filter((project) => {
+        const delay = DateTime.now().diff(DateTime.fromISO(project.deliveryDate)).as("days");
+        return project.status !== 6 && delay > 0;
+      })
+      .map((overDue) => ({
+        name: overDue.name,
+        dueDate: overDue.deliveryDate,
+        delay: DateTime.now().diff(DateTime.fromISO(overDue.deliveryDate)).as("days"),
+      }));
+    setProjectOverDue(overDueProjects);
+  }, [projects]);
+
+  React.useEffect(() => {
+    const overDueTasks = tasks
+      .filter((task) => {
+        const delay = DateTime.now().diff(DateTime.fromISO(task.completionDeadline)).as("days");
+        return delay > 0 && task.status !== 3;
+      })
+      .map((task) => ({
+        name: task.assignee?.name || "N/A",
+        taskTitle: task.title,
+        dueDate: task.completionDeadline,
+      }));
+    setPendingTasks(overDueTasks);
+
+    const next2DayTask = tasks
+      .filter((task) => {
+        const difference = DateTime.fromISO(task.completionDeadline)
+          .diff(DateTime.now())
+          .as("days");
+        return difference > 0 && difference <= 2;
+      })
+      .map((task) => ({
+        name: task.assignee?.name || "N/A",
+        taskTitle: task.title,
+        dueDate: task.completionDeadline,
+      }));
+
+    setUpcomingTasks(next2DayTask);
+  }, [tasks]);
 
   React.useEffect(() => {
     const tsk = tasks.map((task) => ({
@@ -251,9 +319,21 @@ const Dashboard: React.FC<OwnProps> = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tasks, followUps]);
 
+  React.useEffect(() => {
+    if (!token) return;
+    apiGet<ApiResponse<{ project: string; claimsCount: number }[]>>(
+      urls.claims.getHighestProjectClaims,
+      token
+    ).then((res) => {
+      if (res.data.success) {
+        setProjectsWithMostClaims(res.data.data);
+      }
+    });
+  }, [token]);
+
   const projectOverdueRows = projectOverDue.map((project, index) => {
     const dueDate = DateTime.fromISO(project.dueDate).toLocal();
-    const dueDateSt = dueDate.toFormat(DAY_MM_DD_YYYY_HH_MM_SS_A);
+    const dueDateSt = dueDate.toFormat(DAY_MM_DD_YYYY);
     const overDueDuration = DateTime.now().diff(dueDate).as("days");
     return (
       <tr key={index}>
@@ -271,7 +351,7 @@ const Dashboard: React.FC<OwnProps> = () => {
     return (
       <tr key={index}>
         <td>{task.name}</td>
-        <td>{task.task}</td>
+        <td>{task.taskTitle}</td>
         <td>{dueDateSt}</td>
         <td>{overDueDuration.toFixed(1)} Days</td>
       </tr>
@@ -279,11 +359,11 @@ const Dashboard: React.FC<OwnProps> = () => {
   });
 
   const upcomingTaskRows = upcomingTasks.map((task, index) => {
-    const dueDateSt = task.dueDate.toFormat(DAY_MM_DD_YYYY_HH_MM_SS_A);
+    const dueDateSt = DateTime.fromISO(task.dueDate).toFormat(DAY_MM_DD_YYYY_HH_MM_SS_A);
     return (
       <tr key={index}>
         <td>{task.name}</td>
-        <td>{task.task}</td>
+        <td>{task.taskTitle}</td>
         <td>{dueDateSt}</td>
       </tr>
     );
@@ -315,7 +395,7 @@ const Dashboard: React.FC<OwnProps> = () => {
     );
   });
 
-  const projectsInProcessRows = projectsInProcess.map((project, index) => {
+  const projectsInProcessRows = projectsUnderDev.map((project, index) => {
     return (
       <tr key={index}>
         <td>{project.name}</td>
@@ -326,16 +406,10 @@ const Dashboard: React.FC<OwnProps> = () => {
   });
 
   const projectsWithMostClaimsRows = projectsWithMostClaims.map((project, index) => {
-    const value = Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: project.totalCost.currency,
-      maximumFractionDigits: 2,
-    }).format(project.totalCost.amount);
     return (
       <tr key={index}>
-        <td>{project.name}</td>
-        <td>{project.claims}</td>
-        <td>{value}</td>
+        <td>{project.project}</td>
+        <td>{project.claimsCount}</td>
       </tr>
     );
   });
@@ -363,7 +437,7 @@ const Dashboard: React.FC<OwnProps> = () => {
           <Grid.Col md={3} lg={3} xl={3}>
             <Card p="sm" shadow="sm" className={classes.card} my={4} radius={"md"}>
               <Text fw={"bold"} fz={rem(60)} color={colors.titleText}>
-                {248}
+                {companies.length}
               </Text>
               <Text fz="md" className={classes.label} color={colors.titleText} mt={-10} mb={2}>
                 Companies
@@ -374,7 +448,7 @@ const Dashboard: React.FC<OwnProps> = () => {
           <Grid.Col md={3} lg={3} xl={3}>
             <Card p="sm" shadow="sm" className={classes.card} my={4} radius={"md"}>
               <Text fw={"bold"} fz={rem(60)} color={colors.titleText}>
-                {897}
+                {contacts.length}
               </Text>
               <Text fz="md" className={classes.label} color={colors.titleText} mt={-10} mb={2}>
                 Contacts
@@ -385,7 +459,7 @@ const Dashboard: React.FC<OwnProps> = () => {
           <Grid.Col md={3} lg={3} xl={3}>
             <Card p="sm" shadow="sm" className={classes.card} my={4} radius={"md"}>
               <Text fw={"bold"} fz={rem(60)} color={colors.titleText}>
-                {200}
+                {projects.filter((project) => project?.status === 6).length}
               </Text>
               <Text fz="md" className={classes.label} color={colors.titleText} mt={-10} mb={2}>
                 Projects Completed
@@ -396,7 +470,7 @@ const Dashboard: React.FC<OwnProps> = () => {
           <Grid.Col md={3} lg={3} xl={3}>
             <Card p="sm" shadow="sm" className={classes.card} my={4} radius={"md"}>
               <Text fw={"bold"} fz={rem(60)} color={colors.titleText}>
-                {87}
+                {tasks.length}
               </Text>
               <Text fz="md" className={classes.label} color={colors.titleText} mt={-10} mb={2}>
                 Tasks
@@ -433,7 +507,7 @@ const Dashboard: React.FC<OwnProps> = () => {
             <Card p="xs" shadow="sm" className={classes.card} my={4} px={"xs"} radius={"md"}>
               <div className={classes.grayContainer}>
                 <Text fw={"bold"} fz={rem(60)} color={colors.titleText} mt={-16}>
-                  {projectsInProcess.length}
+                  {projectsUnderDev.length}
                 </Text>
                 <Text fz="md" className={classes.label} color={colors.titleText} mt={-10} mb={2}>
                   Projects Under Development
@@ -575,14 +649,14 @@ const Dashboard: React.FC<OwnProps> = () => {
                   mb={2}
                   ml={rem(8)}
                 >
-                  Pending Tasks
+                  Delayed Tasks
                 </Text>
               </div>
               <ScrollArea h={rem(272)}>
                 <Table>
                   <thead>
                     <tr>
-                      <th>Name</th>
+                      <th>Assigned To</th>
                       <th>Task</th>
                       <th>Expected Date</th>
                       <th>Delay (Days)</th>
@@ -649,7 +723,6 @@ const Dashboard: React.FC<OwnProps> = () => {
                     <tr>
                       <th>Name</th>
                       <th>No. of Claims</th>
-                      <th>Total Cost</th>
                     </tr>
                   </thead>
                   <tbody>{projectsWithMostClaimsRows}</tbody>

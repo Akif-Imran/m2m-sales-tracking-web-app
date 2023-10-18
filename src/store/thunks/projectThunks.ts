@@ -56,7 +56,7 @@ export const removeProject = createAsyncThunk("project/update", async (params: D
 });
 
 export const fetchProjects = createAsyncThunk("project/fetch", async (token: string) => {
-  const response = await apiGet<ApiResponse<IProject[]>>(urls.project.list, token);
+  const response = await apiGet<ApiResponse<IProject[]>>(urls.project.list(), token);
   return response.data;
 });
 
@@ -76,6 +76,13 @@ export const fetchProjectStatuses = createAsyncThunk(
   "fetch/status/project",
   async (token: string) => {
     const response = await apiGet<ApiResponse<IProjectStatus[]>>(urls.project.statusList, token);
+    const data = response.data.data;
+    if (data) {
+      if (data[data.length - 1].value === 100) {
+        data[data.length - 1].id = 6;
+      }
+    }
+    response.data.data = data;
     return response.data;
   }
 );

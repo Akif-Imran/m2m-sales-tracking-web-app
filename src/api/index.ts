@@ -45,7 +45,8 @@ export const urls = {
     getById: (id: string) => `${BASE_CONTACT_URL}/getById/${id}`,
   },
   project: {
-    list: `${BASE_PROJECT_URL}/getAll`,
+    list: (sort: "asc" | "desc" = "desc", skip = 0, limit = 0) =>
+      `${BASE_PROJECT_URL}/getAll?sortBydeliveryDate=${sort}&skip=${skip}&limit=${limit}`,
     create: `${BASE_PROJECT_URL}/create`,
     update: (id: string) => `${BASE_PROJECT_URL}/update/${id}`,
     delete: (id: string) => `${BASE_PROJECT_URL}/delete/${id}`,
@@ -68,6 +69,7 @@ export const urls = {
     getById: (id: string) => `${BASE_CLAIM_URL}/getById/${id}`,
     statusList: `${BASE_URL}/getStatusList`,
     updateStatus: (id: string) => `${BASE_CLAIM_URL}/changeStatus/${id}`,
+    getHighestProjectClaims: `${BASE_CLAIM_URL}/getHighestProjectClaims`,
   },
   purchaseRequest: {
     list: `${BASE_PURCHASE_REQUEST_URL}/getAll`,
@@ -79,7 +81,8 @@ export const urls = {
     updateStatus: (id: string) => `${BASE_PURCHASE_REQUEST_URL}/changeStatus/${id}`,
   },
   task: {
-    list: `${BASE_TASK_URL}/getAll`,
+    list: (skip = 0, limit = 0, sort: "asc" | "desc" = "desc") =>
+      `${BASE_TASK_URL}/getAll?skip=${skip}&limit=${limit}&sortByCompletionDeadline=${sort}`,
     create: `${BASE_TASK_URL}/create`,
     update: (id: string) => `${BASE_TASK_URL}/update/${id}`,
     delete: (id: string) => `${BASE_TASK_URL}/delete/${id}`,

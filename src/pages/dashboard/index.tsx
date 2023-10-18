@@ -67,9 +67,16 @@ const Dashboard: React.FC<OwnProps> = () => {
     { project: string; claimsCount: number }[]
   >([]);
 
-  const [mostFollowedUpLeadWithExpenses, _setMostFollowedUpLeadWithExpenses] = useState([
-    { name: "Project 1", followUpCount: 8, expenses: { amount: 15000, currency: "MYR" } },
-  ]);
+  const [mostFollowedUpLeadWithExpenses, setMostFollowedUpLeadWithExpenses] = useState<
+    {
+      name: string;
+      followUpCount: number;
+      expenses: {
+        amount: number;
+        currency: string;
+      };
+    }[]
+  >([{ name: "Project 1", followUpCount: 8, expenses: { amount: 15000, currency: "MYR" } }]);
 
   const [projectOverDue, setProjectOverDue] = useState<
     { name: string; dueDate: string; delay: number }[]
@@ -77,12 +84,11 @@ const Dashboard: React.FC<OwnProps> = () => {
 
   const [pendingTasks, setPendingTasks] = useState<
     { name: string; taskTitle: string; dueDate: string }[]
-  >([{ name: "Jason", taskTitle: "Repair AAV", dueDate: "2023-08-22T20:00:00.000Z" }]);
+  >([]);
 
-  const [todayActivities, _setTodayActivities] = useState([
-    { name: "Repair AAV (2F)", type: "Task", dueDate: DateTime.now().plus({ hours: 1.5 }) },
-    { name: "Meet Json Brow", type: "Follow Up", dueDate: DateTime.now().plus({ hours: 3.5 }) },
-  ]);
+  const [todayActivities, setTodayActivities] = useState<
+    { name: string; type: "Task" | "Follow Up"; dueDate: string }[]
+  >([]);
 
   const [upcomingTasks, setUpcomingTasks] = useState<
     { name: string; taskTitle: string; dueDate: string }[]
@@ -331,6 +337,74 @@ const Dashboard: React.FC<OwnProps> = () => {
     });
   }, [token]);
 
+  React.useEffect(() => {
+    // { name: "Repair AAV (2F)", type: "Task", dueDate: DateTime.now().plus({ hours: 1.5 }) },
+    // { name: "Meet Json Brow", type: "Follow Up", dueDate: DateTime.now().plus({ hours: 3.5 }) },
+    const records: {
+      name: string;
+      type: "Task" | "Follow Up";
+      dueDate: string;
+    }[] = [];
+
+    tasks.forEach((task) => {
+      const today = DateTime.local();
+      const dueDate = DateTime.fromISO(task.completionDeadline);
+      const isSameYear = dueDate.hasSame(today, "year");
+      const isSameMonth = dueDate.hasSame(today, "month");
+      const isSameDay = dueDate.hasSame(today, "day");
+      if (isSameDay && isSameMonth && isSameYear) {
+        records.push({
+          name: task.title,
+          type: "Task",
+          dueDate: dueDate.toFormat(DAY_MM_DD_YYYY_HH_MM_SS_A),
+        });
+      }
+    });
+
+    followUps.forEach((followup) => {
+      const today = DateTime.local();
+      const dueDate = DateTime.fromISO(followup.meetingDate);
+      const isSameYear = dueDate.hasSame(today, "year");
+      const isSameMonth = dueDate.hasSame(today, "month");
+      const isSameDay = dueDate.hasSame(today, "day");
+      if (isSameDay && isSameMonth && isSameYear) {
+        records.push({
+          name: `Meet ${followup.followUpPerson?.name}`,
+          type: "Follow Up",
+          dueDate: dueDate.toFormat(DAY_MM_DD_YYYY_HH_MM_SS_A),
+        });
+      }
+    });
+
+    setTodayActivities(records);
+  }, [tasks, followUps]);
+
+  React.useEffect(() => {
+    const mostFollowedLeadsWithExpense = projects
+      .filter((project) => project.status !== 6)
+      .map((project) => {
+        let expense = 0,
+          count = 0;
+        followUps
+          .filter((follow) => follow.projectId === project._id)
+          .forEach((follow) => {
+            count += 1;
+            expense += follow.expensePrice?.amount || 0;
+          });
+        return {
+          name: project.name,
+          followUpCount: count,
+          expenses: {
+            amount: expense,
+            currency: "MYR",
+          },
+        };
+      })
+      .filter((lead) => lead.followUpCount > 0)
+      .sort((a, b) => b.followUpCount - a.followUpCount);
+    setMostFollowedUpLeadWithExpenses(mostFollowedLeadsWithExpense);
+  }, [projects, followUps]);
+
   const projectOverdueRows = projectOverDue.map((project, index) => {
     const dueDate = DateTime.fromISO(project.dueDate).toLocal();
     const dueDateSt = dueDate.toFormat(DAY_MM_DD_YYYY);
@@ -384,13 +458,12 @@ const Dashboard: React.FC<OwnProps> = () => {
     );
   });
 
-  const todayActivitiesRows = todayActivities.map((task, index) => {
-    const dueDateSt = task.dueDate.toFormat(DAY_MM_DD_YYYY_HH_MM_SS_A);
+  const todayActivitiesRows = todayActivities.map((activity, index) => {
     return (
       <tr key={index}>
-        <td>{task.name}</td>
-        <td>{task.type}</td>
-        <td>{dueDateSt}</td>
+        <td>{activity.name}</td>
+        <td>{activity.type}</td>
+        <td>{activity.dueDate}</td>
       </tr>
     );
   });

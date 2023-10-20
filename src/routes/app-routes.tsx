@@ -45,6 +45,7 @@ const MainApp: React.FC<OwnProps> = () => {
   const _ChangePassword = lazy(() => import("../pages/settings/change-password"));
   const _AppTheme = lazy(() => import("../pages/settings/app-theme"));
   const _Suppliers = lazy(() => import("../pages/settings/suppliers"));
+  const _ExpenseTypes = lazy(() => import("../pages/settings/expense-type"));
   //notifications
   const _Notification = lazy(() => import("../pages/notification"));
   //help
@@ -179,6 +180,10 @@ const MainApp: React.FC<OwnProps> = () => {
         <Route
           path={routes.settings.suppliers}
           element={<SuspendedView children={<_Suppliers />} />}
+        />
+        <Route
+          path={routes.settings.expense_type}
+          element={<SuspendedView children={<_ExpenseTypes />} />}
         />
       </Route>
 

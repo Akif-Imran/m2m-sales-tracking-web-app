@@ -17,3 +17,4 @@ export * from "./leaveApplicationSlice";
 export * from "./leaveStatusSlice";
 export * from "./leaveTypeSlice";
 export * from "./notificationsSlice";
+export * from "./expenseTypeSlice";

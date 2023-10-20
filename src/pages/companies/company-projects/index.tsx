@@ -156,7 +156,7 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
                 </Text>
               </Center>
             </Card>
-            <ScrollArea type="scroll" h={"96vh"}>
+            <ScrollArea type="scroll" h={"80vh"}>
               {projects.map((project) => {
                 const status = projectStatusList.find(
                   (status) => status.value === project.status.toString()
@@ -192,7 +192,7 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
             <Stack spacing={"xs"}>
               <Grid>
                 <Grid.Col span={8}>
-                  <Card shadow="sm" mb={"xs"} px={"sm"} py={"xs"} radius={"md"} h={"46vh"}>
+                  <Card shadow="sm" mb={"xs"} px={"sm"} py={"xs"} radius={"md"} h={"40vh"}>
                     <Stack spacing={"xs"}>
                       <Flex direction={"row"} align={"center"}>
                         <Text {...titleTextStyle} size={"lg"}>
@@ -266,7 +266,7 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
                 </Grid.Col>
 
                 <Grid.Col span={4}>
-                  <ScrollArea type="scroll" h={"48vh"}>
+                  <ScrollArea type="scroll" h={"40vh"}>
                     <Card shadow="sm" mb={"xs"} px={"sm"} py={"xs"} radius={"md"}>
                       <Flex direction={"row"} justify={"space-between"} align={"center"}>
                         <Text {...titleTextStyle} size={"lg"}>

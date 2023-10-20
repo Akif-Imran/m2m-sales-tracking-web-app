@@ -369,7 +369,7 @@ const Dashboard: React.FC<OwnProps> = () => {
       const isSameDay = dueDate.hasSame(today, "day");
       if (isSameDay && isSameMonth && isSameYear) {
         records.push({
-          name: `Meet ${followup.followUpPerson?.name}`,
+          name: `Meet ${followup.contactPerson?.name}`,
           type: "Follow Up",
           dueDate: dueDate.toFormat(DAY_MM_DD_YYYY_HH_MM_SS_A),
         });

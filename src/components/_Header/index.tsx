@@ -285,7 +285,13 @@ const _Header = ({ toggleNavbar, opened }: _HeaderProps) => {
       ));
       if (menuItems) {
         return (
-          <Menu key={item.label} trigger="hover" transitionProps={{ exitDuration: 0 }} withinPortal>
+          <Menu
+            key={item.label}
+            trigger="hover"
+            transitionProps={{ exitDuration: 0 }}
+            withinPortal
+            withArrow
+          >
             <Menu.Target>
               <NavLink
                 className={cx(classes.link, {
@@ -298,7 +304,11 @@ const _Header = ({ toggleNavbar, opened }: _HeaderProps) => {
                 }}
               >
                 <item.icon className={classes.linkIcon} stroke={1.5} />
-                {opened && <span>{item.label}</span>}
+                {opened && (
+                  <span>
+                    {item.label} {"▼"}
+                  </span>
+                )}
               </NavLink>
             </Menu.Target>
             <Menu.Dropdown>{menuItems}</Menu.Dropdown>

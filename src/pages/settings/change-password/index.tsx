@@ -1,6 +1,6 @@
 import React from "react";
 import { useStyles } from "./styles";
-import { Button, Card, Group, PasswordInput, Stack, Text, rem } from "@mantine/core";
+import { Button, Card, Flex, Group, PasswordInput, Stack, Text, rem } from "@mantine/core";
 import { colors } from "../../../theme";
 import { FormikHelpers, useFormik } from "formik";
 import * as yup from "yup";
@@ -70,97 +70,99 @@ const ChangePassword: React.FC<OwnProps> = () => {
   return (
     <Card radius={"md"} shadow="md" h={"92vh"} py={"xs"} mb={"xs"}>
       <Stack>
-        <Text fz={rem(25)} color={colors.titleText}>
+        <Text fz={rem(25)} m={"xs"} color={colors.titleText}>
           Change Password
         </Text>
-        <PasswordInput
-          required
-          withAsterisk={false}
-          label="Old Password"
-          name="old_password"
-          id="old_password"
-          value={form.values.old_password}
-          placeholder="Old Password"
-          onChange={form.handleChange}
-          onBlur={form.handleBlur}
-          error={
-            form.touched.old_password && form.errors.old_password
-              ? `${form.errors.old_password}`
-              : null
-          }
-          radius="md"
-          styles={{
-            input: {
-              color: colors.titleText,
-            },
-            label: {
-              color: colors.titleText,
-            },
-          }}
-        />
-        <PasswordInput
-          required
-          withAsterisk={false}
-          label="New Password"
-          name="new_password"
-          id="new_password"
-          value={form.values.new_password}
-          placeholder="New Password"
-          onChange={form.handleChange}
-          onBlur={form.handleBlur}
-          error={
-            form.touched.new_password && form.errors.new_password
-              ? `${form.errors.new_password}`
-              : null
-          }
-          radius="md"
-          styles={{
-            input: {
-              color: colors.titleText,
-            },
-            label: {
-              color: colors.titleText,
-            },
-          }}
-        />
-        <PasswordInput
-          required
-          withAsterisk={false}
-          label="Confirm New Password"
-          name="confirm_new_password"
-          id="confirm_new_password"
-          value={form.values.confirm_new_password}
-          placeholder="Confirm New Password"
-          onChange={form.handleChange}
-          onBlur={form.handleBlur}
-          error={
-            form.touched.confirm_new_password && form.errors.confirm_new_password
-              ? `${form.errors.confirm_new_password}`
-              : null
-          }
-          radius="md"
-          styles={{
-            input: {
-              color: colors.titleText,
-            },
-            label: {
-              color: colors.titleText,
-            },
-          }}
-        />
-        <Group position="right" align="flex-start">
-          <Button variant="outline" radius={"md"} onClick={() => form.resetForm()}>
-            Reset
-          </Button>
-          <Button
-            loading={isLoading}
-            variant="filled"
-            radius={"md"}
-            onClick={() => form.handleSubmit()}
-          >
-            Save
-          </Button>
-        </Group>
+        <Flex m={"xs"} direction={"column"} rowGap={"sm"}>
+          <PasswordInput
+            required
+            withAsterisk={false}
+            label="Old Password"
+            name="old_password"
+            id="old_password"
+            value={form.values.old_password}
+            placeholder="Old Password"
+            onChange={form.handleChange}
+            onBlur={form.handleBlur}
+            error={
+              form.touched.old_password && form.errors.old_password
+                ? `${form.errors.old_password}`
+                : null
+            }
+            radius="md"
+            styles={{
+              input: {
+                color: colors.titleText,
+              },
+              label: {
+                color: colors.titleText,
+              },
+            }}
+          />
+          <PasswordInput
+            required
+            withAsterisk={false}
+            label="New Password"
+            name="new_password"
+            id="new_password"
+            value={form.values.new_password}
+            placeholder="New Password"
+            onChange={form.handleChange}
+            onBlur={form.handleBlur}
+            error={
+              form.touched.new_password && form.errors.new_password
+                ? `${form.errors.new_password}`
+                : null
+            }
+            radius="md"
+            styles={{
+              input: {
+                color: colors.titleText,
+              },
+              label: {
+                color: colors.titleText,
+              },
+            }}
+          />
+          <PasswordInput
+            required
+            withAsterisk={false}
+            label="Confirm New Password"
+            name="confirm_new_password"
+            id="confirm_new_password"
+            value={form.values.confirm_new_password}
+            placeholder="Confirm New Password"
+            onChange={form.handleChange}
+            onBlur={form.handleBlur}
+            error={
+              form.touched.confirm_new_password && form.errors.confirm_new_password
+                ? `${form.errors.confirm_new_password}`
+                : null
+            }
+            radius="md"
+            styles={{
+              input: {
+                color: colors.titleText,
+              },
+              label: {
+                color: colors.titleText,
+              },
+            }}
+          />
+          <Group position="right" align="flex-start">
+            <Button variant="outline" radius={"md"} onClick={() => form.resetForm()}>
+              Reset
+            </Button>
+            <Button
+              loading={isLoading}
+              variant="filled"
+              radius={"md"}
+              onClick={() => form.handleSubmit()}
+            >
+              Save
+            </Button>
+          </Group>
+        </Flex>
       </Stack>
     </Card>
   );

@@ -5,6 +5,7 @@ import {
   companyContactReducer,
   companyReducer,
   departmentReducer,
+  expenseTypeReducer,
   followUpReducer,
   leaveApplicationReducer,
   leaveStatusReducer,
@@ -35,6 +36,7 @@ const store = configureStore({
     purchaseRequestStatusList: purchaseRequestStatusListReducer,
     claims: claimsReducer,
     claimsStatusList: claimsStatusListReducer,
+    expenseTypeList: expenseTypeReducer,
     tasks: taskReducer,
     taskStatusList: taskStatusListReducer,
     users: userReducer,
@@ -67,6 +69,7 @@ export const selectPurchaseRequestsStatusList = (state: RootState) =>
   state.purchaseRequestStatusList;
 export const selectClaims = (state: RootState) => state.claims;
 export const selectClaimsStatusList = (state: RootState) => state.claimsStatusList;
+export const selectExpenseTypeList = (state: RootState) => state.expenseTypeList;
 export const selectTasks = (state: RootState) => state.tasks;
 export const selectTaskStatusList = (state: RootState) => state.taskStatusList;
 export const selectUsers = (state: RootState) => state.users;
@@ -122,6 +125,7 @@ export const selectRecordsForDropdown = createSelector(
   selectClaimsStatusList,
   selectLeaveStatusList,
   selectLeaveTypes,
+  selectExpenseTypeList,
   (
     companies,
     projects,
@@ -134,7 +138,8 @@ export const selectRecordsForDropdown = createSelector(
     suppliers,
     claimsStatus,
     leaveStatus,
-    leaveTypes
+    leaveTypes,
+    expenseTypes
   ) => {
     return {
       companies: companies.data.map((company) => ({
@@ -172,6 +177,10 @@ export const selectRecordsForDropdown = createSelector(
       claimsStatus: claimsStatus.data.map((status) => ({
         value: status.id.toString(),
         label: status.name,
+      })),
+      expenseTypes: expenseTypes.data.map((type) => ({
+        value: type._id,
+        label: type.name,
       })),
       leaveStatus: leaveStatus.data.map((status) => ({
         value: status.id.toString(),
@@ -222,12 +231,20 @@ export const selectFollowUpsWithRecords = createSelector(
   selectProjects,
   selectCompanyContact,
   selectUsers,
-  (followups, projects, contacts, users) => {
+  selectExpenseTypeList,
+  (followups, projects, contacts, users, expenseTypes) => {
     return followups.data.map((followup) => {
       const project = projects.data.find((project) => project._id === followup.projectId);
       const followUpPerson = users.data.find((user) => user._id === followup.createdBy);
       const contactPerson = contacts.data.find((contact) => contact._id === followup.contactId);
-      return { ...followup, project, contactPerson, followUpPerson };
+      const expenseType = expenseTypes.data.find((type) => type._id === followup?.expenseType);
+      return {
+        ...followup,
+        project,
+        contactPerson,
+        followUpPerson,
+        expenseTypeDetail: expenseType,
+      };
     });
   }
 );

@@ -177,6 +177,21 @@ const _AddProjectModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
       <Grid>
         <Grid.Col span={12}>
           <Stack spacing={"xs"}>
+            <Select
+              required
+              withAsterisk={false}
+              searchable
+              nothingFound="No Companies"
+              label="Company"
+              value={form.values.customerId}
+              onChange={handleOnChangeCompany}
+              data={companiesList}
+              error={
+                form.touched.customerId && form.errors.customerId
+                  ? `${form.errors.customerId}`
+                  : null
+              }
+            />
             <TextInput
               required
               withAsterisk={false}
@@ -315,21 +330,6 @@ const _AddProjectModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
                 }
               />
             </Group>
-            <Select
-              required
-              withAsterisk={false}
-              searchable
-              nothingFound="No Companies"
-              label="Company"
-              value={form.values.customerId}
-              onChange={handleOnChangeCompany}
-              data={companiesList}
-              error={
-                form.touched.customerId && form.errors.customerId
-                  ? `${form.errors.customerId}`
-                  : null
-              }
-            />
             <Select
               required
               withAsterisk={false}

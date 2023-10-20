@@ -8,7 +8,7 @@ import * as yup from "yup";
 import { createSupplier, updateSupplier } from "@thunks";
 import { useAuthContext } from "@contexts";
 import { notify } from "@utility";
-import { modifySupplier } from "@slices";
+import { addSupplier, modifySupplier } from "@slices";
 
 type OwnProps =
   | {
@@ -94,6 +94,7 @@ const _AddSupplierModal: React.FC<OwnProps> = (props) => {
       .then((res) => {
         notify("Add Supplier", res?.message, res.success ? "success" : "error");
         if (res.success) {
+          addSupplier(res.data);
           helpers.resetForm();
           onClose();
         }

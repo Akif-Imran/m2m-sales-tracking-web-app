@@ -277,6 +277,10 @@ interface IClaim {
   // statusId: number;
   // statusName: string;
 }
+interface IExpenseType {
+  _id: string;
+  name: string;
+}
 interface ISupplier {
   createdBy: string;
   createdAt: string;

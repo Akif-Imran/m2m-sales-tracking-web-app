@@ -23,7 +23,7 @@ import {
   IconTrash,
   IconUserPlus,
 } from "@tabler/icons-react";
-import { colors, theme } from "@theme";
+import { colors } from "@theme";
 import { useNavigate } from "react-router-dom";
 import { routes } from "@routes";
 import { BASE_URL } from "@api";
@@ -47,7 +47,7 @@ const _CompanyCard: React.FC<OwnProps> = ({
   openPurchaseRequest,
   handleDelete,
 }) => {
-  const { cx, classes } = useStyles();
+  const { cx, classes, theme } = useStyles();
   const navigate = useNavigate();
 
   const handleNavigate = (route: string) => {
@@ -72,7 +72,7 @@ const _CompanyCard: React.FC<OwnProps> = ({
 
   const menuStyles = {
     itemLabel: {
-      fontSize: theme.fontSize.sm,
+      fontSize: theme.fontSizes.sm,
     },
   };
   const menuIconStyle = {
@@ -172,7 +172,7 @@ const _CompanyCard: React.FC<OwnProps> = ({
                   </Menu.Item>
                   <Menu.Item
                     c={colors.titleText}
-                    icon={<IconCash size={menuIconStyle.size} />}
+                    icon={<IconCash {...menuIconStyle} />}
                     onClick={(event) => {
                       event.stopPropagation();
                       openExpense();
@@ -204,13 +204,19 @@ const _CompanyCard: React.FC<OwnProps> = ({
                 </Menu.Dropdown>
               </Menu>
             </div>
-            <Text fw={"normal"} fs={"normal"} fz={"sm"} color={colors.titleText}>
+            <Text fz={"sm"} color={colors.titleText}>
               {item?.phone || "N/A"}
             </Text>
-            <Anchor href={`mailto:${item?.email}`} underline={true} target="_blank" c={"blue"}>
+            <Anchor
+              href={`mailto:${item?.email}`}
+              underline={true}
+              target="_blank"
+              c={"blue"}
+              fz={"sm"}
+            >
               {item?.email || "N/A"}
             </Anchor>
-            <Anchor href={item?.website} underline={true} target="_blank" c={"blue"}>
+            <Anchor href={item?.website} underline={true} target="_blank" c={"blue"} fz={"sm"}>
               {item?.website || "N/A"}
             </Anchor>
             <div className={classes.textWithIconButton}>

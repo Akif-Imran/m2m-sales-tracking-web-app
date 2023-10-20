@@ -156,7 +156,7 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
                 </Text>
               </Center>
             </Card>
-            <ScrollArea type="scroll" h={"96vh"}>
+            <ScrollArea type="scroll" h={"80vh"}>
               {projects.map((project) => {
                 const status = projectStatusList.find(
                   (status) => status.value === project.status.toString()
@@ -192,7 +192,7 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
             <Stack spacing={"xs"}>
               <Grid>
                 <Grid.Col span={8}>
-                  <Card shadow="sm" mb={"xs"} px={"sm"} py={"xs"} radius={"md"} h={"48vh"}>
+                  <Card shadow="sm" mb={"xs"} px={"sm"} py={"xs"} radius={"md"} h={"40vh"}>
                     <Stack spacing={"xs"}>
                       <Flex direction={"row"} align={"center"}>
                         <Text {...titleTextStyle} size={"lg"}>
@@ -266,7 +266,7 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
                 </Grid.Col>
 
                 <Grid.Col span={4}>
-                  <ScrollArea type="scroll" h={"48vh"}>
+                  <ScrollArea type="scroll" h={"40vh"}>
                     <Card shadow="sm" mb={"xs"} px={"sm"} py={"xs"} radius={"md"}>
                       <Flex direction={"row"} justify={"space-between"} align={"center"}>
                         <Text {...titleTextStyle} size={"lg"}>
@@ -292,7 +292,12 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
                                 align={"center"}
                                 columnGap={"sm"}
                               >
-                                <Text {...bodyTextStyle}>{contact?.name}</Text>
+                                <Flex direction={"row"} align={"center"} justify={"flex-start"}>
+                                  <Text {...titleTextStyle} mr={"xs"}>
+                                    Name:
+                                  </Text>
+                                  <Text {...bodyTextStyle}>{contact?.name || "N/A"}</Text>
+                                </Flex>
                                 <Menu withinPortal withArrow position="bottom-end">
                                   <Menu.Target>
                                     <ActionIcon>
@@ -315,16 +320,37 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
                                   </Menu.Dropdown>
                                 </Menu>
                               </Flex>
-                              <Text {...bodyTextStyle}>{contact?.designation}</Text>
-                              <Anchor
-                                {...bodyTextStyle}
-                                href={contact?.email}
-                                target={"_blank"}
-                                c={"blue"}
-                              >
-                                {contact?.email}
-                              </Anchor>
-                              <Text {...bodyTextStyle}>{contact?.mobile}</Text>
+                              <Flex direction={"row"} align={"center"} justify={"flex-start"}>
+                                <Text {...titleTextStyle} mr={"xs"}>
+                                  Email:
+                                </Text>
+                                <Anchor
+                                  {...bodyTextStyle}
+                                  href={contact?.email}
+                                  target={"_blank"}
+                                  c={"blue"}
+                                >
+                                  {contact?.email || "N/A"}
+                                </Anchor>
+                              </Flex>
+                              <Flex direction={"row"} align={"center"} justify={"flex-start"}>
+                                <Text {...titleTextStyle} mr={"xs"}>
+                                  Mobile No.:
+                                </Text>
+                                <Text {...bodyTextStyle}>{contact?.mobile || "N/A"}</Text>
+                              </Flex>
+                              <Flex direction={"row"} align={"center"} justify={"flex-start"}>
+                                <Text {...titleTextStyle} mr={"xs"}>
+                                  Designation:
+                                </Text>
+                                <Text {...bodyTextStyle}>{contact?.designation || "N/A"}</Text>
+                              </Flex>
+                              <Flex direction={"row"} align={"center"} justify={"flex-start"}>
+                                <Text {...titleTextStyle} mr={"xs"}>
+                                  Department:
+                                </Text>
+                                <Text {...bodyTextStyle}>{contact?.department || "N/A"}</Text>
+                              </Flex>
                             </Flex>
                             <Divider />
                           </>
@@ -335,7 +361,7 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
                 </Grid.Col>
               </Grid>
 
-              <ScrollArea type="scroll" h={"48vh"}>
+              <ScrollArea type="scroll" h={"46vh"}>
                 <Card shadow="sm" mb={"xs"} px={"sm"} py={"xs"} radius={"md"}>
                   <Flex direction={"row"} justify={"space-between"} align={"center"}>
                     <Text {...titleTextStyle} size={"lg"}>
@@ -351,7 +377,7 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
                     </ActionIcon>
                   </Flex>
                   <Divider color={colors.borderColor} mb={rem(8)} />
-                  {followUps.map((followUp) => {
+                  {followUps.map((followUp, index) => {
                     const value = followUp?.expensePrice
                       ? Intl.NumberFormat("en-US", {
                           style: "currency",
@@ -362,50 +388,56 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
                       : "N/A";
 
                     return (
-                      <Flex direction={"column"} my={"md"}>
-                        <Flex direction={"row"} align={"center"} justify={"space-between"}>
-                          <Flex direction={"row"} align={"center"} columnGap={"sm"}>
-                            <Text {...titleTextStyle}>Date/Time: </Text>
-                            <Text {...bodyTextStyle}>
-                              {" "}
-                              {DateTime.fromISO(followUp.meetingDate).toFormat(
-                                DAY_MM_DD_YYYY_HH_MM_SS_A
-                              )}
-                            </Text>
+                      <>
+                        <Flex direction={"column"} my={"md"}>
+                          <Text {...titleTextStyle} mb={"sm"}>
+                            #{index + 1}
+                          </Text>
+                          <Flex direction={"row"} align={"center"} justify={"space-between"}>
+                            <Flex direction={"row"} align={"center"} columnGap={"sm"}>
+                              <Text {...titleTextStyle}>Date/Time: </Text>
+                              <Text {...bodyTextStyle}>
+                                {" "}
+                                {DateTime.fromISO(followUp.meetingDate).toFormat(
+                                  DAY_MM_DD_YYYY_HH_MM_SS_A
+                                )}
+                              </Text>
+                            </Flex>
+
+                            <Flex direction={"row"} align={"center"} columnGap={"sm"}>
+                              <Text {...titleTextStyle}>Location:</Text>
+                              <Text {...bodyTextStyle}>{followUp.meetingPlace}</Text>
+                            </Flex>
+
+                            <Flex direction={"row"} align={"center"} columnGap={"sm"}>
+                              <Text {...titleTextStyle}>Meeting With:</Text>
+                              <Text {...bodyTextStyle}>{followUp.contactPerson?.name}</Text>
+                            </Flex>
                           </Flex>
 
-                          <Flex direction={"row"} align={"center"} columnGap={"sm"}>
-                            <Text {...titleTextStyle}>Location:</Text>
-                            <Text {...bodyTextStyle}>{followUp.meetingPlace}</Text>
+                          <Flex direction={"row"} align={"center"} justify={"space-between"}>
+                            <Flex direction={"row"} align={"flex-start"} columnGap={"sm"}>
+                              <Text {...titleTextStyle}>Agenda:</Text>
+                              <Text {...bodyTextStyle}>{followUp.meetingAgenda}</Text>
+                            </Flex>
                           </Flex>
 
-                          <Flex direction={"row"} align={"center"} columnGap={"sm"}>
-                            <Text {...titleTextStyle}>Meeting With:</Text>
-                            <Text {...bodyTextStyle}>{followUp.contactPerson?.name}</Text>
+                          <Flex direction={"row"} align={"center"} justify={"space-between"}>
+                            <Flex direction={"row"} align={"flex-start"} columnGap={"sm"}>
+                              <Text {...titleTextStyle}>Summary:</Text>
+                              <Text {...bodyTextStyle}>{followUp.meetingSummary}</Text>
+                            </Flex>
+                          </Flex>
+
+                          <Flex direction={"row"} align={"center"} justify={"space-between"}>
+                            <Flex direction={"row"} align={"flex-start"} columnGap={"sm"}>
+                              <Text {...titleTextStyle}>Total Expense:</Text>
+                              <Text {...bodyTextStyle}>{value}</Text>
+                            </Flex>
                           </Flex>
                         </Flex>
-
-                        <Flex direction={"row"} align={"center"} justify={"space-between"}>
-                          <Flex direction={"row"} align={"flex-start"} columnGap={"sm"}>
-                            <Text {...titleTextStyle}>Agenda:</Text>
-                            <Text {...bodyTextStyle}>{followUp.meetingAgenda}</Text>
-                          </Flex>
-                        </Flex>
-
-                        <Flex direction={"row"} align={"center"} justify={"space-between"}>
-                          <Flex direction={"row"} align={"flex-start"} columnGap={"sm"}>
-                            <Text {...titleTextStyle}>Summary:</Text>
-                            <Text {...bodyTextStyle}>{followUp.meetingSummary}</Text>
-                          </Flex>
-                        </Flex>
-
-                        <Flex direction={"row"} align={"center"} justify={"space-between"}>
-                          <Flex direction={"row"} align={"flex-start"} columnGap={"sm"}>
-                            <Text {...titleTextStyle}>Total Expense:</Text>
-                            <Text {...bodyTextStyle}>{value}</Text>
-                          </Flex>
-                        </Flex>
-                      </Flex>
+                        <Divider />
+                      </>
                     );
                   })}
                 </Card>

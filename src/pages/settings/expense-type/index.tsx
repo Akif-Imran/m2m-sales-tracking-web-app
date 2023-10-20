@@ -2,37 +2,38 @@ import React from "react";
 import { useStyles } from "./styles";
 import { Button, Card, Flex, ScrollArea, Stack, Text, TextInput, rem } from "@mantine/core";
 import { colors } from "@theme";
-import { selectSuppliers, useAppSelector } from "@store";
+import { selectExpenseTypeList, useAppSelector } from "@store";
 import { IconPlus, IconSearch } from "@tabler/icons-react";
 import { useGStyles } from "@global-styles";
 import { useAuthContext } from "@contexts";
-import { _AddSupplierModal, _SupplierCard } from "./components";
+import { _AddExpenseTypeModal, _ExpenseTypeCard } from "./components";
 
 interface OwnProps {}
 
-export const Suppliers: React.FC<OwnProps> = () => {
+export const ExpenseTypes: React.FC<OwnProps> = () => {
   useStyles();
   const {
     state: { isAdmin, isHR },
   } = useAuthContext();
   const { classes: gclasses } = useGStyles();
-  const { data: suppliers } = useAppSelector(selectSuppliers);
+  const { data: expenseTypes } = useAppSelector(selectExpenseTypeList);
   const [searchQuery, setSearchQuery] = React.useState("");
-  const [addSupplierModalOpened, setAddSupplierModalOpened] = React.useState(false);
-  const [editSupplierModalOpened, setEditSupplierModalOpened] = React.useState(false);
-  const [searchedData, setSearchedData] = React.useState<typeof suppliers>([]);
-  //TODO - might be unsafe and cause potential undefined issues when reading.
-  const [selectedSupplier, setSelectedSupplier] = React.useState<ISupplier>({} as ISupplier);
+  const [addExpenseTypeModalOpened, setAddExpenseTypeModalOpened] = React.useState(false);
+  const [editExpenseTypeModalOpened, setEditExpenseTypeModalOpened] = React.useState(false);
+  const [searchedData, setSearchedData] = React.useState<typeof expenseTypes>([]);
+  const [selectedExpenseType, setSelectedExpenseType] = React.useState<IExpenseType>(
+    {} as IExpenseType
+  );
 
-  const handleEditSupplier = React.useCallback((supplier: ISupplier) => {
-    setSelectedSupplier(supplier);
-    setEditSupplierModalOpened(true);
+  const handleEditSupplier = React.useCallback((type: IExpenseType) => {
+    setSelectedExpenseType(type);
+    setEditExpenseTypeModalOpened(true);
   }, []);
 
   const onChangeSearch = (query: string) => {
     setSearchQuery(query);
     if (isAdmin || isHR) {
-      const filtered = suppliers.filter((project) =>
+      const filtered = expenseTypes.filter((project) =>
         project.name.toLowerCase().includes(query.toLowerCase())
       );
       setSearchedData(filtered);
@@ -41,31 +42,32 @@ export const Suppliers: React.FC<OwnProps> = () => {
 
   React.useEffect(() => {
     if (isAdmin || isHR) {
-      setSearchedData(suppliers);
+      setSearchedData(expenseTypes);
     }
-  }, [isAdmin, isHR, suppliers]);
+  }, [isAdmin, isHR, expenseTypes]);
 
   const rows =
     searchedData.length === 0 ? (
       <center>
         <Text color={colors.titleText} align="center">
-          No Suppliers
+          No Expense types...
         </Text>
       </center>
     ) : (
       <>
         {searchedData.map((supplier) => {
           return (
-            <_SupplierCard key={supplier._id} item={supplier} setForEdit={handleEditSupplier} />
+            <_ExpenseTypeCard key={supplier._id} item={supplier} setForEdit={handleEditSupplier} />
           );
         })}
       </>
     );
+
   return (
     <Card radius={"md"} shadow="md" h={"92vh"} py={"xs"} mb={"xs"}>
       <Stack>
         <Text fz={rem(25)} m={"xs"} color={colors.titleText}>
-          Suppliers
+          Expense Types
         </Text>
         <Flex gap={"md"} m={"xs"} className={gclasses.searchContainer}>
           <TextInput
@@ -82,32 +84,32 @@ export const Suppliers: React.FC<OwnProps> = () => {
             <Button
               variant="filled"
               rightIcon={<IconPlus size={16} />}
-              onClick={() => setAddSupplierModalOpened(true)}
+              onClick={() => setAddExpenseTypeModalOpened(true)}
             >
-              Supplier
+              Expense Type
             </Button>
           )}
         </Flex>
         <ScrollArea type="scroll" h={"72vh"}>
           {rows}
         </ScrollArea>
-        <_AddSupplierModal
+        <_AddExpenseTypeModal
           mode="add"
-          title="Add Supplier"
+          title="Add Expense Type"
           record={undefined}
-          opened={addSupplierModalOpened}
-          onClose={() => setAddSupplierModalOpened(false)}
+          opened={addExpenseTypeModalOpened}
+          onClose={() => setAddExpenseTypeModalOpened(false)}
         />
-        <_AddSupplierModal
+        <_AddExpenseTypeModal
           mode="edit"
-          title="Update Supplier"
-          record={selectedSupplier}
-          opened={editSupplierModalOpened}
-          onClose={() => setEditSupplierModalOpened(false)}
+          title="Update Expense Type"
+          record={selectedExpenseType}
+          opened={editExpenseTypeModalOpened}
+          onClose={() => setEditExpenseTypeModalOpened(false)}
         />
       </Stack>
     </Card>
   );
 };
 
-export default Suppliers;
+export default ExpenseTypes;

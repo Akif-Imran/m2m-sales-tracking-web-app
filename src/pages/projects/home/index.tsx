@@ -206,7 +206,15 @@ const Projects: React.FC<OwnProps> = () => {
               <td>{project.name}</td>
               <td>{project.description}</td>
               <td>
-                <Badge variant="filled" color={projectStatusColors[project.status]}>
+                <Badge
+                  variant="filled"
+                  color={projectStatusColors[project.status]}
+                  styles={{
+                    root: {
+                      width: "100%",
+                    },
+                  }}
+                >
                   {project.statusName}
                 </Badge>
               </td>

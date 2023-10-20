@@ -25,6 +25,8 @@ import { DateTime } from "luxon";
 import { DAY_MM_DD_YYYY } from "@constants";
 import { useToggle } from "@mantine/hooks";
 import { BASE_URL } from "@api";
+import { removeUser } from "@thunks";
+import { useAuthContext } from "@contexts";
 
 interface OwnProps {}
 
@@ -32,6 +34,9 @@ const Users: React.FC<OwnProps> = () => {
   useStyles();
   const dispatch = useAppDispatch();
   const { classes: gclasses, theme } = useGStyles();
+  const {
+    state: { token },
+  } = useAuthContext();
   const [viewMode, toggle] = useToggle(["cards", "list"]);
   const [searchQuery, setSearchQuery] = React.useState("");
   const [addUserModalOpened, setAddUserModalOpened] = React.useState(false);
@@ -71,8 +76,23 @@ const Users: React.FC<OwnProps> = () => {
       cancelLabel: "Cancel",
       confirmLabel: "Delete",
       onConfirm: () => {
-        dispatch(deleteUser(id));
-        notify("Delete User", "User deleted successfully!", "success");
+        dispatch(
+          removeUser({
+            id,
+            token,
+          })
+        )
+          .unwrap()
+          .then((res) => {
+            notify("Delete User", res?.message, res.success ? "success" : "error");
+            if (res.success) {
+              dispatch(deleteUser(id));
+            }
+          })
+          .catch((err) => {
+            console.log("Delete Message: ", err?.message);
+            notify("Delete User", "An error occurred", "error");
+          });
       },
       onCancel: () => notify("Delete User", "Operation canceled!", "error"),
     });

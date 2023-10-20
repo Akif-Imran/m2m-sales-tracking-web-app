@@ -1,7 +1,7 @@
 import React from "react";
 import { useStyles } from "./styles";
 import { ActionIcon, Anchor, Avatar, Badge, Card, Flex, Menu, Text, rem } from "@mantine/core";
-import { colors, theme } from "@theme";
+import { colors } from "@theme";
 import { userStatusColors } from "@constants";
 import { BASE_URL } from "@api";
 import { IconDotsVertical, IconEdit, IconTrash } from "@tabler/icons-react";
@@ -17,7 +17,7 @@ interface OwnProps {
 }
 
 const _UserCard: React.FC<OwnProps> = ({ item, onClick, handleDelete, setForEdit }) => {
-  const { classes } = useStyles();
+  const { classes, theme } = useStyles();
 
   const noImageStyle = {
     root: {
@@ -33,7 +33,7 @@ const _UserCard: React.FC<OwnProps> = ({ item, onClick, handleDelete, setForEdit
 
   const menuStyles = {
     itemLabel: {
-      fontSize: theme.fontSize.sm,
+      fontSize: theme.fontSizes.sm,
     },
   };
   const menuIconStyle = {

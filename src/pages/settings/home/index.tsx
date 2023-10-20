@@ -25,6 +25,10 @@ const Settings: React.FC<OwnProps> = () => {
             onClick={() => navigate(routes.settings.change_password)}
           />
           <_SettingsCard title="App Theme" onClick={() => navigate(routes.settings.app_theme)} />
+          <_SettingsCard
+            title="Expense Type"
+            onClick={() => navigate(routes.settings.expense_type)}
+          />
           <_SettingsCard title="Suppliers" onClick={() => navigate(routes.settings.suppliers)} />
         </ScrollArea>
       </Grid.Col>

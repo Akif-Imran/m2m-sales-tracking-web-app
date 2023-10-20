@@ -2,10 +2,11 @@ import React from "react";
 import { Notifications } from "@mantine/notifications";
 import { DatesProvider } from "@mantine/dates";
 import { ModalsProvider } from "@mantine/modals";
-import { MantineProvider } from "@mantine/core";
+import { MantineProvider, rem } from "@mantine/core";
 import { AuthProvider } from "@contexts";
 import { MainApp } from "@routes";
 import { _DataLoader } from "@components";
+import { colors } from "@theme";
 
 type PrimaryColorChoice =
   | "primary"
@@ -43,6 +44,17 @@ function App() {
       withNormalizeCSS
       withCSSVariables
       theme={{
+        components: {
+          Modal: {
+            styles: {
+              title: {
+                fontWeight: "bold",
+                fontSize: rem(20),
+                color: colors.titleText,
+              },
+            },
+          },
+        },
         colorScheme: "light",
         colors: {
           primary: [

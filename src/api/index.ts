@@ -12,6 +12,7 @@ export const BASE_CLAIM_URL = `${BASE_URL}/claim`;
 export const BASE_PURCHASE_REQUEST_URL = `${BASE_URL}/purchase-request`;
 export const BASE_TASK_URL = `${BASE_URL}/task`;
 export const BASE_LEAVE_APPLICATION_URL = `${BASE_URL}/leave-application`;
+export const BASE_EXPENSE_TYPE_URL = `${BASE_URL}/expense-type`;
 export const BASE_SUPPLIER_URL = `${BASE_URL}/supplier`;
 export const BASE_REPORT_URL = `${BASE_URL}/app_reports`;
 export const MALAYSIA_ZONE = "Asia/Kuala_Lumpur";
@@ -71,6 +72,13 @@ export const urls = {
     statusList: `${BASE_URL}/getStatusList`,
     updateStatus: (id: string) => `${BASE_CLAIM_URL}/changeStatus/${id}`,
     getHighestProjectClaims: `${BASE_CLAIM_URL}/getHighestProjectClaims`,
+  },
+  expenseType: {
+    list: `${BASE_EXPENSE_TYPE_URL}/getAll`,
+    create: `${BASE_EXPENSE_TYPE_URL}/create`,
+    update: (id: string) => `${BASE_EXPENSE_TYPE_URL}/update/${id}`,
+    delete: (id: string) => `${BASE_EXPENSE_TYPE_URL}/delete/${id}`,
+    getById: (id: string) => `${BASE_EXPENSE_TYPE_URL}/getById/${id}`,
   },
   purchaseRequest: {
     list: `${BASE_PURCHASE_REQUEST_URL}/getAll`,

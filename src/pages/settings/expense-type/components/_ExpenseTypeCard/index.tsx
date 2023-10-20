@@ -1,6 +1,6 @@
 import React from "react";
 import { useStyles } from "./styles";
-import { ActionIcon, Anchor, Card, Flex, Menu, Stack, Text } from "@mantine/core";
+import { ActionIcon, Card, Flex, Menu, Stack, Text } from "@mantine/core";
 import { IconDotsVertical, IconEdit, IconTrash } from "@tabler/icons-react";
 import { colors } from "@theme";
 import { useAuthContext } from "@contexts";
@@ -11,11 +11,11 @@ import { deleteSupplier } from "@slices";
 import { notify } from "@utility";
 
 interface OwnProps {
-  item: ISupplier;
-  setForEdit: (item: ISupplier) => void;
+  item: IExpenseType;
+  setForEdit: (item: IExpenseType) => void;
 }
 
-const _SupplierCard: React.FC<OwnProps> = ({ item, setForEdit }) => {
+const _ExpenseTypeCard: React.FC<OwnProps> = ({ item, setForEdit }) => {
   const { theme } = useStyles();
   const dispatch = useAppDispatch();
   const {
@@ -26,16 +26,16 @@ const _SupplierCard: React.FC<OwnProps> = ({ item, setForEdit }) => {
   const handleDelete = (id: string) => {
     openDeleteModalHelper({
       theme: theme,
-      title: `Delete Supplier`,
+      title: `Delete Expense Type`,
       loading: isDeleting,
       description: (
         <Text fw={"normal"} fs={"normal"} fz={"sm"} color={colors.titleText}>
-          Are you sure you want to delete this supplier? This action is destructive and you will
+          Are you sure you want to delete this Expense Type? This action is destructive and you will
           have to contact support to restore data.
         </Text>
       ),
       cancelLabel: "Cancel",
-      confirmLabel: "Delete Supplier",
+      confirmLabel: "Delete",
       onConfirm: () => {
         setIsDeleting((_prev) => true);
         dispatch(
@@ -46,20 +46,20 @@ const _SupplierCard: React.FC<OwnProps> = ({ item, setForEdit }) => {
         )
           .unwrap()
           .then((res) => {
-            notify("Delete Supplier", res?.message, res.success ? "success" : "error");
+            notify("Delete Expense Type", res?.message, res.success ? "success" : "error");
             if (res.success) {
               dispatch(deleteSupplier(id));
             }
           })
           .catch((err) => {
-            console.log("Delete Supplier: ", err?.message);
-            notify("Delete Supplier", "An error occurred", "error");
+            console.log("Delete Expense Type: ", err?.message);
+            notify("Delete Expense Type", "An error occurred", "error");
           })
           .finally(() => {
             setIsDeleting((_prev) => false);
           });
       },
-      onCancel: () => notify("Delete Supplier", "Operation canceled!", "error"),
+      onCancel: () => notify("Delete Expense Type", "Operation canceled!", "error"),
     });
   };
 
@@ -110,49 +110,9 @@ const _SupplierCard: React.FC<OwnProps> = ({ item, setForEdit }) => {
             "Admin Required"
           )}
         </Flex>
-        <Flex direction={"column"} justify={"flex-start"} m={0} p={0}>
-          <Flex direction={"row"} align={"flex-start"} columnGap={"sm"}>
-            <Text {...titleTextStyle}>Phone: </Text>
-            <Text {...bodyTextStyle}>{item.mobile}</Text>
-          </Flex>
-
-          <Flex direction={"row"} align={"flex-start"} columnGap={"sm"}>
-            <Text {...titleTextStyle}>Email: </Text>
-            <Anchor href={item.email} {...bodyTextStyle} color="blue">
-              {item.email}
-            </Anchor>
-          </Flex>
-
-          <Flex direction={"row"} align={"flex-start"} columnGap={"sm"}>
-            <Text {...titleTextStyle}>City:</Text>
-            <Text {...bodyTextStyle}>{item.city}</Text>
-          </Flex>
-
-          <Flex direction={"row"} align={"flex-start"} columnGap={"sm"}>
-            <Text {...titleTextStyle}>State: </Text>
-            <Text {...bodyTextStyle}>{item.state}</Text>
-          </Flex>
-
-          <Flex direction={"row"} align={"flex-start"} columnGap={"sm"}>
-            <Text {...titleTextStyle}>Country: </Text>
-            <Text {...bodyTextStyle}>{item.state}</Text>
-          </Flex>
-
-          <Flex direction={"row"} align={"flex-start"} columnGap={"sm"}>
-            <Text {...titleTextStyle}>Website: </Text>
-            <Anchor href={item.website} {...bodyTextStyle} color="blue">
-              {item.website}
-            </Anchor>
-          </Flex>
-
-          <Flex direction={"row"} align={"flex-start"} columnGap={"sm"}>
-            <Text {...titleTextStyle}>Address: </Text>
-            <Text {...bodyTextStyle}>{item.address}</Text>
-          </Flex>
-        </Flex>
       </Stack>
     </Card>
   );
 };
 
-export { _SupplierCard };
+export { _ExpenseTypeCard };

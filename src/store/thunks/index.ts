@@ -8,3 +8,4 @@ export * from "./claimsThunks";
 export * from "./purchaseRequestThunks";
 export * from "./leaveApplicationThunks";
 export * from "./taskThunks";
+export * from "./expenseTypeThunks";

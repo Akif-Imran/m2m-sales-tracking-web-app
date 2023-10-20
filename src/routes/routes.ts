@@ -68,6 +68,7 @@ const routes = {
     home: "/settings",
     change_password: "change-password",
     app_theme: "app-theme",
+    expense_type: "expense-type",
     suppliers: "suppliers",
   },
   help: {

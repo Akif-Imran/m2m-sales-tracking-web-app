@@ -74,7 +74,7 @@ const _SupplierCard: React.FC<OwnProps> = ({ item, setForEdit }) => {
   };
 
   return (
-    <Card shadow="md" key={item._id}>
+    <Card shadow="md" m={"xs"} key={item._id}>
       <Stack spacing={"xs"}>
         <Flex direction={"row"} justify={"space-between"}>
           <Flex direction={"row"} align={"center"} columnGap={"sm"}>

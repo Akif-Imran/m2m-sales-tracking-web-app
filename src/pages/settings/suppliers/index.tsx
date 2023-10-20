@@ -64,10 +64,10 @@ export const Suppliers: React.FC<OwnProps> = () => {
   return (
     <Card radius={"md"} shadow="md" h={"92vh"} py={"xs"} mb={"xs"}>
       <Stack>
-        <Text fz={rem(25)} color={colors.titleText}>
+        <Text fz={rem(25)} m={"xs"} color={colors.titleText}>
           Suppliers
         </Text>
-        <Flex gap={"md"} className={gclasses.searchContainer}>
+        <Flex gap={"md"} m={"xs"} className={gclasses.searchContainer}>
           <TextInput
             value={searchQuery}
             className={gclasses.searchInput}

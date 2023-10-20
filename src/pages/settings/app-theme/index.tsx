@@ -13,10 +13,10 @@ const AppTheme: React.FC<OwnProps> = () => {
   return (
     <Card radius={"md"} shadow="md" mih={"92vh"} py={"xs"} mb={"xs"}>
       <Stack>
-        <Text fz={rem(25)} color={colors.titleText}>
+        <Text fz={rem(25)} m={"xs"} color={colors.titleText}>
           App Theme
         </Text>
-        <Flex direction={"row"} wrap={"wrap"}>
+        <Flex direction={"row"} wrap={"wrap"} m={"xs"}>
           {Object.entries(theme.colors).map(([key, value]) => (
             <div
               key={key}

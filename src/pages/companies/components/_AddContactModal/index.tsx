@@ -4,7 +4,6 @@ import { useStyles } from "./styles";
 import {
   Avatar,
   Button,
-  Divider,
   FileButton,
   Flex,
   Group,
@@ -156,7 +155,6 @@ const _AddContactModal: React.FC<OwnProps> = ({ opened, onClose, title, companyI
             </FileButton>
           </div>
         </Flex>
-        <Divider label="Company" labelPosition="center" />
         <Select
           required
           withAsterisk={false}
@@ -170,7 +168,6 @@ const _AddContactModal: React.FC<OwnProps> = ({ opened, onClose, title, companyI
             form.setValues((prev) => ({ ...prev, customerId: value }));
           }}
         />
-        <Divider label="Contact" labelPosition="center" />
         <TextInput
           required
           withAsterisk={false}

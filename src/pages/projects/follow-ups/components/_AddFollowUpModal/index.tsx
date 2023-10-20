@@ -412,22 +412,25 @@ const _AddFollowUpModal: React.FC<OwnProps> = ({
                       : null
                   }
                 />
-                <TextInput
-                  required
-                  withAsterisk={false}
-                  label="Meeting Place"
-                  name="meetingPlace"
-                  id="meetingPlace"
-                  value={form.values.meetingPlace}
-                  onChange={form.handleChange}
-                  onBlur={form.handleBlur}
-                  error={
-                    form.errors.meetingPlace && form.touched.meetingPlace
-                      ? `${form.errors.meetingPlace}`
-                      : null
-                  }
-                />
               </Group>
+              <Text fw={700} size={"xl"} color={colors.titleText}>
+                Meeting Place
+              </Text>
+              <TextInput
+                required
+                withAsterisk={false}
+                label="Name"
+                name="meetingPlace"
+                id="meetingPlace"
+                value={form.values.meetingPlace}
+                onChange={form.handleChange}
+                onBlur={form.handleBlur}
+                error={
+                  form.errors.meetingPlace && form.touched.meetingPlace
+                    ? `${form.errors.meetingPlace}`
+                    : null
+                }
+              />
               <TextInput
                 required
                 withAsterisk={false}

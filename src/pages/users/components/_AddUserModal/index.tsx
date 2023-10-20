@@ -365,7 +365,7 @@ const _AddUserModal: React.FC<OwnProps> = (props) => {
                   onBlur={form.handleBlur}
                   onChange={handleOnChangeJoiningDate}
                   icon={<IconCalendar size={16} stroke={1.5} color={colors.titleText} />}
-                  defaultValue={new Date(form.values.joiningDate)}
+                  defaultValue={mode === "edit" ? new Date(form.values.joiningDate) : new Date()}
                   error={
                     form.touched.joiningDate && form.errors.joiningDate
                       ? `${form.errors.joiningDate}`

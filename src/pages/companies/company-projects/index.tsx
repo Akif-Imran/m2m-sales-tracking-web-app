@@ -197,7 +197,7 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
           </Grid.Col>
 
           <Grid.Col span={9}>
-            <Stack spacing={0}>
+            <Stack spacing={"xs"}>
               <Grid>
                 <Grid.Col span={7}>
                   <Card {...cardConfig}>
@@ -385,87 +385,89 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
                 </Grid.Col>
               </Grid>
 
-              <Card {...cardConfig}>
-                <Flex direction={"row"} justify={"space-between"} align={"center"}>
-                  <Text {...titleTextStyle} size={"lg"}>
-                    Meetings / Follow Up:
-                  </Text>
-                  <ActionIcon
-                    variant="filled"
-                    size={"sm"}
-                    color={"dark"}
-                    onClick={() => setAddFollowUpModalOpened(true)}
-                  >
-                    <IconPlus size={16} stroke={1.3} color={colors.white} />
-                  </ActionIcon>
-                </Flex>
-              </Card>
-              <ScrollArea type="scroll" h={"33vh"}>
-                {followUps.map((followUp, index) => {
-                  const value = followUp?.expensePrice
-                    ? Intl.NumberFormat("en-US", {
-                        style: "currency",
-                        currency: followUp.expensePrice.currency,
-                        maximumFractionDigits: 2,
-                        minimumFractionDigits: 2,
-                      }).format(followUp.expensePrice.amount)
-                    : "N/A";
+              <div>
+                <Card {...cardConfig}>
+                  <Flex direction={"row"} justify={"space-between"} align={"center"}>
+                    <Text {...titleTextStyle} size={"lg"}>
+                      Meetings / Follow Up:
+                    </Text>
+                    <ActionIcon
+                      variant="filled"
+                      size={"sm"}
+                      color={"dark"}
+                      onClick={() => setAddFollowUpModalOpened(true)}
+                    >
+                      <IconPlus size={16} stroke={1.3} color={colors.white} />
+                    </ActionIcon>
+                  </Flex>
+                </Card>
+                <ScrollArea type="scroll" h={"33vh"}>
+                  {followUps.map((followUp, index) => {
+                    const value = followUp?.expensePrice
+                      ? Intl.NumberFormat("en-US", {
+                          style: "currency",
+                          currency: followUp.expensePrice.currency,
+                          maximumFractionDigits: 2,
+                          minimumFractionDigits: 2,
+                        }).format(followUp.expensePrice.amount)
+                      : "N/A";
 
-                  return (
-                    <Card {...cardConfig} key={followUp._id}>
-                      <React.Fragment>
-                        <Flex direction={"column"} my={"md"}>
-                          <Text {...titleTextStyle} mb={"sm"}>
-                            #{index + 1}
-                          </Text>
-                          <Flex direction={"row"} align={"center"} justify={"space-between"}>
-                            <Flex direction={"row"} align={"center"} columnGap={"sm"}>
-                              <Text {...titleTextStyle}>Date/Time: </Text>
-                              <Text {...bodyTextStyle}>
-                                {" "}
-                                {DateTime.fromISO(followUp.meetingDate).toFormat(
-                                  DAY_MM_DD_YYYY_HH_MM_SS_A
-                                )}
-                              </Text>
+                    return (
+                      <Card {...cardConfig} key={followUp._id}>
+                        <React.Fragment>
+                          <Flex direction={"column"} my={"md"}>
+                            <Text {...titleTextStyle} mb={"sm"}>
+                              #{index + 1}
+                            </Text>
+                            <Flex direction={"row"} align={"center"} justify={"space-between"}>
+                              <Flex direction={"row"} align={"center"} columnGap={"sm"}>
+                                <Text {...titleTextStyle}>Date/Time: </Text>
+                                <Text {...bodyTextStyle}>
+                                  {" "}
+                                  {DateTime.fromISO(followUp.meetingDate).toFormat(
+                                    DAY_MM_DD_YYYY_HH_MM_SS_A
+                                  )}
+                                </Text>
+                              </Flex>
+
+                              <Flex direction={"row"} align={"center"} columnGap={"sm"}>
+                                <Text {...titleTextStyle}>Location:</Text>
+                                <Text {...bodyTextStyle}>{followUp.meetingPlace}</Text>
+                              </Flex>
+
+                              <Flex direction={"row"} align={"center"} columnGap={"sm"}>
+                                <Text {...titleTextStyle}>Meeting With:</Text>
+                                <Text {...bodyTextStyle}>{followUp.contactPerson?.name}</Text>
+                              </Flex>
                             </Flex>
 
-                            <Flex direction={"row"} align={"center"} columnGap={"sm"}>
-                              <Text {...titleTextStyle}>Location:</Text>
-                              <Text {...bodyTextStyle}>{followUp.meetingPlace}</Text>
+                            <Flex direction={"row"} align={"center"} justify={"space-between"}>
+                              <Flex direction={"row"} align={"flex-start"} columnGap={"sm"}>
+                                <Text {...titleTextStyle}>Agenda:</Text>
+                                <Text {...bodyTextStyle}>{followUp.meetingAgenda}</Text>
+                              </Flex>
                             </Flex>
 
-                            <Flex direction={"row"} align={"center"} columnGap={"sm"}>
-                              <Text {...titleTextStyle}>Meeting With:</Text>
-                              <Text {...bodyTextStyle}>{followUp.contactPerson?.name}</Text>
+                            <Flex direction={"row"} align={"center"} justify={"space-between"}>
+                              <Flex direction={"row"} align={"flex-start"} columnGap={"sm"}>
+                                <Text {...titleTextStyle}>Summary:</Text>
+                                <Text {...bodyTextStyle}>{followUp.meetingSummary}</Text>
+                              </Flex>
+                            </Flex>
+
+                            <Flex direction={"row"} align={"center"} justify={"space-between"}>
+                              <Flex direction={"row"} align={"flex-start"} columnGap={"sm"}>
+                                <Text {...titleTextStyle}>Total Expense:</Text>
+                                <Text {...bodyTextStyle}>{value}</Text>
+                              </Flex>
                             </Flex>
                           </Flex>
-
-                          <Flex direction={"row"} align={"center"} justify={"space-between"}>
-                            <Flex direction={"row"} align={"flex-start"} columnGap={"sm"}>
-                              <Text {...titleTextStyle}>Agenda:</Text>
-                              <Text {...bodyTextStyle}>{followUp.meetingAgenda}</Text>
-                            </Flex>
-                          </Flex>
-
-                          <Flex direction={"row"} align={"center"} justify={"space-between"}>
-                            <Flex direction={"row"} align={"flex-start"} columnGap={"sm"}>
-                              <Text {...titleTextStyle}>Summary:</Text>
-                              <Text {...bodyTextStyle}>{followUp.meetingSummary}</Text>
-                            </Flex>
-                          </Flex>
-
-                          <Flex direction={"row"} align={"center"} justify={"space-between"}>
-                            <Flex direction={"row"} align={"flex-start"} columnGap={"sm"}>
-                              <Text {...titleTextStyle}>Total Expense:</Text>
-                              <Text {...bodyTextStyle}>{value}</Text>
-                            </Flex>
-                          </Flex>
-                        </Flex>
-                      </React.Fragment>
-                    </Card>
-                  );
-                })}
-              </ScrollArea>
+                        </React.Fragment>
+                      </Card>
+                    );
+                  })}
+                </ScrollArea>
+              </div>
             </Stack>
           </Grid.Col>
         </Grid>

@@ -67,7 +67,7 @@ type ActivePage =
   | "Help"
   | "About";
 
-const removePages: ActivePage[] = ["Company", "Users"];
+const removePages: ActivePage[] = ["Users"];
 interface NavbarButtons {
   link: string;
   links?: { link: string; label: ActivePage }[];

@@ -262,15 +262,13 @@ const Projects: React.FC<OwnProps> = () => {
           //   <IconFilter size={14} color={colors.borderColor} onClick={showFilterModal} />
           // }
         />
-        {isAdmin && (
-          <Button
-            variant="filled"
-            rightIcon={<IconPlus size={16} />}
-            onClick={() => setAddProjectModalOpened(true)}
-          >
-            Project
-          </Button>
-        )}
+        <Button
+          variant="filled"
+          rightIcon={<IconPlus size={16} />}
+          onClick={() => setAddProjectModalOpened(true)}
+        >
+          Project
+        </Button>
       </Flex>
       <ScrollArea type="always" h={"80vh"}>
         <ScrollArea w={"140vw"}>

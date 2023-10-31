@@ -44,6 +44,7 @@ import { openDeleteModalHelper } from "@helpers";
 import { deleteContact } from "@slices";
 import { BASE_URL } from "@api";
 import { useGStyles } from "@global-styles";
+import { PhotoView } from "react-photo-view";
 
 interface OwnProps {}
 type ArrayToObj<T extends Array<Record<string, unknown>>> = T extends Array<infer U> ? U : never;
@@ -350,14 +351,23 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
                               // style={{ border: "1px solid black" }}
                             >
                               <Flex my={"auto"}>
-                                <Avatar
+                                <PhotoView
+                                  key={contact._id}
                                   src={
                                     contact.businessCard
                                       ? `${BASE_URL}\\${contact.businessCard}`
                                       : "/user.png"
                                   }
-                                  size={88}
-                                />
+                                >
+                                  <Avatar
+                                    src={
+                                      contact.businessCard
+                                        ? `${BASE_URL}\\${contact.businessCard}`
+                                        : "/user.png"
+                                    }
+                                    size={88}
+                                  />
+                                </PhotoView>
                               </Flex>
                               <Flex direction={"column"} w={"100%"}>
                                 <Flex direction={"row"} justify={"space-between"} align={"center"}>

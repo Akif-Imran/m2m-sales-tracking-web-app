@@ -27,6 +27,7 @@ import { colors } from "@theme";
 import { useNavigate } from "react-router-dom";
 import { routes } from "@routes";
 import { BASE_URL } from "@api";
+import { PhotoView } from "react-photo-view";
 
 interface OwnProps {
   onClick?: (e?: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
@@ -85,13 +86,15 @@ const _CompanyCard: React.FC<OwnProps> = ({
     <Card shadow="sm" mb={"xs"} px={"sm"} py={"lg"} radius={"md"} onClick={onClick}>
       <div className={classes.imageWithInfoContainer}>
         <div className={classes.machineImageContainer}>
-          <Avatar
-            src={item?.logo ? `${BASE_URL}\\${item?.logo}` : "/company.png"}
-            radius={item?.logo ? rem(250) : rem(250)}
-            size={"xl"}
-            //@ts-expect-error style works
-            styles={item?.logo ? undefined : noImageStyle}
-          />
+          <PhotoView src={item?.logo ? `${BASE_URL}\\${item?.logo}` : "/company.png"}>
+            <Avatar
+              src={item?.logo ? `${BASE_URL}\\${item?.logo}` : "/company.png"}
+              radius={item?.logo ? rem(250) : rem(250)}
+              size={"xl"}
+              //@ts-expect-error style works
+              styles={item?.logo ? undefined : noImageStyle}
+            />
+          </PhotoView>
         </div>
         <div className={classes.infoContainer}>
           <div className={classes.minorDetailsWithCount}>

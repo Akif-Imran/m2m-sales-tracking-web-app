@@ -25,6 +25,7 @@ import { DateTime } from "luxon";
 import { _AddFollowUpModal } from "../components";
 import { removeFollowUp } from "@thunks";
 import { BASE_URL } from "@api";
+import { PhotoView } from "react-photo-view";
 
 interface OwnProps {}
 
@@ -148,11 +149,13 @@ export const FollowUps: React.FC<OwnProps> = () => {
               <td>{value}</td>
               <td>
                 {followup?.expenseDocument ? (
-                  <Avatar
-                    src={`${BASE_URL}\\${followup?.expenseDocument}`}
-                    size={50}
-                    radius={"xs"}
-                  />
+                  <PhotoView key={followup._id} src={`${BASE_URL}\\${followup?.expenseDocument}`}>
+                    <Avatar
+                      src={`${BASE_URL}\\${followup?.expenseDocument}`}
+                      size={50}
+                      radius={"xs"}
+                    />
+                  </PhotoView>
                 ) : (
                   "N/A"
                 )}

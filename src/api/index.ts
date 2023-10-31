@@ -74,7 +74,8 @@ export const urls = {
     getHighestProjectClaims: `${BASE_CLAIM_URL}/getHighestProjectClaims`,
   },
   expenseType: {
-    list: `${BASE_EXPENSE_TYPE_URL}/getAll`,
+    list: (skip: number = 0, limit: number = 100) =>
+      `${BASE_EXPENSE_TYPE_URL}/getAll?skip=${skip}&limit=${limit}`,
     create: `${BASE_EXPENSE_TYPE_URL}/create`,
     update: (id: string) => `${BASE_EXPENSE_TYPE_URL}/update/${id}`,
     delete: (id: string) => `${BASE_EXPENSE_TYPE_URL}/delete/${id}`,

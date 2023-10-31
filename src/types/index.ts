@@ -279,7 +279,13 @@ interface IClaim {
 }
 interface IExpenseType {
   _id: string;
+  createdBy: string;
+  createdAt: string;
+  isActive: boolean;
+  company: string;
   name: string;
+  description: string;
+  __v: number;
 }
 interface ISupplier {
   createdBy: string;

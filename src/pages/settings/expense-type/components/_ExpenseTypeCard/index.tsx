@@ -6,8 +6,8 @@ import { colors } from "@theme";
 import { useAuthContext } from "@contexts";
 import { useAppDispatch } from "@store";
 import { openDeleteModalHelper } from "@helpers";
-import { removeSupplier } from "@thunks";
-import { deleteSupplier } from "@slices";
+import { removeExpenseType } from "@thunks";
+import { deleteExpenseType } from "@slices";
 import { notify } from "@utility";
 
 interface OwnProps {
@@ -39,7 +39,7 @@ const _ExpenseTypeCard: React.FC<OwnProps> = ({ item, setForEdit }) => {
       onConfirm: () => {
         setIsDeleting((_prev) => true);
         dispatch(
-          removeSupplier({
+          removeExpenseType({
             token,
             id,
           })
@@ -48,7 +48,7 @@ const _ExpenseTypeCard: React.FC<OwnProps> = ({ item, setForEdit }) => {
           .then((res) => {
             notify("Delete Expense Type", res?.message, res.success ? "success" : "error");
             if (res.success) {
-              dispatch(deleteSupplier(id));
+              dispatch(deleteExpenseType(id));
             }
           })
           .catch((err) => {
@@ -77,9 +77,15 @@ const _ExpenseTypeCard: React.FC<OwnProps> = ({ item, setForEdit }) => {
     <Card shadow="md" m={"xs"} key={item._id}>
       <Stack spacing={"xs"}>
         <Flex direction={"row"} justify={"space-between"}>
-          <Flex direction={"row"} align={"center"} columnGap={"sm"}>
-            <Text {...titleTextStyle}>Name: </Text>
-            <Text {...bodyTextStyle}>{item.name}</Text>
+          <Flex direction={"column"} columnGap={"sm"}>
+            <Flex direction={"row"} align={"center"} columnGap={"sm"}>
+              <Text {...titleTextStyle}>Name: </Text>
+              <Text {...bodyTextStyle}>{item.name}</Text>
+            </Flex>
+            <Flex direction={"row"} align={"center"} columnGap={"sm"}>
+              <Text {...titleTextStyle}>Description: </Text>
+              <Text {...bodyTextStyle}>{item.description}</Text>
+            </Flex>
           </Flex>
           {isAdmin ? (
             <Menu withArrow withinPortal>

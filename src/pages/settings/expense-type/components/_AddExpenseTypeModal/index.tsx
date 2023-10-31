@@ -30,6 +30,7 @@ interface IExpenseTypeForm
 
 const schema: yup.ObjectSchema<IExpenseTypeForm> = yup.object().shape({
   name: yup.string().required("Expense type name is required"),
+  description: yup.string().required("Expense type description is required"),
 });
 
 const _AddExpenseTypeModal: React.FC<OwnProps> = (props) => {
@@ -44,6 +45,7 @@ const _AddExpenseTypeModal: React.FC<OwnProps> = (props) => {
   const form = useFormik<IExpenseTypeForm>({
     initialValues: {
       name: mode === "edit" ? props.record?.name || "" : "",
+      description: mode === "edit" ? props.record?.description || "" : "",
     },
     validationSchema: schema,
     onSubmit: (values, helpers) => {
@@ -119,13 +121,14 @@ const _AddExpenseTypeModal: React.FC<OwnProps> = (props) => {
     form.setValues((prev) => ({
       ...prev,
       name: mode === "edit" ? props.record?.name || "" : "",
+      description: mode === "edit" ? props.record?.description || "" : "",
     }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.record, mode]);
 
   return (
     <Modal
-      size="xl"
+      size="md"
       withinPortal
       withOverlay
       title={title}
@@ -147,6 +150,19 @@ const _AddExpenseTypeModal: React.FC<OwnProps> = (props) => {
                 onChange={form.handleChange}
                 onBlur={form.handleBlur}
                 error={form.touched.name && form.errors.name ? form.errors.name : ""}
+              />
+              <TextInput
+                required
+                withAsterisk={false}
+                label="Description"
+                name="description"
+                id="description"
+                value={form.values.description}
+                onChange={form.handleChange}
+                onBlur={form.handleBlur}
+                error={
+                  form.touched.description && form.errors.description ? form.errors.description : ""
+                }
               />
 
               <Group align="flex-end" position="right" mt={rem(32)}>

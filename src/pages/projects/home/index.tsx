@@ -226,22 +226,20 @@ const Projects: React.FC<OwnProps> = () => {
               <td>{project?.salesPersonValue?.name || "N/A"}</td>
               <td>{project?.company?.name || "N/A"}</td>
               <td>
-                {isAdmin ? (
-                  <Group>
-                    <ActionIcon
-                      color="gray"
-                      size={"sm"}
-                      onClick={() => showUpdateStatusModal(project.status, project._id)}
-                    >
-                      <IconRotateClockwise2 />
-                    </ActionIcon>
+                <Group>
+                  <ActionIcon
+                    color="gray"
+                    size={"sm"}
+                    onClick={() => showUpdateStatusModal(project.status, project._id)}
+                  >
+                    <IconRotateClockwise2 />
+                  </ActionIcon>
+                  {isAdmin && (
                     <ActionIcon color="red" size={"sm"} onClick={() => handleDelete(project._id)}>
                       <IconTrash />
                     </ActionIcon>
-                  </Group>
-                ) : (
-                  "Admin Required"
-                )}
+                  )}
+                </Group>
               </td>
             </tr>
           );

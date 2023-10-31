@@ -144,7 +144,7 @@ export const FollowUps: React.FC<OwnProps> = () => {
               </td>
               <td>{followup?.nextMeetingAgenda}</td>
               {/* claims on this follow up */}
-              <td>{followup?.expenseType}</td>
+              <td>{followup?.expenseTypeDetail?.name}</td>
               <td>{followup?.expenseName}</td>
               <td>{value}</td>
               <td>

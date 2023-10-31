@@ -13,6 +13,7 @@ import {
   ScrollArea,
   Stack,
   Text,
+  TextInput,
 } from "@mantine/core";
 import {
   selectCompanies,
@@ -27,7 +28,13 @@ import { DAY_MM_DD_YYYY, DAY_MM_DD_YYYY_HH_MM_SS_A, projectStatusColors } from "
 import { useParams } from "react-router-dom";
 import { DateTime } from "luxon";
 import { colors } from "@theme";
-import { IconChevronRight, IconDotsVertical, IconPlus, IconTrashFilled } from "@tabler/icons-react";
+import {
+  IconChevronRight,
+  IconDotsVertical,
+  IconPlus,
+  IconSearch,
+  IconTrashFilled,
+} from "@tabler/icons-react";
 import { _AddContactModal } from "../components";
 import { _AddFollowUpModal } from "../../projects/follow-ups/components";
 import { removeContact } from "@thunks";
@@ -36,12 +43,14 @@ import { notify } from "@utility";
 import { openDeleteModalHelper } from "@helpers";
 import { deleteContact } from "@slices";
 import { BASE_URL } from "@api";
+import { useGStyles } from "@global-styles";
 
 interface OwnProps {}
 type ArrayToObj<T extends Array<Record<string, unknown>>> = T extends Array<infer U> ? U : never;
 
 export const CompanyProjects: React.FC<OwnProps> = () => {
   const { theme } = useStyles();
+  const { classes: gclasses } = useGStyles();
   const { companyId } = useParams();
   console.log(companyId);
   const dispatch = useAppDispatch();
@@ -63,7 +72,9 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
   const [selectedProject, setSelectedProject] = React.useState<ArrayToObj<typeof projectsList>>();
 
   const [addContactModalOpened, setAddContactModalOpened] = React.useState(false);
+  const [contactSearchQuery, setContactSearchQuery] = React.useState("");
   const [addFollowUpModalOpened, setAddFollowUpModalOpened] = React.useState(false);
+  const [followupSearchQuery, setFollowUpSearchQuery] = React.useState("");
 
   React.useEffect(() => {
     if (!companyId) return;
@@ -128,6 +139,28 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
       .finally(() => {
         setIsDeletingContact((_prev) => false);
       });
+  };
+
+  const onChangeContactSearch = (query: string) => {
+    setContactSearchQuery(query);
+    const filtered = contactsList.filter(
+      (contact) =>
+        contact.name.toLowerCase().includes(query.toLowerCase()) && contact.customerId === companyId
+    );
+    setContacts(filtered);
+  };
+
+  const onChangeFollowUpSearch = (query: string) => {
+    setFollowUpSearchQuery(query);
+    const filtered = followUpList
+      .filter((followUp) => followUp.projectId === selectedProject?._id)
+      .filter(
+        (followUp, index) =>
+          `${index + 1}`.toLowerCase().includes(query.toLowerCase()) ||
+          followUp.contactPerson?.name.toLowerCase().includes(query.toLowerCase()) ||
+          followUp.meetingPlace.toLowerCase().includes(query.toLowerCase())
+      );
+    setFollowUps(filtered);
   };
 
   const titleTextStyle = {
@@ -282,14 +315,26 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
                       <Text {...titleTextStyle} size={"lg"}>
                         Contacts
                       </Text>
-                      <ActionIcon
-                        variant="filled"
-                        size={"sm"}
-                        color={"dark"}
-                        onClick={() => setAddContactModalOpened(true)}
-                      >
-                        <IconPlus size={16} stroke={1.3} color={colors.white} />
-                      </ActionIcon>
+
+                      <Flex direction={"row"} columnGap={"xs"} align={"center"}>
+                        <TextInput
+                          size="xs"
+                          radius={"md"}
+                          value={contactSearchQuery}
+                          className={gclasses.searchInput}
+                          placeholder="Search by any field"
+                          icon={<IconSearch size={16} />}
+                          onChange={(e) => onChangeContactSearch(e.target?.value)}
+                        />
+                        <ActionIcon
+                          variant="filled"
+                          size={"sm"}
+                          color={"dark"}
+                          onClick={() => setAddContactModalOpened(true)}
+                        >
+                          <IconPlus size={16} stroke={1.3} color={colors.white} />
+                        </ActionIcon>
+                      </Flex>
                     </Flex>
                   </Card>
                   <ScrollArea type="scroll" h={"36vh"}>
@@ -391,14 +436,26 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
                     <Text {...titleTextStyle} size={"lg"}>
                       Meetings / Follow Up:
                     </Text>
-                    <ActionIcon
-                      variant="filled"
-                      size={"sm"}
-                      color={"dark"}
-                      onClick={() => setAddFollowUpModalOpened(true)}
-                    >
-                      <IconPlus size={16} stroke={1.3} color={colors.white} />
-                    </ActionIcon>
+                    <Flex direction={"row"} columnGap={"xs"} align={"center"}>
+                      <TextInput
+                        miw={"24vw"}
+                        size="xs"
+                        radius={"md"}
+                        value={followupSearchQuery}
+                        className={gclasses.searchInput}
+                        placeholder="Search by contact, place, No."
+                        icon={<IconSearch size={16} />}
+                        onChange={(e) => onChangeFollowUpSearch(e.target?.value)}
+                      />
+                      <ActionIcon
+                        variant="filled"
+                        size={"sm"}
+                        color={"dark"}
+                        onClick={() => setAddFollowUpModalOpened(true)}
+                      >
+                        <IconPlus size={16} stroke={1.3} color={colors.white} />
+                      </ActionIcon>
+                    </Flex>
                   </Flex>
                 </Card>
                 <ScrollArea type="scroll" h={"33vh"}>

@@ -229,7 +229,6 @@ export const PurchaseRequests: React.FC<OwnProps> = () => {
               </tr>
               <tr>
                 <th>#</th>
-                <th>Id</th>
                 <th>Item Name</th>
                 <th>Item Type</th>
                 <th>Status</th>

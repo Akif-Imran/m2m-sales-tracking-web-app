@@ -41,9 +41,7 @@ export const ExpenseTypes: React.FC<OwnProps> = () => {
   };
 
   React.useEffect(() => {
-    if (isAdmin || isHR) {
-      setSearchedData(expenseTypes);
-    }
+    setSearchedData(expenseTypes);
   }, [isAdmin, isHR, expenseTypes]);
 
   const rows =

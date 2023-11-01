@@ -1,6 +1,6 @@
 import React from "react";
 import { useStyles } from "./styles";
-import { ActionIcon, Anchor, Card, Flex, Menu, Stack, Text } from "@mantine/core";
+import { ActionIcon, Anchor, Badge, Card, Flex, Menu, Stack, Text } from "@mantine/core";
 import { IconDotsVertical, IconEdit, IconTrash } from "@tabler/icons-react";
 import { colors } from "@theme";
 import { useAuthContext } from "@contexts";
@@ -107,7 +107,9 @@ const _SupplierCard: React.FC<OwnProps> = ({ item, setForEdit }) => {
               </Menu.Dropdown>
             </Menu>
           ) : (
-            "Admin Required"
+            <Badge variant="light" color="red">
+              <Text>Admin Required</Text>
+            </Badge>
           )}
         </Flex>
         <Flex direction={"column"} justify={"flex-start"} m={0} p={0}>

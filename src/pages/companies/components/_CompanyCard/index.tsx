@@ -147,7 +147,7 @@ const _CompanyCard: React.FC<OwnProps> = ({
                       event.stopPropagation();
                       navigate({
                         pathname: routes.project.list,
-                        search: "?open=add",
+                        search: `?open=add&customerId=${item._id}`,
                       });
                     }}
                   >

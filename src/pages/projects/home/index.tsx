@@ -51,6 +51,7 @@ const Projects: React.FC<OwnProps> = () => {
 
   const [searchParams, _setSearchParams] = useSearchParams();
   const modal = searchParams.get("open");
+  const customerId = searchParams.get("customerId") || "";
 
   const [searchQuery, setSearchQuery] = React.useState("");
   const projects = useAppSelector(selectProjectWithRecords);
@@ -304,6 +305,7 @@ const Projects: React.FC<OwnProps> = () => {
         title="Add Lead/Project"
         opened={addProjectModalOpened}
         onClose={() => setAddProjectModalOpened(false)}
+        companyId={customerId}
       />
       <Modal
         centered

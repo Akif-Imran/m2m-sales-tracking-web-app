@@ -19,6 +19,7 @@ interface OwnProps {
   opened: boolean;
   onClose: () => void;
   title: string;
+  companyId: string;
 }
 interface IProjectForm
   extends Omit<
@@ -43,7 +44,7 @@ const schema: yup.ObjectSchema<IProjectForm> = yup.object().shape({
   customerId: yup.string().required("Customer is required"),
 });
 
-const _AddProjectModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
+const _AddProjectModal: React.FC<OwnProps> = ({ opened, onClose, title, companyId }) => {
   const { theme } = useStyles();
   const dispatch = useAppDispatch();
   const {
@@ -162,6 +163,18 @@ const _AddProjectModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
       salesPerson: value,
     }));
   };
+
+  React.useEffect(() => {
+    if (companyId)
+      form.setValues((prev) => ({
+        ...prev,
+        customerId: companyId,
+      }));
+    return () => {
+      form.resetForm();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [companyId]);
 
   return (
     <Modal

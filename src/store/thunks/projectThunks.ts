@@ -9,7 +9,6 @@ interface CreateReq {
     type: string;
     contractDate: string;
     deliveryDate: string;
-    salesPerson: string;
     costing: object | null;
     value: {
       amount: number;

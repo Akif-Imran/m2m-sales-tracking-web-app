@@ -161,7 +161,19 @@ const MainApp: React.FC<OwnProps> = () => {
       {/* users */}
       <Route
         path={routes.user.leaves.list}
-        element={<_RequireAuth children={<_AppShell page={<_LeaveApplications />} />} />}
+        element={
+          <_RequireAuth
+            children={
+              <_AppShell
+                page={
+                  <SuspendedView>
+                    <_LeaveApplications />
+                  </SuspendedView>
+                }
+              />
+            }
+          />
+        }
       ></Route>
 
       {/* settings */}

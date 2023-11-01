@@ -53,6 +53,7 @@ export const urls = {
     update: (id: string) => `${BASE_PROJECT_URL}/update/${id}`,
     delete: (id: string) => `${BASE_PROJECT_URL}/delete/${id}`,
     getById: (id: string) => `${BASE_PROJECT_URL}/getById/${id}`,
+    assignEngineer: (projectId: string) => `${BASE_PROJECT_URL}/assignEngineer/${projectId}`,
     statusList: `${BASE_PROJECT_URL}/getStatusList`,
     updateStatus: (id: string) => `${BASE_PROJECT_URL}/changeStatus/${id}`,
   },

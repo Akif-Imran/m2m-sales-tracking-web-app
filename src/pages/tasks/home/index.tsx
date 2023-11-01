@@ -84,7 +84,7 @@ const Tasks: React.FC<OwnProps> = () => {
     taskStatus: taskStatusList,
     companies,
     projects,
-    projectManagers,
+    engineers,
     salesPersons,
   } = useAppSelector(selectRecordsForDropdown);
 
@@ -122,10 +122,10 @@ const Tasks: React.FC<OwnProps> = () => {
         statusList: [{ value: "0", label: "All" }].concat(taskStatusList),
         companyList: [{ value: "0", label: "All" }].concat(companies),
         projectList: [{ value: "0", label: "All" }].concat(projects),
-        assigneeList: [{ value: "0", label: "All" }].concat(projectManagers.concat(salesPersons)),
+        assigneeList: [{ value: "0", label: "All" }].concat(engineers.concat(salesPersons)),
       };
     });
-  }, [taskStatusList, companies, projects, projectManagers, salesPersons]);
+  }, [taskStatusList, companies, projects, engineers, salesPersons]);
 
   const handleDelete = (id: string) => {
     openDeleteModalHelper({

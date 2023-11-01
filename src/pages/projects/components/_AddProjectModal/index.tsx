@@ -33,6 +33,9 @@ interface IProjectForm
     | "updatedAt"
     | "deletedAt"
     | "salesPerson"
+    | "updatedAt"
+    | "engineer"
+    | "assignedEngineerDate"
   > {}
 
 const schema: yup.ObjectSchema<IProjectForm> = yup.object().shape({

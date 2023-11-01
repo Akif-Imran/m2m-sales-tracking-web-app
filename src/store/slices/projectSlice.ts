@@ -1,5 +1,5 @@
 import { PayloadAction, SerializedError, createSlice } from "@reduxjs/toolkit";
-import { fetchProjects } from "../thunks/projectThunks";
+import { fetchProjects } from "@thunks";
 
 interface State {
   data: IProject[];
@@ -20,7 +20,7 @@ const projectSlice = createSlice({
     addProject: (state, action: PayloadAction<IProject>) => {
       state.data.push(action.payload);
     },
-    updateProject: (state, action: PayloadAction<IProject>) => {
+    modifyProject: (state, action: PayloadAction<IProject>) => {
       const index = state.data.findIndex((project) => project._id === action.payload._id);
       state.data[index] = action.payload;
     },
@@ -29,7 +29,7 @@ const projectSlice = createSlice({
       state.data[index].status = action.payload.status;
     },
     deleteProject: (state, action: PayloadAction<string>) => {
-      const index = state.data.findIndex((contact) => contact._id === action.payload);
+      const index = state.data.findIndex((project) => project._id === action.payload);
       state.data.splice(index, 1);
     },
   },
@@ -52,6 +52,6 @@ const projectSlice = createSlice({
 });
 
 export { projectSlice };
-export const { addProject, deleteProject, updateProject, updateProjectStatus } =
+export const { addProject, deleteProject, modifyProject, updateProjectStatus } =
   projectSlice.actions;
 export const projectReducer = projectSlice.reducer;

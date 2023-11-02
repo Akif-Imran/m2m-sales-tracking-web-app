@@ -44,23 +44,6 @@ const taskSlice = createSlice({
     builder.addCase(fetchTasks.fulfilled, (state, action) => {
       if (action.payload.success) {
         state.data = action.payload.data;
-        state.data = [
-          {
-            _id: "652e5ffa2e17c8907373f9b2",
-            createdBy: "65258520a7816043f5b0cf47",
-            createdAt: "2023-10-17T10:20:42.406Z",
-            isActive: true,
-            company: "65258520a7816043f5b0cf45",
-            assignedTo: "652ba0e017c1e3516060d1c4",
-            projectId: "652e5fce2e17c8907373f9ad",
-            title: "Meet with the person and add follow up details",
-            description: "this the description of the task",
-            completionDeadline: "2023-10-21T10:00:37.437Z",
-            status: 1,
-            customerId: "652e5f982e17c8907373f9a9",
-            __v: 0,
-          },
-        ];
       }
       state.error = null;
       state.isLoading = false;

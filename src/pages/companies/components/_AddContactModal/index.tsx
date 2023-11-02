@@ -21,6 +21,7 @@ import { IconUpload } from "@tabler/icons-react";
 import { createContact } from "@thunks";
 import { useAuthContext } from "@contexts";
 import * as yup from "yup";
+import { uploadFile } from "@services";
 
 interface OwnProps {
   opened: boolean;
@@ -32,12 +33,15 @@ interface IContactForm
   extends Omit<
     ICompanyContact,
     "_id" | "__v" | "createdBy" | "createdAt" | "company" | "isActive"
-  > {}
+  > {
+  hasImage: boolean;
+}
 
 const schema: yup.ObjectSchema<IContactForm> = yup.object().shape({
   name: yup.string().required("Name is required"),
   email: yup.string().email("Invalid email").required("Email is required"),
   businessCard: yup.string().required("Business card is required").nullable(),
+  hasImage: yup.boolean().required(),
   designation: yup.string().required("Designation is required"),
   department: yup.string().required("Department is required"),
   mobile: yup.string().required("Mobile number is required"),
@@ -52,6 +56,7 @@ const _AddContactModal: React.FC<OwnProps> = ({ opened, onClose, title, companyI
   } = useAuthContext();
   const { companies: companiesList } = useAppSelector(selectRecordsForDropdown);
   const [isCreating, setIsCreating] = React.useState(false);
+  const [file, setFile] = React.useState<File>({} as File);
 
   const form = useFormik<IContactForm>({
     initialValues: {
@@ -61,12 +66,23 @@ const _AddContactModal: React.FC<OwnProps> = ({ opened, onClose, title, companyI
       designation: "",
       department: "",
       mobile: "",
+      hasImage: false,
       customerId: companyId || "",
     },
     validationSchema: schema,
-    onSubmit(values, helpers) {
+    onSubmit: async (values, helpers) => {
       console.log(values);
       setIsCreating((_prev) => true);
+      if (values.hasImage) {
+        const res = await uploadFile(token, file);
+        if (res.statusCode === 200 || res.statusCode === 201) {
+          values.businessCard = res.data;
+        } else {
+          setIsCreating((_prev) => false);
+          notify("Add User", res?.message, "error");
+          return;
+        }
+      }
       dispatch(
         createContact({
           token,
@@ -100,16 +116,17 @@ const _AddContactModal: React.FC<OwnProps> = ({ opened, onClose, title, companyI
     onClose();
   };
 
-  const handleLogoChange = (file: File) => {
+  const handleImageChange = (file: File) => {
     if (file === null) {
       notify("Image Upload", "Business card not uploaded", "error");
       return;
     }
+    setFile(file);
     const reader = new FileReader();
     reader.onload = (e) => {
       const dataUri = e?.target?.result as string;
       if (dataUri) {
-        form.setValues((prev) => ({ ...prev, businessCard: dataUri }));
+        form.setValues((prev) => ({ ...prev, businessCard: dataUri, hasImage: true }));
       }
     };
     reader.readAsDataURL(file);
@@ -140,7 +157,7 @@ const _AddContactModal: React.FC<OwnProps> = ({ opened, onClose, title, companyI
             <Avatar src={"/user.png"} radius={rem(250)} size={rem(170)} />
           )}
           <div className={classes.fileUploadButton}>
-            <FileButton onChange={handleLogoChange} accept="image/png,image/jpeg">
+            <FileButton onChange={handleImageChange} accept="image/png,image/jpeg">
               {(props) => (
                 <Button
                   radius={"xl"}

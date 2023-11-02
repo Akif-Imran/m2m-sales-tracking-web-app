@@ -3,17 +3,17 @@ import { useStyles } from "./styles";
 import {
   ActionIcon,
   Anchor,
+  Avatar,
   Badge,
   Card,
   Center,
-  Divider,
   Flex,
   Grid,
   Menu,
   ScrollArea,
   Stack,
   Text,
-  rem,
+  TextInput,
 } from "@mantine/core";
 import {
   selectCompanies,
@@ -28,7 +28,13 @@ import { DAY_MM_DD_YYYY, DAY_MM_DD_YYYY_HH_MM_SS_A, projectStatusColors } from "
 import { useParams } from "react-router-dom";
 import { DateTime } from "luxon";
 import { colors } from "@theme";
-import { IconChevronRight, IconDotsVertical, IconPlus, IconTrashFilled } from "@tabler/icons-react";
+import {
+  IconChevronRight,
+  IconDotsVertical,
+  IconPlus,
+  IconSearch,
+  IconTrashFilled,
+} from "@tabler/icons-react";
 import { _AddContactModal } from "../components";
 import { _AddFollowUpModal } from "../../projects/follow-ups/components";
 import { removeContact } from "@thunks";
@@ -36,12 +42,16 @@ import { useAuthContext } from "@contexts";
 import { notify } from "@utility";
 import { openDeleteModalHelper } from "@helpers";
 import { deleteContact } from "@slices";
+import { BASE_URL } from "@api";
+import { useGStyles } from "@global-styles";
+import { PhotoView } from "react-photo-view";
 
 interface OwnProps {}
 type ArrayToObj<T extends Array<Record<string, unknown>>> = T extends Array<infer U> ? U : never;
 
 export const CompanyProjects: React.FC<OwnProps> = () => {
   const { theme } = useStyles();
+  const { classes: gclasses } = useGStyles();
   const { companyId } = useParams();
   console.log(companyId);
   const dispatch = useAppDispatch();
@@ -63,7 +73,9 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
   const [selectedProject, setSelectedProject] = React.useState<ArrayToObj<typeof projectsList>>();
 
   const [addContactModalOpened, setAddContactModalOpened] = React.useState(false);
+  const [contactSearchQuery, setContactSearchQuery] = React.useState("");
   const [addFollowUpModalOpened, setAddFollowUpModalOpened] = React.useState(false);
+  const [followupSearchQuery, setFollowUpSearchQuery] = React.useState("");
 
   React.useEffect(() => {
     if (!companyId) return;
@@ -130,6 +142,28 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
       });
   };
 
+  const onChangeContactSearch = (query: string) => {
+    setContactSearchQuery(query);
+    const filtered = contactsList.filter(
+      (contact) =>
+        contact.name.toLowerCase().includes(query.toLowerCase()) && contact.customerId === companyId
+    );
+    setContacts(filtered);
+  };
+
+  const onChangeFollowUpSearch = (query: string) => {
+    setFollowUpSearchQuery(query);
+    const filtered = followUpList
+      .filter((followUp) => followUp.projectId === selectedProject?._id)
+      .filter(
+        (followUp, index) =>
+          `${index + 1}`.toLowerCase().includes(query.toLowerCase()) ||
+          followUp.contactPerson?.name.toLowerCase().includes(query.toLowerCase()) ||
+          followUp.meetingPlace.toLowerCase().includes(query.toLowerCase())
+      );
+    setFollowUps(filtered);
+  };
+
   const titleTextStyle = {
     fw: 700,
     c: colors.titleText,
@@ -138,6 +172,14 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
   const bodyTextStyle = {
     fz: "sm",
     color: colors.titleText,
+  };
+
+  const cardConfig = {
+    shadow: "sm",
+    mb: "xs",
+    px: "sm",
+    py: "xs",
+    radius: "md",
   };
 
   if (isLoading) {
@@ -149,7 +191,7 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
       <>
         <Grid>
           <Grid.Col span={3}>
-            <Card shadow="sm" mb={"xs"} px={"sm"} py={"xs"} radius={"md"}>
+            <Card {...cardConfig}>
               <Center>
                 <Text {...titleTextStyle} size={"lg"}>
                   Leads/Projects List
@@ -191,8 +233,8 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
           <Grid.Col span={9}>
             <Stack spacing={"xs"}>
               <Grid>
-                <Grid.Col span={8}>
-                  <Card shadow="sm" mb={"xs"} px={"sm"} py={"xs"} radius={"md"} h={"40vh"}>
+                <Grid.Col span={7}>
+                  <Card {...cardConfig}>
                     <Stack spacing={"xs"}>
                       <Flex direction={"row"} align={"center"}>
                         <Text {...titleTextStyle} size={"lg"}>
@@ -206,7 +248,10 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
                           {selectedProject.statusName}
                         </Badge>
                       </Flex>
-                      <Divider color={colors.borderColor} mb={rem(8)} />
+                    </Stack>
+                  </Card>
+                  <Card {...cardConfig}>
+                    <Stack>
                       <Flex direction={"row"} align={"center"} columnGap={"sm"}>
                         <Text {...titleTextStyle}>Name: </Text>
                         <Text {...bodyTextStyle}>{selectedProject.name}</Text>
@@ -265,13 +310,23 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
                   </Card>
                 </Grid.Col>
 
-                <Grid.Col span={4}>
-                  <ScrollArea type="scroll" h={"40vh"}>
-                    <Card shadow="sm" mb={"xs"} px={"sm"} py={"xs"} radius={"md"}>
-                      <Flex direction={"row"} justify={"space-between"} align={"center"}>
-                        <Text {...titleTextStyle} size={"lg"}>
-                          Contacts
-                        </Text>
+                <Grid.Col span={5}>
+                  <Card {...cardConfig}>
+                    <Flex direction={"row"} justify={"space-between"} align={"center"}>
+                      <Text {...titleTextStyle} size={"lg"}>
+                        Contacts
+                      </Text>
+
+                      <Flex direction={"row"} columnGap={"xs"} align={"center"}>
+                        <TextInput
+                          size="xs"
+                          radius={"md"}
+                          value={contactSearchQuery}
+                          className={gclasses.searchInput}
+                          placeholder="Search by any field"
+                          icon={<IconSearch size={16} />}
+                          onChange={(e) => onChangeContactSearch(e.target?.value)}
+                        />
                         <ActionIcon
                           variant="filled"
                           size={"sm"}
@@ -281,102 +336,139 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
                           <IconPlus size={16} stroke={1.3} color={colors.white} />
                         </ActionIcon>
                       </Flex>
-                      <Divider color={colors.borderColor} mb={rem(8)} />
-                      {contacts.map((contact) => {
-                        return (
-                          <>
-                            <Flex direction={"column"} my={"md"}>
-                              <Flex
-                                direction={"row"}
-                                justify={"space-between"}
-                                align={"center"}
-                                columnGap={"sm"}
-                              >
+                    </Flex>
+                  </Card>
+                  <ScrollArea type="scroll" h={"36vh"}>
+                    {contacts.map((contact) => {
+                      return (
+                        <Card {...cardConfig}>
+                          <React.Fragment key={contact._id}>
+                            <Flex
+                              direction={"row"}
+                              justify={"flex-start"}
+                              align={"flex-start"}
+                              columnGap={"sm"}
+                              // style={{ border: "1px solid black" }}
+                            >
+                              <Flex my={"auto"}>
+                                <PhotoView
+                                  key={contact._id}
+                                  src={
+                                    contact.businessCard
+                                      ? `${BASE_URL}\\${contact.businessCard}`
+                                      : "/user.png"
+                                  }
+                                >
+                                  <Avatar
+                                    src={
+                                      contact.businessCard
+                                        ? `${BASE_URL}\\${contact.businessCard}`
+                                        : "/user.png"
+                                    }
+                                    size={88}
+                                  />
+                                </PhotoView>
+                              </Flex>
+                              <Flex direction={"column"} w={"100%"}>
+                                <Flex direction={"row"} justify={"space-between"} align={"center"}>
+                                  <Flex direction={"row"} align={"center"} justify={"flex-start"}>
+                                    <Text {...titleTextStyle} mr={"xs"}>
+                                      Name:
+                                    </Text>
+                                    <Text {...bodyTextStyle}>{contact?.name || "N/A"}</Text>
+                                  </Flex>
+                                  <Menu withinPortal withArrow position="bottom-end">
+                                    <Menu.Target>
+                                      <ActionIcon>
+                                        <IconDotsVertical
+                                          size={16}
+                                          stroke={1.3}
+                                          color={colors.titleText}
+                                        />
+                                      </ActionIcon>
+                                    </Menu.Target>
+                                    <Menu.Dropdown>
+                                      <Menu.Label>Options</Menu.Label>
+                                      <Menu.Item
+                                        color="red"
+                                        icon={<IconTrashFilled stroke={1.3} size={16} />}
+                                        onClick={() => handleDelete(contact._id)}
+                                      >
+                                        Delete
+                                      </Menu.Item>
+                                    </Menu.Dropdown>
+                                  </Menu>
+                                </Flex>
                                 <Flex direction={"row"} align={"center"} justify={"flex-start"}>
                                   <Text {...titleTextStyle} mr={"xs"}>
-                                    Name:
+                                    Email:
                                   </Text>
-                                  <Text {...bodyTextStyle}>{contact?.name || "N/A"}</Text>
+                                  <Anchor
+                                    {...bodyTextStyle}
+                                    href={contact?.email}
+                                    target={"_blank"}
+                                    c={"blue"}
+                                  >
+                                    {contact?.email || "N/A"}
+                                  </Anchor>
                                 </Flex>
-                                <Menu withinPortal withArrow position="bottom-end">
-                                  <Menu.Target>
-                                    <ActionIcon>
-                                      <IconDotsVertical
-                                        size={16}
-                                        stroke={1.3}
-                                        color={colors.titleText}
-                                      />
-                                    </ActionIcon>
-                                  </Menu.Target>
-                                  <Menu.Dropdown>
-                                    <Menu.Label>Options</Menu.Label>
-                                    <Menu.Item
-                                      color="red"
-                                      icon={<IconTrashFilled stroke={1.3} size={16} />}
-                                      onClick={() => handleDelete(contact._id)}
-                                    >
-                                      Delete
-                                    </Menu.Item>
-                                  </Menu.Dropdown>
-                                </Menu>
-                              </Flex>
-                              <Flex direction={"row"} align={"center"} justify={"flex-start"}>
-                                <Text {...titleTextStyle} mr={"xs"}>
-                                  Email:
-                                </Text>
-                                <Anchor
-                                  {...bodyTextStyle}
-                                  href={contact?.email}
-                                  target={"_blank"}
-                                  c={"blue"}
-                                >
-                                  {contact?.email || "N/A"}
-                                </Anchor>
-                              </Flex>
-                              <Flex direction={"row"} align={"center"} justify={"flex-start"}>
-                                <Text {...titleTextStyle} mr={"xs"}>
-                                  Mobile No.:
-                                </Text>
-                                <Text {...bodyTextStyle}>{contact?.mobile || "N/A"}</Text>
-                              </Flex>
-                              <Flex direction={"row"} align={"center"} justify={"flex-start"}>
-                                <Text {...titleTextStyle} mr={"xs"}>
-                                  Designation:
-                                </Text>
-                                <Text {...bodyTextStyle}>{contact?.designation || "N/A"}</Text>
-                              </Flex>
-                              <Flex direction={"row"} align={"center"} justify={"flex-start"}>
-                                <Text {...titleTextStyle} mr={"xs"}>
-                                  Department:
-                                </Text>
-                                <Text {...bodyTextStyle}>{contact?.department || "N/A"}</Text>
+                                <Flex direction={"row"} align={"center"} justify={"flex-start"}>
+                                  <Text {...titleTextStyle} mr={"xs"}>
+                                    Mobile No.:
+                                  </Text>
+                                  <Text {...bodyTextStyle}>{contact?.mobile || "N/A"}</Text>
+                                </Flex>
+                                <Flex direction={"row"} align={"center"} justify={"flex-start"}>
+                                  <Text {...titleTextStyle} mr={"xs"}>
+                                    Designation:
+                                  </Text>
+                                  <Text {...bodyTextStyle}>{contact?.designation || "N/A"}</Text>
+                                </Flex>
+                                <Flex direction={"row"} align={"center"} justify={"flex-start"}>
+                                  <Text {...titleTextStyle} mr={"xs"}>
+                                    Department:
+                                  </Text>
+                                  <Text {...bodyTextStyle}>{contact?.department || "N/A"}</Text>
+                                </Flex>
                               </Flex>
                             </Flex>
-                            <Divider />
-                          </>
-                        );
-                      })}
-                    </Card>
+                          </React.Fragment>
+                        </Card>
+                      );
+                    })}
                   </ScrollArea>
                 </Grid.Col>
               </Grid>
 
-              <ScrollArea type="scroll" h={"46vh"}>
-                <Card shadow="sm" mb={"xs"} px={"sm"} py={"xs"} radius={"md"}>
+              <div>
+                <Card {...cardConfig}>
                   <Flex direction={"row"} justify={"space-between"} align={"center"}>
                     <Text {...titleTextStyle} size={"lg"}>
                       Meetings / Follow Up:
                     </Text>
-                    <ActionIcon
-                      variant="filled"
-                      size={"sm"}
-                      color={"dark"}
-                      onClick={() => setAddFollowUpModalOpened(true)}
-                    >
-                      <IconPlus size={16} stroke={1.3} color={colors.white} />
-                    </ActionIcon>
+                    <Flex direction={"row"} columnGap={"xs"} align={"center"}>
+                      <TextInput
+                        miw={"24vw"}
+                        size="xs"
+                        radius={"md"}
+                        value={followupSearchQuery}
+                        className={gclasses.searchInput}
+                        placeholder="Search by contact, place, No."
+                        icon={<IconSearch size={16} />}
+                        onChange={(e) => onChangeFollowUpSearch(e.target?.value)}
+                      />
+                      <ActionIcon
+                        variant="filled"
+                        size={"sm"}
+                        color={"dark"}
+                        onClick={() => setAddFollowUpModalOpened(true)}
+                      >
+                        <IconPlus size={16} stroke={1.3} color={colors.white} />
+                      </ActionIcon>
+                    </Flex>
                   </Flex>
-                  <Divider color={colors.borderColor} mb={rem(8)} />
+                </Card>
+                <ScrollArea type="scroll" h={"33vh"}>
                   {followUps.map((followUp, index) => {
                     const value = followUp?.expensePrice
                       ? Intl.NumberFormat("en-US", {
@@ -388,60 +480,61 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
                       : "N/A";
 
                     return (
-                      <>
-                        <Flex direction={"column"} my={"md"}>
-                          <Text {...titleTextStyle} mb={"sm"}>
-                            #{index + 1}
-                          </Text>
-                          <Flex direction={"row"} align={"center"} justify={"space-between"}>
-                            <Flex direction={"row"} align={"center"} columnGap={"sm"}>
-                              <Text {...titleTextStyle}>Date/Time: </Text>
-                              <Text {...bodyTextStyle}>
-                                {" "}
-                                {DateTime.fromISO(followUp.meetingDate).toFormat(
-                                  DAY_MM_DD_YYYY_HH_MM_SS_A
-                                )}
-                              </Text>
+                      <Card {...cardConfig} key={followUp._id}>
+                        <React.Fragment>
+                          <Flex direction={"column"} my={"md"}>
+                            <Text {...titleTextStyle} mb={"sm"}>
+                              #{index + 1}
+                            </Text>
+                            <Flex direction={"row"} align={"center"} justify={"space-between"}>
+                              <Flex direction={"row"} align={"center"} columnGap={"sm"}>
+                                <Text {...titleTextStyle}>Date/Time: </Text>
+                                <Text {...bodyTextStyle}>
+                                  {" "}
+                                  {DateTime.fromISO(followUp.meetingDate).toFormat(
+                                    DAY_MM_DD_YYYY_HH_MM_SS_A
+                                  )}
+                                </Text>
+                              </Flex>
+
+                              <Flex direction={"row"} align={"center"} columnGap={"sm"}>
+                                <Text {...titleTextStyle}>Location:</Text>
+                                <Text {...bodyTextStyle}>{followUp.meetingPlace}</Text>
+                              </Flex>
+
+                              <Flex direction={"row"} align={"center"} columnGap={"sm"}>
+                                <Text {...titleTextStyle}>Meeting With:</Text>
+                                <Text {...bodyTextStyle}>{followUp.contactPerson?.name}</Text>
+                              </Flex>
                             </Flex>
 
-                            <Flex direction={"row"} align={"center"} columnGap={"sm"}>
-                              <Text {...titleTextStyle}>Location:</Text>
-                              <Text {...bodyTextStyle}>{followUp.meetingPlace}</Text>
+                            <Flex direction={"row"} align={"center"} justify={"space-between"}>
+                              <Flex direction={"row"} align={"flex-start"} columnGap={"sm"}>
+                                <Text {...titleTextStyle}>Agenda:</Text>
+                                <Text {...bodyTextStyle}>{followUp.meetingAgenda}</Text>
+                              </Flex>
                             </Flex>
 
-                            <Flex direction={"row"} align={"center"} columnGap={"sm"}>
-                              <Text {...titleTextStyle}>Meeting With:</Text>
-                              <Text {...bodyTextStyle}>{followUp.contactPerson?.name}</Text>
+                            <Flex direction={"row"} align={"center"} justify={"space-between"}>
+                              <Flex direction={"row"} align={"flex-start"} columnGap={"sm"}>
+                                <Text {...titleTextStyle}>Summary:</Text>
+                                <Text {...bodyTextStyle}>{followUp.meetingSummary}</Text>
+                              </Flex>
+                            </Flex>
+
+                            <Flex direction={"row"} align={"center"} justify={"space-between"}>
+                              <Flex direction={"row"} align={"flex-start"} columnGap={"sm"}>
+                                <Text {...titleTextStyle}>Total Expense:</Text>
+                                <Text {...bodyTextStyle}>{value}</Text>
+                              </Flex>
                             </Flex>
                           </Flex>
-
-                          <Flex direction={"row"} align={"center"} justify={"space-between"}>
-                            <Flex direction={"row"} align={"flex-start"} columnGap={"sm"}>
-                              <Text {...titleTextStyle}>Agenda:</Text>
-                              <Text {...bodyTextStyle}>{followUp.meetingAgenda}</Text>
-                            </Flex>
-                          </Flex>
-
-                          <Flex direction={"row"} align={"center"} justify={"space-between"}>
-                            <Flex direction={"row"} align={"flex-start"} columnGap={"sm"}>
-                              <Text {...titleTextStyle}>Summary:</Text>
-                              <Text {...bodyTextStyle}>{followUp.meetingSummary}</Text>
-                            </Flex>
-                          </Flex>
-
-                          <Flex direction={"row"} align={"center"} justify={"space-between"}>
-                            <Flex direction={"row"} align={"flex-start"} columnGap={"sm"}>
-                              <Text {...titleTextStyle}>Total Expense:</Text>
-                              <Text {...bodyTextStyle}>{value}</Text>
-                            </Flex>
-                          </Flex>
-                        </Flex>
-                        <Divider />
-                      </>
+                        </React.Fragment>
+                      </Card>
                     );
                   })}
-                </Card>
-              </ScrollArea>
+                </ScrollArea>
+              </div>
             </Stack>
           </Grid.Col>
         </Grid>

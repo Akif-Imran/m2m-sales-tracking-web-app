@@ -68,6 +68,7 @@ interface IProjectStatus {
   name: string;
 }
 interface IProject {
+  _id: string;
   createdBy: string;
   createdAt: string;
   isActive: true;
@@ -87,8 +88,10 @@ interface IProject {
   costing: object | null;
   status: number;
   customerId: string;
-  _id: string;
   __v: number;
+  assignedEngineerDate?: string;
+  engineer?: string;
+  updatedAt?: string;
   // deletedAt?: string;
   //-----old-type--------
   // id: number;
@@ -279,7 +282,13 @@ interface IClaim {
 }
 interface IExpenseType {
   _id: string;
+  createdBy: string;
+  createdAt: string;
+  isActive: boolean;
+  company: string;
   name: string;
+  description: string;
+  __v: number;
 }
 interface ISupplier {
   createdBy: string;

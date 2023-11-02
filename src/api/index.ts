@@ -53,6 +53,7 @@ export const urls = {
     update: (id: string) => `${BASE_PROJECT_URL}/update/${id}`,
     delete: (id: string) => `${BASE_PROJECT_URL}/delete/${id}`,
     getById: (id: string) => `${BASE_PROJECT_URL}/getById/${id}`,
+    assignEngineer: (projectId: string) => `${BASE_PROJECT_URL}/assignEngineer/${projectId}`,
     statusList: `${BASE_PROJECT_URL}/getStatusList`,
     updateStatus: (id: string) => `${BASE_PROJECT_URL}/changeStatus/${id}`,
   },
@@ -74,7 +75,8 @@ export const urls = {
     getHighestProjectClaims: `${BASE_CLAIM_URL}/getHighestProjectClaims`,
   },
   expenseType: {
-    list: `${BASE_EXPENSE_TYPE_URL}/getAll`,
+    list: (skip: number = 0, limit: number = 100) =>
+      `${BASE_EXPENSE_TYPE_URL}/getAll?skip=${skip}&limit=${limit}`,
     create: `${BASE_EXPENSE_TYPE_URL}/create`,
     update: (id: string) => `${BASE_EXPENSE_TYPE_URL}/update/${id}`,
     delete: (id: string) => `${BASE_EXPENSE_TYPE_URL}/delete/${id}`,

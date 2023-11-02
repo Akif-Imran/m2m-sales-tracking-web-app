@@ -19,11 +19,23 @@ interface OwnProps {
   opened: boolean;
   onClose: () => void;
   title: string;
+  companyId: string;
 }
 interface IProjectForm
   extends Omit<
     IProject,
-    "_id" | "__v" | "company" | "createdAt" | "createdBy" | "isActive" | "updatedAt" | "deletedAt"
+    | "_id"
+    | "__v"
+    | "company"
+    | "createdAt"
+    | "createdBy"
+    | "isActive"
+    | "updatedAt"
+    | "deletedAt"
+    | "salesPerson"
+    | "updatedAt"
+    | "engineer"
+    | "assignedEngineerDate"
   > {}
 
 const schema: yup.ObjectSchema<IProjectForm> = yup.object().shape({
@@ -38,12 +50,11 @@ const schema: yup.ObjectSchema<IProjectForm> = yup.object().shape({
   contractDate: yup.string().required("Contract date is required"),
   deliveryDate: yup.string().required("Delivery date is required"),
   quotation: yup.number().required("Quotation is required"),
-  salesPerson: yup.string().required("Sales person is required"),
   status: yup.number().required("Status is required"),
   customerId: yup.string().required("Customer is required"),
 });
 
-const _AddProjectModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
+const _AddProjectModal: React.FC<OwnProps> = ({ opened, onClose, title, companyId }) => {
   const { theme } = useStyles();
   const dispatch = useAppDispatch();
   const {
@@ -52,11 +63,8 @@ const _AddProjectModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
   const [isCreating, setIsCreating] = React.useState(false);
   const [contractDate, setContractDate] = React.useState(new Date());
   const [deliveryDate, setDeliveryDate] = React.useState(new Date());
-  const {
-    companies: companiesList,
-    salesPersons: salesPersonsList,
-    projectStatus: projectStatusList,
-  } = useAppSelector(selectRecordsForDropdown);
+  const { companies: companiesList, projectStatus: projectStatusList } =
+    useAppSelector(selectRecordsForDropdown);
 
   const form = useFormik<IProjectForm>({
     initialValues: {
@@ -71,7 +79,6 @@ const _AddProjectModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
       contractDate: DateTime.now().toFormat("yyyy-MM-dd"),
       deliveryDate: DateTime.now().toFormat("yyyy-MM-dd"),
       quotation: 0,
-      salesPerson: "",
       status: 0,
       customerId: "",
     },
@@ -155,13 +162,17 @@ const _AddProjectModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
     }
   };
 
-  const handleOnChangeSalesPerson = (value: string | null) => {
-    if (!value) return;
-    form.setValues((prev) => ({
-      ...prev,
-      salesPerson: value,
-    }));
-  };
+  React.useEffect(() => {
+    if (companyId)
+      form.setValues((prev) => ({
+        ...prev,
+        customerId: companyId,
+      }));
+    return () => {
+      form.resetForm();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [companyId]);
 
   return (
     <Modal
@@ -314,7 +325,7 @@ const _AddProjectModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
                     : null
                 }
               />
-              <Select
+              {/* <Select
                 required
                 withAsterisk={false}
                 searchable
@@ -328,7 +339,7 @@ const _AddProjectModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
                     ? `${form.errors.salesPerson}`
                     : null
                 }
-              />
+              /> */}
             </Group>
             <Select
               required

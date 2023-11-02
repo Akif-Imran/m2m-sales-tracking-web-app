@@ -196,7 +196,7 @@ export const selectRecordsForDropdown = createSelector(
           value: sales._id,
           label: `${sales.name}`,
         })),
-      projectManagers: users.data
+      engineers: users.data
         .filter((user) => user.userType === 3)
         .map((engineer) => ({
           value: engineer._id,
@@ -215,11 +215,13 @@ export const selectProjectWithRecords = createSelector(
     return projects.data.map((project) => {
       const company = companies.data.find((company) => company._id === project.customerId);
       const salesPerson = users.data.find((user) => user._id === project.salesPerson);
+      const engineer = users.data.find((user) => user._id === project?.engineer);
       const status = statuses.data.find((status) => status.id === project.status);
       return {
         ...project,
         company: company,
         salesPersonValue: salesPerson,
+        engineerValue: engineer,
         statusName: `${status?.name} (${status?.value}%)`,
         completionPercentage: status?.value,
       };

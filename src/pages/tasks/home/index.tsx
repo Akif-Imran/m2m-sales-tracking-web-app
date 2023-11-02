@@ -71,7 +71,7 @@ const sortingListInitialState: ListState = {
 const Tasks: React.FC<OwnProps> = () => {
   useStyles();
   const {
-    state: { user, isAdmin, isSales, token },
+    state: { isAdmin, isSales, token },
   } = useAuthContext();
   const dispatch = useAppDispatch();
   const { classes: gclasses, theme } = useGStyles();
@@ -164,12 +164,7 @@ const Tasks: React.FC<OwnProps> = () => {
   };
 
   const clearSort = () => {
-    if (isAdmin) {
-      setSearchedData(tasks);
-    } else {
-      const filtered = tasks.filter((task) => task.assignedTo === user?._id);
-      setSearchedData(filtered);
-    }
+    setSearchedData(tasks);
     setSorting(sortingInitialState);
   };
 

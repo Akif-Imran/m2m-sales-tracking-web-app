@@ -1,4 +1,11 @@
 import { createStyles, rem } from "@mantine/core";
+import { colors } from "@theme";
+
+export const menuIconStyle = {
+  stroke: 1.3,
+  size: 16,
+  color: colors.titleText,
+};
 
 export const useGStyles = createStyles({
   fileUploadButton: {

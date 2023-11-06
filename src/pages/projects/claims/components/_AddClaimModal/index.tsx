@@ -19,6 +19,7 @@ interface OwnProps {
   onClose: () => void;
   title: string;
   companyId?: string;
+  projectId?: string;
 }
 interface IRequestForm
   extends Omit<IClaim, "_id" | "__v" | "createdAt" | "createdBy" | "isActive" | "company"> {}
@@ -39,7 +40,13 @@ const schema: yup.ObjectSchema<IRequestForm> = yup.object().shape({
   status: yup.number().required("Status is required"),
 });
 
-export const _AddClaimModal: React.FC<OwnProps> = ({ onClose, opened, title, companyId }) => {
+export const _AddClaimModal: React.FC<OwnProps> = ({
+  onClose,
+  opened,
+  title,
+  companyId,
+  projectId,
+}) => {
   const { theme } = useStyles();
   const {
     state: { token },
@@ -56,8 +63,8 @@ export const _AddClaimModal: React.FC<OwnProps> = ({ onClose, opened, title, com
 
   const form = useFormik<IRequestForm>({
     initialValues: {
-      projectId: "",
-      customerId: "",
+      projectId: projectId || "",
+      customerId: companyId || "",
       supplierId: "",
       itemName: "",
       itemType: "",
@@ -172,6 +179,18 @@ export const _AddClaimModal: React.FC<OwnProps> = ({ onClose, opened, title, com
       }));
     setProjectsList(project_s);
   }, [companyId, opened, projects]);
+
+  React.useEffect(() => {
+    if (!companyId || !projectId) {
+      return;
+    }
+    form.setValues((prev) => ({
+      ...prev,
+      customerId: companyId,
+      projectId: projectId,
+    }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [companyId, projectId, opened]);
 
   return (
     <Modal

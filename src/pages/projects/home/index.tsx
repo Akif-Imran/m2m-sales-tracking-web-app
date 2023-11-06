@@ -325,6 +325,7 @@ const Projects: React.FC<OwnProps> = () => {
           </Table>
         </ScrollArea>
       </ScrollArea>
+
       <_AddProjectModal
         title="Add Lead/Project"
         opened={addProjectModalOpened}

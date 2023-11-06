@@ -51,8 +51,8 @@ import { markAsRead } from "@slices";
 
 type ActivePage =
   | "Dashboard"
-  | "Company"
-  | "Projects"
+  | "Prospects"
+  | "Leads"
   | "Follow ups"
   | "Purchase Request"
   | "Claims"
@@ -84,17 +84,17 @@ const buttons: NavbarButtons[] = [
   },
   {
     link: routes.company.list,
-    label: "Company",
+    label: "Prospects",
     icon: IconBuildingBank,
     visibleTo: [1, 2, 3, 4],
   },
   {
     link: routes.project.list,
-    label: "Projects",
+    label: "Leads",
     links: [
       {
         link: routes.project.list,
-        label: "Projects",
+        label: "Leads",
         visibleTo: [1, 2, 3, 4],
       },
       {

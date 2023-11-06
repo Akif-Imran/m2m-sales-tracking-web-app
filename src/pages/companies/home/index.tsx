@@ -285,7 +285,7 @@ const Company: React.FC<OwnProps> = () => {
       </Flex>
       {content}
       <_AddCompanyModal
-        title="Add Company"
+        title="Add Prospect"
         opened={addCompanyModalOpened}
         onClose={() => setAddCompanyModalOpened(false)}
       />

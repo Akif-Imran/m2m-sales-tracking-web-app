@@ -5,6 +5,7 @@ import {
   Badge,
   Button,
   Flex,
+  Grid,
   Group,
   Modal,
   Radio,
@@ -22,9 +23,11 @@ import {
 } from "@store";
 import { useGStyles } from "../../../styles";
 import {
+  IconId,
   IconPlus,
   IconRotateClockwise2,
   IconSearch,
+  IconTable,
   IconTrash,
   IconUserCog,
 } from "@tabler/icons-react";
@@ -32,12 +35,13 @@ import { modalOverlayPropsHelper, openDeleteModalHelper } from "@helpers";
 import { notify } from "@utility";
 import { colors } from "@theme";
 import { deleteProject, updateProjectStatus } from "@slices";
-import { _AddProjectModal, _AssignEngineerModal } from "../components";
+import { _AddProjectModal, _AssignEngineerModal, _ProjectCard } from "../components";
 import { DateTime } from "luxon";
 import { DAY_MM_DD_YYYY, projectStatusColors } from "@constants";
 import { useAuthContext } from "@contexts";
-import { useSearchParams } from "react-router-dom";
+import { Outlet, useSearchParams } from "react-router-dom";
 import { removeProject, updateStatusProject } from "@thunks";
+import { useToggle } from "@mantine/hooks";
 
 interface OwnProps {}
 
@@ -55,6 +59,7 @@ const Projects: React.FC<OwnProps> = () => {
   const dispatch = useAppDispatch();
   const { classes: gclasses, theme } = useGStyles();
 
+  const [viewMode, toggle] = useToggle(["cards", "list"]);
   const [searchParams, _setSearchParams] = useSearchParams();
   const modal = searchParams.get("open");
   const customerId = searchParams.get("customerId") || "";
@@ -199,6 +204,13 @@ const Projects: React.FC<OwnProps> = () => {
   //   }
   // }, [modal]);
 
+  let icon: JSX.Element;
+  if (viewMode === "cards") {
+    icon = <IconId size={22} color={colors.white} />;
+  } else {
+    icon = <IconTable size={22} color={colors.white} />;
+  }
+
   const rows =
     searchedData.length === 0 ? (
       <tr>
@@ -214,84 +226,95 @@ const Projects: React.FC<OwnProps> = () => {
             currency: project.value.currency,
             maximumFractionDigits: 2,
           }).format(project.value.amount);
-          return (
-            <tr key={project._id}>
-              <td>{index + 1}</td>
-              <td>{project.name}</td>
-              <td>{project.description}</td>
-              <td>
-                <Badge
-                  variant="filled"
-                  color={projectStatusColors[project.status]}
-                  styles={{
-                    root: {
-                      width: "100%",
-                    },
-                  }}
-                >
-                  {project.statusName}
-                </Badge>
-              </td>
-              <td>{project.type}</td>
-              <td>{value}</td>
-              <td>{DateTime.fromISO(project.contractDate).toLocal().toFormat(DAY_MM_DD_YYYY)}</td>
-              <td>{DateTime.fromISO(project.deliveryDate).toLocal().toFormat(DAY_MM_DD_YYYY)}</td>
-              <td>{project.quotation}</td>
-              <td>{project?.salesPersonValue?.name || "N/A"}</td>
-              <td>{project?.engineerValue?.name || "N/A"}</td>
-              <td>{project?.company?.name || "N/A"}</td>
-              <td>
-                <Group>
-                  <ActionIcon
-                    color="gray"
-                    size={"sm"}
-                    onClick={() => showUpdateStatusModal(project.status, project._id)}
+          if (viewMode === "cards") {
+            return (
+              <Grid.Col span={4} key={project._id}>
+                <_ProjectCard
+                  item={project}
+                  handleDelete={handleDelete}
+                  assignEngineer={showAssignEngineerModal}
+                  updateStatus={showUpdateStatusModal}
+                />
+              </Grid.Col>
+            );
+          } else if (viewMode === "list") {
+            return (
+              <tr key={project._id}>
+                <td>{index + 1}</td>
+                <td>{project.name}</td>
+                <td>{project.description}</td>
+                <td>
+                  <Badge
+                    variant="filled"
+                    color={projectStatusColors[project.status]}
+                    styles={{
+                      root: {
+                        width: "100%",
+                      },
+                    }}
                   >
-                    <IconRotateClockwise2 />
-                  </ActionIcon>
-                  {isAdmin && (
-                    <React.Fragment>
-                      <ActionIcon
-                        color="gray"
-                        size={"sm"}
-                        onClick={() => showAssignEngineerModal(project._id)}
-                      >
-                        <IconUserCog />
-                      </ActionIcon>
-                      <ActionIcon color="red" size={"sm"} onClick={() => handleDelete(project._id)}>
-                        <IconTrash />
-                      </ActionIcon>
-                    </React.Fragment>
-                  )}
-                </Group>
-              </td>
-            </tr>
-          );
+                    {project.statusName}
+                  </Badge>
+                </td>
+                <td>{project.type}</td>
+                <td>{value}</td>
+                <td>{DateTime.fromISO(project.contractDate).toLocal().toFormat(DAY_MM_DD_YYYY)}</td>
+                <td>{DateTime.fromISO(project.deliveryDate).toLocal().toFormat(DAY_MM_DD_YYYY)}</td>
+                <td>{project.quotation}</td>
+                <td>{project?.salesPersonValue?.name || "N/A"}</td>
+                <td>{project?.engineerValue?.name || "N/A"}</td>
+                <td>{project?.company?.name || "N/A"}</td>
+                <td>
+                  <Group>
+                    <ActionIcon
+                      color="gray"
+                      size={"sm"}
+                      onClick={() => showUpdateStatusModal(project.status, project._id)}
+                    >
+                      <IconRotateClockwise2 />
+                    </ActionIcon>
+                    {isAdmin && (
+                      <React.Fragment>
+                        <ActionIcon
+                          color="gray"
+                          size={"sm"}
+                          onClick={() => showAssignEngineerModal(project._id)}
+                        >
+                          <IconUserCog />
+                        </ActionIcon>
+                        <ActionIcon
+                          color="red"
+                          size={"sm"}
+                          onClick={() => handleDelete(project._id)}
+                        >
+                          <IconTrash />
+                        </ActionIcon>
+                      </React.Fragment>
+                    )}
+                  </Group>
+                </td>
+              </tr>
+            );
+          } else {
+            return (
+              <_ProjectCard
+                key={project._id}
+                item={project}
+                handleDelete={handleDelete}
+                assignEngineer={showAssignEngineerModal}
+                updateStatus={showUpdateStatusModal}
+              />
+            );
+          }
         })}
       </>
     );
 
-  return (
-    <Stack spacing={"xs"}>
-      <Flex gap={"md"} className={gclasses.searchContainer}>
-        <TextInput
-          value={searchQuery}
-          className={gclasses.searchInput}
-          placeholder="Search by any field"
-          icon={<IconSearch size={16} />}
-          onChange={(e) => onChangeSearch(e.target?.value)}
-          // rightSection={
-          //   <IconFilter size={14} color={colors.borderColor} onClick={showFilterModal} />
-          // }
-        />
-        <Button
-          variant="filled"
-          rightIcon={<IconPlus size={16} />}
-          onClick={() => setAddProjectModalOpened(true)}
-        >
-          Project
-        </Button>
-      </Flex>
+  let content: JSX.Element;
+  if (viewMode === "cards") {
+    content = <Grid columns={12}>{rows}</Grid>;
+  } else if (viewMode === "list") {
+    content = (
       <ScrollArea type="always" h={"80vh"}>
         <ScrollArea w={"140vw"}>
           <Table border={1} bgcolor={theme.white} withBorder>
@@ -325,7 +348,49 @@ const Projects: React.FC<OwnProps> = () => {
           </Table>
         </ScrollArea>
       </ScrollArea>
+    );
+  } else {
+    content = (
+      <Grid>
+        <Grid.Col span={4}>{rows}</Grid.Col>
+        <Grid.Col span={8}>
+          <Outlet />
+        </Grid.Col>
+      </Grid>
+    );
+  }
 
+  return (
+    <Stack spacing={"xs"}>
+      <Flex gap={"md"} className={gclasses.searchContainer}>
+        <TextInput
+          value={searchQuery}
+          className={gclasses.searchInput}
+          placeholder="Search by any field"
+          icon={<IconSearch size={16} />}
+          onChange={(e) => onChangeSearch(e.target?.value)}
+          // rightSection={
+          //   <IconFilter size={14} color={colors.borderColor} onClick={showFilterModal} />
+          // }
+        />
+        <ActionIcon
+          variant="filled"
+          size={"2.2rem"}
+          color={theme.primaryColor}
+          onClick={() => toggle()}
+        >
+          {icon}
+        </ActionIcon>
+        <Button
+          variant="filled"
+          rightIcon={<IconPlus size={16} />}
+          onClick={() => setAddProjectModalOpened(true)}
+        >
+          Project
+        </Button>
+      </Flex>
+
+      {content}
       <_AddProjectModal
         title="Add Lead/Project"
         opened={addProjectModalOpened}

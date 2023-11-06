@@ -198,12 +198,6 @@ const Projects: React.FC<OwnProps> = () => {
     setSearchedData(projects);
   }, [projects]);
 
-  // React.useEffect(() => {
-  //   if (modal === "add") {
-  //     setAddProjectModalOpened(true);
-  //   }
-  // }, [modal]);
-
   let icon: JSX.Element;
   if (viewMode === "cards") {
     icon = <IconId size={22} color={colors.white} />;

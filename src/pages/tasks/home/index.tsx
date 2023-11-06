@@ -71,7 +71,7 @@ const sortingListInitialState: ListState = {
 const Tasks: React.FC<OwnProps> = () => {
   useStyles();
   const {
-    state: { isAdmin, isSales, token },
+    state: { isAdmin, token },
   } = useAuthContext();
   const dispatch = useAppDispatch();
   const { classes: gclasses, theme } = useGStyles();
@@ -452,7 +452,7 @@ const Tasks: React.FC<OwnProps> = () => {
         >
           <div className={gclasses.radioContainer}>
             {taskStatusList
-              .filter((status) => (isSales ? status.label !== "Pending" : true))
+              .filter((status) => (!isAdmin ? status.label !== "Pending" : true))
               .map((value) => {
                 return <Radio value={value.value} label={value.label} key={value.value} />;
               })}

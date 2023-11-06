@@ -25,6 +25,7 @@ import { colors } from "@theme";
 import { _AddLeaveModal, _UpdateLeaveModal } from "../components";
 import { useAuthContext } from "@contexts";
 import { BASE_URL } from "@api";
+import { PhotoView } from "react-photo-view";
 
 interface OwnProps {}
 
@@ -126,10 +127,15 @@ export const LeaveApplications: React.FC<OwnProps> = () => {
             <tr key={leave._id}>
               <td>{index + 1}</td>
               <td>
-                <Avatar
+                <PhotoView
+                  key={leave._id}
                   src={leave.document ? `${BASE_URL}\\${leave.document}` : "/user.png"}
-                  size={50}
-                />
+                >
+                  <Avatar
+                    src={leave.document ? `${BASE_URL}\\${leave.document}` : "/user.png"}
+                    size={50}
+                  />
+                </PhotoView>
               </td>
               <td>{leave.name}</td>
               <td>

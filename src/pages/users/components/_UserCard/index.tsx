@@ -5,6 +5,7 @@ import { colors } from "@theme";
 import { userStatusColors } from "@constants";
 import { BASE_URL } from "@api";
 import { IconDotsVertical, IconEdit, IconTrash } from "@tabler/icons-react";
+import { PhotoView } from "react-photo-view";
 
 type CardUser = IUser & {
   userTypeName: string | undefined;
@@ -46,13 +47,18 @@ const _UserCard: React.FC<OwnProps> = ({ item, onClick, handleDelete, setForEdit
     <Card shadow="sm" mb={"xs"} px={"sm"} py={"sm"} radius={"md"} onClick={onClick}>
       <div className={classes.imageWithInfoContainer}>
         <div className={classes.machineImageContainer}>
-          <Avatar
+          <PhotoView
+            key={item._id}
             src={item?.picture ? `${BASE_URL}\\${item?.picture}` : "/user.png"}
-            radius={item?.picture ? rem(250) : rem(250)}
-            size={"xl"}
-            //@ts-expect-error style works
-            styles={item?.picture ? undefined : noImageStyle}
-          />
+          >
+            <Avatar
+              src={item?.picture ? `${BASE_URL}\\${item?.picture}` : "/user.png"}
+              radius={item?.picture ? rem(250) : rem(250)}
+              size={"xl"}
+              //@ts-expect-error style works
+              styles={item?.picture ? undefined : noImageStyle}
+            />
+          </PhotoView>
           <Badge variant="filled" color={userStatusColors[item.userType]} mt={"xs"}>
             {item.userTypeName?.split("/")[0]}
           </Badge>

@@ -40,9 +40,7 @@ export const Suppliers: React.FC<OwnProps> = () => {
   };
 
   React.useEffect(() => {
-    if (isAdmin || isHR) {
-      setSearchedData(suppliers);
-    }
+    setSearchedData(suppliers);
   }, [isAdmin, isHR, suppliers]);
 
   const rows =

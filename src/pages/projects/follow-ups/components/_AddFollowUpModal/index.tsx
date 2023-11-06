@@ -126,8 +126,11 @@ const _AddFollowUpModal: React.FC<OwnProps> = ({
   } = useAuthContext();
   const dispatch = useAppDispatch();
   const projects = useAppSelector(selectProjectWithRecords);
-  const { projects: projectsList, companies: companiesList } =
-    useAppSelector(selectRecordsForDropdown);
+  const {
+    projects: projectsList,
+    companies: companiesList,
+    expenseTypes: expenseTypeList,
+  } = useAppSelector(selectRecordsForDropdown);
   const contacts = useAppSelector(selectCompanyContact);
 
   const [isCreating, setIsCreating] = React.useState(false);
@@ -641,7 +644,30 @@ const _AddFollowUpModal: React.FC<OwnProps> = ({
                 }
               />
               <Group grow align="flex-start">
-                <TextInput
+                <Select
+                  required
+                  searchable
+                  withAsterisk={false}
+                  label="Type"
+                  name="expenseType"
+                  id="expenseType"
+                  placeholder="Select expense type"
+                  allowDeselect={false}
+                  nothingFound="No type found"
+                  value={form.values.expenseType}
+                  disabled={!form.values.hasExpense}
+                  data={expenseTypeList}
+                  onChange={(value) => {
+                    if (!value) return;
+                    form.setValues((prev) => ({ ...prev, expenseType: value }));
+                  }}
+                  error={
+                    form.errors.expenseType && form.touched.expenseType
+                      ? `${form.errors.expenseType}`
+                      : null
+                  }
+                />
+                {/* <TextInput
                   required
                   withAsterisk={false}
                   label="Type"
@@ -656,7 +682,7 @@ const _AddFollowUpModal: React.FC<OwnProps> = ({
                       ? `${form.errors.expenseType}`
                       : null
                   }
-                />
+                /> */}
                 <TextInput
                   required
                   withAsterisk={false}

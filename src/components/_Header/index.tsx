@@ -26,12 +26,9 @@ import {
   IconChevronDown,
   IconTrash,
   IconBellFilled,
-  // IconSettings,
   IconDashboard,
   IconUserCircle,
   IconSettingsExclamation,
-  // IconHelpCircle,
-  // IconInfoCircle,
   IconChecklist,
   IconBuildingBank,
   IconDots,
@@ -45,7 +42,7 @@ import { deleteAccount } from "@services";
 import { notify } from "@utility";
 import { openDeleteModalHelper } from "@helpers";
 import { colors } from "@theme";
-import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { routes } from "@routes";
 import { DateTime } from "luxon";
 import { DAY_MM_DD_YYYY_HH_MM_SS_A } from "@constants";
@@ -66,28 +63,30 @@ type ActivePage =
   | "Settings"
   | "Help"
   | "About";
-
-const removePages: ActivePage[] = ["Company", "Users"];
 interface NavbarButtons {
   link: string;
-  links?: { link: string; label: ActivePage }[];
+  links?: { link: string; label: ActivePage; visibleTo: number[] }[];
   label: ActivePage;
   icon: (props: TablerIconsProps) => JSX.Element;
-  adminOnly: boolean;
+  visibleTo: number[];
 }
-
+//UserTypes
+// 1 -> Admin
+// 2 -> Sales
+// 3 -> Engineer
+// 4 -> HR
 const buttons: NavbarButtons[] = [
   {
     link: routes.dashboard.home,
     label: "Dashboard",
     icon: IconDashboard,
-    adminOnly: false,
+    visibleTo: [1, 2, 3, 4],
   },
   {
     link: routes.company.list,
     label: "Company",
     icon: IconBuildingBank,
-    adminOnly: false,
+    visibleTo: [1, 2, 3, 4],
   },
   {
     link: routes.project.list,
@@ -96,22 +95,26 @@ const buttons: NavbarButtons[] = [
       {
         link: routes.project.list,
         label: "Projects",
+        visibleTo: [1, 2, 3, 4],
       },
       {
         link: routes.project.followUps.list,
         label: "Follow ups",
+        visibleTo: [1, 2, 3, 4],
       },
       {
         link: routes.project.purchaseRequest.list,
         label: "Purchase Request",
+        visibleTo: [1, 2, 3, 4],
       },
       {
         link: routes.project.claims.list,
         label: "Claims",
+        visibleTo: [1, 2, 3, 4],
       },
     ],
     icon: IconSettingsExclamation,
-    adminOnly: false,
+    visibleTo: [1, 2, 3, 4],
   },
   {
     link: routes.user.list,
@@ -120,20 +123,22 @@ const buttons: NavbarButtons[] = [
       {
         link: routes.user.list,
         label: "Users",
+        visibleTo: [1],
       },
       {
         link: routes.user.leaves.list,
         label: "Leaves",
+        visibleTo: [1, 2, 3, 4],
       },
     ],
     icon: IconUserCircle,
-    adminOnly: false,
+    visibleTo: [1, 2, 3, 4],
   },
   {
     link: routes.task.list,
     label: "Tasks",
     icon: IconChecklist,
-    adminOnly: false,
+    visibleTo: [1, 2, 3, 4],
   },
   {
     link: routes.settings.home,
@@ -141,19 +146,22 @@ const buttons: NavbarButtons[] = [
       {
         label: "Settings",
         link: routes.settings.home,
+        visibleTo: [1, 2, 3, 4],
       },
       {
         label: "Help",
         link: routes.help.home,
+        visibleTo: [1, 2, 3, 4],
       },
       {
         label: "About",
         link: routes.about.home,
+        visibleTo: [1, 2, 3, 4],
       },
     ],
     label: "More",
     icon: IconDots,
-    adminOnly: true,
+    visibleTo: [1, 2, 3, 4],
   },
   // {
   //   link: routes.settings.home,
@@ -187,7 +195,7 @@ const _Header = ({ toggleNavbar, opened }: _HeaderProps) => {
   const { classes, theme, cx } = useStyles();
   const dispatch = useAppDispatch();
   const {
-    state: { token, user, isAdmin, isHR },
+    state: { token, user },
     logout,
   } = useAuthContext();
 
@@ -242,12 +250,12 @@ const _Header = ({ toggleNavbar, opened }: _HeaderProps) => {
   };
 
   React.useEffect(() => {
-    console.log(active);
+    console.log("useEffect log: ", active);
     if (location.pathname === "/notifications") {
       navigate(routes.notification.list);
       return;
     }
-    if (active === "Dashboard") {
+    /*  if (active === "Dashboard") {
       navigate(routes.dashboard.home);
     } else if (active == "Company") {
       navigate(routes.company.list);
@@ -271,18 +279,27 @@ const _Header = ({ toggleNavbar, opened }: _HeaderProps) => {
       navigate(routes.about.home);
     } else if (active === "Help") {
       navigate(routes.help.home);
-    }
+    } */
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active]);
 
+  // .filter((value) => (isAdmin || isHR ? true : !removePages.includes(value.label)))
   const links = buttons
-    .filter((value) => (isAdmin || isHR ? true : !removePages.includes(value.label)))
+    .filter((value) => value.visibleTo.includes(user!.userType))
     .map((item) => {
-      const menuItems = item.links?.map((item) => (
-        <Menu.Item key={item.link} onClick={() => setActive(item.label)}>
-          {item.label}
-        </Menu.Item>
-      ));
+      const menuItems = item.links
+        ?.filter((item) => item.visibleTo.includes(user!.userType))
+        .map((item) => (
+          <Menu.Item
+            key={item.link}
+            onClick={() => {
+              navigate(item.link);
+              setActive(item.label);
+            }}
+          >
+            {item.label}
+          </Menu.Item>
+        ));
       if (menuItems) {
         return (
           <Menu
@@ -293,13 +310,21 @@ const _Header = ({ toggleNavbar, opened }: _HeaderProps) => {
             withArrow
           >
             <Menu.Target>
-              <NavLink
+              <UnstyledButton
                 className={cx(classes.link, {
                   [classes.linkActive]: item.label === active,
                   [classes.iconCentered]: !opened,
                 })}
-                to={item.link}
                 onClick={(_event) => {
+                  console.log("menu click");
+                  if (
+                    item.links
+                      ?.find((inner) => inner.label === item.label)
+                      ?.visibleTo.includes(user!.userType)
+                  ) {
+                    console.log("user is navigated");
+                    navigate(item.link);
+                  }
                   setActive(item.label);
                 }}
               >
@@ -309,7 +334,7 @@ const _Header = ({ toggleNavbar, opened }: _HeaderProps) => {
                     {item.label} {"▼"}
                   </span>
                 )}
-              </NavLink>
+              </UnstyledButton>
             </Menu.Target>
             <Menu.Dropdown>{menuItems}</Menu.Dropdown>
           </Menu>
@@ -325,19 +350,20 @@ const _Header = ({ toggleNavbar, opened }: _HeaderProps) => {
           withArrow
           key={item.label}
         >
-          <NavLink
+          <UnstyledButton
             className={cx(classes.link, {
               [classes.linkActive]: item.label === active,
               [classes.iconCentered]: !opened,
             })}
-            to={item.link}
             onClick={(_event) => {
+              console.log("simple click");
+              if (item.visibleTo.includes(user!.userType)) navigate(item.link);
               setActive(item.label);
             }}
           >
             <item.icon className={classes.linkIcon} stroke={1.5} />
             {opened && <span>{item.label}</span>}
-          </NavLink>
+          </UnstyledButton>
         </Tooltip>
       );
     });

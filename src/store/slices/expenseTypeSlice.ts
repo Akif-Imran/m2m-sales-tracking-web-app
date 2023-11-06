@@ -8,12 +8,7 @@ interface State {
 }
 
 const initialState: State = {
-  data: [
-    {
-      _id: "0js09gj309gje093",
-      name: "Food",
-    },
-  ],
+  data: [],
   isLoading: false,
   error: null,
 };

@@ -71,7 +71,7 @@ const sortingListInitialState: ListState = {
 const Tasks: React.FC<OwnProps> = () => {
   useStyles();
   const {
-    state: { user, isAdmin, isSales, token },
+    state: { isAdmin, token },
   } = useAuthContext();
   const dispatch = useAppDispatch();
   const { classes: gclasses, theme } = useGStyles();
@@ -84,7 +84,7 @@ const Tasks: React.FC<OwnProps> = () => {
     taskStatus: taskStatusList,
     companies,
     projects,
-    projectManagers,
+    engineers,
     salesPersons,
   } = useAppSelector(selectRecordsForDropdown);
 
@@ -122,10 +122,10 @@ const Tasks: React.FC<OwnProps> = () => {
         statusList: [{ value: "0", label: "All" }].concat(taskStatusList),
         companyList: [{ value: "0", label: "All" }].concat(companies),
         projectList: [{ value: "0", label: "All" }].concat(projects),
-        assigneeList: [{ value: "0", label: "All" }].concat(projectManagers.concat(salesPersons)),
+        assigneeList: [{ value: "0", label: "All" }].concat(engineers.concat(salesPersons)),
       };
     });
-  }, [taskStatusList, companies, projects, projectManagers, salesPersons]);
+  }, [taskStatusList, companies, projects, engineers, salesPersons]);
 
   const handleDelete = (id: string) => {
     openDeleteModalHelper({
@@ -164,12 +164,7 @@ const Tasks: React.FC<OwnProps> = () => {
   };
 
   const clearSort = () => {
-    if (isAdmin) {
-      setSearchedData(tasks);
-    } else {
-      const filtered = tasks.filter((task) => task.assignedTo === user?._id);
-      setSearchedData(filtered);
-    }
+    setSearchedData(tasks);
     setSorting(sortingInitialState);
   };
 
@@ -457,7 +452,7 @@ const Tasks: React.FC<OwnProps> = () => {
         >
           <div className={gclasses.radioContainer}>
             {taskStatusList
-              .filter((status) => (isSales ? status.label !== "Pending" : true))
+              .filter((status) => (!isAdmin ? status.label !== "Pending" : true))
               .map((value) => {
                 return <Radio value={value.value} label={value.label} key={value.value} />;
               })}

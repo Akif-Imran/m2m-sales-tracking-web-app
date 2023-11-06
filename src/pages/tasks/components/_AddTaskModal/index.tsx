@@ -34,7 +34,7 @@ const _AddTaskModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
   } = useAuthContext();
   const [plannedEndDate, setPlannedEndDate] = React.useState(new Date());
   const allProjects = useAppSelector(selectProjectWithRecords);
-  const { companies, salesPersons, projectManagers } = useAppSelector(selectRecordsForDropdown);
+  const { companies, salesPersons, engineers } = useAppSelector(selectRecordsForDropdown);
   const [projectsList, setProjectList] = React.useState<IDropDownList>([]);
   const [isCreating, setIsCreating] = React.useState(false);
 
@@ -180,7 +180,7 @@ const _AddTaskModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
             value={form.values.assignedTo}
             onChange={handleOnChangeAssignee}
             //TODO - might need a fix to include all users
-            data={[...salesPersons, ...projectManagers]}
+            data={[...salesPersons, ...engineers]}
           />
           <DateTimePicker
             dropdownType="modal"

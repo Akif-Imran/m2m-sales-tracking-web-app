@@ -27,7 +27,7 @@ const _Help: React.FC<OwnProps> = () => {
           </div>
         </Container>
       </div>
-      <Grid mt={-100} mx={"xl"}>
+      <Grid mt={rem(-50)} mx={"xl"}>
         <Grid.Col xs={12} md={6}>
           <Card radius={"md"} shadow="md" w={"100%"} h={rem(280)}>
             <Stack align="center">

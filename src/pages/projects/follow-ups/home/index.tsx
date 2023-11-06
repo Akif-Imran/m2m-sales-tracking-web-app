@@ -25,6 +25,7 @@ import { DateTime } from "luxon";
 import { _AddFollowUpModal } from "../components";
 import { removeFollowUp } from "@thunks";
 import { BASE_URL } from "@api";
+import { PhotoView } from "react-photo-view";
 
 interface OwnProps {}
 
@@ -143,16 +144,18 @@ export const FollowUps: React.FC<OwnProps> = () => {
               </td>
               <td>{followup?.nextMeetingAgenda}</td>
               {/* claims on this follow up */}
-              <td>{followup?.expenseType}</td>
+              <td>{followup?.expenseTypeDetail?.name}</td>
               <td>{followup?.expenseName}</td>
               <td>{value}</td>
               <td>
                 {followup?.expenseDocument ? (
-                  <Avatar
-                    src={`${BASE_URL}\\${followup?.expenseDocument}`}
-                    size={50}
-                    radius={"xs"}
-                  />
+                  <PhotoView key={followup._id} src={`${BASE_URL}\\${followup?.expenseDocument}`}>
+                    <Avatar
+                      src={`${BASE_URL}\\${followup?.expenseDocument}`}
+                      size={50}
+                      radius={"xs"}
+                    />
+                  </PhotoView>
                 ) : (
                   "N/A"
                 )}
@@ -186,15 +189,13 @@ export const FollowUps: React.FC<OwnProps> = () => {
           //   <IconFilter size={14} color={colors.borderColor} onClick={showFilterModal} />
           // }
         />
-        {isAdmin && (
-          <Button
-            variant="filled"
-            rightIcon={<IconPlus size={16} />}
-            onClick={() => setAddFollowUpModalOpened(true)}
-          >
-            Follow Up
-          </Button>
-        )}
+        <Button
+          variant="filled"
+          rightIcon={<IconPlus size={16} />}
+          onClick={() => setAddFollowUpModalOpened(true)}
+        >
+          Follow Up
+        </Button>
       </Flex>
       <ScrollArea type="always" h={"80vh"}>
         <ScrollArea w={"140vw"}>

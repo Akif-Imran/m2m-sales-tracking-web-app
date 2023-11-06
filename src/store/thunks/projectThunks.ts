@@ -9,7 +9,6 @@ interface CreateReq {
     type: string;
     contractDate: string;
     deliveryDate: string;
-    salesPerson: string;
     costing: object | null;
     value: {
       amount: number;
@@ -23,6 +22,13 @@ interface CreateReq {
 interface DeleteReq {
   token: string;
   id: string;
+}
+interface AssignEngineer {
+  token: string;
+  projectId: string;
+  body: {
+    engineer: string;
+  };
 }
 
 interface StatusReq {
@@ -94,3 +100,15 @@ export const getProjectById = createAsyncThunk("project/get", async (params: ByI
   );
   return response.data;
 });
+
+export const assignEngineer = createAsyncThunk(
+  "project/assign-engineer",
+  async (params: AssignEngineer) => {
+    const response = await apiPut<ApiResponse<IProject>, typeof params.body>(
+      urls.project.assignEngineer(params.projectId),
+      params.token,
+      params.body
+    );
+    return response.data;
+  }
+);

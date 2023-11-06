@@ -6,6 +6,7 @@ import {
   fetchClaim,
   fetchClaimStatuses,
   fetchContacts,
+  fetchExpenseType,
   fetchFollowUps,
   fetchLeaveStatuses,
   fetchLeaves,
@@ -47,6 +48,7 @@ export const _DataLoader: React.FC<React.PropsWithChildren> = ({ children }) => 
     dispatch(fetchLeaveStatuses(token));
     dispatch(fetchTasks(token));
     dispatch(fetchTaskStatuses(token));
+    dispatch(fetchExpenseType(token));
   }, [dispatch, token]);
 
   return (

@@ -21,12 +21,18 @@ import {
   useAppSelector,
 } from "@store";
 import { useGStyles } from "../../../styles";
-import { IconPlus, IconRotateClockwise2, IconSearch, IconTrash } from "@tabler/icons-react";
+import {
+  IconPlus,
+  IconRotateClockwise2,
+  IconSearch,
+  IconTrash,
+  IconUserCog,
+} from "@tabler/icons-react";
 import { modalOverlayPropsHelper, openDeleteModalHelper } from "@helpers";
 import { notify } from "@utility";
 import { colors } from "@theme";
 import { deleteProject, updateProjectStatus } from "@slices";
-import { _AddProjectModal } from "../components";
+import { _AddProjectModal, _AssignEngineerModal } from "../components";
 import { DateTime } from "luxon";
 import { DAY_MM_DD_YYYY, projectStatusColors } from "@constants";
 import { useAuthContext } from "@contexts";
@@ -51,11 +57,13 @@ const Projects: React.FC<OwnProps> = () => {
 
   const [searchParams, _setSearchParams] = useSearchParams();
   const modal = searchParams.get("open");
+  const customerId = searchParams.get("customerId") || "";
 
   const [searchQuery, setSearchQuery] = React.useState("");
   const projects = useAppSelector(selectProjectWithRecords);
   const [isDeleting, setIsDeleting] = React.useState(false);
   const [addProjectModalOpened, setAddProjectModalOpened] = React.useState(modal === "add");
+  const [assignEngineerModalOpened, setAssignEngineerModalOpened] = React.useState(false);
   const [searchedData, setSearchedData] = React.useState<typeof projects>([]);
 
   const { projectStatus: projectStatusList } = useAppSelector(selectRecordsForDropdown);
@@ -72,7 +80,13 @@ const Projects: React.FC<OwnProps> = () => {
     setSelectedProject(projectId);
     setVisible(true);
   };
+  const showAssignEngineerModal = (projectId: string) => {
+    setSelectedProject(projectId);
+    setAssignEngineerModalOpened(true);
+  };
+
   const hideUpdateStatusModal = () => setVisible(false);
+  const hideAssignEngineerModal = () => setAssignEngineerModalOpened(false);
 
   const onChangeSearch = (query: string) => {
     setSearchQuery(query);
@@ -224,24 +238,32 @@ const Projects: React.FC<OwnProps> = () => {
               <td>{DateTime.fromISO(project.deliveryDate).toLocal().toFormat(DAY_MM_DD_YYYY)}</td>
               <td>{project.quotation}</td>
               <td>{project?.salesPersonValue?.name || "N/A"}</td>
+              <td>{project?.engineerValue?.name || "N/A"}</td>
               <td>{project?.company?.name || "N/A"}</td>
               <td>
-                {isAdmin ? (
-                  <Group>
-                    <ActionIcon
-                      color="gray"
-                      size={"sm"}
-                      onClick={() => showUpdateStatusModal(project.status, project._id)}
-                    >
-                      <IconRotateClockwise2 />
-                    </ActionIcon>
-                    <ActionIcon color="red" size={"sm"} onClick={() => handleDelete(project._id)}>
-                      <IconTrash />
-                    </ActionIcon>
-                  </Group>
-                ) : (
-                  "Admin Required"
-                )}
+                <Group>
+                  <ActionIcon
+                    color="gray"
+                    size={"sm"}
+                    onClick={() => showUpdateStatusModal(project.status, project._id)}
+                  >
+                    <IconRotateClockwise2 />
+                  </ActionIcon>
+                  {isAdmin && (
+                    <React.Fragment>
+                      <ActionIcon
+                        color="gray"
+                        size={"sm"}
+                        onClick={() => showAssignEngineerModal(project._id)}
+                      >
+                        <IconUserCog />
+                      </ActionIcon>
+                      <ActionIcon color="red" size={"sm"} onClick={() => handleDelete(project._id)}>
+                        <IconTrash />
+                      </ActionIcon>
+                    </React.Fragment>
+                  )}
+                </Group>
               </td>
             </tr>
           );
@@ -262,15 +284,13 @@ const Projects: React.FC<OwnProps> = () => {
           //   <IconFilter size={14} color={colors.borderColor} onClick={showFilterModal} />
           // }
         />
-        {isAdmin && (
-          <Button
-            variant="filled"
-            rightIcon={<IconPlus size={16} />}
-            onClick={() => setAddProjectModalOpened(true)}
-          >
-            Project
-          </Button>
-        )}
+        <Button
+          variant="filled"
+          rightIcon={<IconPlus size={16} />}
+          onClick={() => setAddProjectModalOpened(true)}
+        >
+          Project
+        </Button>
       </Flex>
       <ScrollArea type="always" h={"80vh"}>
         <ScrollArea w={"140vw"}>
@@ -296,6 +316,7 @@ const Projects: React.FC<OwnProps> = () => {
                 <th onClick={() => sortData("salesPerson")}>
                   Sales Person {sortOrder.salesPerson === "asc" ? "▲" : "▼"}
                 </th>
+                <th>Engineer</th>
                 <th>Customer Name</th>
                 <th>Actions</th>
               </tr>
@@ -308,6 +329,13 @@ const Projects: React.FC<OwnProps> = () => {
         title="Add Lead/Project"
         opened={addProjectModalOpened}
         onClose={() => setAddProjectModalOpened(false)}
+        companyId={customerId}
+      />
+      <_AssignEngineerModal
+        title="Assign Engineer"
+        opened={assignEngineerModalOpened}
+        onClose={hideAssignEngineerModal}
+        projectId={selectedProject}
       />
       <Modal
         centered

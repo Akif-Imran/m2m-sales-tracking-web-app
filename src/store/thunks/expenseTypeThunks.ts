@@ -5,6 +5,7 @@ interface CreateReq {
   token: string;
   expenseType: {
     name: string;
+    description: string;
   };
 }
 
@@ -13,6 +14,7 @@ interface UpdateReq {
   id: string;
   expenseType: {
     name: string;
+    description: string;
   };
 }
 
@@ -62,7 +64,7 @@ export const removeExpenseType = createAsyncThunk(
 );
 
 export const fetchExpenseType = createAsyncThunk("expenseType/fetch", async (token: string) => {
-  const response = await apiGet<ApiResponse<IExpenseType[]>>(urls.expenseType.list, token);
+  const response = await apiGet<ApiResponse<IExpenseType[]>>(urls.expenseType.list(), token);
   return response.data;
 });
 

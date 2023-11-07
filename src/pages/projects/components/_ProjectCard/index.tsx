@@ -45,13 +45,15 @@ export const _ProjectCard: React.FC<OwnProps> = ({
     <Card shadow="sm" mb={"xs"} px={"sm"} py={"lg"} radius={"md"} onClick={onClick}>
       <div className={classes.imageWithInfoContainer}>
         <div className={classes.machineImageContainer}>
-          <PhotoView src={item?.image ? `${BASE_URL}\\${item?.image}` : "/company.png"}>
+          <PhotoView
+            src={item?.images.length > 0 ? `${BASE_URL}\\${item?.images[0]}` : "/company.png"}
+          >
             <Avatar
-              src={item?.image ? `${BASE_URL}\\${item?.image}` : "/company.png"}
-              radius={item?.image ? rem(250) : rem(250)}
+              src={item?.images.length > 0 ? `${BASE_URL}\\${item?.images[0]}` : "/company.png"}
+              radius={item?.images.length > 0 ? rem(250) : rem(250)}
               size={"xl"}
               //@ts-expect-error style works
-              styles={item?.image ? undefined : noImageStyle}
+              styles={item?.images.length > 0 ? undefined : noImageStyle}
             />
           </PhotoView>
         </div>

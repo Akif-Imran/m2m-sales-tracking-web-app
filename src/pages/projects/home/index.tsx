@@ -2,6 +2,7 @@ import React from "react";
 import { useStyles } from "./styles";
 import {
   ActionIcon,
+  Avatar,
   Badge,
   Button,
   Flex,
@@ -21,7 +22,7 @@ import {
   useAppDispatch,
   useAppSelector,
 } from "@store";
-import { useGStyles } from "../../../styles";
+import { useGStyles, noImageStyle } from "@global-styles";
 import {
   IconId,
   IconPlus,
@@ -42,6 +43,7 @@ import { useAuthContext } from "@contexts";
 import { Outlet, useSearchParams } from "react-router-dom";
 import { removeProject, updateStatusProject } from "@thunks";
 import { useToggle } from "@mantine/hooks";
+import { BASE_URL } from "@api";
 
 interface OwnProps {}
 
@@ -220,6 +222,7 @@ const Projects: React.FC<OwnProps> = () => {
             currency: project.value.currency,
             maximumFractionDigits: 2,
           }).format(project.value.amount);
+
           if (viewMode === "cards") {
             return (
               <Grid.Col span={4} key={project._id}>
@@ -235,6 +238,18 @@ const Projects: React.FC<OwnProps> = () => {
             return (
               <tr key={project._id}>
                 <td>{index + 1}</td>
+                <td>
+                  <Avatar
+                    src={
+                      project?.images.length > 0
+                        ? `${BASE_URL}\\${project?.images[0]}`
+                        : "/company.png"
+                    }
+                    size={50}
+                    //@ts-expect-error style works
+                    styles={project.images.length > 0 ? undefined : noImageStyle}
+                  />
+                </td>
                 <td>{project.name}</td>
                 <td>{project.description}</td>
                 <td>

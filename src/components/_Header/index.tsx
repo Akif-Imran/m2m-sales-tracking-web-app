@@ -506,8 +506,8 @@ const _Header = ({ toggleNavbar, opened }: _HeaderProps) => {
                     </Text>
                     <Text weight={400} size="sm" sx={{ lineHeight: 1 }} mr={3}>
                       Last Login:{" "}
-                      {user?.lastLogin
-                        ? DateTime.fromISO(user?.lastLogin)
+                      {user?.lastLoginTime
+                        ? DateTime.fromISO(user?.lastLoginTime)
                             .toUTC()
                             .toLocaleString(DateTime.DATETIME_MED_WITH_SECONDS)
                         : "N/A"}

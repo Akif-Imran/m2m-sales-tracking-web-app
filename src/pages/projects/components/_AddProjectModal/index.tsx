@@ -52,7 +52,6 @@ interface IProjectForm
     | "assignedEngineerDate"
   > {
   hasImage: boolean;
-  image: string;
 }
 
 const schema: yup.ObjectSchema<IProjectForm> = yup.object().shape({
@@ -70,7 +69,7 @@ const schema: yup.ObjectSchema<IProjectForm> = yup.object().shape({
   status: yup.number().required("Status is required"),
   customerId: yup.string().required("Customer is required"),
   hasImage: yup.boolean().required("Has Image is required"),
-  image: yup.string().required("Image is required"),
+  images: yup.array().of(yup.string().required()).required("Image is required"),
 });
 
 const _AddProjectModal: React.FC<OwnProps> = ({ opened, onClose, title, companyId }) => {
@@ -104,7 +103,7 @@ const _AddProjectModal: React.FC<OwnProps> = ({ opened, onClose, title, companyI
       status: 0,
       customerId: "",
       hasImage: false,
-      image: "",
+      images: [],
     },
     validationSchema: schema,
     onSubmit: async (values, helpers) => {
@@ -114,7 +113,7 @@ const _AddProjectModal: React.FC<OwnProps> = ({ opened, onClose, title, companyI
         const res = await uploadFile(token, file);
         console.log("Lead Image Upload: ", res);
         if (res.statusCode === 200 || res.statusCode === 201) {
-          values.image = res.data;
+          values.images = [res.data];
         } else {
           setIsCreating((_prev) => false);
           notify("Add Lead", res?.message, "error");
@@ -151,7 +150,7 @@ const _AddProjectModal: React.FC<OwnProps> = ({ opened, onClose, title, companyI
     onClose();
   };
 
-  const handleReceiptChange = (file: File) => {
+  const handleImageChange = (file: File) => {
     if (file === null) {
       notify("Image Upload", "Company logo not uploaded", "error");
       return;
@@ -161,7 +160,7 @@ const _AddProjectModal: React.FC<OwnProps> = ({ opened, onClose, title, companyI
     reader.onload = (e) => {
       const dataUri = e?.target?.result as string;
       if (dataUri) {
-        form.setValues((prev) => ({ ...prev, image: dataUri, hasImage: true }));
+        form.setValues((prev) => ({ ...prev, images: [dataUri], hasImage: true }));
       }
     };
     reader.readAsDataURL(file);
@@ -239,7 +238,7 @@ const _AddProjectModal: React.FC<OwnProps> = ({ opened, onClose, title, companyI
       <Stack spacing={"xs"}>
         <Flex direction={"column"} align={"center"} justify={"flex-end"}>
           {form.values.hasImage ? (
-            <Avatar src={form.values.image} radius={"md"} size={rem(170)} />
+            <Avatar src={form.values.images[0]} radius={"md"} size={rem(170)} />
           ) : (
             <div
               style={{
@@ -251,7 +250,7 @@ const _AddProjectModal: React.FC<OwnProps> = ({ opened, onClose, title, companyI
             />
           )}
           <div className={gclasses.fileUploadButton}>
-            <FileButton onChange={handleReceiptChange} accept="image/png,image/jpeg">
+            <FileButton onChange={handleImageChange} accept="image/png,image/jpeg">
               {(props) => (
                 <Button
                   radius={"xl"}

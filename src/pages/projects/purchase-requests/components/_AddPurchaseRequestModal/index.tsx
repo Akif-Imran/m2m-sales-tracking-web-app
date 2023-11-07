@@ -18,6 +18,7 @@ interface OwnProps {
   onClose: () => void;
   title: string;
   companyId?: string;
+  projectId?: string;
 }
 interface IRequestForm
   extends Omit<
@@ -30,6 +31,7 @@ export const _AddPurchaseRequestModal: React.FC<OwnProps> = ({
   opened,
   title,
   companyId,
+  projectId,
 }) => {
   const { theme } = useStyles();
   const {
@@ -47,9 +49,9 @@ export const _AddPurchaseRequestModal: React.FC<OwnProps> = ({
 
   const form = useFormik<IRequestForm>({
     initialValues: {
-      projectId: "",
+      projectId: projectId || "",
       supplierId: "",
-      customerId: "",
+      customerId: companyId || "",
       itemName: "",
       itemType: "",
       warranty: "",
@@ -160,6 +162,18 @@ export const _AddPurchaseRequestModal: React.FC<OwnProps> = ({
       }));
     setProjectsList(project_s);
   }, [companyId, projects, opened]);
+
+  React.useEffect(() => {
+    if (!companyId || !projectId) {
+      return;
+    }
+    form.setValues((prev) => ({
+      ...prev,
+      customerId: companyId,
+      projectId: projectId,
+    }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [companyId, projectId, opened]);
 
   return (
     <Modal

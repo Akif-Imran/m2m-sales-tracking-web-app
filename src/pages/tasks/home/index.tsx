@@ -5,6 +5,7 @@ import {
   Badge,
   Button,
   Flex,
+  Grid,
   Group,
   Modal,
   Radio,
@@ -18,9 +19,11 @@ import {
 } from "@mantine/core";
 import {
   IconFilterFilled,
+  IconId,
   IconPlus,
   IconRotateClockwise2,
   IconSearch,
+  IconTable,
   IconTrash,
 } from "@tabler/icons-react";
 import {
@@ -36,9 +39,10 @@ import { DAY_MM_DD_YYYY_HH_MM_SS_A, taskStatusColors } from "@constants";
 import { modalOverlayPropsHelper, openDeleteModalHelper } from "@helpers";
 import { notify } from "@utility";
 import { deleteTask, modifyTaskStatus } from "@slices";
-import { _AddTaskModal } from "../components";
+import { _AddTaskModal, _TaskCard } from "../components";
 import { useAuthContext } from "@contexts";
 import { removeTask, updateStatusTask } from "@thunks";
+import { useToggle } from "@mantine/hooks";
 
 interface OwnProps {}
 
@@ -88,6 +92,7 @@ const Tasks: React.FC<OwnProps> = () => {
     salesPersons,
   } = useAppSelector(selectRecordsForDropdown);
 
+  const [viewMode, toggle] = useToggle(["cards", "list"]);
   const [visible, setVisible] = React.useState<boolean>(false);
   const [selectedStatus, setSelectedStatus] = React.useState<string>();
   const [selectedTask, setSelectedTask] = React.useState<string>("");
@@ -95,8 +100,9 @@ const Tasks: React.FC<OwnProps> = () => {
   const [sorting, setSorting] = React.useState<State>(sortingInitialState);
   const [sortingList, setSortingList] = React.useState<ListState>(sortingListInitialState);
 
-  const showUpdateStatusModal = (taskId: string) => {
+  const showUpdateStatusModal = (status: number, taskId: string) => {
     setSelectedTask(taskId);
+    setSelectedStatus(status.toString());
     setVisible(true);
   };
   const hideUpdateStatusModal = () => setVisible(false);
@@ -268,6 +274,13 @@ const Tasks: React.FC<OwnProps> = () => {
       });
   };
 
+  let icon: JSX.Element;
+  if (viewMode === "cards") {
+    icon = <IconId size={22} color={colors.white} />;
+  } else {
+    icon = <IconTable size={22} color={colors.white} />;
+  }
+
   const rows =
     searchedData.length === 0 ? (
       <tr>
@@ -277,76 +290,72 @@ const Tasks: React.FC<OwnProps> = () => {
       </tr>
     ) : (
       <>
-        {searchedData.map((task, index) => (
-          <tr key={task._id}>
-            <td>{index + 1}</td>
-            <td>
-              <Badge variant="filled" color={taskStatusColors[task.status]}>
-                {task.statusName}
-              </Badge>
-            </td>
-            <td>{task.company?.name || "N/A"}</td>
-            <td>{task.project?.name || "N/A"}</td>
-            <td>{task.title}</td>
-            <td>{task.description}</td>
-            <td>
-              {DateTime.fromISO(task.createdAt).toLocal().toFormat(DAY_MM_DD_YYYY_HH_MM_SS_A)}
-            </td>
-            <td>{task.assignee?.name}</td>
-            <td>
-              {DateTime.fromISO(task.completionDeadline)
-                .toLocal()
-                .toFormat(DAY_MM_DD_YYYY_HH_MM_SS_A)}
-            </td>
-            {/* <td>
-              {task.completedDate
-                ? DateTime.fromISO(task.completedDate).toLocal().toFormat(DAY_MM_DD_YYYY_HH_MM_SS_A)
-                : "N/A"}
-            </td> */}
-            <td>
-              <Group>
-                <ActionIcon
-                  color="gray"
-                  size={"sm"}
-                  onClick={() => showUpdateStatusModal(task._id)}
-                >
-                  <IconRotateClockwise2 />
-                </ActionIcon>
-                {isAdmin && (
-                  <ActionIcon color="red" size={"sm"} onClick={() => handleDelete(task._id)}>
-                    <IconTrash />
-                  </ActionIcon>
-                )}
-              </Group>
-            </td>
-          </tr>
-        ))}
+        {searchedData.map((task, index) => {
+          if (viewMode === "cards") {
+            return (
+              <Grid.Col span={4} key={task._id}>
+                <_TaskCard
+                  item={task}
+                  handleDelete={handleDelete}
+                  updateStatus={showUpdateStatusModal}
+                />
+              </Grid.Col>
+            );
+          } else {
+            return (
+              <tr key={task._id}>
+                <td>{index + 1}</td>
+                <td>
+                  <Badge variant="filled" color={taskStatusColors[task.status]}>
+                    {task.statusName}
+                  </Badge>
+                </td>
+                <td>{task.company?.name || "N/A"}</td>
+                <td>{task.project?.name || "N/A"}</td>
+                <td>{task.title}</td>
+                <td>{task.description}</td>
+                <td>
+                  {DateTime.fromISO(task.createdAt).toLocal().toFormat(DAY_MM_DD_YYYY_HH_MM_SS_A)}
+                </td>
+                <td>{task.assignee?.name}</td>
+                <td>
+                  {DateTime.fromISO(task.completionDeadline)
+                    .toLocal()
+                    .toFormat(DAY_MM_DD_YYYY_HH_MM_SS_A)}
+                </td>
+                {/* <td>
+                  {task.completedDate
+                    ? DateTime.fromISO(task.completedDate).toLocal().toFormat(DAY_MM_DD_YYYY_HH_MM_SS_A)
+                    : "N/A"}
+                </td> */}
+                <td>
+                  <Group>
+                    <ActionIcon
+                      color="gray"
+                      size={"sm"}
+                      onClick={() => showUpdateStatusModal(task.status, task._id)}
+                    >
+                      <IconRotateClockwise2 />
+                    </ActionIcon>
+                    {isAdmin && (
+                      <ActionIcon color="red" size={"sm"} onClick={() => handleDelete(task._id)}>
+                        <IconTrash />
+                      </ActionIcon>
+                    )}
+                  </Group>
+                </td>
+              </tr>
+            );
+          }
+        })}
       </>
     );
 
-  return (
-    <Stack spacing={"xs"}>
-      <Flex gap={"md"} className={gclasses.searchContainer}>
-        <TextInput
-          value={searchQuery}
-          className={gclasses.searchInput}
-          placeholder="Search by any field"
-          icon={<IconSearch size={16} />}
-          onChange={(e) => onChangeSearch(e.target?.value)}
-        />
-        {isAdmin && (
-          <Button
-            variant="filled"
-            rightIcon={<IconPlus size={16} />}
-            onClick={() => setAddTaskModalOpened(true)}
-          >
-            Task
-          </Button>
-        )}
-        <Button variant="filled" rightIcon={<IconFilterFilled size={16} />} onClick={clearSort}>
-          Clear
-        </Button>
-      </Flex>
+  let content: JSX.Element;
+  if (viewMode === "cards") {
+    content = <Grid columns={12}>{rows}</Grid>;
+  } else {
+    content = (
       <ScrollArea type="always" h={"80vh"}>
         <ScrollArea w={"140vw"}>
           <Table border={1} bgcolor={theme.white} withBorder>
@@ -428,6 +437,41 @@ const Tasks: React.FC<OwnProps> = () => {
           </Table>
         </ScrollArea>
       </ScrollArea>
+    );
+  }
+
+  return (
+    <Stack spacing={"xs"}>
+      <Flex gap={"md"} className={gclasses.searchContainer}>
+        <TextInput
+          value={searchQuery}
+          className={gclasses.searchInput}
+          placeholder="Search by any field"
+          icon={<IconSearch size={16} />}
+          onChange={(e) => onChangeSearch(e.target?.value)}
+        />
+        <ActionIcon
+          variant="filled"
+          size={"2.2rem"}
+          color={theme.primaryColor}
+          onClick={() => toggle()}
+        >
+          {icon}
+        </ActionIcon>
+        {isAdmin && (
+          <Button
+            variant="filled"
+            rightIcon={<IconPlus size={16} />}
+            onClick={() => setAddTaskModalOpened(true)}
+          >
+            Task
+          </Button>
+        )}
+        <Button variant="filled" rightIcon={<IconFilterFilled size={16} />} onClick={clearSort}>
+          Clear
+        </Button>
+      </Flex>
+      {content}
       <_AddTaskModal
         title="Add Task"
         opened={addTaskModalOpened}

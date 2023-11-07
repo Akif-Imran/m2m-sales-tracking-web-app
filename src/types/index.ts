@@ -19,7 +19,7 @@ interface IUser {
   __v: number; //
   createdAt: string; //
 }
-type ILoginUserData = Omit<IUser, "createdAt">;
+type ILoginUserData = Omit<IUser, "createdAt"> & { lastLoginTime: string };
 
 interface ICompanyContact {
   _id: string;
@@ -69,6 +69,7 @@ interface IProjectStatus {
 }
 interface IProject {
   _id: string;
+  images: string[];
   createdBy: string;
   createdAt: string;
   isActive: true;

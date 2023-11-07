@@ -51,8 +51,8 @@ import { markAsRead } from "@slices";
 
 type ActivePage =
   | "Dashboard"
-  | "Company"
-  | "Projects"
+  | "Prospects"
+  | "Leads"
   | "Follow ups"
   | "Purchase Request"
   | "Claims"
@@ -84,17 +84,17 @@ const buttons: NavbarButtons[] = [
   },
   {
     link: routes.company.list,
-    label: "Company",
+    label: "Prospects",
     icon: IconBuildingBank,
     visibleTo: [1, 2, 3, 4],
   },
   {
     link: routes.project.list,
-    label: "Projects",
+    label: "Leads",
     links: [
       {
         link: routes.project.list,
-        label: "Projects",
+        label: "Leads",
         visibleTo: [1, 2, 3, 4],
       },
       {
@@ -504,12 +504,14 @@ const _Header = ({ toggleNavbar, opened }: _HeaderProps) => {
                     <Text weight={400} size="sm" sx={{ lineHeight: 1 }} mr={3}>
                       {user?.email}
                     </Text>
-                    {/* <Text weight={400} size="sm" sx={{ lineHeight: 1 }} mr={3}>
-                    Last Login:{" "}
-                    {DateTime.fromISO(user?.lastLogin || "")
-                      .toUTC()
-                      .toLocaleString(DateTime.DATETIME_MED_WITH_SECONDS)}
-                  </Text> */}
+                    <Text weight={400} size="sm" sx={{ lineHeight: 1 }} mr={3}>
+                      Last Login:{" "}
+                      {user?.lastLoginTime
+                        ? DateTime.fromISO(user?.lastLoginTime)
+                            .toUTC()
+                            .toLocaleString(DateTime.DATETIME_MED_WITH_SECONDS)
+                        : "N/A"}
+                    </Text>
                   </div>
                   <IconChevronDown size={rem(12)} stroke={1.5} />
                 </Group>

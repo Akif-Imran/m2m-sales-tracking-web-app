@@ -1,4 +1,4 @@
-import { ActionIcon, Avatar, Badge, Card, Flex, Menu, Text, Tooltip, rem } from "@mantine/core";
+import { ActionIcon, Avatar, Badge, Card, Flex, Menu, Text, rem } from "@mantine/core";
 import React from "react";
 import { selectProjectWithRecords } from "@store";
 import {
@@ -117,7 +117,7 @@ export const _ProjectCard: React.FC<OwnProps> = ({
             </div>
             <Flex direction={"row"} align={"center"} justify={"flex-start"}>
               <Text fw={700} color={colors.titleText} mr={"xs"} fz={"sm"}>
-                Company
+                Prospect
               </Text>
               <Text color={colors.titleText} fz={"sm"}>
                 {item?.company?.name || "N/A"}
@@ -145,11 +145,9 @@ export const _ProjectCard: React.FC<OwnProps> = ({
               </Text>
             </Flex>
             <div className={classes.textWithIconButton}>
-              <Tooltip label={"View Details"} position="bottom" withinPortal withArrow>
-                <Badge variant="filled" color={projectStatusColors[item.status]} mt={"xs"}>
-                  {item.statusName}
-                </Badge>
-              </Tooltip>
+              <Badge variant="filled" color={projectStatusColors[item.status]} mt={"xs"}>
+                {item.statusName}
+              </Badge>
             </div>
           </div>
         </div>

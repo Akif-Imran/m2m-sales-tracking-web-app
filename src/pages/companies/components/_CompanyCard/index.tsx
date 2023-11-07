@@ -29,6 +29,7 @@ import { routes } from "@routes";
 import { BASE_URL } from "@api";
 import { PhotoView } from "react-photo-view";
 import { menuIconStyle, noImageStyle } from "@global-styles";
+import { useAuthContext } from "@contexts";
 
 interface OwnProps {
   onClick?: (e?: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
@@ -50,6 +51,9 @@ const _CompanyCard: React.FC<OwnProps> = ({
   handleDelete,
 }) => {
   const { cx, classes, theme } = useStyles();
+  const {
+    state: { isAdmin },
+  } = useAuthContext();
   const navigate = useNavigate();
 
   const handleNavigate = (route: string) => {
@@ -176,16 +180,18 @@ const _CompanyCard: React.FC<OwnProps> = ({
                   >
                     Reports
                   </Menu.Item>
-                  <Menu.Item
-                    color="red"
-                    icon={<IconTrash size={menuIconStyle.size} />}
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      handleDelete();
-                    }}
-                  >
-                    Delete
-                  </Menu.Item>
+                  {isAdmin && (
+                    <Menu.Item
+                      color="red"
+                      icon={<IconTrash size={menuIconStyle.size} />}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        handleDelete();
+                      }}
+                    >
+                      Delete
+                    </Menu.Item>
+                  )}
                 </Menu.Dropdown>
               </Menu>
             </div>

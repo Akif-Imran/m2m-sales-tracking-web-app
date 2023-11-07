@@ -19,7 +19,7 @@ interface IUser {
   __v: number; //
   createdAt: string; //
 }
-type ILoginUserData = Omit<IUser, "createdAt">;
+type ILoginUserData = Omit<IUser, "createdAt"> & { lastLogin: string };
 
 interface ICompanyContact {
   _id: string;

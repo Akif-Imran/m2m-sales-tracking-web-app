@@ -504,12 +504,14 @@ const _Header = ({ toggleNavbar, opened }: _HeaderProps) => {
                     <Text weight={400} size="sm" sx={{ lineHeight: 1 }} mr={3}>
                       {user?.email}
                     </Text>
-                    {/* <Text weight={400} size="sm" sx={{ lineHeight: 1 }} mr={3}>
-                    Last Login:{" "}
-                    {DateTime.fromISO(user?.lastLogin || "")
-                      .toUTC()
-                      .toLocaleString(DateTime.DATETIME_MED_WITH_SECONDS)}
-                  </Text> */}
+                    <Text weight={400} size="sm" sx={{ lineHeight: 1 }} mr={3}>
+                      Last Login:{" "}
+                      {user?.lastLogin
+                        ? DateTime.fromISO(user?.lastLogin)
+                            .toUTC()
+                            .toLocaleString(DateTime.DATETIME_MED_WITH_SECONDS)
+                        : "N/A"}
+                    </Text>
                   </div>
                   <IconChevronDown size={rem(12)} stroke={1.5} />
                 </Group>

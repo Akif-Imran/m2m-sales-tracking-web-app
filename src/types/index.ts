@@ -69,6 +69,7 @@ interface IProjectStatus {
 }
 interface IProject {
   _id: string;
+  image?: string;
   createdBy: string;
   createdAt: string;
   isActive: true;

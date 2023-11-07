@@ -54,7 +54,7 @@ interface ProjectSort {
 const Projects: React.FC<OwnProps> = () => {
   useStyles();
   const {
-    state: { isAdmin, token },
+    state: { isAdmin, token, user },
   } = useAuthContext();
   const dispatch = useAppDispatch();
   const { classes: gclasses, theme } = useGStyles();
@@ -255,8 +255,14 @@ const Projects: React.FC<OwnProps> = () => {
                 <td>{DateTime.fromISO(project.contractDate).toLocal().toFormat(DAY_MM_DD_YYYY)}</td>
                 <td>{DateTime.fromISO(project.deliveryDate).toLocal().toFormat(DAY_MM_DD_YYYY)}</td>
                 <td>{project.quotation}</td>
-                <td>{project?.salesPersonValue?.name || "N/A"}</td>
-                <td>{project?.engineerValue?.name || "N/A"}</td>
+                <td>
+                  {project.salesPerson !== user?._id
+                    ? project?.salesPersonValue?.name || "N/A"
+                    : "(You)"}
+                </td>
+                <td>
+                  {project?.engineer ? project?.engineerValue?.name || "N/A" : "Not Assigned"}
+                </td>
                 <td>{project?.company?.name || "N/A"}</td>
                 <td>
                   <Group>

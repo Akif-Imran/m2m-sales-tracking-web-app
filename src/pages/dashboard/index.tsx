@@ -175,6 +175,7 @@ const Dashboard: React.FC<OwnProps> = () => {
       ["Project", "Value"],
       // [`RM (${6000}) Quotation`, 6000],// example of data
     ];
+
     let totalValue = 0;
     projectStatusList.forEach((value) => {
       const counts = projects.filter((project) => project.status === value.id);

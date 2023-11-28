@@ -5,10 +5,10 @@ import { Button, Grid, Group, Modal, Stack, TextInput, rem } from "@mantine/core
 import { FormikHelpers, useFormik } from "formik";
 import { useAppDispatch } from "@store";
 import * as yup from "yup";
-import { createExpenseType, updateExpenseType } from "@thunks";
+import { createPurchaseCategory, updatePurchaseCategory } from "@thunks";
 import { useAuthContext } from "@contexts";
 import { notify } from "@utility";
-import { addExpenseType, modifyExpenseType } from "@slices";
+import { addPurchaseCategory, modifyPurchaseCategory } from "@slices";
 
 type OwnProps =
   | {
@@ -23,14 +23,17 @@ type OwnProps =
       onClose: () => void;
       title: string;
       mode: "edit";
-      record: IExpenseType;
+      record: IPurchaseCategory;
     };
 interface IForm
-  extends Omit<IExpenseType, "_id" | "__v" | "createdBy" | "createdAt" | "company" | "isActive"> {}
+  extends Omit<
+    IPurchaseCategory,
+    "_id" | "__v" | "createdBy" | "createdAt" | "company" | "isActive"
+  > {}
 
 const schema: yup.ObjectSchema<IForm> = yup.object().shape({
-  name: yup.string().required("Expense type name is required"),
-  description: yup.string().required("Expense type description is required"),
+  name: yup.string().required("Category name is required"),
+  description: yup.string().required("Category description is required"),
 });
 
 const _AddCategoryModal: React.FC<OwnProps> = (props) => {
@@ -66,23 +69,23 @@ const _AddCategoryModal: React.FC<OwnProps> = (props) => {
   const handleAdd = (values: IForm, helpers: FormikHelpers<IForm>) => {
     setIsCreating((_prev) => true);
     dispatch(
-      createExpenseType({
+      createPurchaseCategory({
         token,
-        expenseType: values,
+        category: values,
       })
     )
       .unwrap()
       .then((res) => {
-        notify("Add Expense Type", res?.message, res.success ? "success" : "error");
+        notify("Add Purchase Category", res?.message, res.success ? "success" : "error");
         if (res.success) {
-          dispatch(addExpenseType(res.data));
+          dispatch(addPurchaseCategory(res.data));
           helpers.resetForm();
           onClose();
         }
       })
       .catch((err) => {
-        console.log("Add Expense Type: ", err?.message);
-        notify("Add Expense Type", "An error occurred", "error");
+        console.log("Add Purchase Category: ", err?.message);
+        notify("Add Purchase Category", "An error occurred", "error");
       })
       .finally(() => {
         setIsCreating((_prev) => false);
@@ -92,24 +95,24 @@ const _AddCategoryModal: React.FC<OwnProps> = (props) => {
   const handleUpdate = (values: IForm, helpers: FormikHelpers<IForm>) => {
     setIsCreating((_prev) => true);
     dispatch(
-      updateExpenseType({
+      updatePurchaseCategory({
         token,
         id: props.record?._id || "",
-        expenseType: values,
+        category: values,
       })
     )
       .unwrap()
       .then((res) => {
-        notify("Update Expense Type", res?.message, res.success ? "success" : "error");
+        notify("Update Purchase Category", res?.message, res.success ? "success" : "error");
         if (res.success) {
-          dispatch(modifyExpenseType(res.data));
+          dispatch(modifyPurchaseCategory(res.data));
           helpers.resetForm();
           onClose();
         }
       })
       .catch((err) => {
-        console.log("Update Expense Type: ", err?.message);
-        notify("Update Expense Type", "An error occurred", "error");
+        console.log("Update Purchase Category: ", err?.message);
+        notify("Update Purchase Category", "An error occurred", "error");
       })
       .finally(() => {
         setIsCreating((_prev) => false);

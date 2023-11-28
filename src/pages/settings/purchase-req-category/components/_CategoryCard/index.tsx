@@ -6,13 +6,13 @@ import { colors } from "@theme";
 import { useAuthContext } from "@contexts";
 import { useAppDispatch } from "@store";
 import { openDeleteModalHelper } from "@helpers";
-import { removeExpenseType } from "@thunks";
-import { deleteExpenseType } from "@slices";
+import { removePurchaseCategory } from "@thunks";
+import { deletePurchaseCategory } from "@slices";
 import { notify } from "@utility";
 
 interface OwnProps {
-  item: IExpenseType;
-  setForEdit: (item: IExpenseType) => void;
+  item: IPurchaseCategory;
+  setForEdit: (item: IPurchaseCategory) => void;
 }
 
 const _CategoryCard: React.FC<OwnProps> = ({ item, setForEdit }) => {
@@ -26,12 +26,12 @@ const _CategoryCard: React.FC<OwnProps> = ({ item, setForEdit }) => {
   const handleDelete = (id: string) => {
     openDeleteModalHelper({
       theme: theme,
-      title: `Delete Expense Type`,
+      title: `Delete Purchase Category`,
       loading: isDeleting,
       description: (
         <Text fw={"normal"} fs={"normal"} fz={"sm"} color={colors.titleText}>
-          Are you sure you want to delete this Expense Type? This action is destructive and you will
-          have to contact support to restore data.
+          Are you sure you want to delete this Purchase Category? This action is destructive and you
+          will have to contact support to restore data.
         </Text>
       ),
       cancelLabel: "Cancel",
@@ -39,27 +39,27 @@ const _CategoryCard: React.FC<OwnProps> = ({ item, setForEdit }) => {
       onConfirm: () => {
         setIsDeleting((_prev) => true);
         dispatch(
-          removeExpenseType({
+          removePurchaseCategory({
             token,
             id,
           })
         )
           .unwrap()
           .then((res) => {
-            notify("Delete Expense Type", res?.message, res.success ? "success" : "error");
+            notify("Delete Purchase Category", res?.message, res.success ? "success" : "error");
             if (res.success) {
-              dispatch(deleteExpenseType(id));
+              dispatch(deletePurchaseCategory(id));
             }
           })
           .catch((err) => {
-            console.log("Delete Expense Type: ", err?.message);
-            notify("Delete Expense Type", "An error occurred", "error");
+            console.log("Delete Purchase Category: ", err?.message);
+            notify("Delete Purchase Category", "An error occurred", "error");
           })
           .finally(() => {
             setIsDeleting((_prev) => false);
           });
       },
-      onCancel: () => notify("Delete Expense Type", "Operation canceled!", "error"),
+      onCancel: () => notify("Delete Purchase Category", "Operation canceled!", "error"),
     });
   };
 

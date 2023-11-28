@@ -69,6 +69,7 @@ const routes = {
     change_password: "change-password",
     app_theme: "app-theme",
     expense_type: "expense-type",
+    purchase_category: "purchase-category",
     suppliers: "suppliers",
   },
   help: {

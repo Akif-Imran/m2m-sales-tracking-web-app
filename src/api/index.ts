@@ -13,7 +13,9 @@ export const BASE_PURCHASE_REQUEST_URL = `${BASE_URL}/purchase-request`;
 export const BASE_TASK_URL = `${BASE_URL}/task`;
 export const BASE_LEAVE_APPLICATION_URL = `${BASE_URL}/leave-application`;
 export const BASE_EXPENSE_TYPE_URL = `${BASE_URL}/expense-type`;
+export const BASE_PURCHASE_CATEGORY_URL = `${BASE_URL}/purchase-category`;
 export const BASE_SUPPLIER_URL = `${BASE_URL}/supplier`;
+export const BASE_STOCK_ITEM_URL = `${BASE_URL}/stock-item`;
 export const BASE_REPORT_URL = `${BASE_URL}/app_reports`;
 export const MALAYSIA_ZONE = "Asia/Kuala_Lumpur";
 
@@ -82,6 +84,14 @@ export const urls = {
     delete: (id: string) => `${BASE_EXPENSE_TYPE_URL}/delete/${id}`,
     getById: (id: string) => `${BASE_EXPENSE_TYPE_URL}/getById/${id}`,
   },
+  purchaseCategory: {
+    list: (skip: number = 0, limit: number = 100) =>
+      `${BASE_PURCHASE_CATEGORY_URL}/getAll?skip=${skip}&limit=${limit}`,
+    create: `${BASE_PURCHASE_CATEGORY_URL}/create`,
+    update: (id: string) => `${BASE_PURCHASE_CATEGORY_URL}/update/${id}`,
+    delete: (id: string) => `${BASE_PURCHASE_CATEGORY_URL}/delete/${id}`,
+    getById: (id: string) => `${BASE_PURCHASE_CATEGORY_URL}/getById/${id}`,
+  },
   purchaseRequest: {
     list: `${BASE_PURCHASE_REQUEST_URL}/getAll`,
     create: `${BASE_PURCHASE_REQUEST_URL}/create`,
@@ -109,6 +119,14 @@ export const urls = {
     getById: (id: string) => `${BASE_LEAVE_APPLICATION_URL}/getById/${id}`,
     statusList: `${BASE_URL}/getStatusList`,
     updateStatus: (id: string) => `${BASE_LEAVE_APPLICATION_URL}/changeStatus/${id}`,
+  },
+  stockItem: {
+    list: `${BASE_STOCK_ITEM_URL}/getAll`,
+    create: `${BASE_STOCK_ITEM_URL}/create`,
+    update: (id: string) => `${BASE_STOCK_ITEM_URL}/update/${id}`,
+    delete: (id: string) => `${BASE_STOCK_ITEM_URL}/delete/${id}`,
+    statusList: `${BASE_STOCK_ITEM_URL}/getStatusList`,
+    getById: (id: string) => `${BASE_STOCK_ITEM_URL}/getById/${id}`,
   },
   supplier: {
     list: `${BASE_SUPPLIER_URL}/getAll`,

@@ -2,7 +2,7 @@ import React from "react";
 import { useStyles } from "./styles";
 import { Button, Card, Flex, ScrollArea, Stack, Text, TextInput, rem } from "@mantine/core";
 import { colors } from "@theme";
-import { selectExpenseTypeList, useAppSelector } from "@store";
+import { selectPurchaseCategories, useAppSelector } from "@store";
 import { IconPlus, IconSearch } from "@tabler/icons-react";
 import { useGStyles } from "@global-styles";
 import { useAuthContext } from "@contexts";
@@ -10,20 +10,22 @@ import { _AddCategoryModal, _CategoryCard } from "./components";
 
 interface OwnProps {}
 
-export const ExpenseTypes: React.FC<OwnProps> = () => {
+export const PurchaseCategories: React.FC<OwnProps> = () => {
   useStyles();
   const {
     state: { isAdmin, isHR },
   } = useAuthContext();
   const { classes: gclasses } = useGStyles();
-  const { data: expenseTypes } = useAppSelector(selectExpenseTypeList);
+  const { data: categories } = useAppSelector(selectPurchaseCategories);
   const [searchQuery, setSearchQuery] = React.useState("");
   const [addCategoryModalOpened, setAddCategoryModalOpened] = React.useState(false);
   const [editCategoryModalOpened, setEditCategoryModalOpened] = React.useState(false);
-  const [searchedData, setSearchedData] = React.useState<typeof expenseTypes>([]);
-  const [selectedCategory, setSelectedCategory] = React.useState<IExpenseType>({} as IExpenseType);
+  const [searchedData, setSearchedData] = React.useState<typeof categories>([]);
+  const [selectedCategory, setSelectedCategory] = React.useState<IPurchaseCategory>(
+    {} as IPurchaseCategory
+  );
 
-  const handleEditSupplier = React.useCallback((type: IExpenseType) => {
+  const handleEditSupplier = React.useCallback((type: IPurchaseCategory) => {
     setSelectedCategory(type);
     setEditCategoryModalOpened(true);
   }, []);
@@ -31,7 +33,7 @@ export const ExpenseTypes: React.FC<OwnProps> = () => {
   const onChangeSearch = (query: string) => {
     setSearchQuery(query);
     if (isAdmin || isHR) {
-      const filtered = expenseTypes.filter((project) =>
+      const filtered = categories.filter((project) =>
         project.name.toLowerCase().includes(query.toLowerCase())
       );
       setSearchedData(filtered);
@@ -39,14 +41,14 @@ export const ExpenseTypes: React.FC<OwnProps> = () => {
   };
 
   React.useEffect(() => {
-    setSearchedData(expenseTypes);
-  }, [isAdmin, isHR, expenseTypes]);
+    setSearchedData(categories);
+  }, [isAdmin, isHR, categories]);
 
   const rows =
     searchedData.length === 0 ? (
       <center>
         <Text color={colors.titleText} align="center">
-          No Expense types...
+          No Purchase categories...
         </Text>
       </center>
     ) : (
@@ -63,7 +65,7 @@ export const ExpenseTypes: React.FC<OwnProps> = () => {
     <Card radius={"md"} shadow="md" h={"92vh"} py={"xs"} mb={"xs"}>
       <Stack>
         <Text fz={rem(25)} m={"xs"} color={colors.titleText}>
-          Expense Types
+          Purchase Categories
         </Text>
         <Flex gap={"md"} m={"xs"} className={gclasses.searchContainer}>
           <TextInput
@@ -82,7 +84,7 @@ export const ExpenseTypes: React.FC<OwnProps> = () => {
               rightIcon={<IconPlus size={16} />}
               onClick={() => setAddCategoryModalOpened(true)}
             >
-              Expense Type
+              Category
             </Button>
           )}
         </Flex>
@@ -108,4 +110,4 @@ export const ExpenseTypes: React.FC<OwnProps> = () => {
   );
 };
 
-export default ExpenseTypes;
+export default PurchaseCategories;

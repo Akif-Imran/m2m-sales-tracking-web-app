@@ -169,6 +169,7 @@ export const PurchaseRequests: React.FC<OwnProps> = () => {
               <td>
                 {DateTime.fromISO(request.warranty).toLocal().toFormat(DAY_MM_DD_YYYY_HH_MM_SS_A)}
               </td>
+              <td>{request.category?.name || "N/A"}</td>
               <td>{request.quantity}</td>
               <td>{request.supplier?.name}</td>
               <td>{value}</td>
@@ -236,6 +237,7 @@ export const PurchaseRequests: React.FC<OwnProps> = () => {
                 <th>Project</th>
                 <th>Request By</th>
                 <th>Warranty</th>
+                <th>Category</th>
                 <th>Qty</th>
                 <th>Supplier</th>
                 <th>Price</th>

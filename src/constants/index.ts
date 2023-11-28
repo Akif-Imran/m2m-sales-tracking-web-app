@@ -39,7 +39,7 @@ export const purchaseRequestStatusColors: Record<number, string> = {
   1: "red",
   2: "green",
   3: "orange",
-  5: "blue",
+  4: "blue",
 };
 export const claimStatusColors: Record<number, string> = {
   1: "red",

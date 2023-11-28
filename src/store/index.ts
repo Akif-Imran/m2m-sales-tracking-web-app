@@ -135,6 +135,8 @@ export const selectRecordsForDropdown = createSelector(
   selectLeaveStatusList,
   selectLeaveTypes,
   selectExpenseTypeList,
+  selectPurchaseCategories,
+  selectStockItemsStatusList,
   (
     companies,
     projects,
@@ -148,7 +150,9 @@ export const selectRecordsForDropdown = createSelector(
     claimsStatus,
     leaveStatus,
     leaveTypes,
-    expenseTypes
+    expenseTypes,
+    purchaseCategories,
+    stockItemStatus
   ) => {
     return {
       companies: companies.data.map((company) => ({
@@ -183,6 +187,10 @@ export const selectRecordsForDropdown = createSelector(
         value: status.id.toString(),
         label: status.name,
       })),
+      stockItemStatus: stockItemStatus.data.map((status) => ({
+        value: status.id.toString(),
+        label: status.name,
+      })),
       claimsStatus: claimsStatus.data.map((status) => ({
         value: status.id.toString(),
         label: status.name,
@@ -190,6 +198,10 @@ export const selectRecordsForDropdown = createSelector(
       expenseTypes: expenseTypes.data.map((type) => ({
         value: type._id,
         label: type.name,
+      })),
+      purchaseCategories: purchaseCategories.data.map((category) => ({
+        value: category._id,
+        label: category.name,
       })),
       leaveStatus: leaveStatus.data.map((status) => ({
         value: status.id.toString(),

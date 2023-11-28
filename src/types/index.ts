@@ -246,6 +246,7 @@ interface IPurchaseRequest {
   company: string;
   projectId: string;
   supplierId: string;
+  categoryId: string;
   itemName: string;
   itemType: string;
   warranty: string;

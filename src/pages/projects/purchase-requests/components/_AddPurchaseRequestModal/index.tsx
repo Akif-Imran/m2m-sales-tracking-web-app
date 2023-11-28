@@ -1,17 +1,31 @@
 import React from "react";
 import { useStyles } from "./styles";
-import { Button, Grid, Group, Modal, Select, Stack, TextInput, Textarea, rem } from "@mantine/core";
+import {
+  Avatar,
+  Button,
+  FileButton,
+  Flex,
+  Grid,
+  Group,
+  Modal,
+  Select,
+  Stack,
+  TextInput,
+  Textarea,
+  rem,
+} from "@mantine/core";
 import { DATE_FORMAT_YYYY_MM_DD, modalOverlayPropsHelper } from "@helpers";
 import { DatePickerInput, DateValue } from "@mantine/dates";
 import { useFormik } from "formik";
 import { useAuthContext } from "@contexts";
 import { selectProjects, selectRecordsForDropdown, useAppDispatch, useAppSelector } from "@store";
 import { addPurchaseRequest } from "@slices";
-import { IconCalendar } from "@tabler/icons-react";
+import { IconCalendar, IconUpload } from "@tabler/icons-react";
 import { currencyList } from "@constants";
 import { colors } from "@theme";
 import { createPurchaseRequest } from "@thunks";
 import { notify } from "@utility";
+import * as yup from "yup";
 
 interface OwnProps {
   opened: boolean;
@@ -24,7 +38,26 @@ interface IRequestForm
   extends Omit<
     IPurchaseRequest,
     "_id" | "__v" | "createdBy" | "createdAt" | "company" | "isActive"
-  > {}
+  > {
+  quotation: string;
+}
+
+const schema = yup.object().shape({
+  customerId: yup.string().required("Company is required"),
+  projectId: yup.string().required("Project is required"),
+  supplierId: yup.string().required("Supplier is required"),
+  categoryId: yup.string().required("Category is required"),
+  itemName: yup.string().required("Item name is required"),
+  itemType: yup.string().required("Item type is required"),
+  warranty: yup.string().required("Warranty is required"),
+  price: yup.object().shape({
+    amount: yup.number().required("Price is required"),
+    currency: yup.string().required("Currency is required"),
+  }),
+  quantity: yup.number().required("Quantity is required"),
+  remarks: yup.string().required("Remarks is required"),
+  status: yup.number().required("Status is required"),
+});
 
 export const _AddPurchaseRequestModal: React.FC<OwnProps> = ({
   onClose,
@@ -33,7 +66,7 @@ export const _AddPurchaseRequestModal: React.FC<OwnProps> = ({
   companyId,
   projectId,
 }) => {
-  const { theme } = useStyles();
+  const { theme, classes } = useStyles();
   const {
     state: { token },
   } = useAuthContext();
@@ -42,16 +75,20 @@ export const _AddPurchaseRequestModal: React.FC<OwnProps> = ({
     companies,
     suppliers: suppliersList,
     purchaseRequestStatus: purchaseRequestStatusList,
+    purchaseCategories,
   } = useAppSelector(selectRecordsForDropdown);
   const { data: projects } = useAppSelector(selectProjects);
   const [isCreating, setIsCreating] = React.useState(false);
   const [projectsList, setProjectsList] = React.useState<IDropDownList>([]);
+  const [_file, setFile] = React.useState<File>({} as File);
 
   const form = useFormik<IRequestForm>({
     initialValues: {
+      quotation: "",
       projectId: projectId || "",
       supplierId: "",
       customerId: companyId || "",
+      categoryId: "",
       itemName: "",
       itemType: "",
       warranty: "",
@@ -63,6 +100,7 @@ export const _AddPurchaseRequestModal: React.FC<OwnProps> = ({
       remarks: "",
       status: 1,
     },
+    validationSchema: schema,
     onSubmit: (values, helpers) => {
       console.log(values);
       setIsCreating((_prev) => true);
@@ -76,7 +114,7 @@ export const _AddPurchaseRequestModal: React.FC<OwnProps> = ({
         .then((res) => {
           notify("Purchase Request", res?.message, res.success ? "success" : "error");
           if (res.success) {
-            dispatch(addPurchaseRequest(res.data));
+            dispatch(addPurchaseRequest({ ...res.data, categoryId: values.categoryId }));
             helpers.resetForm();
             onClose();
           }
@@ -90,6 +128,23 @@ export const _AddPurchaseRequestModal: React.FC<OwnProps> = ({
         });
     },
   });
+
+  const handleFileChange = (file: File) => {
+    if (file === null) {
+      notify("Image Upload", "Company logo not uploaded", "error");
+      return;
+    }
+    setFile(file);
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const dataUri = e?.target?.result as string;
+      if (dataUri) {
+        form.setValues((prev) => ({ ...prev, quotation: dataUri, hasLogo: true }));
+        notify("Quotation Upload", "File uploaded successfully", "success");
+      }
+    };
+    reader.readAsDataURL(file);
+  };
 
   const handleOnChangeCompany = (value: string | null) => {
     if (!value) return;
@@ -189,6 +244,35 @@ export const _AddPurchaseRequestModal: React.FC<OwnProps> = ({
       <Grid>
         <Grid.Col span={12}>
           <Stack>
+            <Flex direction={"column"} align={"center"} justify={"flex-end"}>
+              {form.values.quotation ? (
+                <Avatar src={"success.png"} radius={"md"} size={rem(170)} />
+              ) : (
+                <div
+                  style={{
+                    width: rem(170),
+                    height: rem(170),
+                    borderRadius: theme.radius.md,
+                    backgroundColor: `${theme.colors[theme.primaryColor][1]}`,
+                  }}
+                />
+              )}
+              <div className={classes.fileUploadButton}>
+                <FileButton onChange={handleFileChange} accept="application/pdf">
+                  {(props) => (
+                    <Button
+                      radius={"xl"}
+                      variant="filled"
+                      color={theme.primaryColor}
+                      {...props}
+                      rightIcon={<IconUpload size={16} color={theme.white} stroke={1.5} />}
+                    >
+                      Quotation
+                    </Button>
+                  )}
+                </FileButton>
+              </div>
+            </Flex>
             <Select
               required
               withAsterisk={false}
@@ -198,6 +282,11 @@ export const _AddPurchaseRequestModal: React.FC<OwnProps> = ({
               value={form.values.customerId}
               onChange={handleOnChangeCompany}
               data={companies}
+              error={
+                form.errors.customerId && form.touched.customerId
+                  ? `${form.errors.customerId}`
+                  : null
+              }
             />
             <Group grow align="flex-start">
               <Select
@@ -209,6 +298,11 @@ export const _AddPurchaseRequestModal: React.FC<OwnProps> = ({
                 value={form.values.projectId.toString()}
                 onChange={handleOnChangeProject}
                 data={projectsList}
+                error={
+                  form.errors.projectId && form.touched.projectId
+                    ? `${form.errors.projectId}`
+                    : null
+                }
               />
               <Select
                 required
@@ -219,6 +313,11 @@ export const _AddPurchaseRequestModal: React.FC<OwnProps> = ({
                 value={form.values.supplierId.toString()}
                 onChange={handleOnChangeSupplier}
                 data={suppliersList}
+                error={
+                  form.errors.supplierId && form.touched.supplierId
+                    ? `${form.errors.supplierId}`
+                    : null
+                }
               />
             </Group>
             <TextInput
@@ -230,7 +329,11 @@ export const _AddPurchaseRequestModal: React.FC<OwnProps> = ({
               value={form.values.itemName}
               onChange={form.handleChange}
               onBlur={form.handleBlur}
+              error={
+                form.errors.itemName && form.touched.itemName ? `${form.errors.itemName}` : null
+              }
             />
+
             <Group grow align="flex-start">
               <TextInput
                 required
@@ -241,7 +344,11 @@ export const _AddPurchaseRequestModal: React.FC<OwnProps> = ({
                 value={form.values.itemType}
                 onChange={form.handleChange}
                 onBlur={form.handleBlur}
+                error={
+                  form.errors.itemType && form.touched.itemType ? `${form.errors.itemType}` : null
+                }
               />
+
               <DatePickerInput
                 required
                 withAsterisk={false}
@@ -268,7 +375,11 @@ export const _AddPurchaseRequestModal: React.FC<OwnProps> = ({
                 value={form.values.quantity}
                 onChange={form.handleChange}
                 onBlur={form.handleBlur}
+                error={
+                  form.errors.quantity && form.touched.quantity ? `${form.errors.quantity}` : null
+                }
               />
+
               <TextInput
                 required
                 withAsterisk={false}
@@ -293,6 +404,11 @@ export const _AddPurchaseRequestModal: React.FC<OwnProps> = ({
                     data={currencyList}
                   />
                 }
+                error={
+                  form.errors.price?.currency && form.touched.price?.currency
+                    ? `${form.errors.price.currency}`
+                    : null
+                }
               />
             </Group>
             <Select
@@ -304,7 +420,30 @@ export const _AddPurchaseRequestModal: React.FC<OwnProps> = ({
               value={form.values.status.toString()}
               onChange={handleOnChangeStatus}
               data={purchaseRequestStatusList}
+              error={form.errors.status && form.touched.status ? `${form.errors.status}` : null}
             />
+
+            <Select
+              required
+              withAsterisk={false}
+              searchable
+              nothingFound="No category found"
+              label="Category"
+              value={form.values.categoryId}
+              onChange={(value) => {
+                if (!value) {
+                  return;
+                }
+                form.setValues((prev) => ({ ...prev, categoryId: value }));
+              }}
+              data={purchaseCategories}
+              error={
+                form.errors.categoryId && form.touched.categoryId
+                  ? `${form.errors.categoryId}`
+                  : null
+              }
+            />
+
             <Textarea
               minRows={5}
               maxRows={5}
@@ -314,6 +453,7 @@ export const _AddPurchaseRequestModal: React.FC<OwnProps> = ({
               value={form.values.remarks}
               onChange={form.handleChange}
               onBlur={form.handleBlur}
+              error={form.errors.remarks && form.touched.remarks ? `${form.errors.remarks}` : null}
             />
           </Stack>
 

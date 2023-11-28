@@ -62,6 +62,10 @@ export const taskStatusColors: Record<number, string> = {
   2: "blue",
   3: "green",
 };
+export const stockItemStatusColors: Record<number, string> = {
+  1: "green",
+  2: "red",
+};
 
 export enum DriverFilters {
   "ALL" = 1,

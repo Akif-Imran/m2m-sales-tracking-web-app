@@ -18,3 +18,6 @@ export * from "./leaveStatusSlice";
 export * from "./leaveTypeSlice";
 export * from "./notificationsSlice";
 export * from "./expenseTypeSlice";
+export * from "./purchaseCategorySlice";
+export * from "./stockItemSlice";
+export * from "./stockItemStatusSlice";

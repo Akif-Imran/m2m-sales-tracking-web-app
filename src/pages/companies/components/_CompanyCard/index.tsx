@@ -28,6 +28,8 @@ import { useNavigate } from "react-router-dom";
 import { routes } from "@routes";
 import { BASE_URL } from "@api";
 import { PhotoView } from "react-photo-view";
+import { menuIconStyle, noImageStyle } from "@global-styles";
+import { useAuthContext } from "@contexts";
 
 interface OwnProps {
   onClick?: (e?: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
@@ -49,6 +51,9 @@ const _CompanyCard: React.FC<OwnProps> = ({
   handleDelete,
 }) => {
   const { cx, classes, theme } = useStyles();
+  const {
+    state: { isAdmin },
+  } = useAuthContext();
   const navigate = useNavigate();
 
   const handleNavigate = (route: string) => {
@@ -57,29 +62,10 @@ const _CompanyCard: React.FC<OwnProps> = ({
     // setScrollIndex(index);
   };
 
-  const noImageStyle = {
-    root: {
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-    },
-    image: {
-      filter: `invert(33%) sepia(65%) saturate(0%) hue-rotate(253deg) brightness(98%) contrast(88%)`,
-      objectFit: "contain",
-      width: rem(64),
-      height: rem(64),
-    },
-  };
-
   const menuStyles = {
     itemLabel: {
       fontSize: theme.fontSizes.sm,
     },
-  };
-  const menuIconStyle = {
-    stroke: 1.3,
-    size: 16,
-    color: colors.titleText,
   };
 
   return (
@@ -194,16 +180,18 @@ const _CompanyCard: React.FC<OwnProps> = ({
                   >
                     Reports
                   </Menu.Item>
-                  <Menu.Item
-                    color="red"
-                    icon={<IconTrash size={menuIconStyle.size} />}
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      handleDelete();
-                    }}
-                  >
-                    Delete
-                  </Menu.Item>
+                  {isAdmin && (
+                    <Menu.Item
+                      color="red"
+                      icon={<IconTrash size={menuIconStyle.size} />}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        handleDelete();
+                      }}
+                    >
+                      Delete
+                    </Menu.Item>
+                  )}
                 </Menu.Dropdown>
               </Menu>
             </div>

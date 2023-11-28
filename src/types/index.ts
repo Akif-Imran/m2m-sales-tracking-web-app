@@ -19,7 +19,7 @@ interface IUser {
   __v: number; //
   createdAt: string; //
 }
-type ILoginUserData = Omit<IUser, "createdAt">;
+type ILoginUserData = Omit<IUser, "createdAt"> & { lastLoginTime: string };
 
 interface ICompanyContact {
   _id: string;
@@ -69,6 +69,7 @@ interface IProjectStatus {
 }
 interface IProject {
   _id: string;
+  images: string[];
   createdBy: string;
   createdAt: string;
   isActive: true;
@@ -111,6 +112,40 @@ interface IProject {
   // statusName: string;
   // companyId: number; //company
 }
+
+interface IPurchaseCategory {
+  _id: string;
+  createdBy: string;
+  createdAt: string;
+  isActive: boolean;
+  company: string;
+  name: string;
+  description: string;
+  __v: number;
+}
+interface IStockItemStatus {
+  id: number;
+  name: string;
+}
+interface IStockItem {
+  createdBy: string;
+  createdAt: string;
+  isActive: boolean;
+  company: string;
+  image: string;
+  no: number;
+  name: string;
+  type: string;
+  cost: {
+    amount: number;
+    currency: string;
+  };
+  assignedTo: string;
+  status: number;
+  _id: string;
+  __v: number;
+}
+
 interface IFollowUp {
   _id: string;
   projectId: string;
@@ -211,6 +246,7 @@ interface IPurchaseRequest {
   company: string;
   projectId: string;
   supplierId: string;
+  categoryId: string;
   itemName: string;
   itemType: string;
   warranty: string;

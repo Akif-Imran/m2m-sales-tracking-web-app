@@ -6,7 +6,6 @@ import {
   Avatar,
   Badge,
   Card,
-  Center,
   Flex,
   Grid,
   Menu,
@@ -29,21 +28,27 @@ import { useParams } from "react-router-dom";
 import { DateTime } from "luxon";
 import { colors } from "@theme";
 import {
+  IconBriefcase,
+  IconCash,
   IconChevronRight,
   IconDotsVertical,
   IconPlus,
   IconSearch,
+  IconShoppingBag,
   IconTrashFilled,
 } from "@tabler/icons-react";
 import { _AddContactModal } from "../components";
 import { _AddFollowUpModal } from "../../projects/follow-ups/components";
+import { _AddClaimModal } from "../../projects/claims/components";
+import { _AddPurchaseRequestModal } from "../../projects/purchase-requests/components";
+import { _AddProjectModal } from "../../projects/components";
 import { removeContact } from "@thunks";
 import { useAuthContext } from "@contexts";
 import { notify } from "@utility";
 import { openDeleteModalHelper } from "@helpers";
 import { deleteContact } from "@slices";
 import { BASE_URL } from "@api";
-import { useGStyles } from "@global-styles";
+import { useGStyles, menuIconStyle } from "@global-styles";
 import { PhotoView } from "react-photo-view";
 
 interface OwnProps {}
@@ -73,6 +78,9 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
   const [selectedProject, setSelectedProject] = React.useState<ArrayToObj<typeof projectsList>>();
 
   const [addContactModalOpened, setAddContactModalOpened] = React.useState(false);
+  const [addProjectModalOpened, setAddProjectModalOpened] = React.useState(false);
+  const [addClaimModalOpened, setAddClaimModalOpened] = React.useState(false);
+  const [addPurchaseModalOpened, setAddPurchaseModalOpened] = React.useState(false);
   const [contactSearchQuery, setContactSearchQuery] = React.useState("");
   const [addFollowUpModalOpened, setAddFollowUpModalOpened] = React.useState(false);
   const [followupSearchQuery, setFollowUpSearchQuery] = React.useState("");
@@ -192,11 +200,43 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
         <Grid>
           <Grid.Col span={3}>
             <Card {...cardConfig}>
-              <Center>
+              <Flex direction={"row"} justify={"space-between"} align={"center"}>
                 <Text {...titleTextStyle} size={"lg"}>
                   Leads/Projects List
                 </Text>
-              </Center>
+
+                <Menu withArrow withinPortal>
+                  <Menu.Target>
+                    <ActionIcon>
+                      <IconDotsVertical size={16} stroke={1.3} color={colors.titleText} />
+                    </ActionIcon>
+                  </Menu.Target>
+                  <Menu.Dropdown>
+                    <Menu.Label>New</Menu.Label>
+                    <Menu.Item
+                      color={colors.titleText}
+                      icon={<IconBriefcase {...menuIconStyle} />}
+                      onClick={() => setAddProjectModalOpened(true)}
+                    >
+                      Project
+                    </Menu.Item>
+                    <Menu.Item
+                      color={colors.titleText}
+                      icon={<IconCash {...menuIconStyle} />}
+                      onClick={() => setAddClaimModalOpened(true)}
+                    >
+                      Expense / Claim
+                    </Menu.Item>
+                    <Menu.Item
+                      color={colors.titleText}
+                      icon={<IconShoppingBag {...menuIconStyle} />}
+                      onClick={() => setAddPurchaseModalOpened(true)}
+                    >
+                      Purchase Request
+                    </Menu.Item>
+                  </Menu.Dropdown>
+                </Menu>
+              </Flex>
             </Card>
             <ScrollArea type="scroll" h={"80vh"}>
               {projects.map((project) => {
@@ -214,7 +254,7 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
                     onClick={() => handleSelectProject(project._id)}
                   >
                     <Flex direction={"row"} justify={"space-between"} align={"center"}>
-                      <Flex direction={"column"}>
+                      <Flex direction={"column"} align={"flex-start"}>
                         <Text {...titleTextStyle}>{project.name}</Text>
                         <Badge variant="filled" color={projectStatusColors[project.status]}>
                           {status?.label}
@@ -251,7 +291,7 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
                     </Stack>
                   </Card>
                   <Card {...cardConfig}>
-                    <Stack>
+                    <Flex direction={"column"}>
                       <Flex direction={"row"} align={"center"} columnGap={"sm"}>
                         <Text {...titleTextStyle}>Name: </Text>
                         <Text {...bodyTextStyle}>{selectedProject.name}</Text>
@@ -306,7 +346,7 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
                         <Text {...titleTextStyle}>Description: </Text>
                         <Text {...bodyTextStyle}>{selectedProject.description}</Text>
                       </Flex>
-                    </Stack>
+                    </Flex>
                   </Card>
                 </Grid.Col>
 
@@ -482,15 +522,14 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
                     return (
                       <Card {...cardConfig} key={followUp._id}>
                         <React.Fragment>
-                          <Flex direction={"column"} my={"md"}>
-                            <Text {...titleTextStyle} mb={"sm"}>
-                              #{index + 1}
-                            </Text>
-                            <Flex direction={"row"} align={"center"} justify={"space-between"}>
+                          <Flex direction={"row"} justify={"space-between"}>
+                            <Flex direction={"column"} my={"md"}>
+                              <Text {...titleTextStyle} mb={"xs"}>
+                                #{index + 1}
+                              </Text>
                               <Flex direction={"row"} align={"center"} columnGap={"sm"}>
                                 <Text {...titleTextStyle}>Date/Time: </Text>
                                 <Text {...bodyTextStyle}>
-                                  {" "}
                                   {DateTime.fromISO(followUp.meetingDate).toFormat(
                                     DAY_MM_DD_YYYY_HH_MM_SS_A
                                   )}
@@ -506,25 +545,62 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
                                 <Text {...titleTextStyle}>Meeting With:</Text>
                                 <Text {...bodyTextStyle}>{followUp.contactPerson?.name}</Text>
                               </Flex>
-                            </Flex>
 
-                            <Flex direction={"row"} align={"center"} justify={"space-between"}>
                               <Flex direction={"row"} align={"flex-start"} columnGap={"sm"}>
                                 <Text {...titleTextStyle}>Agenda:</Text>
                                 <Text {...bodyTextStyle}>{followUp.meetingAgenda}</Text>
                               </Flex>
-                            </Flex>
 
-                            <Flex direction={"row"} align={"center"} justify={"space-between"}>
                               <Flex direction={"row"} align={"flex-start"} columnGap={"sm"}>
                                 <Text {...titleTextStyle}>Summary:</Text>
                                 <Text {...bodyTextStyle}>{followUp.meetingSummary}</Text>
                               </Flex>
                             </Flex>
 
-                            <Flex direction={"row"} align={"center"} justify={"space-between"}>
-                              <Flex direction={"row"} align={"flex-start"} columnGap={"sm"}>
-                                <Text {...titleTextStyle}>Total Expense:</Text>
+                            <Flex direction={"column"} my={"md"}>
+                              <Text {...titleTextStyle} mb={"xs"}>
+                                Next Visit
+                              </Text>
+                              <Flex direction={"row"} align={"center"} columnGap={"sm"}>
+                                <Text {...titleTextStyle}>Date/Time: </Text>
+                                <Text {...bodyTextStyle}>
+                                  {followUp.nextMeetingDate
+                                    ? DateTime.fromISO(followUp.nextMeetingDate).toFormat(
+                                        DAY_MM_DD_YYYY_HH_MM_SS_A
+                                      )
+                                    : "---"}
+                                </Text>
+                              </Flex>
+
+                              <Flex direction={"row"} align={"center"} columnGap={"sm"}>
+                                <Text {...titleTextStyle}>Agenda:</Text>
+                                <Text {...bodyTextStyle}>{followUp.nextMeetingAgenda}</Text>
+                              </Flex>
+
+                              <Flex direction={"row"} align={"center"} columnGap={"sm"}>
+                                <Text {...titleTextStyle}>Place:</Text>
+                                <Text {...bodyTextStyle}>{followUp.nextMeetingPlace}</Text>
+                              </Flex>
+                            </Flex>
+
+                            <Flex direction={"column"} my={"md"}>
+                              <Text {...titleTextStyle} mb={"xs"}>
+                                Expense / Claim
+                              </Text>
+                              <Flex direction={"row"} align={"center"} columnGap={"sm"}>
+                                <Text {...titleTextStyle}>Name:</Text>
+                                <Text {...bodyTextStyle}>{followUp?.expenseName}</Text>
+                              </Flex>
+
+                              <Flex direction={"row"} align={"center"} columnGap={"sm"}>
+                                <Text {...titleTextStyle}>Type:</Text>
+                                <Text {...bodyTextStyle}>
+                                  {followUp?.expenseTypeDetail?.name || "---"}
+                                </Text>
+                              </Flex>
+
+                              <Flex direction={"row"} align={"center"} columnGap={"sm"}>
+                                <Text {...titleTextStyle}>Price:</Text>
                                 <Text {...bodyTextStyle}>{value}</Text>
                               </Flex>
                             </Flex>
@@ -538,6 +614,12 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
             </Stack>
           </Grid.Col>
         </Grid>
+        <_AddProjectModal
+          title="Add Lead/Project"
+          opened={addProjectModalOpened}
+          onClose={() => setAddProjectModalOpened(false)}
+          companyId={company._id}
+        />
         <_AddContactModal
           title="Add Contact"
           opened={addContactModalOpened}
@@ -550,6 +632,20 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
           projectId={selectedProject._id}
           companyId={company._id}
           onClose={() => setAddFollowUpModalOpened(false)}
+        />
+        <_AddClaimModal
+          title="Add Claim"
+          opened={addClaimModalOpened}
+          companyId={company._id}
+          projectId={selectedProject._id}
+          onClose={() => setAddClaimModalOpened(false)}
+        />
+        <_AddPurchaseRequestModal
+          title="Add Purchase Request"
+          opened={addPurchaseModalOpened}
+          companyId={company._id}
+          projectId={selectedProject._id}
+          onClose={() => setAddPurchaseModalOpened(false)}
         />
       </>
     );

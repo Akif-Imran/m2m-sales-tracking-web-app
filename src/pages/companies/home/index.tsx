@@ -42,7 +42,7 @@ interface OwnProps {}
 const Company: React.FC<OwnProps> = () => {
   useStyles();
   const {
-    state: { token },
+    state: { token, isAdmin },
   } = useAuthContext();
   const dispatch = useAppDispatch();
   const { classes: gclasses, theme } = useGStyles();
@@ -188,13 +188,15 @@ const Company: React.FC<OwnProps> = () => {
                 <td>{company.address}</td>
                 <td>{company.city}</td>
                 <td>{company.country}</td>
-                <td>
-                  <Group>
-                    <ActionIcon color="red" size={"sm"} onClick={() => handleDelete(company._id)}>
-                      <IconTrash />
-                    </ActionIcon>
-                  </Group>
-                </td>
+                {isAdmin && (
+                  <td>
+                    <Group>
+                      <ActionIcon color="red" size={"sm"} onClick={() => handleDelete(company._id)}>
+                        <IconTrash />
+                      </ActionIcon>
+                    </Group>
+                  </td>
+                )}
               </tr>
             );
           } else {
@@ -285,7 +287,7 @@ const Company: React.FC<OwnProps> = () => {
       </Flex>
       {content}
       <_AddCompanyModal
-        title="Add Company"
+        title="Add Prospect"
         opened={addCompanyModalOpened}
         onClose={() => setAddCompanyModalOpened(false)}
       />

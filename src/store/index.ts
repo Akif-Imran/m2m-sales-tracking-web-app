@@ -12,8 +12,11 @@ import {
   leaveTypeReducer,
   projectReducer,
   projectStatusListReducer,
+  purchaseCategoryReducer,
   purchaseRequestReducer,
   purchaseRequestStatusListReducer,
+  stockItemReducer,
+  stockItemStatusListReducer,
   supplierReducer,
   taskReducer,
   taskStatusListReducer,
@@ -34,6 +37,7 @@ const store = configureStore({
     followUps: followUpReducer,
     purchaseRequest: purchaseRequestReducer,
     purchaseRequestStatusList: purchaseRequestStatusListReducer,
+    purchaseCategories: purchaseCategoryReducer,
     claims: claimsReducer,
     claimsStatusList: claimsStatusListReducer,
     expenseTypeList: expenseTypeReducer,
@@ -44,6 +48,8 @@ const store = configureStore({
     leaves: leaveApplicationReducer,
     leaveStatusList: leaveStatusReducer,
     leaveTypes: leaveTypeReducer,
+    stockItems: stockItemReducer,
+    stockItemStatusList: stockItemStatusListReducer,
     suppliers: supplierReducer,
     notifications: notificationReducer,
   },
@@ -67,6 +73,7 @@ export const selectFollowUps = (state: RootState) => state.followUps;
 export const selectPurchaseRequests = (state: RootState) => state.purchaseRequest;
 export const selectPurchaseRequestsStatusList = (state: RootState) =>
   state.purchaseRequestStatusList;
+export const selectPurchaseCategories = (state: RootState) => state.purchaseCategories;
 export const selectClaims = (state: RootState) => state.claims;
 export const selectClaimsStatusList = (state: RootState) => state.claimsStatusList;
 export const selectExpenseTypeList = (state: RootState) => state.expenseTypeList;
@@ -77,6 +84,8 @@ export const selectUserTypes = (state: RootState) => state.userTypes;
 export const selectLeaves = (state: RootState) => state.leaves;
 export const selectLeaveStatusList = (state: RootState) => state.leaveStatusList;
 export const selectLeaveTypes = (state: RootState) => state.leaveTypes;
+export const selectStockItems = (state: RootState) => state.stockItems;
+export const selectStockItemsStatusList = (state: RootState) => state.stockItemStatusList;
 export const selectSuppliers = (state: RootState) => state.suppliers;
 export const selectNotifications = (state: RootState) => state.notifications;
 
@@ -126,6 +135,8 @@ export const selectRecordsForDropdown = createSelector(
   selectLeaveStatusList,
   selectLeaveTypes,
   selectExpenseTypeList,
+  selectPurchaseCategories,
+  selectStockItemsStatusList,
   (
     companies,
     projects,
@@ -139,7 +150,9 @@ export const selectRecordsForDropdown = createSelector(
     claimsStatus,
     leaveStatus,
     leaveTypes,
-    expenseTypes
+    expenseTypes,
+    purchaseCategories,
+    stockItemStatus
   ) => {
     return {
       companies: companies.data.map((company) => ({
@@ -174,6 +187,10 @@ export const selectRecordsForDropdown = createSelector(
         value: status.id.toString(),
         label: status.name,
       })),
+      stockItemStatus: stockItemStatus.data.map((status) => ({
+        value: status.id.toString(),
+        label: status.name,
+      })),
       claimsStatus: claimsStatus.data.map((status) => ({
         value: status.id.toString(),
         label: status.name,
@@ -181,6 +198,10 @@ export const selectRecordsForDropdown = createSelector(
       expenseTypes: expenseTypes.data.map((type) => ({
         value: type._id,
         label: type.name,
+      })),
+      purchaseCategories: purchaseCategories.data.map((category) => ({
+        value: category._id,
+        label: category.name,
       })),
       leaveStatus: leaveStatus.data.map((status) => ({
         value: status.id.toString(),
@@ -256,18 +277,21 @@ export const selectPurchaseRequestsWithRecords = createSelector(
   selectSuppliers,
   selectProjects,
   selectPurchaseRequestsStatusList,
-  (requests, users, suppliers, projects, statuses) => {
+  selectPurchaseCategories,
+  (requests, users, suppliers, projects, statuses, categories) => {
     return requests.data.map((request) => {
       const requestByPerson = users.data.find((user) => user._id === request.createdBy);
       const project = projects.data.find((project) => project._id === request.projectId);
       const supplier = suppliers.data.find((supplier) => supplier._id === request.supplierId);
       const statusName = statuses.data.find((status) => status.id === request.status)?.name;
+      const category = categories.data.find((category) => category._id === request.categoryId);
       return {
         ...request,
         requestByPerson,
         project,
         supplier,
         statusName,
+        category,
       };
     });
   }
@@ -318,6 +342,25 @@ export const selectLeavesWithRecords = createSelector(
         ...leave,
         requestByPerson,
         statusName,
+      };
+    });
+  }
+);
+
+export const selectStockItemsWithRecords = createSelector(
+  selectStockItems,
+  selectStockItemsStatusList,
+  selectUsers,
+  (item, statuses, users) => {
+    return item.data.map((item) => {
+      const statusName = statuses.data.find((status) => status.id === item.status)?.name;
+      const requestByPerson = users.data.find((user) => user._id === item.createdBy);
+      const assignee = users.data.find((user) => user._id === item.assignedTo);
+      return {
+        ...item,
+        statusName,
+        requestByPerson,
+        assignee,
       };
     });
   }

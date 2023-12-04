@@ -55,7 +55,7 @@ export const Claims: React.FC<OwnProps> = () => {
     setSearchQuery(query);
     const filtered = claims.filter(
       (request) =>
-        request.project?.name.toLowerCase().includes(query.toLowerCase()) ||
+        request.lead?.name.toLowerCase().includes(query.toLowerCase()) ||
         request.supplier?.name?.toLowerCase().includes(query.toLowerCase()) ||
         request.requestByPerson?.name.toLowerCase().includes(query.toLowerCase()) ||
         request.itemName?.toLowerCase().includes(query.toLowerCase())
@@ -166,7 +166,7 @@ export const Claims: React.FC<OwnProps> = () => {
                   {request?.statusName}
                 </Badge>
               </td>
-              <td>{request.project?.name}</td>
+              <td>{request.lead?.name}</td>
               <td>{request.requestByPerson?.name}</td>
               <td>
                 {DateTime.fromISO(request.warranty).toLocal().toFormat(DAY_MM_DD_YYYY_HH_MM_SS_A)}

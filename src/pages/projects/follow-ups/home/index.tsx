@@ -47,7 +47,7 @@ export const FollowUps: React.FC<OwnProps> = () => {
     setSearchQuery(query);
     const filtered = followups.filter(
       (followup) =>
-        followup.project?.name.toLowerCase().includes(query.toLowerCase()) ||
+        followup.lead?.name.toLowerCase().includes(query.toLowerCase()) ||
         followup.contactPerson?.name.toLowerCase().includes(query.toLowerCase()) ||
         followup.followUpPerson?.name.toLowerCase().includes(query.toLowerCase()) ||
         followup.meetingPlace?.toLowerCase().includes(query.toLowerCase())
@@ -119,7 +119,7 @@ export const FollowUps: React.FC<OwnProps> = () => {
           return (
             <tr key={followup._id}>
               <td>{index + 1}</td>
-              <td>{followup.project?.name}</td>
+              <td>{followup.lead?.name}</td>
               <td>{followup.contactPerson?.name}</td>
               <td>
                 {DateTime.fromISO(followup.meetingDate)

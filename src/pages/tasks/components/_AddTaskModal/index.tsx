@@ -6,7 +6,7 @@ import { useFormik } from "formik";
 import { IconCalendar } from "@tabler/icons-react";
 import { notify } from "@utility";
 import {
-  selectProjectWithRecords,
+  selectLeadsWithRecords,
   selectRecordsForDropdown,
   useAppDispatch,
   useAppSelector,
@@ -33,7 +33,7 @@ const _AddTaskModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
     state: { token },
   } = useAuthContext();
   const [plannedEndDate, setPlannedEndDate] = React.useState(new Date());
-  const allProjects = useAppSelector(selectProjectWithRecords);
+  const allProjects = useAppSelector(selectLeadsWithRecords);
   const { companies, salesPersons, engineers } = useAppSelector(selectRecordsForDropdown);
   const [projectsList, setProjectList] = React.useState<IDropDownList>([]);
   const [isCreating, setIsCreating] = React.useState(false);

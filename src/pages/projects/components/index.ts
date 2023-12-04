@@ -1,3 +1,3 @@
-export { _AddProjectModal } from "./_AddProjectModal";
+export { _AddLeadModal } from "./_AddLeadModal";
 export { _AssignEngineerModal } from "./_AssignEngineerModal";
-export { _ProjectCard } from "./_ProjectCard";
+export { _LeadCard } from "./_LeadCard";

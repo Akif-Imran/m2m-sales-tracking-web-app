@@ -17,7 +17,7 @@ import {
   TextInput,
 } from "@mantine/core";
 import {
-  selectProjectWithRecords,
+  selectLeadsWithRecords,
   selectRecordsForDropdown,
   useAppDispatch,
   useAppSelector,
@@ -35,8 +35,8 @@ import {
 import { modalOverlayPropsHelper, openDeleteModalHelper } from "@helpers";
 import { notify } from "@utility";
 import { colors } from "@theme";
-import { deleteProject, updateProjectStatus } from "@slices";
-import { _AddProjectModal, _AssignEngineerModal, _ProjectCard } from "../components";
+import { deleteLead, modifyLeadStatus } from "@slices";
+import { _AddLeadModal, _AssignEngineerModal, _LeadCard } from "../components";
 import { DateTime } from "luxon";
 import { DAY_MM_DD_YYYY, projectStatusColors } from "@constants";
 import { useAuthContext } from "@contexts";
@@ -47,7 +47,7 @@ import { BASE_URL } from "@api";
 
 interface OwnProps {}
 
-interface ProjectSort {
+interface LeadSort {
   statusName: string;
   salesPerson: string;
   // Add other properties as needed
@@ -67,28 +67,28 @@ const Projects: React.FC<OwnProps> = () => {
   const customerId = searchParams.get("customerId") || "";
 
   const [searchQuery, setSearchQuery] = React.useState("");
-  const projects = useAppSelector(selectProjectWithRecords);
+  const projects = useAppSelector(selectLeadsWithRecords);
   const [isDeleting, setIsDeleting] = React.useState(false);
-  const [addProjectModalOpened, setAddProjectModalOpened] = React.useState(modal === "add");
+  const [addModalOpened, setAddModalOpened] = React.useState(modal === "add");
   const [assignEngineerModalOpened, setAssignEngineerModalOpened] = React.useState(false);
   const [searchedData, setSearchedData] = React.useState<typeof projects>([]);
 
   const { projectStatus: projectStatusList } = useAppSelector(selectRecordsForDropdown);
   const [visible, setVisible] = React.useState<boolean>(false);
   const [selectedStatus, setSelectedStatus] = React.useState<string>();
-  const [selectedProject, setSelectedProject] = React.useState<string>("");
-  const [sortOrder, setSortOrder] = React.useState<ProjectSort>({
+  const [selectedLead, setSelectedLead] = React.useState<string>("");
+  const [sortOrder, setSortOrder] = React.useState<LeadSort>({
     statusName: "asc", // Initial sorting order (asc or desc)
     salesPerson: "asc",
   });
 
-  const showUpdateStatusModal = (statusId: number, projectId: string) => {
+  const showUpdateStatusModal = (statusId: number, leadId: string) => {
     setSelectedStatus(statusId.toString());
-    setSelectedProject(projectId);
+    setSelectedLead(leadId);
     setVisible(true);
   };
-  const showAssignEngineerModal = (projectId: string) => {
-    setSelectedProject(projectId);
+  const showAssignEngineerModal = (leadId: string) => {
+    setSelectedLead(leadId);
     setAssignEngineerModalOpened(true);
   };
 
@@ -103,7 +103,7 @@ const Projects: React.FC<OwnProps> = () => {
     setSearchedData(filtered);
   };
 
-  const sortData = (columnName: keyof ProjectSort) => {
+  const sortData = (columnName: keyof LeadSort) => {
     const sortOrderCopy = { ...sortOrder };
     sortOrderCopy[columnName] = sortOrderCopy[columnName] === "asc" ? "desc" : "asc";
     setSortOrder(sortOrderCopy);
@@ -130,16 +130,16 @@ const Projects: React.FC<OwnProps> = () => {
   const handleDelete = (id: string) => {
     openDeleteModalHelper({
       theme: theme,
-      title: `Delete Project`,
+      title: `Delete Lead`,
       loading: isDeleting,
       description: (
         <Text fw={"normal"} fs={"normal"} fz={"sm"} color={colors.titleText}>
-          Are you sure you want to delete this project? This action is destructive and you will have
-          to contact support to restore data.
+          Are you sure you want to delete this Lead? This action is destructive and you will have to
+          contact support to restore data.
         </Text>
       ),
       cancelLabel: "Cancel",
-      confirmLabel: "Delete Project",
+      confirmLabel: "Delete Lead",
       onConfirm: () => {
         setIsDeleting((_prev) => true);
         dispatch(
@@ -151,32 +151,32 @@ const Projects: React.FC<OwnProps> = () => {
           .unwrap()
           .then((res) => {
             if (res.success) {
-              dispatch(deleteProject(res.data._id));
+              dispatch(deleteLead(res.data._id));
             }
           })
           .catch((err) => {
-            console.log("Delete project: ", err?.message);
-            notify("Delete Project", "An error occurred", "error");
+            console.log("Delete Lead: ", err?.message);
+            notify("Delete Lead", "An error occurred", "error");
           })
           .finally(() => {
             setIsDeleting((_prev) => false);
           });
 
-        notify("Delete Project", "Project deleted successfully!", "success");
+        notify("Delete Lead", "Lead deleted successfully!", "success");
       },
-      onCancel: () => notify("Delete Project", "Operation canceled!", "error"),
+      onCancel: () => notify("Delete Lead", "Operation canceled!", "error"),
     });
   };
 
   const handleOnChangeStatus = (value: string | null) => {
     if (!value) {
-      notify("Update Project Status", "Invalid status value", "error");
+      notify("Update Lead Status", "Invalid status value", "error");
       return;
     }
     dispatch(
       updateStatusProject({
         token,
-        id: selectedProject,
+        id: selectedLead,
         body: {
           status: parseInt(value),
         },
@@ -184,15 +184,15 @@ const Projects: React.FC<OwnProps> = () => {
     )
       .unwrap()
       .then((res) => {
-        notify("Project Status", res?.message, res.success ? "success" : "error");
+        notify("Lead Status", res?.message, res.success ? "success" : "error");
         if (res.success) {
-          dispatch(updateProjectStatus(res.data));
+          dispatch(modifyLeadStatus(res.data));
           hideUpdateStatusModal();
         }
       })
       .catch((err) => {
-        console.log("Update Project Status: ", err?.message);
-        notify("Project Status", "An error occurred", "error");
+        console.log("Update Lead Status: ", err?.message);
+        notify("Lead Status", "An error occurred", "error");
       });
   };
 
@@ -226,7 +226,7 @@ const Projects: React.FC<OwnProps> = () => {
           if (viewMode === "cards") {
             return (
               <Grid.Col span={4} key={project._id}>
-                <_ProjectCard
+                <_LeadCard
                   item={project}
                   handleDelete={handleDelete}
                   assignEngineer={showAssignEngineerModal}
@@ -312,7 +312,7 @@ const Projects: React.FC<OwnProps> = () => {
             );
           } else {
             return (
-              <_ProjectCard
+              <_LeadCard
                 key={project._id}
                 item={project}
                 handleDelete={handleDelete}
@@ -399,31 +399,31 @@ const Projects: React.FC<OwnProps> = () => {
         <Button
           variant="filled"
           rightIcon={<IconPlus size={16} />}
-          onClick={() => setAddProjectModalOpened(true)}
+          onClick={() => setAddModalOpened(true)}
         >
           Project
         </Button>
       </Flex>
 
       {content}
-      <_AddProjectModal
-        title="Add Lead/Project"
-        opened={addProjectModalOpened}
-        onClose={() => setAddProjectModalOpened(false)}
+      <_AddLeadModal
+        title="Add Lead"
+        opened={addModalOpened}
+        onClose={() => setAddModalOpened(false)}
         companyId={customerId}
       />
       <_AssignEngineerModal
         title="Assign Engineer"
         opened={assignEngineerModalOpened}
         onClose={hideAssignEngineerModal}
-        projectId={selectedProject}
+        projectId={selectedLead}
       />
       <Modal
         centered
         radius="md"
         opened={visible}
         onClose={hideUpdateStatusModal}
-        title="Project Status"
+        title="Lead Status"
         scrollAreaComponent={ScrollArea.Autosize}
         withinPortal
         withOverlay

@@ -10,7 +10,7 @@ import {
   leaveApplicationReducer,
   leaveStatusReducer,
   leaveTypeReducer,
-  projectReducer,
+  leadReducer,
   projectStatusListReducer,
   purchaseCategoryReducer,
   purchaseRequestReducer,
@@ -32,7 +32,7 @@ const store = configureStore({
     companyContacts: companyContactReducer,
     companies: companyReducer,
     departments: departmentReducer,
-    projects: projectReducer,
+    leads: leadReducer,
     projectStatusList: projectStatusListReducer,
     followUps: followUpReducer,
     purchaseRequest: purchaseRequestReducer,
@@ -67,7 +67,7 @@ export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
 export const selectCompanies = (state: RootState) => state.companies;
 export const selectCompanyContact = (state: RootState) => state.companyContacts;
 export const selectDepartments = (state: RootState) => state.departments;
-export const selectProjects = (state: RootState) => state.projects;
+export const selectLeads = (state: RootState) => state.leads;
 export const selectProjectStatusList = (state: RootState) => state.projectStatusList;
 export const selectFollowUps = (state: RootState) => state.followUps;
 export const selectPurchaseRequests = (state: RootState) => state.purchaseRequest;
@@ -91,7 +91,7 @@ export const selectNotifications = (state: RootState) => state.notifications;
 
 //memoized selectors
 export const selectTasksCombined = createSelector(
-  selectProjects,
+  selectLeads,
   selectUsers,
   selectTasks,
   selectCompanies,
@@ -123,7 +123,7 @@ export const selectUsersBasedOnType = createSelector(selectUsers, (users) => {
 });
 export const selectRecordsForDropdown = createSelector(
   selectCompanies,
-  selectProjects,
+  selectLeads,
   selectDepartments,
   selectUserTypes,
   selectUsers,
@@ -139,7 +139,7 @@ export const selectRecordsForDropdown = createSelector(
   selectStockItemsStatusList,
   (
     companies,
-    projects,
+    leads,
     departments,
     userTypes,
     users,
@@ -159,7 +159,7 @@ export const selectRecordsForDropdown = createSelector(
         value: company._id,
         label: company.name,
       })),
-      projects: projects.data.map((project) => ({
+      leads: leads.data.map((project) => ({
         value: project._id,
         label: project.name,
       })),
@@ -227,8 +227,8 @@ export const selectRecordsForDropdown = createSelector(
   }
 );
 
-export const selectProjectWithRecords = createSelector(
-  selectProjects,
+export const selectLeadsWithRecords = createSelector(
+  selectLeads,
   selectCompanies,
   selectUsers,
   selectProjectStatusList,
@@ -249,21 +249,22 @@ export const selectProjectWithRecords = createSelector(
     });
   }
 );
+
 export const selectFollowUpsWithRecords = createSelector(
   selectFollowUps,
-  selectProjects,
+  selectLeads,
   selectCompanyContact,
   selectUsers,
   selectExpenseTypeList,
-  (followups, projects, contacts, users, expenseTypes) => {
+  (followups, leads, contacts, users, expenseTypes) => {
     return followups.data.map((followup) => {
-      const project = projects.data.find((project) => project._id === followup.projectId);
+      const lead = leads.data.find((project) => project._id === followup.projectId);
       const followUpPerson = users.data.find((user) => user._id === followup.createdBy);
       const contactPerson = contacts.data.find((contact) => contact._id === followup.contactId);
       const expenseType = expenseTypes.data.find((type) => type._id === followup?.expenseType);
       return {
         ...followup,
-        project,
+        lead: lead,
         contactPerson,
         followUpPerson,
         expenseTypeDetail: expenseType,
@@ -271,11 +272,12 @@ export const selectFollowUpsWithRecords = createSelector(
     });
   }
 );
+
 export const selectPurchaseRequestsWithRecords = createSelector(
   selectPurchaseRequests,
   selectUsers,
   selectSuppliers,
-  selectProjects,
+  selectLeads,
   selectPurchaseRequestsStatusList,
   selectPurchaseCategories,
   (requests, users, suppliers, projects, statuses, categories) => {
@@ -300,18 +302,18 @@ export const selectClaimsWithRecords = createSelector(
   selectClaims,
   selectUsers,
   selectSuppliers,
-  selectProjects,
+  selectLeads,
   selectClaimsStatusList,
-  (claims, users, suppliers, projects, statuses) => {
+  (claims, users, suppliers, leads, statuses) => {
     return claims.data.map((request) => {
       const requestByPerson = users.data.find((user) => user._id === request.createdBy);
-      const project = projects.data.find((project) => project._id === request.projectId);
+      const lead = leads.data.find((project) => project._id === request.projectId);
       const supplier = suppliers.data.find((supplier) => supplier._id === request.supplierId);
       const statusName = statuses.data.find((status) => status.id === request.status)?.name;
       return {
         ...request,
         requestByPerson,
-        project,
+        lead,
         supplier,
         statusName,
       };

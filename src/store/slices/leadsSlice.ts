@@ -13,22 +13,22 @@ const initialState: State = {
   error: null,
 };
 
-const projectSlice = createSlice({
+const leadSlice = createSlice({
   name: "leads",
   initialState: initialState,
   reducers: {
-    addProject: (state, action: PayloadAction<IProject>) => {
+    addLead: (state, action: PayloadAction<IProject>) => {
       state.data.push(action.payload);
     },
-    modifyProject: (state, action: PayloadAction<IProject>) => {
+    modifyLead: (state, action: PayloadAction<IProject>) => {
       const index = state.data.findIndex((project) => project._id === action.payload._id);
       state.data[index] = action.payload;
     },
-    updateProjectStatus: (state, action: PayloadAction<IProject>) => {
+    modifyLeadStatus: (state, action: PayloadAction<IProject>) => {
       const index = state.data.findIndex((project) => project._id === action.payload._id);
       state.data[index].status = action.payload.status;
     },
-    deleteProject: (state, action: PayloadAction<string>) => {
+    deleteLead: (state, action: PayloadAction<string>) => {
       const index = state.data.findIndex((project) => project._id === action.payload);
       state.data.splice(index, 1);
     },
@@ -43,7 +43,7 @@ const projectSlice = createSlice({
     });
     builder.addCase(fetchProjects.fulfilled, (state, action) => {
       if (action.payload.success) {
-        state.data = action.payload.data;
+        state.data = action.payload.data.filter((value) => value.status < 4);
       }
       state.error = null;
       state.isLoading = false;
@@ -51,7 +51,6 @@ const projectSlice = createSlice({
   },
 });
 
-export { projectSlice };
-export const { addProject, deleteProject, modifyProject, updateProjectStatus } =
-  projectSlice.actions;
-export const projectReducer = projectSlice.reducer;
+export { leadSlice };
+export const { addLead, deleteLead, modifyLead, modifyLeadStatus } = leadSlice.actions;
+export const leadReducer = leadSlice.reducer;

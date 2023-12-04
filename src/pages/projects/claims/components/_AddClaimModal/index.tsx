@@ -5,7 +5,7 @@ import { DATE_FORMAT_YYYY_MM_DD, modalOverlayPropsHelper } from "@helpers";
 import { DatePickerInput, DateValue } from "@mantine/dates";
 import { useFormik } from "formik";
 import { useAuthContext } from "@contexts";
-import { selectProjects, selectRecordsForDropdown, useAppDispatch, useAppSelector } from "@store";
+import { selectLeads, selectRecordsForDropdown, useAppDispatch, useAppSelector } from "@store";
 import { addClaim } from "@slices";
 import { IconCalendar } from "@tabler/icons-react";
 import { currencyList } from "@constants";
@@ -58,7 +58,7 @@ export const _AddClaimModal: React.FC<OwnProps> = ({
     companies: companiesList,
     purchaseRequestStatus: purchaseRequestStatusList,
   } = useAppSelector(selectRecordsForDropdown);
-  const { data: projects } = useAppSelector(selectProjects);
+  const { data: projects } = useAppSelector(selectLeads);
   const [projectsList, setProjectsList] = React.useState<IDropDownList>([]);
 
   const form = useFormik<IRequestForm>({

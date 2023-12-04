@@ -18,7 +18,7 @@ import {
   selectCompanies,
   selectCompanyContact,
   selectFollowUpsWithRecords,
-  selectProjectWithRecords,
+  selectLeadsWithRecords,
   selectRecordsForDropdown,
   useAppDispatch,
   useAppSelector,
@@ -41,7 +41,7 @@ import { _AddContactModal } from "../components";
 import { _AddFollowUpModal } from "../../projects/follow-ups/components";
 import { _AddClaimModal } from "../../projects/claims/components";
 import { _AddPurchaseRequestModal } from "../../projects/purchase-requests/components";
-import { _AddProjectModal } from "../../projects/components";
+import { _AddLeadModal } from "../../projects/components";
 import { removeContact } from "@thunks";
 import { useAuthContext } from "@contexts";
 import { notify } from "@utility";
@@ -64,7 +64,7 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
     state: { token },
   } = useAuthContext();
   const followUpList = useAppSelector(selectFollowUpsWithRecords);
-  const projectsList = useAppSelector(selectProjectWithRecords);
+  const projectsList = useAppSelector(selectLeadsWithRecords);
   const { projectStatus: projectStatusList } = useAppSelector(selectRecordsForDropdown);
   const { data: companiesList } = useAppSelector(selectCompanies);
   const { data: contactsList } = useAppSelector(selectCompanyContact);
@@ -614,7 +614,7 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
             </Stack>
           </Grid.Col>
         </Grid>
-        <_AddProjectModal
+        <_AddLeadModal
           title="Add Lead/Project"
           opened={addProjectModalOpened}
           onClose={() => setAddProjectModalOpened(false)}

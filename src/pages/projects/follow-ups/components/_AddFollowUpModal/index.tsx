@@ -23,7 +23,7 @@ import { modalOverlayPropsHelper } from "@helpers";
 import { useAuthContext } from "@contexts";
 import {
   selectCompanyContact,
-  selectProjectWithRecords,
+  selectLeadsWithRecords,
   selectRecordsForDropdown,
   useAppDispatch,
   useAppSelector,
@@ -125,9 +125,9 @@ const _AddFollowUpModal: React.FC<OwnProps> = ({
     state: { token },
   } = useAuthContext();
   const dispatch = useAppDispatch();
-  const projects = useAppSelector(selectProjectWithRecords);
+  const projects = useAppSelector(selectLeadsWithRecords);
   const {
-    projects: projectsList,
+    leads: projectsList,
     companies: companiesList,
     expenseTypes: expenseTypeList,
   } = useAppSelector(selectRecordsForDropdown);

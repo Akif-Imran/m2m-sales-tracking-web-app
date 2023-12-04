@@ -87,7 +87,7 @@ const Tasks: React.FC<OwnProps> = () => {
   const {
     taskStatus: taskStatusList,
     companies,
-    projects,
+    leads: projects,
     engineers,
     salesPersons,
   } = useAppSelector(selectRecordsForDropdown);

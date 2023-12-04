@@ -1,6 +1,6 @@
 import { ActionIcon, Avatar, Badge, Card, Flex, Menu, Text, rem } from "@mantine/core";
 import React from "react";
-import { selectProjectWithRecords } from "@store";
+import { selectLeadsWithRecords } from "@store";
 import {
   IconDotsVertical,
   IconRotateClockwise2,
@@ -17,13 +17,13 @@ import { projectStatusColors } from "@constants";
 
 interface OwnProps {
   onClick?: (e?: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
-  item: ReturnType<typeof selectProjectWithRecords>[0];
+  item: ReturnType<typeof selectLeadsWithRecords>[0];
   handleDelete: (id: string) => void;
   assignEngineer: (projectId: string) => void;
   updateStatus: (statusId: number, projectId: string) => void;
 }
 
-export const _ProjectCard: React.FC<OwnProps> = ({
+export const _LeadCard: React.FC<OwnProps> = ({
   item,
   onClick,
   handleDelete,
@@ -158,4 +158,4 @@ export const _ProjectCard: React.FC<OwnProps> = ({
   );
 };
 
-export default _ProjectCard;
+export default _LeadCard;

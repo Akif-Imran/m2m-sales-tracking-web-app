@@ -202,14 +202,14 @@ export const FollowUps: React.FC<OwnProps> = () => {
           <Table border={1} bgcolor={theme.white} withBorder>
             <thead>
               <tr>
-                <th colSpan={11}>Project</th>
+                <th colSpan={11}>Meeting</th>
                 <th colSpan={3}>Next Follow Up</th>
                 <th colSpan={4}>Expense</th>
                 <th colSpan={1}>Action</th>
               </tr>
               <tr>
                 <th>#</th>
-                <th>Lead/Project</th>
+                <th>Prospect</th>
                 <th>Meeting With</th>
                 <th>Meeting Date/Time</th>
                 <th>Place</th>

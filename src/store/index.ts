@@ -10,7 +10,7 @@ import {
   leaveApplicationReducer,
   leaveStatusReducer,
   leaveTypeReducer,
-  projectReducer,
+  leadReducer,
   projectStatusListReducer,
   purchaseCategoryReducer,
   purchaseRequestReducer,
@@ -22,6 +22,7 @@ import {
   taskStatusListReducer,
   userReducer,
   userTypeReducer,
+  projectReducer,
 } from "@slices";
 import { useSelector } from "react-redux";
 import { TypedUseSelectorHook, useDispatch } from "react-redux";
@@ -32,6 +33,7 @@ const store = configureStore({
     companyContacts: companyContactReducer,
     companies: companyReducer,
     departments: departmentReducer,
+    leads: leadReducer,
     projects: projectReducer,
     projectStatusList: projectStatusListReducer,
     followUps: followUpReducer,
@@ -67,6 +69,7 @@ export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
 export const selectCompanies = (state: RootState) => state.companies;
 export const selectCompanyContact = (state: RootState) => state.companyContacts;
 export const selectDepartments = (state: RootState) => state.departments;
+export const selectLeads = (state: RootState) => state.leads;
 export const selectProjects = (state: RootState) => state.projects;
 export const selectProjectStatusList = (state: RootState) => state.projectStatusList;
 export const selectFollowUps = (state: RootState) => state.followUps;
@@ -91,15 +94,18 @@ export const selectNotifications = (state: RootState) => state.notifications;
 
 //memoized selectors
 export const selectTasksCombined = createSelector(
+  selectLeads,
   selectProjects,
   selectUsers,
   selectTasks,
   selectCompanies,
   selectTaskStatusList,
-  (projects, users, tasks, companies, statuses) => {
+  (leads, projects, users, tasks, companies, statuses) => {
     return {
       tasks: tasks.data.map((task) => {
-        const project = projects.data.find((project) => project._id === task.projectId);
+        const project = leads.data
+          .concat(projects.data)
+          .find((project) => project._id === task.projectId);
         const user = users.data.find((user) => user._id === task.assignedTo);
         const company = companies.data.find((company) => company._id === task.customerId);
         const statusName = statuses.data.find((status) => status.id === task.status)?.name;
@@ -114,6 +120,7 @@ export const selectTasksCombined = createSelector(
     };
   }
 );
+
 export const selectUsersBasedOnType = createSelector(selectUsers, (users) => {
   return {
     engineers: users.data.filter((user) => user.userType === 3),
@@ -121,8 +128,10 @@ export const selectUsersBasedOnType = createSelector(selectUsers, (users) => {
     admins: users.data.filter((user) => user.userType === 1),
   };
 });
+
 export const selectRecordsForDropdown = createSelector(
   selectCompanies,
+  selectLeads,
   selectProjects,
   selectDepartments,
   selectUserTypes,
@@ -139,6 +148,7 @@ export const selectRecordsForDropdown = createSelector(
   selectStockItemsStatusList,
   (
     companies,
+    leads,
     projects,
     departments,
     userTypes,
@@ -159,6 +169,10 @@ export const selectRecordsForDropdown = createSelector(
         value: company._id,
         label: company.name,
       })),
+      leads: leads.data.map((lead) => ({
+        value: lead._id,
+        label: lead.name,
+      })),
       projects: projects.data.map((project) => ({
         value: project._id,
         label: project.name,
@@ -175,10 +189,18 @@ export const selectRecordsForDropdown = createSelector(
         value: userType.id.toString(),
         label: userType.name,
       })),
-      projectStatus: projectStatus.data.map((status) => ({
-        value: status.id.toString(),
-        label: `${status.name} (${status.value}%)`,
-      })),
+      projectStatus: projectStatus.data
+        .filter((value) => value.id >= 4)
+        .map((status) => ({
+          value: status.id.toString(),
+          label: `${status.name} (${status.value}%)`,
+        })),
+      leadStatus: projectStatus.data
+        .filter((value) => value.id < 4)
+        .map((status) => ({
+          value: status.id.toString(),
+          label: `${status.name} (${status.value}%)`,
+        })),
       taskStatus: taskStatus.data.map((status) => ({
         value: status.id.toString(),
         label: status.name,
@@ -227,7 +249,30 @@ export const selectRecordsForDropdown = createSelector(
   }
 );
 
-export const selectProjectWithRecords = createSelector(
+export const selectLeadsWithRecords = createSelector(
+  selectLeads,
+  selectCompanies,
+  selectUsers,
+  selectProjectStatusList,
+  (projects, companies, users, statuses) => {
+    return projects.data.map((project) => {
+      const company = companies.data.find((company) => company._id === project.customerId);
+      const salesPerson = users.data.find((user) => user._id === project.salesPerson);
+      const engineer = users.data.find((user) => user._id === project?.engineer);
+      const status = statuses.data.find((status) => status.id === project.status);
+      return {
+        ...project,
+        company: company,
+        salesPersonValue: salesPerson,
+        engineerValue: engineer,
+        statusName: `${status?.name} (${status?.value}%)`,
+        completionPercentage: status?.value,
+      };
+    });
+  }
+);
+
+export const selectProjectsWithRecords = createSelector(
   selectProjects,
   selectCompanies,
   selectUsers,
@@ -249,21 +294,22 @@ export const selectProjectWithRecords = createSelector(
     });
   }
 );
+
 export const selectFollowUpsWithRecords = createSelector(
   selectFollowUps,
-  selectProjects,
+  selectLeads,
   selectCompanyContact,
   selectUsers,
   selectExpenseTypeList,
-  (followups, projects, contacts, users, expenseTypes) => {
+  (followups, leads, contacts, users, expenseTypes) => {
     return followups.data.map((followup) => {
-      const project = projects.data.find((project) => project._id === followup.projectId);
+      const lead = leads.data.find((project) => project._id === followup.projectId);
       const followUpPerson = users.data.find((user) => user._id === followup.createdBy);
       const contactPerson = contacts.data.find((contact) => contact._id === followup.contactId);
       const expenseType = expenseTypes.data.find((type) => type._id === followup?.expenseType);
       return {
         ...followup,
-        project,
+        lead: lead,
         contactPerson,
         followUpPerson,
         expenseTypeDetail: expenseType,
@@ -271,6 +317,7 @@ export const selectFollowUpsWithRecords = createSelector(
     });
   }
 );
+
 export const selectPurchaseRequestsWithRecords = createSelector(
   selectPurchaseRequests,
   selectUsers,
@@ -300,18 +347,21 @@ export const selectClaimsWithRecords = createSelector(
   selectClaims,
   selectUsers,
   selectSuppliers,
+  selectLeads,
   selectProjects,
   selectClaimsStatusList,
-  (claims, users, suppliers, projects, statuses) => {
+  (claims, users, suppliers, leads, projects, statuses) => {
     return claims.data.map((request) => {
       const requestByPerson = users.data.find((user) => user._id === request.createdBy);
-      const project = projects.data.find((project) => project._id === request.projectId);
+      const lead = leads.data
+        .concat(projects.data)
+        .find((project) => project._id === request.projectId);
       const supplier = suppliers.data.find((supplier) => supplier._id === request.supplierId);
       const statusName = statuses.data.find((status) => status.id === request.status)?.name;
       return {
         ...request,
         requestByPerson,
-        project,
+        lead,
         supplier,
         statusName,
       };

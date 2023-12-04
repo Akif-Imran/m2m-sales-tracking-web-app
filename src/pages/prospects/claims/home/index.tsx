@@ -55,7 +55,7 @@ export const Claims: React.FC<OwnProps> = () => {
     setSearchQuery(query);
     const filtered = claims.filter(
       (request) =>
-        request.project?.name.toLowerCase().includes(query.toLowerCase()) ||
+        request.lead?.name.toLowerCase().includes(query.toLowerCase()) ||
         request.supplier?.name?.toLowerCase().includes(query.toLowerCase()) ||
         request.requestByPerson?.name.toLowerCase().includes(query.toLowerCase()) ||
         request.itemName?.toLowerCase().includes(query.toLowerCase())
@@ -144,7 +144,7 @@ export const Claims: React.FC<OwnProps> = () => {
     searchedData.length === 0 ? (
       <tr>
         <td colSpan={14} color={colors.titleText} align="center">
-          No Projects
+          No Claims
         </td>
       </tr>
     ) : (
@@ -166,7 +166,7 @@ export const Claims: React.FC<OwnProps> = () => {
                   {request?.statusName}
                 </Badge>
               </td>
-              <td>{request.project?.name}</td>
+              <td>{request.lead?.name}</td>
               <td>{request.requestByPerson?.name}</td>
               <td>
                 {DateTime.fromISO(request.warranty).toLocal().toFormat(DAY_MM_DD_YYYY_HH_MM_SS_A)}
@@ -227,7 +227,7 @@ export const Claims: React.FC<OwnProps> = () => {
             <thead>
               <tr>
                 <th colSpan={5}>Claim</th>
-                <th colSpan={8}>Details</th>
+                <th colSpan={7}>Details</th>
               </tr>
               <tr>
                 <th>#</th>
@@ -235,7 +235,7 @@ export const Claims: React.FC<OwnProps> = () => {
                 <th>Item Type</th>
                 <th>Status</th>
 
-                <th>Project</th>
+                <th>Prospect / Project</th>
                 <th>Request By</th>
                 <th>Warranty</th>
                 <th>Qty</th>

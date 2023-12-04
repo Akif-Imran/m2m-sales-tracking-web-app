@@ -2,10 +2,11 @@ import { ActionIcon, Avatar, Badge, Card, Flex, Menu, Text, rem } from "@mantine
 import React from "react";
 import { selectLeadsWithRecords } from "@store";
 import {
+  IconCornerDownRight,
   IconDotsVertical,
   IconRotateClockwise2,
   IconTrash,
-  IconUserCog,
+  // IconUserCog,
 } from "@tabler/icons-react";
 import { BASE_URL } from "@api";
 import { menuIconStyle, noImageStyle } from "@global-styles";
@@ -20,19 +21,21 @@ interface OwnProps {
   item: ReturnType<typeof selectLeadsWithRecords>[0];
   handleDelete: (id: string) => void;
   assignEngineer: (projectId: string) => void;
+  moveToProject: (prospectId: string) => void;
   updateStatus: (statusId: number, projectId: string) => void;
 }
 
-export const _ProjectCard: React.FC<OwnProps> = ({
+export const _LeadCard: React.FC<OwnProps> = ({
   item,
   onClick,
   handleDelete,
-  assignEngineer,
+  // assignEngineer,
+  moveToProject,
   updateStatus,
 }) => {
   const { classes, theme } = useStyles();
   const {
-    state: { isAdmin },
+    state: { isAdmin, isHR },
   } = useAuthContext();
 
   const menuStyles = {
@@ -90,9 +93,21 @@ export const _ProjectCard: React.FC<OwnProps> = ({
                   >
                     Update Status
                   </Menu.Item>
+                  {(isHR || isAdmin) && (
+                    <Menu.Item
+                      c={colors.titleText}
+                      icon={<IconCornerDownRight {...menuIconStyle} />}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        moveToProject(item._id);
+                      }}
+                    >
+                      Move to Projects
+                    </Menu.Item>
+                  )}
                   {isAdmin && (
                     <>
-                      <Menu.Item
+                      {/* <Menu.Item
                         c={colors.titleText}
                         icon={<IconUserCog {...menuIconStyle} />}
                         onClick={(event) => {
@@ -101,7 +116,7 @@ export const _ProjectCard: React.FC<OwnProps> = ({
                         }}
                       >
                         Assign Engineer
-                      </Menu.Item>
+                      </Menu.Item> */}
                       <Menu.Item
                         c={"red"}
                         icon={<IconTrash size={menuIconStyle.size} />}
@@ -127,7 +142,7 @@ export const _ProjectCard: React.FC<OwnProps> = ({
             </Flex>
             <Flex direction={"row"} align={"center"} justify={"flex-start"}>
               <Text fw={700} color={colors.titleText} mr={"xs"} fz={"sm"}>
-                Project Type:
+                Prospect Type:
               </Text>
               <Text color={colors.titleText} fz={"sm"}>
                 {item?.type || "N/A"}
@@ -158,4 +173,4 @@ export const _ProjectCard: React.FC<OwnProps> = ({
   );
 };
 
-export default _ProjectCard;
+export default _LeadCard;

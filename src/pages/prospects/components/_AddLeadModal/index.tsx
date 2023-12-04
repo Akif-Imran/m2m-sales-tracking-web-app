@@ -17,7 +17,7 @@ import {
 import { useFormik } from "formik";
 import { IconCalendar, IconUpload } from "@tabler/icons-react";
 import { selectRecordsForDropdown, useAppDispatch, useAppSelector } from "@store";
-import { addProject } from "@slices";
+import { addLead } from "@slices";
 import { DateTime } from "luxon";
 import { DatePickerInput, DateValue } from "@mantine/dates";
 import { colors } from "@theme";
@@ -72,7 +72,7 @@ const schema: yup.ObjectSchema<IProjectForm> = yup.object().shape({
   images: yup.array().of(yup.string().required()).required("Image is required"),
 });
 
-const _AddProjectModal: React.FC<OwnProps> = ({ opened, onClose, title, companyId }) => {
+const _AddLeadModal: React.FC<OwnProps> = ({ opened, onClose, title, companyId }) => {
   const { theme } = useStyles();
   const { classes: gclasses } = useGStyles();
   const dispatch = useAppDispatch();
@@ -84,7 +84,7 @@ const _AddProjectModal: React.FC<OwnProps> = ({ opened, onClose, title, companyI
   const [file, setFile] = React.useState<File>({} as File);
   const [contractDate, setContractDate] = React.useState(new Date());
   const [deliveryDate, setDeliveryDate] = React.useState(new Date());
-  const { companies: companiesList, projectStatus: projectStatusList } =
+  const { companies: companiesList, leadStatus: leadsStatusList } =
     useAppSelector(selectRecordsForDropdown);
 
   const form = useFormik<IProjectForm>({
@@ -111,12 +111,12 @@ const _AddProjectModal: React.FC<OwnProps> = ({ opened, onClose, title, companyI
       setIsCreating((_prev) => true);
       if (values.hasImage) {
         const res = await uploadFile(token, file);
-        console.log("Lead Image Upload: ", res);
+        console.log("Prospect Image Upload: ", res);
         if (res.statusCode === 200 || res.statusCode === 201) {
           values.images = [res.data];
         } else {
           setIsCreating((_prev) => false);
-          notify("Project", res?.message, "error");
+          notify("Add Prospect", res?.message, "error");
           return;
         }
       }
@@ -128,16 +128,16 @@ const _AddProjectModal: React.FC<OwnProps> = ({ opened, onClose, title, companyI
       )
         .unwrap()
         .then((res) => {
-          notify("Project", res.message, res.success ? "success" : "error");
+          notify("Prospect", res.message, res.success ? "success" : "error");
           if (res.success) {
-            dispatch(addProject(res.data));
+            dispatch(addLead(res.data));
             helpers.resetForm();
             onClose();
           }
         })
         .catch((err) => {
-          console.log("Add Project: ", err?.message);
-          notify("Project", "An error occurred", "error");
+          console.log("Add Prospect: ", err?.message);
+          notify("Prospect", "An error occurred", "error");
         })
         .finally(() => {
           setIsCreating((_prev) => false);
@@ -152,7 +152,7 @@ const _AddProjectModal: React.FC<OwnProps> = ({ opened, onClose, title, companyI
 
   const handleImageChange = (file: File) => {
     if (file === null) {
-      notify("Image Upload", "Company logo not uploaded", "error");
+      notify("Image Upload", "Prospect Image not uploaded", "error");
       return;
     }
     setFile(file);
@@ -176,7 +176,7 @@ const _AddProjectModal: React.FC<OwnProps> = ({ opened, onClose, title, companyI
 
   const handleOnChangeStatus = (value: string | null) => {
     if (!value) return;
-    const typeName = projectStatusList.find((status) => status.value === value)?.label;
+    const typeName = leadsStatusList.find((status) => status.value === value)?.label;
     if (!typeName) return;
     form.setValues((prev) => ({
       ...prev,
@@ -269,7 +269,7 @@ const _AddProjectModal: React.FC<OwnProps> = ({ opened, onClose, title, companyI
           required
           withAsterisk={false}
           searchable
-          nothingFound="No contacts"
+          nothingFound="No Contacts"
           label="Contact"
           value={form.values.customerId}
           onChange={handleOnChangeCompany}
@@ -308,7 +308,7 @@ const _AddProjectModal: React.FC<OwnProps> = ({ opened, onClose, title, companyI
           <TextInput
             required
             withAsterisk={false}
-            label="Project Type"
+            label="Prospect Type"
             name="type"
             id="type"
             value={form.values.type}
@@ -419,10 +419,10 @@ const _AddProjectModal: React.FC<OwnProps> = ({ opened, onClose, title, companyI
           withAsterisk={false}
           searchable
           nothingFound="No Such Status"
-          label="Project Status"
+          label="Prospect Status"
           value={form.values.status.toString()}
           onChange={handleOnChangeStatus}
-          data={projectStatusList}
+          data={leadsStatusList}
           error={form.touched.status && form.errors.status ? `${form.errors.status}` : null}
         />
 
@@ -444,4 +444,4 @@ const _AddProjectModal: React.FC<OwnProps> = ({ opened, onClose, title, companyI
   );
 };
 
-export { _AddProjectModal };
+export { _AddLeadModal };

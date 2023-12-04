@@ -47,7 +47,7 @@ export const FollowUps: React.FC<OwnProps> = () => {
     setSearchQuery(query);
     const filtered = followups.filter(
       (followup) =>
-        followup.project?.name.toLowerCase().includes(query.toLowerCase()) ||
+        followup.lead?.name.toLowerCase().includes(query.toLowerCase()) ||
         followup.contactPerson?.name.toLowerCase().includes(query.toLowerCase()) ||
         followup.followUpPerson?.name.toLowerCase().includes(query.toLowerCase()) ||
         followup.meetingPlace?.toLowerCase().includes(query.toLowerCase())
@@ -103,7 +103,7 @@ export const FollowUps: React.FC<OwnProps> = () => {
     searchedData.length === 0 ? (
       <tr>
         <td colSpan={14} color={colors.titleText} align="center">
-          No Projects
+          No Follow Ups
         </td>
       </tr>
     ) : (
@@ -119,7 +119,7 @@ export const FollowUps: React.FC<OwnProps> = () => {
           return (
             <tr key={followup._id}>
               <td>{index + 1}</td>
-              <td>{followup.project?.name}</td>
+              <td>{followup.lead?.name}</td>
               <td>{followup.contactPerson?.name}</td>
               <td>
                 {DateTime.fromISO(followup.meetingDate)
@@ -202,14 +202,14 @@ export const FollowUps: React.FC<OwnProps> = () => {
           <Table border={1} bgcolor={theme.white} withBorder>
             <thead>
               <tr>
-                <th colSpan={11}>Project</th>
+                <th colSpan={11}>Meeting</th>
                 <th colSpan={3}>Next Follow Up</th>
                 <th colSpan={4}>Expense</th>
                 <th colSpan={1}>Action</th>
               </tr>
               <tr>
                 <th>#</th>
-                <th>Lead/Project</th>
+                <th>Prospect</th>
                 <th>Meeting With</th>
                 <th>Meeting Date/Time</th>
                 <th>Place</th>

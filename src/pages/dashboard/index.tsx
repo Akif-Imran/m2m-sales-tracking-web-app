@@ -27,7 +27,7 @@ import {
   selectCompanyContact,
   selectFollowUpsWithRecords,
   selectProjectStatusList,
-  selectProjectWithRecords,
+  selectLeadsWithRecords,
   selectTasksCombined,
   useAppSelector,
 } from "@store";
@@ -48,7 +48,7 @@ const Dashboard: React.FC<OwnProps> = () => {
   // const [isFetching, setIsFetching] = React.useState(false);
   const { tasks } = useAppSelector(selectTasksCombined);
   const followUps = useAppSelector(selectFollowUpsWithRecords);
-  const projects = useAppSelector(selectProjectWithRecords);
+  const projects = useAppSelector(selectLeadsWithRecords);
   const { data: projectStatusList } = useAppSelector(selectProjectStatusList);
   const { data: companies } = useAppSelector(selectCompanies);
   const { data: contacts } = useAppSelector(selectCompanyContact);

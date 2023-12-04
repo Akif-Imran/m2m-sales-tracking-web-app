@@ -12,12 +12,13 @@ const routes = {
     list: "/notifications",
   },
   company: {
-    list: "/companies",
+    list: "/contacts",
     project: "/company-projects/:companyId",
     project_nav: (companyId: string) => `/company-projects/${companyId}`,
     details: "details/:companyId",
     details_nav: (companyId: string) => `details/${companyId}`,
   },
+
   reports: {
     list: "/reports/:companyId",
     list_nav: (companyId: string) => `/reports/${companyId}`,
@@ -37,13 +38,18 @@ const routes = {
     purchase_request_report: "purchase-request-report/:companyId",
     purchase_request_report_nav: (companyId: string) => `purchase-request-report/${companyId}`,
   },
-  project: {
+
+  projects: {
     list: "/projects",
-    followUps: {
-      list: "/follow-ups",
-    },
     purchaseRequest: {
       list: "/purchase-requests",
+    },
+  },
+
+  prospects: {
+    list: "/prospects",
+    followUps: {
+      list: "/follow-ups",
     },
     claims: {
       list: "/claims",

@@ -23,7 +23,7 @@ import { modalOverlayPropsHelper } from "@helpers";
 import { useAuthContext } from "@contexts";
 import {
   selectCompanyContact,
-  selectProjectWithRecords,
+  selectLeadsWithRecords,
   selectRecordsForDropdown,
   useAppDispatch,
   useAppSelector,
@@ -125,9 +125,9 @@ const _AddFollowUpModal: React.FC<OwnProps> = ({
     state: { token },
   } = useAuthContext();
   const dispatch = useAppDispatch();
-  const projects = useAppSelector(selectProjectWithRecords);
+  const prospects = useAppSelector(selectLeadsWithRecords);
   const {
-    projects: projectsList,
+    leads: projectsList,
     companies: companiesList,
     expenseTypes: expenseTypeList,
   } = useAppSelector(selectRecordsForDropdown);
@@ -136,7 +136,7 @@ const _AddFollowUpModal: React.FC<OwnProps> = ({
   const [isCreating, setIsCreating] = React.useState(false);
   const [file, setFile] = React.useState<File>({} as File);
   const [contactList, setContactList] = React.useState<IDropDownList>([]);
-  const [companyProjectList, setCompanyProjectsList] = React.useState<IDropDownList>([]);
+  const [companyProspectsList, setCompanyProspectsList] = React.useState<IDropDownList>([]);
 
   const form = useFormik<IFollowUpForm>({
     initialValues: {
@@ -233,7 +233,7 @@ const _AddFollowUpModal: React.FC<OwnProps> = ({
   const handleOnChangeCompany = (value: string | null) => {
     if (!value) return;
     form.setValues((prev) => ({ ...prev, customerId: value }));
-    const project_s = projects
+    const project_s = prospects
       .filter((project) => project.customerId === value)
       .map((project) => ({
         label: project.name,
@@ -245,7 +245,7 @@ const _AddFollowUpModal: React.FC<OwnProps> = ({
         label: contact.name,
         value: contact._id,
       }));
-    setCompanyProjectsList(project_s);
+    setCompanyProspectsList(project_s);
     setContactList(contact_s);
   };
 
@@ -266,7 +266,7 @@ const _AddFollowUpModal: React.FC<OwnProps> = ({
 
   const setProjectAndContactsBasedOnCompany = React.useCallback(
     (companyId: string) => {
-      const project_s = projects
+      const project_s = prospects
         .filter((project) => project.customerId === companyId)
         .map((project) => ({
           label: project.name,
@@ -279,9 +279,9 @@ const _AddFollowUpModal: React.FC<OwnProps> = ({
           value: contact._id,
         }));
       setContactList(contact_s);
-      setCompanyProjectsList(project_s);
+      setCompanyProspectsList(project_s);
     },
-    [contacts.data, projects]
+    [contacts.data, prospects]
   );
 
   React.useEffect(() => {
@@ -291,7 +291,7 @@ const _AddFollowUpModal: React.FC<OwnProps> = ({
 
   React.useEffect(() => {
     if (!companyId) {
-      setCompanyProjectsList(projectsList);
+      setCompanyProspectsList(projectsList);
       return;
     }
     form.setValues((prev) => ({ ...prev, customerId: companyId }));
@@ -335,10 +335,10 @@ const _AddFollowUpModal: React.FC<OwnProps> = ({
                 required
                 searchable
                 withAsterisk={false}
-                label="Company"
-                placeholder="Select a company"
+                label="Contact"
+                placeholder="Select a contact"
                 allowDeselect={false}
-                nothingFound="No company found"
+                nothingFound="No contact found"
                 value={form.values.customerId}
                 data={companiesList}
                 onChange={handleOnChangeCompany}
@@ -353,12 +353,12 @@ const _AddFollowUpModal: React.FC<OwnProps> = ({
                   required
                   searchable
                   withAsterisk={false}
-                  label="Lead/Project"
-                  placeholder="Select a project"
+                  label="Prospect"
+                  placeholder="Select a prospect"
                   allowDeselect={false}
-                  nothingFound="No projects found"
+                  nothingFound="No prospect found"
                   value={form.values.projectId}
-                  data={companyProjectList}
+                  data={companyProspectsList}
                   onChange={(value) => {
                     if (!value) return;
                     form.setValues((prev) => ({ ...prev, projectId: value }));
@@ -374,9 +374,9 @@ const _AddFollowUpModal: React.FC<OwnProps> = ({
                   searchable
                   withAsterisk={false}
                   label="Meeting With"
-                  placeholder="Select contact"
+                  placeholder="Select contact person"
                   allowDeselect={false}
-                  nothingFound="No contacts found"
+                  nothingFound="No contact person found"
                   value={form.values.contactId}
                   data={contactList}
                   onChange={(value) => {

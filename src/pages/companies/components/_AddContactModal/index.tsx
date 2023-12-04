@@ -176,8 +176,8 @@ const _AddContactModal: React.FC<OwnProps> = ({ opened, onClose, title, companyI
           required
           withAsterisk={false}
           searchable
-          nothingFound="No Companies"
-          label="Company"
+          nothingFound="No Contacts"
+          label="Contact"
           value={form.values.customerId}
           data={companiesList}
           onChange={(value) => {

@@ -117,7 +117,7 @@ const buttons: NavbarButtons[] = [
     label: "Projects",
     links: [
       {
-        link: routes.prospects.list,
+        link: routes.projects.list,
         label: "Projects",
         visibleTo: [1, 2, 3, 4],
       },

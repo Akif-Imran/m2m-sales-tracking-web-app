@@ -337,10 +337,11 @@ export const Projects: React.FC<OwnProps> = () => {
               <tr>
                 <th colSpan={4}>Project</th>
                 <th colSpan={6}>Project Details</th>
-                <th colSpan={1}>Company</th>
+                <th colSpan={1}>Contact</th>
               </tr>
               <tr>
                 <th>#</th>
+                <th>Image</th>
                 <th>Name</th>
                 <th>Description</th>
                 <th onClick={() => sortData("statusName")}>
@@ -355,7 +356,7 @@ export const Projects: React.FC<OwnProps> = () => {
                   Sales Person {sortOrder.salesPerson === "asc" ? "▲" : "▼"}
                 </th>
                 <th>Engineer</th>
-                <th>Customer Name</th>
+                <th>Contact Name</th>
                 <th>Actions</th>
               </tr>
             </thead>

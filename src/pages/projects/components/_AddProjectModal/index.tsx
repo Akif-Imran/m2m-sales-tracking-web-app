@@ -116,7 +116,7 @@ const _AddProjectModal: React.FC<OwnProps> = ({ opened, onClose, title, companyI
           values.images = [res.data];
         } else {
           setIsCreating((_prev) => false);
-          notify("Add Lead", res?.message, "error");
+          notify("Project", res?.message, "error");
           return;
         }
       }
@@ -259,7 +259,7 @@ const _AddProjectModal: React.FC<OwnProps> = ({ opened, onClose, title, companyI
                   rightIcon={<IconUpload size={16} color={theme.white} stroke={1.5} />}
                   {...props}
                 >
-                  Receipt
+                  Image
                 </Button>
               )}
             </FileButton>
@@ -269,8 +269,8 @@ const _AddProjectModal: React.FC<OwnProps> = ({ opened, onClose, title, companyI
           required
           withAsterisk={false}
           searchable
-          nothingFound="No Companies"
-          label="Company"
+          nothingFound="No contacts"
+          label="Contact"
           value={form.values.customerId}
           onChange={handleOnChangeCompany}
           data={companiesList}

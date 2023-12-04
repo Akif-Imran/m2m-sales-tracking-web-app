@@ -7,7 +7,7 @@ import * as yup from "yup";
 import { assignEngineer } from "@thunks";
 import { useAuthContext } from "@contexts";
 import { notify } from "@utility";
-import { modifyLead } from "@slices";
+import { modifyProject } from "@slices";
 import { useGStyles } from "@global-styles";
 
 type OwnProps = {
@@ -63,7 +63,7 @@ const _AssignEngineerModal: React.FC<OwnProps> = (props) => {
       .then((res) => {
         notify("Assign Engineer", res?.message, res.success ? "success" : "error");
         if (res.success) {
-          dispatch(modifyLead(res.data));
+          dispatch(modifyProject(res.data));
           helpers.resetForm();
           onClose();
         }

@@ -5,7 +5,13 @@ import { DATE_FORMAT_YYYY_MM_DD, modalOverlayPropsHelper } from "@helpers";
 import { DatePickerInput, DateValue } from "@mantine/dates";
 import { useFormik } from "formik";
 import { useAuthContext } from "@contexts";
-import { selectProjects, selectRecordsForDropdown, useAppDispatch, useAppSelector } from "@store";
+import {
+  selectLeads,
+  selectProjects,
+  selectRecordsForDropdown,
+  useAppDispatch,
+  useAppSelector,
+} from "@store";
 import { addClaim } from "@slices";
 import { IconCalendar } from "@tabler/icons-react";
 import { currencyList } from "@constants";
@@ -58,8 +64,9 @@ export const _AddClaimModal: React.FC<OwnProps> = ({
     companies: companiesList,
     purchaseRequestStatus: purchaseRequestStatusList,
   } = useAppSelector(selectRecordsForDropdown);
+  const { data: leads } = useAppSelector(selectLeads);
   const { data: projects } = useAppSelector(selectProjects);
-  const [projectsList, setProjectsList] = React.useState<IDropDownList>([]);
+  const [projectsLeadList, setProjectsLeadList] = React.useState<IDropDownList>([]);
 
   const form = useFormik<IRequestForm>({
     initialValues: {
@@ -112,13 +119,14 @@ export const _AddClaimModal: React.FC<OwnProps> = ({
       ...prev,
       customerId: value,
     }));
-    const project_s = projects
+    const project_s = leads
+      .concat(projects)
       .filter((project) => project.customerId === value)
       .map((project) => ({
         value: project._id,
         label: project.name,
       }));
-    setProjectsList(project_s);
+    setProjectsLeadList(project_s);
   };
 
   const handleOnChangeProject = (value: string | null) => {
@@ -171,14 +179,15 @@ export const _AddClaimModal: React.FC<OwnProps> = ({
 
   React.useEffect(() => {
     if (!companyId) return;
-    const project_s = projects
+    const project_s = leads
+      .concat(projects)
       .filter((project) => project.customerId === companyId)
       .map((project) => ({
         value: project._id,
         label: project.name,
       }));
-    setProjectsList(project_s);
-  }, [companyId, opened, projects]);
+    setProjectsLeadList(project_s);
+  }, [companyId, opened, leads, projects]);
 
   React.useEffect(() => {
     if (!companyId || !projectId) {
@@ -210,8 +219,8 @@ export const _AddClaimModal: React.FC<OwnProps> = ({
               required
               withAsterisk={false}
               searchable
-              nothingFound="No company found"
-              label="Company"
+              nothingFound="No contact found"
+              label="Contact"
               value={form.values.customerId}
               onChange={handleOnChangeCompany}
               data={companiesList}
@@ -226,11 +235,11 @@ export const _AddClaimModal: React.FC<OwnProps> = ({
                 required
                 withAsterisk={false}
                 searchable
-                nothingFound="No project found"
-                label="Project"
+                nothingFound="No record found"
+                label="Prospect / Project"
                 value={form.values.projectId}
                 onChange={handleOnChangeProject}
-                data={projectsList}
+                data={projectsLeadList}
                 error={
                   form.errors.projectId && form.touched.projectId
                     ? `${form.errors.projectId}`

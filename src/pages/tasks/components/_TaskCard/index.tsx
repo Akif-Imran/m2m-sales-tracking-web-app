@@ -80,7 +80,7 @@ export const _TaskCard: React.FC<OwnProps> = ({ onClick, item, handleDelete, upd
           </div>
           <Flex direction={"row"} align={"center"} justify={"flex-start"}>
             <Text fw={700} color={colors.titleText} mr={"xs"} fz={"sm"}>
-              Prospect:
+              Contact:
             </Text>
             <Text color={colors.titleText} fz={"sm"}>
               {item?.company?.name || "N/A"}
@@ -88,7 +88,7 @@ export const _TaskCard: React.FC<OwnProps> = ({ onClick, item, handleDelete, upd
           </Flex>
           <Flex direction={"row"} align={"center"} justify={"flex-start"}>
             <Text fw={700} color={colors.titleText} mr={"xs"} fz={"sm"}>
-              Lead:
+              Prospect / Project:
             </Text>
             <Text color={colors.titleText} fz={"sm"}>
               {item?.project?.name || "N/A"}

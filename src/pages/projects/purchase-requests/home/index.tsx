@@ -142,7 +142,7 @@ export const PurchaseRequests: React.FC<OwnProps> = () => {
     searchedData.length === 0 ? (
       <tr>
         <td colSpan={14} color={colors.titleText} align="center">
-          No Projects
+          No Purchase Requests
         </td>
       </tr>
     ) : (
@@ -159,7 +159,6 @@ export const PurchaseRequests: React.FC<OwnProps> = () => {
               <td>{request.itemName}</td>
               <td>{request.itemType}</td>
               <td>
-                {" "}
                 <Badge variant="filled" color={purchaseRequestStatusColors[request.status]}>
                   {request.statusName}
                 </Badge>

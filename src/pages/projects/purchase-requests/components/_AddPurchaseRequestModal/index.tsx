@@ -277,8 +277,8 @@ export const _AddPurchaseRequestModal: React.FC<OwnProps> = ({
               required
               withAsterisk={false}
               searchable
-              nothingFound="No company found"
-              label="Company"
+              nothingFound="No contacts found"
+              label="Contact"
               value={form.values.customerId}
               onChange={handleOnChangeCompany}
               data={companies}
@@ -293,7 +293,7 @@ export const _AddPurchaseRequestModal: React.FC<OwnProps> = ({
                 required
                 withAsterisk={false}
                 searchable
-                nothingFound="No Project Found"
+                nothingFound="No projects found"
                 label="Project"
                 value={form.values.projectId.toString()}
                 onChange={handleOnChangeProject}
@@ -308,7 +308,7 @@ export const _AddPurchaseRequestModal: React.FC<OwnProps> = ({
                 required
                 withAsterisk={false}
                 searchable
-                nothingFound="No suppliers"
+                nothingFound="No suppliers found"
                 label="Supplier"
                 value={form.values.supplierId.toString()}
                 onChange={handleOnChangeSupplier}

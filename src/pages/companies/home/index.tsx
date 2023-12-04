@@ -29,8 +29,8 @@ import { openDeleteModalHelper } from "@helpers";
 import { notify } from "@utility";
 import { deleteCompany } from "@slices";
 import { useToggle } from "@mantine/hooks";
-import { _AddFollowUpModal } from "../../projects/follow-ups/components";
-import { _AddClaimModal } from "../../projects/claims/components";
+import { _AddFollowUpModal } from "../../prospects/follow-ups/components";
+import { _AddClaimModal } from "../../prospects/claims/components";
 import { _AddPurchaseRequestModal } from "../../projects/purchase-requests/components";
 import { Outlet } from "react-router-dom";
 import { removeCompany } from "@thunks";
@@ -76,22 +76,22 @@ const Company: React.FC<OwnProps> = () => {
   const handleDelete = (id: string) => {
     openDeleteModalHelper({
       theme: theme,
-      title: `Delete Company`,
+      title: `Delete Contact`,
       loading: isDeleting,
       description: (
         <Text fw={"normal"} fs={"normal"} fz={"sm"} color={colors.titleText}>
-          Are you sure you want to delete this Company? This action is destructive and you will have
+          Are you sure you want to delete this Contact? This action is destructive and you will have
           to contact support to restore data.
         </Text>
       ),
       cancelLabel: "Cancel",
-      confirmLabel: "Delete Company",
+      confirmLabel: "Delete Contact",
       onConfirm: () => {
         setIsDeleting((_prev) => true);
         dispatch(removeCompany({ id, token }))
           .unwrap()
           .then((res) => {
-            notify("Delete Company", res?.message, res.success ? "success" : "error");
+            notify("Delete Contact", res?.message, res.success ? "success" : "error");
             if (res.success) {
               dispatch(deleteCompany(res.data._id));
             }
@@ -103,7 +103,7 @@ const Company: React.FC<OwnProps> = () => {
             setIsDeleting((_prev) => false);
           });
       },
-      onCancel: () => notify("Delete Company", "Operation canceled!", "error"),
+      onCancel: () => notify("Delete Contact", "Operation canceled!", "error"),
     });
   };
 
@@ -156,42 +156,43 @@ const Company: React.FC<OwnProps> = () => {
       </tr>
     ) : (
       <>
-        {searchedData.map((company, index) => {
+        {searchedData.map((contact, index) => {
           if (viewMode === "cards") {
             return (
-              <Grid.Col span={4} key={company._id}>
+              <Grid.Col span={4} key={contact._id}>
                 <_CompanyCard
-                  item={company}
-                  openContact={() => handleOpenContact(company._id)}
-                  openFollowUp={() => handleOpenFollowUp(company._id)}
-                  openExpense={() => handleOpenExpense(company._id)}
-                  openPurchaseRequest={() => handleOpenPurchaseRequest(company._id)}
-                  handleDelete={() => handleDelete(company._id)}
+                  item={contact}
+                  openContact={() => handleOpenContact(contact._id)}
+                  openFollowUp={() => handleOpenFollowUp(contact._id)}
+                  openExpense={() => handleOpenExpense(contact._id)}
+                  openPurchaseRequest={() => handleOpenPurchaseRequest(contact._id)}
+                  handleDelete={() => handleDelete(contact._id)}
                 />
               </Grid.Col>
             );
           } else if (viewMode === "list") {
             return (
-              <tr key={company._id}>
+              <tr key={contact._id}>
                 <td>{index + 1}</td>
                 <td>
                   <Avatar
-                    src={company?.logo ? `${BASE_URL}\\${company?.logo}` : "/company.png"}
+                    src={contact?.logo ? `${BASE_URL}\\${contact?.logo}` : "/company.png"}
                     size={50}
                     //@ts-expect-error style works
-                    styles={company?.logo ? undefined : noImageStyle}
+                    styles={contact?.logo ? undefined : noImageStyle}
                   />
                 </td>
-                <td>{company.name}</td>
-                <td>{company.email}</td>
-                <td>{company.phone}</td>
-                <td>{company.address}</td>
-                <td>{company.city}</td>
-                <td>{company.country}</td>
+                <td>{contact.name}</td>
+                <td>{contact.email}</td>
+                <td>{contact.phone}</td>
+                <td>{contact.address}</td>
+                <td>{contact.city}</td>
+                <td>{contact.state}</td>
+                <td>{contact.country}</td>
                 {isAdmin && (
                   <td>
                     <Group>
-                      <ActionIcon color="red" size={"sm"} onClick={() => handleDelete(company._id)}>
+                      <ActionIcon color="red" size={"sm"} onClick={() => handleDelete(contact._id)}>
                         <IconTrash />
                       </ActionIcon>
                     </Group>
@@ -202,13 +203,13 @@ const Company: React.FC<OwnProps> = () => {
           } else {
             return (
               <_CompanyCard
-                item={company}
-                key={company._id}
-                openContact={() => handleOpenContact(company._id)}
-                openFollowUp={() => handleOpenFollowUp(company._id)}
-                openExpense={() => handleOpenExpense(company._id)}
-                openPurchaseRequest={() => handleOpenPurchaseRequest(company._id)}
-                handleDelete={() => handleDelete(company._id)}
+                item={contact}
+                key={contact._id}
+                openContact={() => handleOpenContact(contact._id)}
+                openFollowUp={() => handleOpenFollowUp(contact._id)}
+                openExpense={() => handleOpenExpense(contact._id)}
+                openPurchaseRequest={() => handleOpenPurchaseRequest(contact._id)}
+                handleDelete={() => handleDelete(contact._id)}
               />
             );
           }
@@ -226,19 +227,20 @@ const Company: React.FC<OwnProps> = () => {
           <Table border={1} bgcolor={theme.white} withBorder>
             <thead>
               <tr>
-                <th colSpan={4}>Company</th>
+                <th colSpan={4}>Contact</th>
                 {/* <th colSpan={6}>Contact Person</th> */}
-                <th colSpan={6}>Company Details</th>
+                <th colSpan={6}>Contact Details</th>
               </tr>
               <tr>
                 <th>#</th>
                 <th>Logo</th>
                 <th>Name</th>
-
                 <th>Email</th>
+
                 <th>Phone</th>
                 <th>Address</th>
                 <th>City</th>
+                <th>State</th>
                 <th>Country</th>
                 <th>Actions</th>
               </tr>
@@ -282,17 +284,17 @@ const Company: React.FC<OwnProps> = () => {
           rightIcon={<IconPlus size={16} />}
           onClick={() => setAddCompanyModalOpened(true)}
         >
-          Company
+          Contact
         </Button>
       </Flex>
       {content}
       <_AddCompanyModal
-        title="Add Prospect"
+        title="Add Contact"
         opened={addCompanyModalOpened}
         onClose={() => setAddCompanyModalOpened(false)}
       />
       <_AddContactModal
-        title="Add Contact"
+        title="Add Contact Person"
         opened={addContactModalOpened}
         companyId={selectedCompany}
         onClose={() => setAddContactModalOpened(false)}

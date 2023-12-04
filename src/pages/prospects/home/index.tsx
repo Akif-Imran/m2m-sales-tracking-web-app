@@ -19,26 +19,27 @@ import {
   TextInput,
 } from "@mantine/core";
 import {
-  selectProjectsWithRecords,
+  selectLeadsWithRecords,
   selectRecordsForDropdown,
   useAppDispatch,
   useAppSelector,
 } from "@store";
 import { useGStyles, noImageStyle } from "@global-styles";
 import {
+  IconCornerDownRight,
   IconId,
   IconPlus,
   IconRotateClockwise2,
   IconSearch,
   IconTable,
   IconTrash,
-  IconUserCog,
+  // IconUserCog,
 } from "@tabler/icons-react";
-import { modalOverlayPropsHelper, openDeleteModalHelper } from "@helpers";
+import { modalOverlayPropsHelper, openConfirmModalHelper, openDeleteModalHelper } from "@helpers";
 import { notify } from "@utility";
 import { colors } from "@theme";
-import { deleteProject } from "@slices";
-import { _AddProjectModal, _AssignEngineerModal, _ProjectCard } from "../components";
+import { deleteLead } from "@slices";
+import { _AddLeadModal, _AssignEngineerModal, _LeadCard } from "../components";
 import { DateTime } from "luxon";
 import { DAY_MM_DD_YYYY, projectStatusColors } from "@constants";
 import { useAuthContext } from "@contexts";
@@ -49,16 +50,16 @@ import { BASE_URL } from "@api";
 
 interface OwnProps {}
 
-interface ProjectSort {
+interface LeadSort {
   statusName: string;
   salesPerson: string;
   // Add other properties as needed
 }
 
-export const Projects: React.FC<OwnProps> = () => {
+export const Leads: React.FC<OwnProps> = () => {
   useStyles();
   const {
-    state: { isAdmin, token, user },
+    state: { isAdmin, isHR, token, user },
   } = useAuthContext();
   const dispatch = useAppDispatch();
   const { classes: gclasses, theme } = useGStyles();
@@ -69,28 +70,28 @@ export const Projects: React.FC<OwnProps> = () => {
   const customerId = searchParams.get("customerId") || "";
 
   const [searchQuery, setSearchQuery] = React.useState("");
-  const projects = useAppSelector(selectProjectsWithRecords);
+  const leads = useAppSelector(selectLeadsWithRecords);
   const [isDeleting, setIsDeleting] = React.useState(false);
   const [addModalOpened, setAddModalOpened] = React.useState(modal === "add");
   const [assignEngineerModalOpened, setAssignEngineerModalOpened] = React.useState(false);
-  const [searchedData, setSearchedData] = React.useState<typeof projects>([]);
+  const [searchedData, setSearchedData] = React.useState<typeof leads>([]);
 
-  const { projectStatus: projectStatusList } = useAppSelector(selectRecordsForDropdown);
+  const { leadStatus: leadsStatusList } = useAppSelector(selectRecordsForDropdown);
   const [visible, setVisible] = React.useState<boolean>(false);
   const [selectedStatus, setSelectedStatus] = React.useState<string>();
-  const [selectedProject, setSelectedProject] = React.useState<string>("");
-  const [sortOrder, setSortOrder] = React.useState<ProjectSort>({
+  const [selectedLead, setSelectedLead] = React.useState<string>("");
+  const [sortOrder, setSortOrder] = React.useState<LeadSort>({
     statusName: "asc", // Initial sorting order (asc or desc)
     salesPerson: "asc",
   });
 
   const showUpdateStatusModal = (statusId: number, leadId: string) => {
     setSelectedStatus(statusId.toString());
-    setSelectedProject(leadId);
+    setSelectedLead(leadId);
     setVisible(true);
   };
   const showAssignEngineerModal = (leadId: string) => {
-    setSelectedProject(leadId);
+    setSelectedLead(leadId);
     setAssignEngineerModalOpened(true);
   };
 
@@ -99,13 +100,11 @@ export const Projects: React.FC<OwnProps> = () => {
 
   const onChangeSearch = (query: string) => {
     setSearchQuery(query);
-    const filtered = projects.filter((project) =>
-      project.name.toLowerCase().includes(query.toLowerCase())
-    );
+    const filtered = leads.filter((lead) => lead.name.toLowerCase().includes(query.toLowerCase()));
     setSearchedData(filtered);
   };
 
-  const sortData = (columnName: keyof ProjectSort) => {
+  const sortData = (columnName: keyof LeadSort) => {
     const sortOrderCopy = { ...sortOrder };
     sortOrderCopy[columnName] = sortOrderCopy[columnName] === "asc" ? "desc" : "asc";
     setSortOrder(sortOrderCopy);
@@ -132,16 +131,16 @@ export const Projects: React.FC<OwnProps> = () => {
   const handleDelete = (id: string) => {
     openDeleteModalHelper({
       theme: theme,
-      title: `Delete Project`,
+      title: `Delete Lead`,
       loading: isDeleting,
       description: (
         <Text fw={"normal"} fs={"normal"} fz={"sm"} color={colors.titleText}>
-          Are you sure you want to delete this Project? This action is destructive and you will have
-          to contact support to restore data.
+          Are you sure you want to delete this Lead? This action is destructive and you will have to
+          contact support to restore data.
         </Text>
       ),
       cancelLabel: "Cancel",
-      confirmLabel: "Delete Project",
+      confirmLabel: "Delete Lead",
       onConfirm: () => {
         setIsDeleting((_prev) => true);
         dispatch(
@@ -153,32 +152,71 @@ export const Projects: React.FC<OwnProps> = () => {
           .unwrap()
           .then((res) => {
             if (res.success) {
-              dispatch(deleteProject(res.data._id));
+              dispatch(deleteLead(res.data._id));
             }
           })
           .catch((err) => {
-            console.log("Delete Project: ", err?.message);
-            notify("Delete Project", "An error occurred", "error");
+            console.log("Delete Lead: ", err?.message);
+            notify("Delete Lead", "An error occurred", "error");
           })
           .finally(() => {
             setIsDeleting((_prev) => false);
           });
 
-        notify("Delete Project", "Project deleted successfully!", "success");
+        notify("Delete Lead", "Lead deleted successfully!", "success");
       },
-      onCancel: () => notify("Delete Project", "Operation canceled!", "error"),
+      onCancel: () => notify("Delete Lead", "Operation canceled!", "error"),
+    });
+  };
+
+  const handleMoveToProjects = (prospectId: string) => {
+    openConfirmModalHelper({
+      theme: theme,
+      title: `Move to Projects`,
+      loading: false,
+      description: (
+        <Text fw={"normal"} fs={"normal"} fz={"sm"} color={colors.titleText}>
+          Are you sure you want to move this Prospect to Projects? This will mark the prospect as a
+          project with status of "WORK ORDER RECEIVED". This action is irreversible.
+        </Text>
+      ),
+      cancelLabel: "Cancel",
+      confirmLabel: "Move",
+      onConfirm: () => {
+        dispatch(
+          updateStatusProject({
+            token,
+            id: prospectId,
+            body: {
+              status: 4,
+            },
+          })
+        )
+          .unwrap()
+          .then((res) => {
+            notify("Move to Projects", res?.message, res.success ? "success" : "error");
+            if (res.success) {
+              // dispatch(modifyLeadStatus(res.data));
+            }
+          })
+          .catch((err) => {
+            console.log("Move to Projects", err?.message);
+            notify("Move to Projects", "An error occurred", "error");
+          });
+      },
+      onCancel: () => notify("Delete Prospect", "Operation canceled!", "error"),
     });
   };
 
   const handleOnChangeStatus = (value: string | null) => {
     if (!value) {
-      notify("Update Project Status", "Invalid status value", "error");
+      notify("Update Lead Status", "Invalid status value", "error");
       return;
     }
     dispatch(
       updateStatusProject({
         token,
-        id: selectedProject,
+        id: selectedLead,
         body: {
           status: parseInt(value),
         },
@@ -186,21 +224,21 @@ export const Projects: React.FC<OwnProps> = () => {
     )
       .unwrap()
       .then((res) => {
-        notify("Project Status", res?.message, res.success ? "success" : "error");
+        notify("Lead Status", res?.message, res.success ? "success" : "error");
         if (res.success) {
-          // dispatch(modifyProjectStatus(res.data));
+          // dispatch(modifyLeadStatus(res.data));
           hideUpdateStatusModal();
         }
       })
       .catch((err) => {
-        console.log("Update Project Status: ", err?.message);
-        notify("Project Status", "An error occurred", "error");
+        console.log("Update Lead Status: ", err?.message);
+        notify("Lead Status", "An error occurred", "error");
       });
   };
 
   React.useEffect(() => {
-    setSearchedData(projects);
-  }, [projects]);
+    setSearchedData(leads);
+  }, [leads]);
 
   let icon: JSX.Element;
   if (viewMode === "cards") {
@@ -212,95 +250,109 @@ export const Projects: React.FC<OwnProps> = () => {
   const rows =
     searchedData.length === 0 ? (
       <Container>
-        <Center>No Projects</Center>
+        <Center>No Prospects</Center>
       </Container>
     ) : (
       <>
-        {searchedData.map((project, index) => {
+        {searchedData.map((prospect, index) => {
           const value = Intl.NumberFormat("en-US", {
             style: "currency",
-            currency: project.value.currency,
+            currency: prospect.value.currency,
             maximumFractionDigits: 2,
-          }).format(project.value.amount);
+          }).format(prospect.value.amount);
 
           if (viewMode === "cards") {
             return (
-              <Grid.Col span={4} key={project._id}>
-                <_ProjectCard
-                  item={project}
+              <Grid.Col span={4} key={prospect._id}>
+                <_LeadCard
+                  item={prospect}
                   handleDelete={handleDelete}
                   assignEngineer={showAssignEngineerModal}
                   updateStatus={showUpdateStatusModal}
+                  moveToProject={handleMoveToProjects}
                 />
               </Grid.Col>
             );
           } else if (viewMode === "list") {
             return (
-              <tr key={project._id}>
+              <tr key={prospect._id}>
                 <td>{index + 1}</td>
                 <td>
                   <Avatar
                     src={
-                      project?.images.length > 0
-                        ? `${BASE_URL}\\${project?.images[0]}`
+                      prospect?.images.length > 0
+                        ? `${BASE_URL}\\${prospect?.images[0]}`
                         : "/company.png"
                     }
                     size={50}
                     //@ts-expect-error style works
-                    styles={project.images.length > 0 ? undefined : noImageStyle}
+                    styles={prospect.images.length > 0 ? undefined : noImageStyle}
                   />
                 </td>
-                <td>{project.name}</td>
-                <td>{project.description}</td>
+                <td>{prospect.name}</td>
+                <td>{prospect.description}</td>
                 <td>
                   <Badge
                     variant="filled"
-                    color={projectStatusColors[project.status]}
+                    color={projectStatusColors[prospect.status]}
                     styles={{
                       root: {
                         width: "100%",
                       },
                     }}
                   >
-                    {project.statusName}
+                    {prospect.statusName}
                   </Badge>
                 </td>
-                <td>{project.type}</td>
+                <td>{prospect.type}</td>
                 <td>{value}</td>
-                <td>{DateTime.fromISO(project.contractDate).toLocal().toFormat(DAY_MM_DD_YYYY)}</td>
-                <td>{DateTime.fromISO(project.deliveryDate).toLocal().toFormat(DAY_MM_DD_YYYY)}</td>
-                <td>{project.quotation}</td>
                 <td>
-                  {project.salesPerson !== user?._id
-                    ? project?.salesPersonValue?.name || "N/A"
+                  {DateTime.fromISO(prospect.contractDate).toLocal().toFormat(DAY_MM_DD_YYYY)}
+                </td>
+                <td>
+                  {DateTime.fromISO(prospect.deliveryDate).toLocal().toFormat(DAY_MM_DD_YYYY)}
+                </td>
+                <td>{prospect.quotation}</td>
+                <td>
+                  {prospect.salesPerson !== user?._id
+                    ? prospect?.salesPersonValue?.name || "N/A"
                     : "(You)"}
                 </td>
                 <td>
-                  {project?.engineer ? project?.engineerValue?.name || "N/A" : "Not Assigned"}
+                  {prospect?.engineer ? prospect?.engineerValue?.name || "N/A" : "Not Assigned"}
                 </td>
-                <td>{project?.company?.name || "N/A"}</td>
+                <td>{prospect?.company?.name || "N/A"}</td>
                 <td>
                   <Group>
                     <ActionIcon
                       color="gray"
                       size={"sm"}
-                      onClick={() => showUpdateStatusModal(project.status, project._id)}
+                      onClick={() => showUpdateStatusModal(prospect.status, prospect._id)}
                     >
                       <IconRotateClockwise2 />
                     </ActionIcon>
+                    {(isAdmin || isHR) && (
+                      <ActionIcon
+                        color="gray"
+                        size={"sm"}
+                        onClick={() => handleMoveToProjects(prospect._id)}
+                      >
+                        <IconCornerDownRight />
+                      </ActionIcon>
+                    )}
                     {isAdmin && (
                       <React.Fragment>
-                        <ActionIcon
+                        {/* <ActionIcon
                           color="gray"
                           size={"sm"}
-                          onClick={() => showAssignEngineerModal(project._id)}
+                          onClick={() => showAssignEngineerModal(prospect._id)}
                         >
                           <IconUserCog />
-                        </ActionIcon>
+                        </ActionIcon> */}
                         <ActionIcon
                           color="red"
                           size={"sm"}
-                          onClick={() => handleDelete(project._id)}
+                          onClick={() => handleDelete(prospect._id)}
                         >
                           <IconTrash />
                         </ActionIcon>
@@ -312,12 +364,13 @@ export const Projects: React.FC<OwnProps> = () => {
             );
           } else {
             return (
-              <_ProjectCard
-                key={project._id}
-                item={project}
+              <_LeadCard
+                key={prospect._id}
+                item={prospect}
                 handleDelete={handleDelete}
                 assignEngineer={showAssignEngineerModal}
                 updateStatus={showUpdateStatusModal}
+                moveToProject={handleMoveToProjects}
               />
             );
           }
@@ -335,18 +388,19 @@ export const Projects: React.FC<OwnProps> = () => {
           <Table border={1} bgcolor={theme.white} withBorder>
             <thead>
               <tr>
-                <th colSpan={4}>Project</th>
-                <th colSpan={6}>Project Details</th>
-                <th colSpan={1}>Company</th>
+                <th colSpan={4}>Prospect</th>
+                <th colSpan={6}>Prospect Details</th>
+                <th colSpan={1}>Contact</th>
               </tr>
               <tr>
                 <th>#</th>
+                <th>Image</th>
                 <th>Name</th>
                 <th>Description</th>
                 <th onClick={() => sortData("statusName")}>
                   Status {sortOrder.statusName === "asc" ? "▲" : "▼"}
                 </th>
-                <th>Project Type</th>
+                <th>Prospect Type</th>
                 <th>Value</th>
                 <th>Contract Date</th>
                 <th>Delivery Date</th>
@@ -355,7 +409,7 @@ export const Projects: React.FC<OwnProps> = () => {
                   Sales Person {sortOrder.salesPerson === "asc" ? "▲" : "▼"}
                 </th>
                 <th>Engineer</th>
-                <th>Customer Name</th>
+                <th>Contact Name</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -401,13 +455,13 @@ export const Projects: React.FC<OwnProps> = () => {
           rightIcon={<IconPlus size={16} />}
           onClick={() => setAddModalOpened(true)}
         >
-          Project
+          Prospect
         </Button>
       </Flex>
 
       {content}
-      <_AddProjectModal
-        title="Add Project"
+      <_AddLeadModal
+        title="Add Prospect"
         opened={addModalOpened}
         onClose={() => setAddModalOpened(false)}
         companyId={customerId}
@@ -416,14 +470,14 @@ export const Projects: React.FC<OwnProps> = () => {
         title="Assign Engineer"
         opened={assignEngineerModalOpened}
         onClose={hideAssignEngineerModal}
-        projectId={selectedProject}
+        projectId={selectedLead}
       />
       <Modal
         centered
         radius="md"
         opened={visible}
         onClose={hideUpdateStatusModal}
-        title="Project Status"
+        title="Prospect Status"
         scrollAreaComponent={ScrollArea.Autosize}
         withinPortal
         withOverlay
@@ -436,7 +490,7 @@ export const Projects: React.FC<OwnProps> = () => {
           onChange={handleOnChangeStatus}
         >
           <div className={gclasses.radioContainer}>
-            {projectStatusList.map((value) => {
+            {leadsStatusList.map((value) => {
               return <Radio value={value.value} label={value.label} key={value.value} />;
             })}
           </div>
@@ -446,4 +500,4 @@ export const Projects: React.FC<OwnProps> = () => {
   );
 };
 
-export default Projects;
+export default Leads;

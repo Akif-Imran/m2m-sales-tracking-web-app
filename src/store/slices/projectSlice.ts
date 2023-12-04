@@ -1,5 +1,5 @@
 import { PayloadAction, SerializedError, createSlice } from "@reduxjs/toolkit";
-import { fetchProjects } from "@thunks";
+import { fetchProjects, updateStatusProject } from "@thunks";
 
 interface State {
   data: IProject[];
@@ -14,7 +14,7 @@ const initialState: State = {
 };
 
 const projectSlice = createSlice({
-  name: "leads",
+  name: "project",
   initialState: initialState,
   reducers: {
     addProject: (state, action: PayloadAction<IProject>) => {
@@ -24,7 +24,7 @@ const projectSlice = createSlice({
       const index = state.data.findIndex((project) => project._id === action.payload._id);
       state.data[index] = action.payload;
     },
-    updateProjectStatus: (state, action: PayloadAction<IProject>) => {
+    modifyProjectStatus: (state, action: PayloadAction<IProject>) => {
       const index = state.data.findIndex((project) => project._id === action.payload._id);
       state.data[index].status = action.payload.status;
     },
@@ -34,6 +34,20 @@ const projectSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
+    builder.addCase(updateStatusProject.fulfilled, (state, action) => {
+      if (action.payload.success) {
+        const data = action.payload.data;
+        if (data.status >= 4) {
+          const index = state.data.findIndex((value) => value._id === data._id);
+          if (index > -1) {
+            state.data[index] = data;
+          } else {
+            state.data.push(data);
+          }
+        }
+      }
+    });
+
     builder.addCase(fetchProjects.pending, (state) => {
       state.isLoading = true;
     });
@@ -43,7 +57,7 @@ const projectSlice = createSlice({
     });
     builder.addCase(fetchProjects.fulfilled, (state, action) => {
       if (action.payload.success) {
-        state.data = action.payload.data;
+        state.data = action.payload.data.filter((value) => value.status >= 4);
       }
       state.error = null;
       state.isLoading = false;
@@ -52,6 +66,6 @@ const projectSlice = createSlice({
 });
 
 export { projectSlice };
-export const { addProject, deleteProject, modifyProject, updateProjectStatus } =
+export const { addProject, deleteProject, modifyProject, modifyProjectStatus } =
   projectSlice.actions;
 export const projectReducer = projectSlice.reducer;

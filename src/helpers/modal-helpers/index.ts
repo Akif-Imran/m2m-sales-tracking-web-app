@@ -43,6 +43,36 @@ export const openDeleteModalHelper = ({
   });
 };
 
+export const openConfirmModalHelper = ({
+  title,
+  loading,
+  description,
+  confirmLabel,
+  onConfirm,
+  cancelLabel,
+  onCancel,
+  theme,
+}: ModalProps) => {
+  modals.openConfirmModal({
+    title: `${title}`,
+    centered: true,
+    children: description,
+    labels: { confirm: `${confirmLabel}`, cancel: `${cancelLabel}` },
+    overlayProps: modalOverlayPropsHelper(theme),
+    radius: "md",
+    shadow: "md",
+    confirmProps: {
+      color: "blue",
+      variant: "filled",
+      loading: loading,
+      radius: "md",
+    },
+    onCancel,
+    cancelProps: { color: "blue", variant: "outline", radius: "md" },
+    onConfirm,
+  });
+};
+
 export const modalOverlayPropsHelper = (theme: MantineTheme): ModalBaseOverlayProps => {
   return {
     color: theme.colorScheme === "dark" ? theme.colors.dark[9] : theme.colors.gray[2],

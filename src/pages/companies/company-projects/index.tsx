@@ -38,10 +38,10 @@ import {
   IconTrashFilled,
 } from "@tabler/icons-react";
 import { _AddContactModal } from "../components";
-import { _AddFollowUpModal } from "../../projects/follow-ups/components";
-import { _AddClaimModal } from "../../projects/claims/components";
+import { _AddFollowUpModal } from "../../prospects/follow-ups/components";
+import { _AddClaimModal } from "../../prospects/claims/components";
 import { _AddPurchaseRequestModal } from "../../projects/purchase-requests/components";
-import { _AddLeadModal } from "../../projects/components";
+import { _AddLeadModal } from "../../prospects/components";
 import { removeContact } from "@thunks";
 import { useAuthContext } from "@contexts";
 import { notify } from "@utility";

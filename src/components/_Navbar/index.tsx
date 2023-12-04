@@ -45,7 +45,7 @@ const data: NavbarButtons[] = [
     adminOnly: false,
   },
   {
-    link: routes.project.list,
+    link: routes.prospects.list,
     label: "Projects",
     icon: IconSettingsExclamation,
     adminOnly: false,
@@ -134,7 +134,7 @@ const _Navbar: React.FC<_NavbarProps> = ({ opened, close }) => {
     } else if (active == "Company") {
       navigate(routes.company.list);
     } else if (active === "Projects") {
-      navigate(routes.project.list);
+      navigate(routes.prospects.list);
     } else if (active === "Tasks") {
       navigate(routes.task.list);
     } else if (active === "Users") {

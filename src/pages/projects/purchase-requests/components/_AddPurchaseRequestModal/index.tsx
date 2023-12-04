@@ -18,7 +18,7 @@ import { DATE_FORMAT_YYYY_MM_DD, modalOverlayPropsHelper } from "@helpers";
 import { DatePickerInput, DateValue } from "@mantine/dates";
 import { useFormik } from "formik";
 import { useAuthContext } from "@contexts";
-import { selectLeads, selectRecordsForDropdown, useAppDispatch, useAppSelector } from "@store";
+import { selectProjects, selectRecordsForDropdown, useAppDispatch, useAppSelector } from "@store";
 import { addPurchaseRequest } from "@slices";
 import { IconCalendar, IconUpload } from "@tabler/icons-react";
 import { currencyList } from "@constants";
@@ -77,7 +77,7 @@ export const _AddPurchaseRequestModal: React.FC<OwnProps> = ({
     purchaseRequestStatus: purchaseRequestStatusList,
     purchaseCategories,
   } = useAppSelector(selectRecordsForDropdown);
-  const { data: projects } = useAppSelector(selectLeads);
+  const { data: projects } = useAppSelector(selectProjects);
   const [isCreating, setIsCreating] = React.useState(false);
   const [projectsList, setProjectsList] = React.useState<IDropDownList>([]);
   const [_file, setFile] = React.useState<File>({} as File);

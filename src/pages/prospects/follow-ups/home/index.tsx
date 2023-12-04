@@ -103,7 +103,7 @@ export const FollowUps: React.FC<OwnProps> = () => {
     searchedData.length === 0 ? (
       <tr>
         <td colSpan={14} color={colors.titleText} align="center">
-          No Projects
+          No Follow Ups
         </td>
       </tr>
     ) : (

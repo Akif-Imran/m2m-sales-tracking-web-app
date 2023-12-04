@@ -22,6 +22,7 @@ import {
   taskStatusListReducer,
   userReducer,
   userTypeReducer,
+  projectReducer,
 } from "@slices";
 import { useSelector } from "react-redux";
 import { TypedUseSelectorHook, useDispatch } from "react-redux";
@@ -33,6 +34,7 @@ const store = configureStore({
     companies: companyReducer,
     departments: departmentReducer,
     leads: leadReducer,
+    projects: projectReducer,
     projectStatusList: projectStatusListReducer,
     followUps: followUpReducer,
     purchaseRequest: purchaseRequestReducer,
@@ -68,6 +70,7 @@ export const selectCompanies = (state: RootState) => state.companies;
 export const selectCompanyContact = (state: RootState) => state.companyContacts;
 export const selectDepartments = (state: RootState) => state.departments;
 export const selectLeads = (state: RootState) => state.leads;
+export const selectProjects = (state: RootState) => state.projects;
 export const selectProjectStatusList = (state: RootState) => state.projectStatusList;
 export const selectFollowUps = (state: RootState) => state.followUps;
 export const selectPurchaseRequests = (state: RootState) => state.purchaseRequest;
@@ -114,6 +117,7 @@ export const selectTasksCombined = createSelector(
     };
   }
 );
+
 export const selectUsersBasedOnType = createSelector(selectUsers, (users) => {
   return {
     engineers: users.data.filter((user) => user.userType === 3),
@@ -121,9 +125,11 @@ export const selectUsersBasedOnType = createSelector(selectUsers, (users) => {
     admins: users.data.filter((user) => user.userType === 1),
   };
 });
+
 export const selectRecordsForDropdown = createSelector(
   selectCompanies,
   selectLeads,
+  selectProjects,
   selectDepartments,
   selectUserTypes,
   selectUsers,
@@ -140,6 +146,7 @@ export const selectRecordsForDropdown = createSelector(
   (
     companies,
     leads,
+    projects,
     departments,
     userTypes,
     users,
@@ -159,7 +166,11 @@ export const selectRecordsForDropdown = createSelector(
         value: company._id,
         label: company.name,
       })),
-      leads: leads.data.map((project) => ({
+      leads: leads.data.map((lead) => ({
+        value: lead._id,
+        label: lead.name,
+      })),
+      projects: projects.data.map((project) => ({
         value: project._id,
         label: project.name,
       })),
@@ -175,10 +186,18 @@ export const selectRecordsForDropdown = createSelector(
         value: userType.id.toString(),
         label: userType.name,
       })),
-      projectStatus: projectStatus.data.map((status) => ({
-        value: status.id.toString(),
-        label: `${status.name} (${status.value}%)`,
-      })),
+      projectStatus: projectStatus.data
+        .filter((value) => value.id >= 4)
+        .map((status) => ({
+          value: status.id.toString(),
+          label: `${status.name} (${status.value}%)`,
+        })),
+      leadStatus: projectStatus.data
+        .filter((value) => value.id < 4)
+        .map((status) => ({
+          value: status.id.toString(),
+          label: `${status.name} (${status.value}%)`,
+        })),
       taskStatus: taskStatus.data.map((status) => ({
         value: status.id.toString(),
         label: status.name,
@@ -250,6 +269,29 @@ export const selectLeadsWithRecords = createSelector(
   }
 );
 
+export const selectProjectsWithRecords = createSelector(
+  selectProjects,
+  selectCompanies,
+  selectUsers,
+  selectProjectStatusList,
+  (projects, companies, users, statuses) => {
+    return projects.data.map((project) => {
+      const company = companies.data.find((company) => company._id === project.customerId);
+      const salesPerson = users.data.find((user) => user._id === project.salesPerson);
+      const engineer = users.data.find((user) => user._id === project?.engineer);
+      const status = statuses.data.find((status) => status.id === project.status);
+      return {
+        ...project,
+        company: company,
+        salesPersonValue: salesPerson,
+        engineerValue: engineer,
+        statusName: `${status?.name} (${status?.value}%)`,
+        completionPercentage: status?.value,
+      };
+    });
+  }
+);
+
 export const selectFollowUpsWithRecords = createSelector(
   selectFollowUps,
   selectLeads,
@@ -277,7 +319,7 @@ export const selectPurchaseRequestsWithRecords = createSelector(
   selectPurchaseRequests,
   selectUsers,
   selectSuppliers,
-  selectLeads,
+  selectProjects,
   selectPurchaseRequestsStatusList,
   selectPurchaseCategories,
   (requests, users, suppliers, projects, statuses, categories) => {

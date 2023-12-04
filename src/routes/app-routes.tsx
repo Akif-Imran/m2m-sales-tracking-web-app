@@ -8,13 +8,14 @@ import {
   _VerifyOTP,
   Settings,
   Company,
-  Projects,
+  Leads,
   FollowUps,
   PurchaseRequests,
   Claims,
   Tasks,
   Users,
   Reports,
+  Projects,
 } from "@pages";
 import { routes } from "./routes";
 import { Suspense, lazy } from "react";
@@ -93,25 +94,31 @@ const MainApp: React.FC<OwnProps> = () => {
 
       {/* projects */}
       <Route
-        path={routes.project.list}
+        path={routes.projects.list}
         element={<_RequireAuth children={<_AppShell page={<Projects />} />} />}
-      ></Route>
-
-      {/* follow ups */}
-      <Route
-        path={routes.project.followUps.list}
-        element={<_RequireAuth children={<_AppShell page={<FollowUps />} />} />}
       ></Route>
 
       {/* purchase requests  */}
       <Route
-        path={routes.project.purchaseRequest.list}
+        path={routes.projects.purchaseRequest.list}
         element={<_RequireAuth children={<_AppShell page={<PurchaseRequests />} />} />}
+      ></Route>
+
+      {/* leads */}
+      <Route
+        path={routes.prospects.list}
+        element={<_RequireAuth children={<_AppShell page={<Leads />} />} />}
+      ></Route>
+
+      {/* follow ups */}
+      <Route
+        path={routes.prospects.followUps.list}
+        element={<_RequireAuth children={<_AppShell page={<FollowUps />} />} />}
       ></Route>
 
       {/* claims */}
       <Route
-        path={routes.project.claims.list}
+        path={routes.prospects.claims.list}
         element={<_RequireAuth children={<_AppShell page={<Claims />} />} />}
       ></Route>
 

@@ -1,5 +1,5 @@
 import { PayloadAction, SerializedError, createSlice } from "@reduxjs/toolkit";
-import { fetchProjects } from "@thunks";
+import { fetchProjects, updateStatusProject } from "@thunks";
 
 interface State {
   data: IProject[];
@@ -34,6 +34,20 @@ const leadSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
+    builder.addCase(updateStatusProject.fulfilled, (state, action) => {
+      if (action.payload.success) {
+        const data = action.payload.data;
+        if (data.status < 4) {
+          const index = state.data.findIndex((value) => value._id === data._id);
+          if (index > -1) {
+            state.data[index] = data;
+          } else {
+            state.data.push(data);
+          }
+        }
+      }
+    });
+
     builder.addCase(fetchProjects.pending, (state) => {
       state.isLoading = true;
     });

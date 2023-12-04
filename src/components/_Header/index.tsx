@@ -51,8 +51,9 @@ import { markAsRead } from "@slices";
 
 type ActivePage =
   | "Dashboard"
+  | "Contacts"
   | "Prospects"
-  | "Leads"
+  | "Projects"
   | "Follow ups"
   | "Purchase Request"
   | "Claims"
@@ -84,32 +85,45 @@ const buttons: NavbarButtons[] = [
   },
   {
     link: routes.company.list,
-    label: "Prospects",
+    label: "Contacts",
     icon: IconBuildingBank,
     visibleTo: [1, 2, 3, 4],
   },
   {
-    link: routes.project.list,
-    label: "Leads",
+    link: routes.prospects.list,
+    label: "Prospects",
     links: [
       {
-        link: routes.project.list,
-        label: "Leads",
+        link: routes.prospects.list,
+        label: "Prospects",
         visibleTo: [1, 2, 3, 4],
       },
       {
-        link: routes.project.followUps.list,
+        link: routes.prospects.followUps.list,
         label: "Follow ups",
         visibleTo: [1, 2, 3, 4],
       },
       {
-        link: routes.project.purchaseRequest.list,
-        label: "Purchase Request",
+        link: routes.prospects.claims.list,
+        label: "Claims",
+        visibleTo: [1, 2, 3, 4],
+      },
+    ],
+    icon: IconSettingsExclamation,
+    visibleTo: [1, 2, 3, 4],
+  },
+  {
+    link: routes.projects.list,
+    label: "Projects",
+    links: [
+      {
+        link: routes.prospects.list,
+        label: "Projects",
         visibleTo: [1, 2, 3, 4],
       },
       {
-        link: routes.project.claims.list,
-        label: "Claims",
+        link: routes.projects.purchaseRequest.list,
+        label: "Purchase Request",
         visibleTo: [1, 2, 3, 4],
       },
     ],

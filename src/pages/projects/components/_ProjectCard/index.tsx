@@ -23,7 +23,7 @@ interface OwnProps {
   updateStatus: (statusId: number, projectId: string) => void;
 }
 
-export const _LeadCard: React.FC<OwnProps> = ({
+export const _ProjectCard: React.FC<OwnProps> = ({
   item,
   onClick,
   handleDelete,
@@ -158,4 +158,4 @@ export const _LeadCard: React.FC<OwnProps> = ({
   );
 };
 
-export default _LeadCard;
+export default _ProjectCard;

@@ -17,7 +17,7 @@ import {
 import { useFormik } from "formik";
 import { IconCalendar, IconUpload } from "@tabler/icons-react";
 import { selectRecordsForDropdown, useAppDispatch, useAppSelector } from "@store";
-import { addLead } from "@slices";
+import { addProject } from "@slices";
 import { DateTime } from "luxon";
 import { DatePickerInput, DateValue } from "@mantine/dates";
 import { colors } from "@theme";
@@ -72,7 +72,7 @@ const schema: yup.ObjectSchema<IProjectForm> = yup.object().shape({
   images: yup.array().of(yup.string().required()).required("Image is required"),
 });
 
-const _AddLeadModal: React.FC<OwnProps> = ({ opened, onClose, title, companyId }) => {
+const _AddProjectModal: React.FC<OwnProps> = ({ opened, onClose, title, companyId }) => {
   const { theme } = useStyles();
   const { classes: gclasses } = useGStyles();
   const dispatch = useAppDispatch();
@@ -130,7 +130,7 @@ const _AddLeadModal: React.FC<OwnProps> = ({ opened, onClose, title, companyId }
         .then((res) => {
           notify("Project", res.message, res.success ? "success" : "error");
           if (res.success) {
-            dispatch(addLead(res.data));
+            dispatch(addProject(res.data));
             helpers.resetForm();
             onClose();
           }
@@ -444,4 +444,4 @@ const _AddLeadModal: React.FC<OwnProps> = ({ opened, onClose, title, companyId }
   );
 };
 
-export { _AddLeadModal };
+export { _AddProjectModal };

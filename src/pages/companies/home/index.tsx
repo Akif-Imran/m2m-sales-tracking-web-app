@@ -76,22 +76,22 @@ const Company: React.FC<OwnProps> = () => {
   const handleDelete = (id: string) => {
     openDeleteModalHelper({
       theme: theme,
-      title: `Delete Company`,
+      title: `Delete Contact`,
       loading: isDeleting,
       description: (
         <Text fw={"normal"} fs={"normal"} fz={"sm"} color={colors.titleText}>
-          Are you sure you want to delete this Company? This action is destructive and you will have
+          Are you sure you want to delete this Contact? This action is destructive and you will have
           to contact support to restore data.
         </Text>
       ),
       cancelLabel: "Cancel",
-      confirmLabel: "Delete Company",
+      confirmLabel: "Delete Contact",
       onConfirm: () => {
         setIsDeleting((_prev) => true);
         dispatch(removeCompany({ id, token }))
           .unwrap()
           .then((res) => {
-            notify("Delete Company", res?.message, res.success ? "success" : "error");
+            notify("Delete Contact", res?.message, res.success ? "success" : "error");
             if (res.success) {
               dispatch(deleteCompany(res.data._id));
             }
@@ -103,7 +103,7 @@ const Company: React.FC<OwnProps> = () => {
             setIsDeleting((_prev) => false);
           });
       },
-      onCancel: () => notify("Delete Company", "Operation canceled!", "error"),
+      onCancel: () => notify("Delete Contact", "Operation canceled!", "error"),
     });
   };
 

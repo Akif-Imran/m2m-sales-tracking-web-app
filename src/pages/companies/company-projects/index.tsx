@@ -117,8 +117,8 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
       loading: isDeletingContact,
       description: (
         <Text fw={"normal"} fs={"normal"} fz={"sm"} color={colors.titleText}>
-          Are you sure you want to delete this Contact? This action is destructive and you will have
-          to contact support to restore data.
+          Are you sure you want to delete this Contact Person? This action is destructive and you
+          will have to contact support to restore data.
         </Text>
       ),
       cancelLabel: "Cancel",

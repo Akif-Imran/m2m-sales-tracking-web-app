@@ -37,13 +37,15 @@ const leadSlice = createSlice({
     builder.addCase(updateStatusProject.fulfilled, (state, action) => {
       if (action.payload.success) {
         const data = action.payload.data;
+        const index = state.data.findIndex((value) => value._id === data._id);
         if (data.status < 4) {
-          const index = state.data.findIndex((value) => value._id === data._id);
           if (index > -1) {
             state.data[index] = data;
           } else {
             state.data.push(data);
           }
+        } else {
+          state.data.splice(index, 1);
         }
       }
     });

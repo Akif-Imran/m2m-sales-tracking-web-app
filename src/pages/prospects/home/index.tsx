@@ -131,16 +131,16 @@ export const Leads: React.FC<OwnProps> = () => {
   const handleDelete = (id: string) => {
     openDeleteModalHelper({
       theme: theme,
-      title: `Delete Lead`,
+      title: `Delete Prospect`,
       loading: isDeleting,
       description: (
         <Text fw={"normal"} fs={"normal"} fz={"sm"} color={colors.titleText}>
-          Are you sure you want to delete this Lead? This action is destructive and you will have to
-          contact support to restore data.
+          Are you sure you want to delete this Prospect? This action is destructive and you will
+          have to contact support to restore data.
         </Text>
       ),
       cancelLabel: "Cancel",
-      confirmLabel: "Delete Lead",
+      confirmLabel: "Delete Prospect",
       onConfirm: () => {
         setIsDeleting((_prev) => true);
         dispatch(
@@ -156,16 +156,16 @@ export const Leads: React.FC<OwnProps> = () => {
             }
           })
           .catch((err) => {
-            console.log("Delete Lead: ", err?.message);
-            notify("Delete Lead", "An error occurred", "error");
+            console.log("Delete Prospect: ", err?.message);
+            notify("Delete Prospect", "An error occurred", "error");
           })
           .finally(() => {
             setIsDeleting((_prev) => false);
           });
 
-        notify("Delete Lead", "Lead deleted successfully!", "success");
+        notify("Delete Prospect", "Prospect deleted successfully!", "success");
       },
-      onCancel: () => notify("Delete Lead", "Operation canceled!", "error"),
+      onCancel: () => notify("Delete Prospect", "Operation canceled!", "error"),
     });
   };
 

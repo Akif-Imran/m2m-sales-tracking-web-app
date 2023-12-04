@@ -19,7 +19,7 @@ import {
   selectCompanyContact,
   selectFollowUpsWithRecords,
   selectLeadsWithRecords,
-  selectRecordsForDropdown,
+  selectProjectsWithRecords,
   useAppDispatch,
   useAppSelector,
 } from "@store";
@@ -61,21 +61,21 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
   console.log(companyId);
   const dispatch = useAppDispatch();
   const {
-    state: { token },
+    state: { token, user },
   } = useAuthContext();
   const followUpList = useAppSelector(selectFollowUpsWithRecords);
-  const projectsList = useAppSelector(selectLeadsWithRecords);
-  const { projectStatus: projectStatusList } = useAppSelector(selectRecordsForDropdown);
+  const leadsList = useAppSelector(selectLeadsWithRecords);
+  const projectsList = useAppSelector(selectProjectsWithRecords);
   const { data: companiesList } = useAppSelector(selectCompanies);
   const { data: contactsList } = useAppSelector(selectCompanyContact);
 
   const [isDeletingContact, setIsDeletingContact] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(true);
   const [company, setCompany] = React.useState<ICompany>();
-  const [projects, setProjects] = React.useState<typeof projectsList>([]);
+  const [projectLeadsList, setProjectsLeadList] = React.useState<typeof leadsList>([]);
   const [contacts, setContacts] = React.useState<typeof contactsList>([]);
   const [followUps, setFollowUps] = React.useState<typeof followUpList>([]);
-  const [selectedProject, setSelectedProject] = React.useState<ArrayToObj<typeof projectsList>>();
+  const [selectedProject, setSelectedProject] = React.useState<ArrayToObj<typeof leadsList>>();
 
   const [addContactModalOpened, setAddContactModalOpened] = React.useState(false);
   const [addProjectModalOpened, setAddProjectModalOpened] = React.useState(false);
@@ -88,20 +88,22 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
   React.useEffect(() => {
     if (!companyId) return;
     const company = companiesList.find((company) => company._id === companyId);
-    const project_s = projectsList.filter((project) => project.customerId === companyId);
+    const project_s = leadsList
+      .concat(projectsList)
+      .filter((project) => project.customerId === companyId);
     const contact_s = contactsList.filter((contact) => contact.customerId === companyId);
     setContacts(contact_s);
-    setProjects(project_s);
+    setProjectsLeadList(project_s);
     setCompany(company);
     if (project_s.length > 0) {
       setSelectedProject(project_s[0]);
       setFollowUps(followUpList.filter((followUp) => followUp.projectId === project_s[0]._id));
     }
     setIsLoading(false);
-  }, [companyId, companiesList, projectsList, contactsList, followUpList]);
+  }, [companyId, companiesList, leadsList, contactsList, followUpList, projectsList]);
 
   const handleSelectProject = (projectId: string) => {
-    const project = projectsList.find((project) => project._id === projectId);
+    const project = leadsList.concat(projectsList).find((project) => project._id === projectId);
     setSelectedProject(project);
     //FIXME - fix this follow project id type
     const followUp_s = followUpList.filter((followUp) => followUp.projectId === projectId);
@@ -193,7 +195,7 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
   if (isLoading) {
     return <div>Loading...</div>;
   } else if (!company || !selectedProject) {
-    return <div>Nothing to see here...</div>;
+    return <center>Nothing to see here...</center>;
   } else {
     return (
       <>
@@ -218,7 +220,7 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
                       icon={<IconBriefcase {...menuIconStyle} />}
                       onClick={() => setAddProjectModalOpened(true)}
                     >
-                      Project
+                      Prospect
                     </Menu.Item>
                     <Menu.Item
                       color={colors.titleText}
@@ -239,10 +241,7 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
               </Flex>
             </Card>
             <ScrollArea type="scroll" h={"80vh"}>
-              {projects.map((project) => {
-                const status = projectStatusList.find(
-                  (status) => status.value === project.status.toString()
-                );
+              {projectLeadsList.map((project) => {
                 return (
                   <Card
                     key={project._id}
@@ -257,7 +256,7 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
                       <Flex direction={"column"} align={"flex-start"}>
                         <Text {...titleTextStyle}>{project.name}</Text>
                         <Badge variant="filled" color={projectStatusColors[project.status]}>
-                          {status?.label}
+                          {project?.statusName}
                         </Badge>
                       </Flex>
                       {selectedProject._id === project._id && (
@@ -278,7 +277,7 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
                     <Stack spacing={"xs"}>
                       <Flex direction={"row"} align={"center"}>
                         <Text {...titleTextStyle} size={"lg"}>
-                          Project Details
+                          Details
                         </Text>
                         <Badge
                           ml={"lg"}
@@ -303,7 +302,11 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
                         </Flex>
                         <Flex direction={"row"} align={"center"} columnGap={"sm"}>
                           <Text {...titleTextStyle}>Salesman: </Text>
-                          <Text {...bodyTextStyle}>{selectedProject.salesPersonValue?.name}</Text>
+                          <Text {...bodyTextStyle}>
+                            {selectedProject.salesPerson === user?._id
+                              ? "(You)"
+                              : selectedProject.salesPersonValue?.name}
+                          </Text>
                         </Flex>
                       </Flex>
                       <Flex direction={"row"} align={"center"} justify={"space-between"}>
@@ -354,7 +357,7 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
                   <Card {...cardConfig}>
                     <Flex direction={"row"} justify={"space-between"} align={"center"}>
                       <Text {...titleTextStyle} size={"lg"}>
-                        Contacts
+                        Contact Persons
                       </Text>
 
                       <Flex direction={"row"} columnGap={"xs"} align={"center"}>

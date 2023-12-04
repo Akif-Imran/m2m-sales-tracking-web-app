@@ -113,7 +113,7 @@ const _CompanyCard: React.FC<OwnProps> = ({
                   </ActionIcon>
                 </Menu.Target>
                 <Menu.Dropdown>
-                  <Menu.Label>Company</Menu.Label>
+                  <Menu.Label>Contact</Menu.Label>
                   <Menu.Item
                     c={colors.titleText}
                     icon={<IconUserPlus {...menuIconStyle} />}
@@ -122,7 +122,7 @@ const _CompanyCard: React.FC<OwnProps> = ({
                       openContact();
                     }}
                   >
-                    Contact
+                    Contact Person
                   </Menu.Item>
                   <Menu.Divider />
                   <Menu.Label>New</Menu.Label>
@@ -137,7 +137,7 @@ const _CompanyCard: React.FC<OwnProps> = ({
                       });
                     }}
                   >
-                    Project
+                    Prospect
                   </Menu.Item>
                   <Menu.Item
                     c={colors.titleText}

@@ -227,7 +227,7 @@ export const Claims: React.FC<OwnProps> = () => {
             <thead>
               <tr>
                 <th colSpan={5}>Claim</th>
-                <th colSpan={8}>Details</th>
+                <th colSpan={7}>Details</th>
               </tr>
               <tr>
                 <th>#</th>
@@ -235,7 +235,7 @@ export const Claims: React.FC<OwnProps> = () => {
                 <th>Item Type</th>
                 <th>Status</th>
 
-                <th>Project</th>
+                <th>Prospect / Project</th>
                 <th>Request By</th>
                 <th>Warranty</th>
                 <th>Qty</th>

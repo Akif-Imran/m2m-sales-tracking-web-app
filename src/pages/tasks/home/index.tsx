@@ -4,6 +4,8 @@ import {
   ActionIcon,
   Badge,
   Button,
+  Center,
+  Container,
   Flex,
   Grid,
   Group,
@@ -87,7 +89,8 @@ const Tasks: React.FC<OwnProps> = () => {
   const {
     taskStatus: taskStatusList,
     companies,
-    leads: projects,
+    leads,
+    projects,
     engineers,
     salesPersons,
   } = useAppSelector(selectRecordsForDropdown);
@@ -127,11 +130,11 @@ const Tasks: React.FC<OwnProps> = () => {
       return {
         statusList: [{ value: "0", label: "All" }].concat(taskStatusList),
         companyList: [{ value: "0", label: "All" }].concat(companies),
-        projectList: [{ value: "0", label: "All" }].concat(projects),
+        projectList: [{ value: "0", label: "All" }].concat(projects).concat(leads),
         assigneeList: [{ value: "0", label: "All" }].concat(engineers.concat(salesPersons)),
       };
     });
-  }, [taskStatusList, companies, projects, engineers, salesPersons]);
+  }, [taskStatusList, companies, projects, leads, engineers, salesPersons]);
 
   const handleDelete = (id: string) => {
     openDeleteModalHelper({
@@ -210,6 +213,7 @@ const Tasks: React.FC<OwnProps> = () => {
       };
     });
   };
+
   const handleOnChangeProjectFilter = (value: string | null) => {
     if (!value) return;
     setSorting((prev) => {
@@ -283,11 +287,19 @@ const Tasks: React.FC<OwnProps> = () => {
 
   const rows =
     searchedData.length === 0 ? (
-      <tr>
-        <td colSpan={14} color={colors.titleText} align="center">
-          No Tasks
-        </td>
-      </tr>
+      <>
+        {viewMode === "cards" ? (
+          <Container>
+            <Center>No Tasks</Center>
+          </Container>
+        ) : (
+          <tr>
+            <td colSpan={10} align="center">
+              No Tasks
+            </td>
+          </tr>
+        )}
+      </>
     ) : (
       <>
         {searchedData.map((task, index) => {
@@ -362,8 +374,8 @@ const Tasks: React.FC<OwnProps> = () => {
             <thead>
               <tr>
                 <th colSpan={2}>Task</th>
-                <th colSpan={1}>Company</th>
-                <th colSpan={1}>Project</th>
+                <th colSpan={1}>Contact</th>
+                <th colSpan={1}>Prospect / Project</th>
                 <th colSpan={5}>Task Details</th>
                 <th colSpan={1}>Action</th>
               </tr>
@@ -389,7 +401,7 @@ const Tasks: React.FC<OwnProps> = () => {
                     value={sorting.company}
                     withinPortal
                     withAsterisk={false}
-                    label="Company Name"
+                    label="Contact Name"
                     variant="filled"
                     size="sm"
                     placeholder="Pick one"
@@ -403,7 +415,7 @@ const Tasks: React.FC<OwnProps> = () => {
                     value={sorting.project.toString()}
                     withinPortal
                     withAsterisk={false}
-                    label="Project Name"
+                    label="Prospect / Project Name"
                     variant="filled"
                     size="sm"
                     placeholder="Pick one"
@@ -429,7 +441,6 @@ const Tasks: React.FC<OwnProps> = () => {
                   />
                 </th>
                 <th>Deadline</th>
-                {/* <th>Completed Date</th> */}
                 <th>Actions</th>
               </tr>
             </thead>

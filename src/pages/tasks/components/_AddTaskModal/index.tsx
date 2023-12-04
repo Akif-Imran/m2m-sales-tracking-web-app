@@ -7,6 +7,7 @@ import { IconCalendar } from "@tabler/icons-react";
 import { notify } from "@utility";
 import {
   selectLeadsWithRecords,
+  selectProjectsWithRecords,
   selectRecordsForDropdown,
   useAppDispatch,
   useAppSelector,
@@ -33,9 +34,10 @@ const _AddTaskModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
     state: { token },
   } = useAuthContext();
   const [plannedEndDate, setPlannedEndDate] = React.useState(new Date());
-  const allProjects = useAppSelector(selectLeadsWithRecords);
+  const leads = useAppSelector(selectLeadsWithRecords);
+  const projects = useAppSelector(selectProjectsWithRecords);
   const { companies, salesPersons, engineers } = useAppSelector(selectRecordsForDropdown);
-  const [projectsList, setProjectList] = React.useState<IDropDownList>([]);
+  const [projectsLeadList, setProjectsLeadList] = React.useState<IDropDownList>([]);
   const [isCreating, setIsCreating] = React.useState(false);
 
   const form = useFormik<ITaskForm>({
@@ -103,13 +105,14 @@ const _AddTaskModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
       ...prev,
       customerId: value,
     }));
-    const project_s = allProjects
+    const project_s = leads
+      .concat(projects)
       .filter((project) => project.customerId === value)
       .map((project) => ({
         value: project._id,
         label: project.name,
       }));
-    setProjectList(project_s);
+    setProjectsLeadList(project_s);
   };
 
   return (
@@ -130,8 +133,8 @@ const _AddTaskModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
             required
             withAsterisk={false}
             searchable
-            nothingFound="No Status"
-            label="Company"
+            nothingFound="No contacts found"
+            label="Contact"
             value={form.values.customerId}
             onChange={handleOnChangeCompany}
             data={companies}
@@ -142,13 +145,14 @@ const _AddTaskModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
             required
             withAsterisk={false}
             searchable
-            nothingFound="No Project"
-            label="Project"
+            nothingFound="No record found"
+            label="Prospect / Project"
             value={form.values.projectId.toString()}
             onChange={handleOnChangeProject}
-            data={projectsList}
+            data={projectsLeadList}
           />
         </Group>
+
         <TextInput
           required
           withAsterisk={false}

@@ -95,14 +95,17 @@ export const selectNotifications = (state: RootState) => state.notifications;
 //memoized selectors
 export const selectTasksCombined = createSelector(
   selectLeads,
+  selectProjects,
   selectUsers,
   selectTasks,
   selectCompanies,
   selectTaskStatusList,
-  (projects, users, tasks, companies, statuses) => {
+  (leads, projects, users, tasks, companies, statuses) => {
     return {
       tasks: tasks.data.map((task) => {
-        const project = projects.data.find((project) => project._id === task.projectId);
+        const project = leads.data
+          .concat(projects.data)
+          .find((project) => project._id === task.projectId);
         const user = users.data.find((user) => user._id === task.assignedTo);
         const company = companies.data.find((company) => company._id === task.customerId);
         const statusName = statuses.data.find((status) => status.id === task.status)?.name;
@@ -345,11 +348,14 @@ export const selectClaimsWithRecords = createSelector(
   selectUsers,
   selectSuppliers,
   selectLeads,
+  selectProjects,
   selectClaimsStatusList,
-  (claims, users, suppliers, leads, statuses) => {
+  (claims, users, suppliers, leads, projects, statuses) => {
     return claims.data.map((request) => {
       const requestByPerson = users.data.find((user) => user._id === request.createdBy);
-      const lead = leads.data.find((project) => project._id === request.projectId);
+      const lead = leads.data
+        .concat(projects.data)
+        .find((project) => project._id === request.projectId);
       const supplier = suppliers.data.find((supplier) => supplier._id === request.supplierId);
       const statusName = statuses.data.find((status) => status.id === request.status)?.name;
       return {

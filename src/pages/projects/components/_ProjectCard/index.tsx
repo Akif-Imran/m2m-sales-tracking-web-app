@@ -119,7 +119,7 @@ export const _ProjectCard: React.FC<OwnProps> = ({
             </div>
             <Flex direction={"row"} align={"center"} justify={"flex-start"}>
               <Text fw={700} color={colors.titleText} mr={"xs"} fz={"sm"}>
-                Prospect
+                Contact
               </Text>
               <Text color={colors.titleText} fz={"sm"}>
                 {item?.company?.name || "N/A"}
@@ -127,7 +127,7 @@ export const _ProjectCard: React.FC<OwnProps> = ({
             </Flex>
             <Flex direction={"row"} align={"center"} justify={"flex-start"}>
               <Text fw={700} color={colors.titleText} mr={"xs"} fz={"sm"}>
-                Lead Type:
+                Project Type:
               </Text>
               <Text color={colors.titleText} fz={"sm"}>
                 {item?.type || "N/A"}

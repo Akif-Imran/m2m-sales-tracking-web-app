@@ -107,7 +107,7 @@ const homeButtons: NavbarButtons[] = [
 
 const crmButtons: NavbarButtons[] = [
   {
-    link: routes.dashboard.home,
+    link: routes.dashboard.crm,
     label: "Dashboard",
     icon: IconDashboard,
     visibleTo: [1, 2, 3, 4],
@@ -168,7 +168,7 @@ const crmButtons: NavbarButtons[] = [
 ];
 const projectButtons: NavbarButtons[] = [
   {
-    link: routes.dashboard.home,
+    link: routes.dashboard.project,
     label: "Dashboard",
     icon: IconDashboard,
     visibleTo: [1, 2, 3, 4],
@@ -224,7 +224,7 @@ const projectButtons: NavbarButtons[] = [
 ];
 const inventoryButtons: NavbarButtons[] = [
   {
-    link: routes.dashboard.home,
+    link: routes.dashboard.inventory,
     label: "Dashboard",
     icon: IconDashboard,
     visibleTo: [1, 2, 3, 4],

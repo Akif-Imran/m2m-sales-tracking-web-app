@@ -1,6 +1,6 @@
 export { Home } from "./home";
 export { Login, Register, ForgotPassword, _VerifyOTP } from "./auth";
-export { Dashboard } from "./dashboard";
+export { CRMDash, InventoryDash, ProjectDash } from "./dashboard";
 export { Leads, Claims, FollowUps } from "./prospects";
 export { Projects, PurchaseRequests } from "./projects";
 export { Company } from "./companies";

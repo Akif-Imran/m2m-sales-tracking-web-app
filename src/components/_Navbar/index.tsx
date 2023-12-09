@@ -33,7 +33,7 @@ interface NavbarButtons {
 
 const data: NavbarButtons[] = [
   {
-    link: routes.dashboard.home,
+    link: routes.dashboard.crm,
     label: "Dashboard",
     icon: IconDashboard,
     adminOnly: false,
@@ -130,7 +130,7 @@ const _Navbar: React.FC<_NavbarProps> = ({ opened, close }) => {
       return;
     }
     if (active === "Dashboard") {
-      navigate(routes.dashboard.home);
+      navigate(routes.dashboard.crm);
     } else if (active == "Company") {
       navigate(routes.company.list);
     } else if (active === "Projects") {

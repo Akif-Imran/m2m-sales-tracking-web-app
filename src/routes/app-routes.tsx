@@ -1,6 +1,8 @@
 import { _AppShell, _RequireAuth, _SocketWrapper } from "@components";
 import {
-  Dashboard,
+  CRMDash,
+  ProjectDash,
+  InventoryDash,
   Error404,
   ForgotPassword,
   Login,
@@ -72,8 +74,16 @@ const MainApp: React.FC<OwnProps> = () => {
 
       {/* dashboard */}
       <Route
-        path={routes.dashboard.home}
-        element={<_RequireAuth children={<_AppShell page={<Dashboard />} />} />}
+        path={routes.dashboard.crm}
+        element={<_RequireAuth children={<_AppShell page={<CRMDash />} />} />}
+      />
+      <Route
+        path={routes.dashboard.project}
+        element={<_RequireAuth children={<_AppShell page={<ProjectDash />} />} />}
+      />
+      <Route
+        path={routes.dashboard.inventory}
+        element={<_RequireAuth children={<_AppShell page={<InventoryDash />} />} />}
       />
 
       {/* notification */}

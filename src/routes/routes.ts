@@ -10,7 +10,9 @@ const routes = {
     verify_otp: "/auth/verify-otp",
   },
   dashboard: {
-    home: "/dashboard",
+    crm: "/crm-dash",
+    project: "/pm-dash",
+    inventory: "/im-dash",
   },
   notification: {
     list: "/notifications",

@@ -52,6 +52,9 @@ const routes = {
     purchaseRequest: {
       list: "/purchase-requests",
     },
+    claims: {
+      list: "/claims",
+    },
   },
 
   prospects: {

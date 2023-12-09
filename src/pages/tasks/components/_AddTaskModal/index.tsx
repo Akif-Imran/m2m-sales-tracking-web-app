@@ -7,6 +7,7 @@ import { IconCalendar } from "@tabler/icons-react";
 import { notify } from "@utility";
 import {
   selectLeadsWithRecords,
+  selectModule,
   selectProjectsWithRecords,
   selectRecordsForDropdown,
   useAppDispatch,
@@ -34,6 +35,7 @@ const _AddTaskModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
     state: { token },
   } = useAuthContext();
   const [plannedEndDate, setPlannedEndDate] = React.useState(new Date());
+  const { module } = useAppSelector(selectModule);
   const leads = useAppSelector(selectLeadsWithRecords);
   const projects = useAppSelector(selectProjectsWithRecords);
   const { companies, salesPersons, engineers } = useAppSelector(selectRecordsForDropdown);
@@ -146,7 +148,7 @@ const _AddTaskModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
             withAsterisk={false}
             searchable
             nothingFound="No record found"
-            label="Prospect / Project"
+            label={module === "crm" ? "Prospect" : "Project"}
             value={form.values.projectId.toString()}
             onChange={handleOnChangeProject}
             data={projectsLeadList}

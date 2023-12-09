@@ -26,6 +26,7 @@ import { deleteClaim, updateClaimStatus } from "@slices";
 import { _AddClaimModal } from "../components";
 import {
   selectClaimsWithRecords,
+  selectModule,
   selectRecordsForDropdown,
   useAppDispatch,
   useAppSelector,
@@ -41,6 +42,7 @@ export const Claims: React.FC<OwnProps> = () => {
   } = useAuthContext();
   const dispatch = useAppDispatch();
   const { classes: gclasses, theme } = useGStyles();
+  const { module } = useAppSelector(selectModule);
   const { claimsStatus } = useAppSelector(selectRecordsForDropdown);
 
   const [searchQuery, setSearchQuery] = React.useState("");
@@ -235,7 +237,7 @@ export const Claims: React.FC<OwnProps> = () => {
                 <th>Item Type</th>
                 <th>Status</th>
 
-                <th>Prospect / Project</th>
+                <th>{module === "crm" ? "Prospect" : "Project"}</th>
                 <th>Request By</th>
                 <th>Warranty</th>
                 <th>Qty</th>

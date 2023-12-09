@@ -40,6 +40,7 @@ import { _AddFollowUpModal } from "../../prospects/follow-ups/components";
 import { _AddClaimModal } from "../../prospects/claims/components";
 import { _AddPurchaseRequestModal } from "../../projects/purchase-requests/components";
 import { _AddLeadModal } from "../../prospects/components";
+import { _AddProjectModal } from "../../projects/components";
 import { removeCompany, removeContact } from "@thunks";
 import { useAuthContext } from "@contexts";
 import { notify } from "@utility";
@@ -232,7 +233,14 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
                   icon={<IconPlus {...menuIconStyle} />}
                   onClick={() => setAddProjectModalOpened(true)}
                 >
-                  Prospect
+                  Project
+                </Menu.Item>
+                <Menu.Item
+                  color={colors.titleText}
+                  icon={<IconPlus {...menuIconStyle} />}
+                  onClick={() => setAddPurchaseModalOpened(true)}
+                >
+                  Purchase Request
                 </Menu.Item>
                 <Menu.Item
                   color={colors.titleText}
@@ -264,14 +272,6 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
                     Delete
                   </Menu.Item>
                 )}
-                {/* TODO - in Project Management module */}
-                {/* <Menu.Item
-                      color={colors.titleText}
-                      icon={<IconShoppingBag {...menuIconStyle} />}
-                      onClick={() => setAddPurchaseModalOpened(true)}
-                    >
-                      Purchase Request
-                    </Menu.Item> */}
               </Menu.Dropdown>
             </Menu>
           </Flex>
@@ -554,14 +554,14 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
                         icon={<IconSearch size={16} />}
                         onChange={(e) => onChangeFollowUpSearch(e.target?.value)}
                       />
-                      <ActionIcon
+                      {/* <ActionIcon
                         variant="filled"
                         size={"sm"}
                         color={"dark"}
                         onClick={() => setAddFollowUpModalOpened(true)}
                       >
                         <IconPlus size={16} stroke={1.3} color={colors.white} />
-                      </ActionIcon>
+                      </ActionIcon> */}
                     </Flex>
                   </Flex>
                 </Card>
@@ -671,8 +671,8 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
             </Stack>
           </Grid.Col>
         </Grid>
-        <_AddLeadModal
-          title="Add Prospect"
+        <_AddProjectModal
+          title="Add Project"
           opened={addProjectModalOpened}
           onClose={() => setAddProjectModalOpened(false)}
           companyId={company._id}

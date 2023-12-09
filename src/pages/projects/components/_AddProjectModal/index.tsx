@@ -269,8 +269,8 @@ const _AddProjectModal: React.FC<OwnProps> = ({ opened, onClose, title, companyI
           required
           withAsterisk={false}
           searchable
-          nothingFound="No contacts"
-          label="Contact"
+          nothingFound="No company"
+          label="Company"
           value={form.values.customerId}
           onChange={handleOnChangeCompany}
           data={companiesList}

@@ -189,6 +189,11 @@ const projectButtons: NavbarButtons[] = [
         visibleTo: [1, 2, 3, 4],
       },
       {
+        link: routes.projects.claims.list,
+        label: "Claims",
+        visibleTo: [1, 2, 3, 4],
+      },
+      {
         link: routes.projects.purchaseRequest.list,
         label: "Purchase Request",
         visibleTo: [1, 2, 3, 4],

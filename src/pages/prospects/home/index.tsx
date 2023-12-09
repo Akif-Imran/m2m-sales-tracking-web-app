@@ -407,7 +407,7 @@ export const Leads: React.FC<OwnProps> = () => {
                   Sales Person {sortOrder.salesPerson === "asc" ? "▲" : "▼"}
                 </th>
                 <th>Engineer</th>
-                <th>Contact Name</th>
+                <th>Company Name</th>
                 <th>Actions</th>
               </tr>
             </thead>

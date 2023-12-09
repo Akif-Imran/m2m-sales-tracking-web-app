@@ -277,8 +277,8 @@ export const _AddPurchaseRequestModal: React.FC<OwnProps> = ({
               required
               withAsterisk={false}
               searchable
-              nothingFound="No contacts found"
-              label="Contact"
+              nothingFound="No company found"
+              label="Company"
               value={form.values.customerId}
               onChange={handleOnChangeCompany}
               data={companies}

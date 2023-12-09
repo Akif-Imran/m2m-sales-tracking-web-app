@@ -335,10 +335,10 @@ const _AddFollowUpModal: React.FC<OwnProps> = ({
                 required
                 searchable
                 withAsterisk={false}
-                label="Contact"
-                placeholder="Select a contact"
+                label="Company"
+                placeholder="Select a company"
                 allowDeselect={false}
-                nothingFound="No contact found"
+                nothingFound="No company found"
                 value={form.values.customerId}
                 data={companiesList}
                 onChange={handleOnChangeCompany}

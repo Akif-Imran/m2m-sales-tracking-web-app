@@ -219,8 +219,8 @@ export const _AddClaimModal: React.FC<OwnProps> = ({
               required
               withAsterisk={false}
               searchable
-              nothingFound="No contact found"
-              label="Contact"
+              nothingFound="No company found"
+              label="Company"
               value={form.values.customerId}
               onChange={handleOnChangeCompany}
               data={companiesList}

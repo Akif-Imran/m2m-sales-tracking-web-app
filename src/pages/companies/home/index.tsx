@@ -3,6 +3,7 @@ import { useStyles } from "./styles";
 import {
   ActionIcon,
   Avatar,
+  Badge,
   Button,
   Flex,
   Grid,
@@ -15,6 +16,8 @@ import {
 } from "@mantine/core";
 import { useGStyles } from "../../../styles";
 import {
+  IconAddressBook,
+  IconBuildingBank,
   IconColumns2,
   IconId,
   IconPlus,
@@ -22,18 +25,18 @@ import {
   IconTable,
   IconTrash,
 } from "@tabler/icons-react";
-import { selectCompanies, useAppDispatch, useAppSelector } from "@store";
+import { selectCompanies, selectCompanyContact, useAppDispatch, useAppSelector } from "@store";
 import { colors } from "@theme";
-import { _AddCompanyModal, _AddContactModal, _CompanyCard } from "../components";
+import { _AddCompanyModal, _AddContactModal, _CompanyCard, _ContactCard } from "../components";
 import { openDeleteModalHelper } from "@helpers";
 import { notify } from "@utility";
-import { deleteCompany } from "@slices";
+import { deleteCompany, deleteContact } from "@slices";
 import { useToggle } from "@mantine/hooks";
 import { _AddFollowUpModal } from "../../prospects/follow-ups/components";
 import { _AddClaimModal } from "../../prospects/claims/components";
 import { _AddPurchaseRequestModal } from "../../projects/purchase-requests/components";
 import { Outlet } from "react-router-dom";
-import { removeCompany } from "@thunks";
+import { removeCompany, removeContact } from "@thunks";
 import { useAuthContext } from "@contexts";
 import { BASE_URL } from "@api";
 
@@ -46,10 +49,11 @@ const Company: React.FC<OwnProps> = () => {
   } = useAuthContext();
   const dispatch = useAppDispatch();
   const { classes: gclasses, theme } = useGStyles();
-  // const [viewMode, toggle] = useToggle(["cards", "two-column", "list"]);
-  const [viewMode, toggle] = useToggle(["cards", "list"]);
+  const [viewMode, toggleViewMode] = useToggle(["cards", "list"]);
+  const [recordType, toggleRecordType] = useToggle(["contact", "company"]);
   const [searchQuery, setSearchQuery] = React.useState("");
   const { data: companies } = useAppSelector(selectCompanies);
+  const { data: contacts } = useAppSelector(selectCompanyContact);
   const [isDeleting, setIsDeleting] = React.useState(false);
 
   const [addCompanyModalOpened, setAddCompanyModalOpened] = React.useState(false);
@@ -58,40 +62,51 @@ const Company: React.FC<OwnProps> = () => {
   const [addClaimModalOpened, setAddClaimModalOpened] = React.useState(false);
   const [addPurchaseReqModalOpened, setAddPurchaseReqModalOpened] = React.useState(false);
 
-  const [searchedData, setSearchedData] = React.useState<typeof companies>([]);
+  const [searchedCompanyData, setSearchedCompanyData] = React.useState<typeof companies>([]);
+  const [searchedContactData, setSearchedContactData] = React.useState<typeof contacts>([]);
   const [selectedCompany, setSelectedCompany] = React.useState<string>("");
 
   const onChangeSearch = (query: string) => {
     setSearchQuery(query);
-    const filtered = companies.filter((company) =>
-      company.name.toLowerCase().includes(query.toLocaleLowerCase())
-    );
-    setSearchedData(filtered);
+    if (recordType === "contact") {
+      const filtered = contacts.filter((contact) =>
+        contact.name.toLowerCase().includes(query.toLocaleLowerCase())
+      );
+      setSearchedContactData(filtered);
+    } else {
+      const filtered = companies.filter((company) =>
+        company.name.toLowerCase().includes(query.toLocaleLowerCase())
+      );
+      setSearchedCompanyData(filtered);
+    }
   };
 
   React.useEffect(() => {
-    setSearchedData(companies);
+    setSearchedCompanyData(companies);
   }, [companies]);
+  React.useEffect(() => {
+    setSearchedContactData(contacts);
+  }, [contacts]);
 
-  const handleDelete = (id: string) => {
+  const handleDeleteCompany = (id: string) => {
     openDeleteModalHelper({
       theme: theme,
-      title: `Delete Contact`,
+      title: `Delete Company`,
       loading: isDeleting,
       description: (
         <Text fw={"normal"} fs={"normal"} fz={"sm"} color={colors.titleText}>
-          Are you sure you want to delete this Contact? This action is destructive and you will have
-          to contact support to restore data.
+          Are you sure you want to delete this Company? This action is destructive and you will have
+          to company support to restore data.
         </Text>
       ),
       cancelLabel: "Cancel",
-      confirmLabel: "Delete Contact",
+      confirmLabel: "Delete Company",
       onConfirm: () => {
         setIsDeleting((_prev) => true);
         dispatch(removeCompany({ id, token }))
           .unwrap()
           .then((res) => {
-            notify("Delete Contact", res?.message, res.success ? "success" : "error");
+            notify("Delete Company", res?.message, res.success ? "success" : "error");
             if (res.success) {
               dispatch(deleteCompany(res.data._id));
             }
@@ -103,7 +118,43 @@ const Company: React.FC<OwnProps> = () => {
             setIsDeleting((_prev) => false);
           });
       },
-      onCancel: () => notify("Delete Contact", "Operation canceled!", "error"),
+      onCancel: () => notify("Delete Company", "Operation canceled!", "error"),
+    });
+  };
+
+  const handleDeleteContact = (id: string) => {
+    openDeleteModalHelper({
+      theme: theme,
+      title: `Delete`,
+      loading: false,
+      description: (
+        <Text fw={"normal"} fs={"normal"} fz={"sm"} color={colors.titleText}>
+          Are you sure you want to delete this Contact? This action is destructive and you will have
+          to contact support to restore data.
+        </Text>
+      ),
+      cancelLabel: "Cancel",
+      confirmLabel: "Delete",
+      onConfirm: () => {
+        dispatch(
+          removeContact({
+            token,
+            id,
+          })
+        )
+          .unwrap()
+          .then((res) => {
+            notify("Delete Contact", res?.message, res.success ? "success" : "error");
+            if (res.success) {
+              dispatch(deleteContact(res.data._id));
+            }
+          })
+          .catch((err) => {
+            console.log("Delete Contact: ", err?.message);
+            notify("Delete Contact", "An error occurred", "error");
+          });
+      },
+      onCancel: () => notify("Delete", "Operation canceled!", "error"),
     });
   };
 
@@ -138,17 +189,43 @@ const Company: React.FC<OwnProps> = () => {
     },
   };
 
-  let icon: JSX.Element;
+  let viewModeIcon: JSX.Element;
   if (viewMode === "cards") {
-    icon = <IconId size={22} color={colors.white} />;
+    viewModeIcon = <IconId size={22} color={colors.white} />;
   } else if (viewMode === "two-column") {
-    icon = <IconColumns2 size={22} color={colors.white} />;
+    viewModeIcon = <IconColumns2 size={22} color={colors.white} />;
   } else {
-    icon = <IconTable size={22} color={colors.white} />;
+    viewModeIcon = <IconTable size={22} color={colors.white} />;
   }
 
-  const rows =
-    searchedData.length === 0 ? (
+  let recordTypeIcon: JSX.Element;
+  let actionButton: JSX.Element;
+  if (recordType === "contact") {
+    recordTypeIcon = <IconAddressBook size={22} color={colors.white} />;
+    actionButton = (
+      <Button
+        variant="filled"
+        rightIcon={<IconPlus size={16} />}
+        onClick={() => setAddContactModalOpened(true)}
+      >
+        Contact
+      </Button>
+    );
+  } else {
+    recordTypeIcon = <IconBuildingBank size={22} color={colors.white} />;
+    actionButton = (
+      <Button
+        variant="filled"
+        rightIcon={<IconPlus size={16} />}
+        onClick={() => setAddCompanyModalOpened(true)}
+      >
+        Company
+      </Button>
+    );
+  }
+
+  const companyRows =
+    searchedCompanyData.length === 0 ? (
       <tr>
         <td colSpan={14} color={colors.titleText} align="center">
           No Companies
@@ -156,18 +233,89 @@ const Company: React.FC<OwnProps> = () => {
       </tr>
     ) : (
       <>
-        {searchedData.map((contact, index) => {
+        {searchedCompanyData.map((company, index) => {
+          if (viewMode === "cards") {
+            return (
+              <Grid.Col span={4} key={company._id}>
+                <_CompanyCard
+                  item={company}
+                  openContact={() => handleOpenContact(company._id)}
+                  openFollowUp={() => handleOpenFollowUp(company._id)}
+                  openExpense={() => handleOpenExpense(company._id)}
+                  openPurchaseRequest={() => handleOpenPurchaseRequest(company._id)}
+                  handleDelete={() => handleDeleteCompany(company._id)}
+                />
+              </Grid.Col>
+            );
+          } else if (viewMode === "list") {
+            return (
+              <tr key={company._id}>
+                <td>{index + 1}</td>
+                <td>
+                  <Avatar
+                    src={company?.logo ? `${BASE_URL}\\${company?.logo}` : "/company.png"}
+                    size={50}
+                    //@ts-expect-error style works
+                    styles={company?.logo ? undefined : noImageStyle}
+                  />
+                </td>
+                <td>{company.name}</td>
+                <td>{company.email}</td>
+                <td>{company.phone}</td>
+                <td>{company.address}</td>
+                <td>{company.city}</td>
+                <td>{company.state}</td>
+                <td>{company.country}</td>
+                <td>
+                  {isAdmin ? (
+                    <Group>
+                      <ActionIcon
+                        color="red"
+                        size={"sm"}
+                        onClick={() => handleDeleteCompany(company._id)}
+                      >
+                        <IconTrash />
+                      </ActionIcon>
+                    </Group>
+                  ) : (
+                    <Badge variant="light" color="red">
+                      <Text>Admin Required</Text>
+                    </Badge>
+                  )}
+                </td>
+              </tr>
+            );
+          } else {
+            return (
+              <_CompanyCard
+                item={company}
+                key={company._id}
+                openContact={() => handleOpenContact(company._id)}
+                openFollowUp={() => handleOpenFollowUp(company._id)}
+                openExpense={() => handleOpenExpense(company._id)}
+                openPurchaseRequest={() => handleOpenPurchaseRequest(company._id)}
+                handleDelete={() => handleDeleteCompany(company._id)}
+              />
+            );
+          }
+        })}
+      </>
+    );
+
+  const contactRows =
+    searchedContactData.length === 0 ? (
+      <tr>
+        <td colSpan={14} color={colors.titleText} align="center">
+          No Contacts
+        </td>
+      </tr>
+    ) : (
+      <>
+        {searchedContactData.map((contact, index) => {
           if (viewMode === "cards") {
             return (
               <Grid.Col span={4} key={contact._id}>
-                <_CompanyCard
-                  item={contact}
-                  openContact={() => handleOpenContact(contact._id)}
-                  openFollowUp={() => handleOpenFollowUp(contact._id)}
-                  openExpense={() => handleOpenExpense(contact._id)}
-                  openPurchaseRequest={() => handleOpenPurchaseRequest(contact._id)}
-                  handleDelete={() => handleDelete(contact._id)}
-                />
+                <_ContactCard contact={contact} />
               </Grid.Col>
             );
           } else if (viewMode === "list") {
@@ -176,7 +324,9 @@ const Company: React.FC<OwnProps> = () => {
                 <td>{index + 1}</td>
                 <td>
                   <Avatar
-                    src={contact?.logo ? `${BASE_URL}\\${contact?.logo}` : "/company.png"}
+                    src={
+                      contact?.businessCard ? `${BASE_URL}\\${contact?.businessCard}` : "/user.png"
+                    }
                     size={50}
                     //@ts-expect-error style works
                     styles={contact?.logo ? undefined : noImageStyle}
@@ -184,76 +334,99 @@ const Company: React.FC<OwnProps> = () => {
                 </td>
                 <td>{contact.name}</td>
                 <td>{contact.email}</td>
-                <td>{contact.phone}</td>
-                <td>{contact.address}</td>
-                <td>{contact.city}</td>
-                <td>{contact.state}</td>
-                <td>{contact.country}</td>
-                {isAdmin && (
-                  <td>
+                <td>{contact.mobile}</td>
+                <td>{contact.designation}</td>
+                <td>{contact.designation}</td>
+                <td>
+                  {isAdmin ? (
                     <Group>
-                      <ActionIcon color="red" size={"sm"} onClick={() => handleDelete(contact._id)}>
+                      <ActionIcon
+                        color="red"
+                        size={"sm"}
+                        onClick={() => handleDeleteContact(contact._id)}
+                      >
                         <IconTrash />
                       </ActionIcon>
                     </Group>
-                  </td>
-                )}
+                  ) : (
+                    <Badge variant="light" color="red">
+                      <Text>Admin Required</Text>
+                    </Badge>
+                  )}
+                </td>
               </tr>
             );
           } else {
-            return (
-              <_CompanyCard
-                item={contact}
-                key={contact._id}
-                openContact={() => handleOpenContact(contact._id)}
-                openFollowUp={() => handleOpenFollowUp(contact._id)}
-                openExpense={() => handleOpenExpense(contact._id)}
-                openPurchaseRequest={() => handleOpenPurchaseRequest(contact._id)}
-                handleDelete={() => handleDelete(contact._id)}
-              />
-            );
+            return <_ContactCard contact={contact} />;
           }
         })}
       </>
     );
 
+  let table: JSX.Element;
+  if (recordType === "contact") {
+    table = (
+      <Table border={1} bgcolor={theme.white} withBorder>
+        <thead>
+          <tr>
+            <th colSpan={4}>Contact</th>
+            <th colSpan={4}>Contact Details</th>
+          </tr>
+          <tr>
+            <th>#</th>
+            <th>Image</th>
+            <th>Name</th>
+            <th>Email</th>
+
+            <th>Phone</th>
+            <th>Designation</th>
+            <th>Department</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>{contactRows}</tbody>
+      </Table>
+    );
+  } else {
+    table = (
+      <Table border={1} bgcolor={theme.white} withBorder>
+        <thead>
+          <tr>
+            <th colSpan={4}>Company</th>
+            <th colSpan={6}>Company Details</th>
+          </tr>
+          <tr>
+            <th>#</th>
+            <th>Logo</th>
+            <th>Name</th>
+            <th>Email</th>
+
+            <th>Phone</th>
+            <th>Address</th>
+            <th>City</th>
+            <th>State</th>
+            <th>Country</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>{companyRows}</tbody>
+      </Table>
+    );
+  }
+
   let content: JSX.Element;
   if (viewMode === "cards") {
-    content = <Grid columns={12}>{rows}</Grid>;
+    content = <Grid columns={12}>{recordType === "contact" ? contactRows : companyRows}</Grid>;
   } else if (viewMode === "list") {
     content = (
       <ScrollArea type="always" h={"80vh"}>
-        <ScrollArea w={"160vw"}>
-          <Table border={1} bgcolor={theme.white} withBorder>
-            <thead>
-              <tr>
-                <th colSpan={4}>Contact</th>
-                {/* <th colSpan={6}>Contact Person</th> */}
-                <th colSpan={6}>Contact Details</th>
-              </tr>
-              <tr>
-                <th>#</th>
-                <th>Logo</th>
-                <th>Name</th>
-                <th>Email</th>
-
-                <th>Phone</th>
-                <th>Address</th>
-                <th>City</th>
-                <th>State</th>
-                <th>Country</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>{rows}</tbody>
-          </Table>
-        </ScrollArea>
+        <ScrollArea w={"160vw"}>{table}</ScrollArea>
       </ScrollArea>
     );
   } else {
     content = (
       <Grid>
-        <Grid.Col span={4}>{rows}</Grid.Col>
+        <Grid.Col span={4}>{recordType === "contact" ? contactRows : companyRows}</Grid.Col>
         <Grid.Col span={8}>
           <Outlet />
         </Grid.Col>
@@ -275,26 +448,28 @@ const Company: React.FC<OwnProps> = () => {
           variant="filled"
           size={"2.2rem"}
           color={theme.primaryColor}
-          onClick={() => toggle()}
+          onClick={() => toggleRecordType()}
         >
-          {icon}
+          {recordTypeIcon}
         </ActionIcon>
-        <Button
+        <ActionIcon
           variant="filled"
-          rightIcon={<IconPlus size={16} />}
-          onClick={() => setAddCompanyModalOpened(true)}
+          size={"2.2rem"}
+          color={theme.primaryColor}
+          onClick={() => toggleViewMode()}
         >
-          Contact
-        </Button>
+          {viewModeIcon}
+        </ActionIcon>
+        {actionButton}
       </Flex>
       {content}
       <_AddCompanyModal
-        title="Add Contact"
+        title="Add Company"
         opened={addCompanyModalOpened}
         onClose={() => setAddCompanyModalOpened(false)}
       />
       <_AddContactModal
-        title="Add Contact Person"
+        title="Add Contact"
         opened={addContactModalOpened}
         companyId={selectedCompany}
         onClose={() => setAddContactModalOpened(false)}

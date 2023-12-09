@@ -2,6 +2,7 @@ import { modalOverlayPropsHelper } from "@helpers";
 import React from "react";
 import { useStyles } from "./styles";
 import {
+  ActionIcon,
   Avatar,
   Button,
   FileButton,
@@ -17,11 +18,12 @@ import { useFormik } from "formik";
 import { notify } from "@utility";
 import { selectRecordsForDropdown, useAppDispatch, useAppSelector } from "@store";
 import { addContact } from "@slices";
-import { IconUpload } from "@tabler/icons-react";
+import { IconPlus, IconUpload } from "@tabler/icons-react";
 import { createContact } from "@thunks";
 import { useAuthContext } from "@contexts";
 import * as yup from "yup";
 import { uploadFile } from "@services";
+import { _AddCompanyModal } from "../_AddCompanyModal";
 
 interface OwnProps {
   opened: boolean;
@@ -32,15 +34,16 @@ interface OwnProps {
 interface IContactForm
   extends Omit<
     ICompanyContact,
-    "_id" | "__v" | "createdBy" | "createdAt" | "company" | "isActive"
+    "_id" | "__v" | "createdBy" | "createdAt" | "company" | "isActive" | "businessCard"
   > {
+  businessCard?: string;
   hasImage: boolean;
 }
 
 const schema: yup.ObjectSchema<IContactForm> = yup.object().shape({
   name: yup.string().required("Name is required"),
   email: yup.string().email("Invalid email").required("Email is required"),
-  businessCard: yup.string().required("Business card is required").nullable(),
+  businessCard: yup.string().optional(),
   hasImage: yup.boolean().required(),
   designation: yup.string().required("Designation is required"),
   department: yup.string().required("Department is required"),
@@ -55,6 +58,7 @@ const _AddContactModal: React.FC<OwnProps> = ({ opened, onClose, title, companyI
     state: { token },
   } = useAuthContext();
   const { companies: companiesList } = useAppSelector(selectRecordsForDropdown);
+  const [addCompanyModalOpened, setAddCompanyModalOpened] = React.useState(false);
   const [isCreating, setIsCreating] = React.useState(false);
   const [file, setFile] = React.useState<File>({} as File);
 
@@ -176,8 +180,13 @@ const _AddContactModal: React.FC<OwnProps> = ({ opened, onClose, title, companyI
           required
           withAsterisk={false}
           searchable
-          nothingFound="No Contacts"
-          label="Contact"
+          nothingFound="No Company"
+          label="Company"
+          rightSection={
+            <ActionIcon variant="light" onClick={() => setAddCompanyModalOpened(true)}>
+              <IconPlus size={16} />
+            </ActionIcon>
+          }
           value={form.values.customerId}
           data={companiesList}
           onChange={(value) => {
@@ -263,6 +272,12 @@ const _AddContactModal: React.FC<OwnProps> = ({ opened, onClose, title, companyI
           </Button>
         </Group>
       </Stack>
+
+      <_AddCompanyModal
+        title="Add Company"
+        opened={addCompanyModalOpened}
+        onClose={() => setAddCompanyModalOpened(false)}
+      />
     </Modal>
   );
 };

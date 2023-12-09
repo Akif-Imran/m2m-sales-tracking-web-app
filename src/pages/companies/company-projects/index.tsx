@@ -19,7 +19,6 @@ import {
   selectCompanyContact,
   selectFollowUpsWithRecords,
   selectLeadsWithRecords,
-  selectProjectsWithRecords,
   useAppDispatch,
   useAppSelector,
 } from "@store";
@@ -34,7 +33,6 @@ import {
   IconDotsVertical,
   IconPlus,
   IconSearch,
-  IconShoppingBag,
   IconTrashFilled,
 } from "@tabler/icons-react";
 import { _AddContactModal } from "../components";
@@ -48,7 +46,13 @@ import { notify } from "@utility";
 import { openDeleteModalHelper } from "@helpers";
 import { deleteContact } from "@slices";
 import { BASE_URL } from "@api";
-import { useGStyles, menuIconStyle } from "@global-styles";
+import {
+  useGStyles,
+  menuIconStyle,
+  cardConfig,
+  titleTextStyle,
+  bodyTextStyle,
+} from "@global-styles";
 import { PhotoView } from "react-photo-view";
 
 interface OwnProps {}
@@ -64,18 +68,17 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
     state: { token, user },
   } = useAuthContext();
   const followUpList = useAppSelector(selectFollowUpsWithRecords);
-  const leadsList = useAppSelector(selectLeadsWithRecords);
-  const projectsList = useAppSelector(selectProjectsWithRecords);
+  const leads = useAppSelector(selectLeadsWithRecords);
   const { data: companiesList } = useAppSelector(selectCompanies);
   const { data: contactsList } = useAppSelector(selectCompanyContact);
 
   const [isDeletingContact, setIsDeletingContact] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(true);
   const [company, setCompany] = React.useState<ICompany>();
-  const [projectLeadsList, setProjectsLeadList] = React.useState<typeof leadsList>([]);
+  const [leadsList, setLeadsList] = React.useState<typeof leads>([]);
   const [contacts, setContacts] = React.useState<typeof contactsList>([]);
   const [followUps, setFollowUps] = React.useState<typeof followUpList>([]);
-  const [selectedProject, setSelectedProject] = React.useState<ArrayToObj<typeof leadsList>>();
+  const [selectedLead, setSelectedLead] = React.useState<ArrayToObj<typeof leads>>();
 
   const [addContactModalOpened, setAddContactModalOpened] = React.useState(false);
   const [addProjectModalOpened, setAddProjectModalOpened] = React.useState(false);
@@ -88,23 +91,21 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
   React.useEffect(() => {
     if (!companyId) return;
     const company = companiesList.find((company) => company._id === companyId);
-    const project_s = leadsList
-      .concat(projectsList)
-      .filter((project) => project.customerId === companyId);
+    const lead_s = leads.filter((project) => project.customerId === companyId);
     const contact_s = contactsList.filter((contact) => contact.customerId === companyId);
     setContacts(contact_s);
-    setProjectsLeadList(project_s);
+    setLeadsList(lead_s);
     setCompany(company);
-    if (project_s.length > 0) {
-      setSelectedProject(project_s[0]);
-      setFollowUps(followUpList.filter((followUp) => followUp.projectId === project_s[0]._id));
+    if (lead_s.length > 0) {
+      setSelectedLead(lead_s[0]);
+      setFollowUps(followUpList.filter((followUp) => followUp.projectId === lead_s[0]._id));
     }
-    setIsLoading(false);
-  }, [companyId, companiesList, leadsList, contactsList, followUpList, projectsList]);
+    setIsLoading((_prev) => false);
+  }, [companyId, companiesList, leads, contactsList, followUpList]);
 
   const handleSelectProject = (projectId: string) => {
-    const project = leadsList.concat(projectsList).find((project) => project._id === projectId);
-    setSelectedProject(project);
+    const project = leads.find((project) => project._id === projectId);
+    setSelectedLead(project);
     //FIXME - fix this follow project id type
     const followUp_s = followUpList.filter((followUp) => followUp.projectId === projectId);
     setFollowUps(followUp_s);
@@ -164,7 +165,7 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
   const onChangeFollowUpSearch = (query: string) => {
     setFollowUpSearchQuery(query);
     const filtered = followUpList
-      .filter((followUp) => followUp.projectId === selectedProject?._id)
+      .filter((followUp) => followUp.projectId === selectedLead?._id)
       .filter(
         (followUp, index) =>
           `${index + 1}`.toLowerCase().includes(query.toLowerCase()) ||
@@ -173,29 +174,11 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
       );
     setFollowUps(filtered);
   };
-
-  const titleTextStyle = {
-    fw: 700,
-    c: colors.titleText,
-    size: "sm",
-  };
-  const bodyTextStyle = {
-    fz: "sm",
-    color: colors.titleText,
-  };
-
-  const cardConfig = {
-    shadow: "sm",
-    mb: "xs",
-    px: "sm",
-    py: "xs",
-    radius: "md",
-  };
-
+  //  } else if (!company || !selectedProject) {
   if (isLoading) {
     return <div>Loading...</div>;
-  } else if (!company || !selectedProject) {
-    return <center>Nothing to see here...</center>;
+  } else if (!company) {
+    return <center>No such company exits...</center>;
   } else {
     return (
       <>
@@ -204,7 +187,7 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
             <Card {...cardConfig}>
               <Flex direction={"row"} justify={"space-between"} align={"center"}>
                 <Text {...titleTextStyle} size={"lg"}>
-                  Leads/Projects List
+                  Prospects
                 </Text>
 
                 <Menu withArrow withinPortal>
@@ -229,19 +212,20 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
                     >
                       Expense / Claim
                     </Menu.Item>
-                    <Menu.Item
+                    {/* TODO - in Project Management module */}
+                    {/* <Menu.Item
                       color={colors.titleText}
                       icon={<IconShoppingBag {...menuIconStyle} />}
                       onClick={() => setAddPurchaseModalOpened(true)}
                     >
                       Purchase Request
-                    </Menu.Item>
+                    </Menu.Item> */}
                   </Menu.Dropdown>
                 </Menu>
               </Flex>
             </Card>
             <ScrollArea type="scroll" h={"80vh"}>
-              {projectLeadsList.map((project) => {
+              {leadsList.map((project) => {
                 return (
                   <Card
                     key={project._id}
@@ -259,7 +243,7 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
                           {project?.statusName}
                         </Badge>
                       </Flex>
-                      {selectedProject._id === project._id && (
+                      {selectedLead?._id === project._id && (
                         <IconChevronRight size={24} color={colors.titleText} />
                       )}
                     </Flex>
@@ -279,78 +263,89 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
                         <Text {...titleTextStyle} size={"lg"}>
                           Details
                         </Text>
-                        <Badge
-                          ml={"lg"}
-                          variant="filled"
-                          color={projectStatusColors[selectedProject.status]}
-                        >
-                          {selectedProject.statusName}
-                        </Badge>
+                        {selectedLead?.status && (
+                          <Badge
+                            ml={"lg"}
+                            variant="filled"
+                            color={projectStatusColors[selectedLead?.status]}
+                          >
+                            {selectedLead?.statusName}
+                          </Badge>
+                        )}
                       </Flex>
                     </Stack>
                   </Card>
-                  <Card {...cardConfig}>
-                    <Flex direction={"column"}>
-                      <Flex direction={"row"} align={"center"} columnGap={"sm"}>
-                        <Text {...titleTextStyle}>Name: </Text>
-                        <Text {...bodyTextStyle}>{selectedProject.name}</Text>
+                  {selectedLead && (
+                    <Card {...cardConfig}>
+                      <Flex direction={"column"}>
+                        <Flex direction={"row"} align={"center"} columnGap={"sm"}>
+                          <Text {...titleTextStyle}>Name: </Text>
+                          <Text {...bodyTextStyle}>{selectedLead?.name || "N/A"}</Text>
+                        </Flex>
+                        <Flex direction={"row"} align={"center"} justify={"space-between"}>
+                          <Flex direction={"row"} align={"center"} columnGap={"sm"}>
+                            <Text {...titleTextStyle}>Type: </Text>
+                            <Text {...bodyTextStyle}>{selectedLead?.type || "N/A"}</Text>
+                          </Flex>
+                          <Flex direction={"row"} align={"center"} columnGap={"sm"}>
+                            <Text {...titleTextStyle}>Salesman: </Text>
+                            <Text {...bodyTextStyle}>
+                              {selectedLead?.salesPerson
+                                ? selectedLead?.salesPerson === user?._id
+                                  ? "(You)"
+                                  : selectedLead?.salesPersonValue?.name
+                                : "N/A"}
+                            </Text>
+                          </Flex>
+                        </Flex>
+                        <Flex direction={"row"} align={"center"} justify={"space-between"}>
+                          <Flex direction={"row"} align={"center"} columnGap={"sm"}>
+                            <Text {...titleTextStyle}>Value: </Text>
+                            <Text {...bodyTextStyle}>
+                              {selectedLead?.value
+                                ? Intl.NumberFormat("en-US", {
+                                    style: "currency",
+                                    currency: selectedLead?.value.currency,
+                                    maximumFractionDigits: 2,
+                                    minimumFractionDigits: 2,
+                                  }).format(selectedLead?.value.amount)
+                                : "N/A"}
+                            </Text>
+                          </Flex>
+                          <Flex direction={"row"} align={"center"} columnGap={"sm"}>
+                            <Text {...titleTextStyle}>Contract Date: </Text>
+                            <Text {...bodyTextStyle}>
+                              {selectedLead?.contractDate
+                                ? DateTime.fromISO(selectedLead?.contractDate).toFormat(
+                                    DAY_MM_DD_YYYY
+                                  )
+                                : "N/A"}
+                            </Text>
+                          </Flex>
+                        </Flex>
+                        <Flex direction={"row"} align={"center"} justify={"space-between"}>
+                          <Flex direction={"row"} align={"center"} columnGap={"sm"}>
+                            <Text {...titleTextStyle}>Quotation: </Text>
+                            <Text {...bodyTextStyle}>{selectedLead?.quotation || "N/A"}</Text>
+                          </Flex>
+                          <Flex direction={"row"} align={"center"} columnGap={"sm"}>
+                            <Text {...titleTextStyle}>Delivery Date: </Text>
+                            <Text {...bodyTextStyle}>
+                              {selectedLead?.deliveryDate
+                                ? DateTime.fromISO(selectedLead?.deliveryDate).toFormat(
+                                    DAY_MM_DD_YYYY
+                                  )
+                                : "N/A"}
+                            </Text>
+                          </Flex>
+                        </Flex>
+                        <Flex direction={"row"} align={"flex-start"} columnGap={"sm"}>
+                          <Text {...titleTextStyle}>Description: </Text>
+                          <Text {...bodyTextStyle}>{selectedLead?.description || "N/A"}</Text>
+                        </Flex>
                       </Flex>
-                      <Flex direction={"row"} align={"center"} justify={"space-between"}>
-                        <Flex direction={"row"} align={"center"} columnGap={"sm"}>
-                          <Text {...titleTextStyle}>Type: </Text>
-                          <Text {...bodyTextStyle}>{selectedProject.type}</Text>
-                        </Flex>
-                        <Flex direction={"row"} align={"center"} columnGap={"sm"}>
-                          <Text {...titleTextStyle}>Salesman: </Text>
-                          <Text {...bodyTextStyle}>
-                            {selectedProject.salesPerson === user?._id
-                              ? "(You)"
-                              : selectedProject.salesPersonValue?.name}
-                          </Text>
-                        </Flex>
-                      </Flex>
-                      <Flex direction={"row"} align={"center"} justify={"space-between"}>
-                        <Flex direction={"row"} align={"center"} columnGap={"sm"}>
-                          <Text {...titleTextStyle}>Value: </Text>
-                          <Text {...bodyTextStyle}>
-                            {Intl.NumberFormat("en-US", {
-                              style: "currency",
-                              currency: selectedProject.value.currency,
-                              maximumFractionDigits: 2,
-                              minimumFractionDigits: 2,
-                            }).format(selectedProject.value.amount)}
-                          </Text>
-                        </Flex>
-                        <Flex direction={"row"} align={"center"} columnGap={"sm"}>
-                          <Text {...titleTextStyle}>Contract Date: </Text>
-                          <Text {...bodyTextStyle}>
-                            {DateTime.fromISO(selectedProject.contractDate).toFormat(
-                              DAY_MM_DD_YYYY
-                            )}
-                          </Text>
-                        </Flex>
-                      </Flex>
-                      <Flex direction={"row"} align={"center"} justify={"space-between"}>
-                        <Flex direction={"row"} align={"center"} columnGap={"sm"}>
-                          <Text {...titleTextStyle}>Quotation: </Text>
-                          <Text {...bodyTextStyle}>{selectedProject.quotation}</Text>
-                        </Flex>
-                        <Flex direction={"row"} align={"center"} columnGap={"sm"}>
-                          <Text {...titleTextStyle}>Delivery Date: </Text>
-                          <Text {...bodyTextStyle}>
-                            {" "}
-                            {DateTime.fromISO(selectedProject.deliveryDate).toFormat(
-                              DAY_MM_DD_YYYY
-                            )}
-                          </Text>
-                        </Flex>
-                      </Flex>
-                      <Flex direction={"row"} align={"center"} columnGap={"sm"}>
-                        <Text {...titleTextStyle}>Description: </Text>
-                        <Text {...bodyTextStyle}>{selectedProject.description}</Text>
-                      </Flex>
-                    </Flex>
-                  </Card>
+                    </Card>
+                  )}
                 </Grid.Col>
 
                 <Grid.Col span={5}>
@@ -632,7 +627,7 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
         <_AddFollowUpModal
           title="Add Follow Up"
           opened={addFollowUpModalOpened}
-          projectId={selectedProject._id}
+          projectId={selectedLead?._id}
           companyId={company._id}
           onClose={() => setAddFollowUpModalOpened(false)}
         />
@@ -640,14 +635,14 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
           title="Add Claim"
           opened={addClaimModalOpened}
           companyId={company._id}
-          projectId={selectedProject._id}
+          projectId={selectedLead?._id}
           onClose={() => setAddClaimModalOpened(false)}
         />
         <_AddPurchaseRequestModal
           title="Add Purchase Request"
           opened={addPurchaseModalOpened}
           companyId={company._id}
-          projectId={selectedProject._id}
+          projectId={selectedLead?._id}
           onClose={() => setAddPurchaseModalOpened(false)}
         />
       </>

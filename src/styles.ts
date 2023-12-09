@@ -21,6 +21,25 @@ export const menuIconStyle = {
   color: colors.titleText,
 };
 
+export const titleTextStyle = {
+  fw: 700,
+  c: colors.titleText,
+  size: "sm",
+};
+
+export const bodyTextStyle = {
+  fz: "sm",
+  color: colors.titleText,
+};
+
+export const cardConfig = {
+  shadow: "sm",
+  mb: "xs",
+  px: "sm",
+  py: "xs",
+  radius: "md",
+};
+
 export const useGStyles = createStyles((_theme) => ({
   fileUploadButton: {
     marginTop: rem(-32),

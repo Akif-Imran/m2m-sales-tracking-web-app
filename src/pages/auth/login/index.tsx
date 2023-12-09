@@ -33,10 +33,7 @@ const Login: React.FC = () => {
   } = useAuthContext();
   const navigate = useNavigate();
   const location = useLocation();
-  const redirectPath = React.useMemo(
-    () => location.state?.path || routes.dashboard.home,
-    [location.state]
-  );
+  const redirectPath = React.useMemo(() => location.state?.path || routes.home, [location.state]);
   // const redirectPath = routes.dashboard.home;
 
   const validationSchema = yup.object().shape({
@@ -56,7 +53,7 @@ const Login: React.FC = () => {
     validationSchema: validationSchema,
   });
 
-/*   React.useLayoutEffect(() => {
+  /*   React.useLayoutEffect(() => {
     const creds = localStorage.getItem("login");
     if (!creds) return;
     const { email, password } = JSON.parse(creds);
@@ -146,4 +143,4 @@ const Login: React.FC = () => {
   );
 };
 
-export {Login};
+export { Login };

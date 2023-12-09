@@ -3,7 +3,7 @@ import { IconDotsVertical, IconRotateClockwise2, IconTrash } from "@tabler/icons
 import { colors } from "@theme";
 import React from "react";
 import { useStyles } from "./styles";
-import { selectTasksCombined } from "@store";
+import { selectModule, selectTasksCombined, useAppSelector } from "@store";
 import { menuIconStyle } from "@global-styles";
 import { useAuthContext } from "@contexts";
 import { DateTime } from "luxon";
@@ -21,6 +21,7 @@ export const _TaskCard: React.FC<OwnProps> = ({ onClick, item, handleDelete, upd
   const {
     state: { isAdmin },
   } = useAuthContext();
+  const { module } = useAppSelector(selectModule);
 
   const menuStyles = {
     itemLabel: {
@@ -80,7 +81,7 @@ export const _TaskCard: React.FC<OwnProps> = ({ onClick, item, handleDelete, upd
           </div>
           <Flex direction={"row"} align={"center"} justify={"flex-start"}>
             <Text fw={700} color={colors.titleText} mr={"xs"} fz={"sm"}>
-              Contact:
+              Company:
             </Text>
             <Text color={colors.titleText} fz={"sm"}>
               {item?.company?.name || "N/A"}
@@ -88,7 +89,7 @@ export const _TaskCard: React.FC<OwnProps> = ({ onClick, item, handleDelete, upd
           </Flex>
           <Flex direction={"row"} align={"center"} justify={"flex-start"}>
             <Text fw={700} color={colors.titleText} mr={"xs"} fz={"sm"}>
-              Prospect / Project:
+              {module === "crm" ? "Prospect:" : "Project:"}
             </Text>
             <Text color={colors.titleText} fz={"sm"}>
               {item?.project?.name || "N/A"}

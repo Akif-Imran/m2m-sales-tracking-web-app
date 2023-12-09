@@ -79,7 +79,7 @@ const _AddCompanyModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
           values.logo = res.data;
         } else {
           setIsCreating((_prev) => false);
-          notify("Add User", res?.message, "error");
+          notify("Company", res?.message, "error");
           return;
         }
       }
@@ -91,7 +91,7 @@ const _AddCompanyModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
       )
         .unwrap()
         .then((res) => {
-          notify("Contact", res?.message, res.success ? "success" : "error");
+          notify("Company", res?.message, res.success ? "success" : "error");
           if (res.success) {
             dispatch(addCompany(res.data));
             helpers.resetForm();
@@ -99,8 +99,8 @@ const _AddCompanyModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
           }
         })
         .catch((err) => {
-          console.log("Add Contact: ", err?.message);
-          notify("Contact", "An error occurred", "error");
+          console.log("Add Company: ", err?.message);
+          notify("Company", "An error occurred", "error");
         })
         .finally(() => {
           setIsCreating(false);
@@ -110,7 +110,7 @@ const _AddCompanyModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
 
   const handleLogoChange = (file: File) => {
     if (file === null) {
-      notify("Image Upload", "Contact logo not uploaded", "error");
+      notify("Image Upload", "Company logo not uploaded", "error");
       return;
     }
     setFile(file);
@@ -165,7 +165,7 @@ const _AddCompanyModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
                   </FileButton>
                 </div>
               </Flex>
-              <Divider label="Contact" labelPosition="center" />
+              <Divider label="Company" labelPosition="center" />
               <TextInput
                 required
                 withAsterisk={false}

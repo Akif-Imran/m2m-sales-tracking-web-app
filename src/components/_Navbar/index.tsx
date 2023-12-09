@@ -33,7 +33,7 @@ interface NavbarButtons {
 
 const data: NavbarButtons[] = [
   {
-    link: routes.dashboard.home,
+    link: routes.dashboard.crm,
     label: "Dashboard",
     icon: IconDashboard,
     adminOnly: false,
@@ -75,7 +75,7 @@ const data: NavbarButtons[] = [
     adminOnly: false,
   },
   {
-    link: routes.about.home,
+    link: routes.contact_us.home,
     label: "About",
     icon: IconInfoCircle,
     adminOnly: false,
@@ -130,7 +130,7 @@ const _Navbar: React.FC<_NavbarProps> = ({ opened, close }) => {
       return;
     }
     if (active === "Dashboard") {
-      navigate(routes.dashboard.home);
+      navigate(routes.dashboard.crm);
     } else if (active == "Company") {
       navigate(routes.company.list);
     } else if (active === "Projects") {
@@ -142,7 +142,7 @@ const _Navbar: React.FC<_NavbarProps> = ({ opened, close }) => {
     } else if (active === "Settings") {
       navigate(routes.settings.home);
     } else if (active === "About") {
-      navigate(routes.about.home);
+      navigate(routes.contact_us.home);
     } else if (active === "Help") {
       navigate(routes.help.home);
     }

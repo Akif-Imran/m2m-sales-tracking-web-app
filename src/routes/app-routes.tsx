@@ -1,6 +1,8 @@
 import { _AppShell, _RequireAuth, _SocketWrapper } from "@components";
 import {
-  Dashboard,
+  CRMDash,
+  ProjectDash,
+  InventoryDash,
   Error404,
   ForgotPassword,
   Login,
@@ -16,6 +18,7 @@ import {
   Users,
   Reports,
   Projects,
+  Home,
 } from "@pages";
 import { routes } from "./routes";
 import { Suspense, lazy } from "react";
@@ -26,7 +29,8 @@ import React from "react";
 interface OwnProps {}
 const MainApp: React.FC<OwnProps> = () => {
   //company
-  const _CompanyProject = lazy(() => import("../pages/companies/company-projects"));
+  const _CompanyProspects = lazy(() => import("../pages/companies/company-prospects"));
+  const _CompanyProjects = lazy(() => import("../pages/companies/company-projects"));
   //projects
   //task
   //reports
@@ -54,18 +58,33 @@ const MainApp: React.FC<OwnProps> = () => {
   //help
   const _Help = lazy(() => import("../pages/help"));
   //about
-  const _About = lazy(() => import("../pages/about"));
+  const _ContactUs = lazy(() => import("../pages/contact-us"));
 
   return (
     <Routes>
-      <Route path="/" element={<Navigate to={routes.dashboard.home} />} />
+      <Route path="/" element={<Navigate to={routes.home} />} />
       <Route path={routes.auth.login} element={<Login />} />
       <Route path={routes.auth.register} element={<Register />} />
       <Route path={routes.auth.forget_password} element={<ForgotPassword />} />
       <Route path={routes.auth.verify_otp} element={<_VerifyOTP />} />
+
       <Route
-        path={routes.dashboard.home}
-        element={<_RequireAuth children={<_AppShell page={<Dashboard />} />} />}
+        path={routes.home}
+        element={<_RequireAuth children={<_AppShell page={<Home />} />} />}
+      />
+
+      {/* dashboard */}
+      <Route
+        path={routes.dashboard.crm}
+        element={<_RequireAuth children={<_AppShell page={<CRMDash />} />} />}
+      />
+      <Route
+        path={routes.dashboard.project}
+        element={<_RequireAuth children={<_AppShell page={<ProjectDash />} />} />}
+      />
+      <Route
+        path={routes.dashboard.inventory}
+        element={<_RequireAuth children={<_AppShell page={<InventoryDash />} />} />}
       />
 
       {/* notification */}
@@ -84,10 +103,18 @@ const MainApp: React.FC<OwnProps> = () => {
         element={<_RequireAuth children={<_AppShell page={<Company />} />} />}
       />
       <Route
-        path={routes.company.project}
+        path={routes.company.prospects}
         element={
           <_RequireAuth
-            children={<_AppShell page={<SuspendedView children={<_CompanyProject />} />} />}
+            children={<_AppShell page={<SuspendedView children={<_CompanyProspects />} />} />}
+          />
+        }
+      />
+      <Route
+        path={routes.company.projects}
+        element={
+          <_RequireAuth
+            children={<_AppShell page={<SuspendedView children={<_CompanyProjects />} />} />}
           />
         }
       />
@@ -225,9 +252,11 @@ const MainApp: React.FC<OwnProps> = () => {
       />
       {/* home */}
       <Route
-        path={routes.about.home}
+        path={routes.contact_us.home}
         element={
-          <_RequireAuth children={<_AppShell page={<SuspendedView children={<_About />} />} />} />
+          <_RequireAuth
+            children={<_AppShell page={<SuspendedView children={<_ContactUs />} />} />}
+          />
         }
       />
       {/* error */}

@@ -1,4 +1,8 @@
 const routes = {
+  home: "/home",
+  stock: {
+    list: "/stock",
+  },
   auth: {
     login: "/auth/login",
     forget_password: "/auth/forget_password",
@@ -6,14 +10,18 @@ const routes = {
     verify_otp: "/auth/verify-otp",
   },
   dashboard: {
-    home: "/dashboard",
+    crm: "/crm-dash",
+    project: "/pm-dash",
+    inventory: "/im-dash",
   },
   notification: {
     list: "/notifications",
   },
   company: {
     list: "/contacts",
-    project: "/company-projects/:companyId",
+    prospects: "/company-prospects/:companyId",
+    prospect_nav: (companyId: string) => `/company-prospects/${companyId}`,
+    projects: "/company-projects/:companyId",
     project_nav: (companyId: string) => `/company-projects/${companyId}`,
     details: "details/:companyId",
     details_nav: (companyId: string) => `details/${companyId}`,
@@ -43,6 +51,9 @@ const routes = {
     list: "/projects",
     purchaseRequest: {
       list: "/purchase-requests",
+    },
+    claims: {
+      list: "/claims",
     },
   },
 
@@ -82,8 +93,8 @@ const routes = {
   help: {
     home: "/help",
   },
-  about: {
-    home: "/about",
+  contact_us: {
+    home: "/contact-us",
   },
 };
 export { routes };

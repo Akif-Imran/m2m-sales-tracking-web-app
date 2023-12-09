@@ -1,3 +1,4 @@
+export * from "./moduleSlice";
 export * from "./companySlice";
 export * from "./departmentSlice";
 export * from "./projectStatusSlice";

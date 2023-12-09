@@ -7,6 +7,7 @@ import { useFormik } from "formik";
 import { useAuthContext } from "@contexts";
 import {
   selectLeads,
+  selectModule,
   selectProjects,
   selectRecordsForDropdown,
   useAppDispatch,
@@ -64,6 +65,7 @@ export const _AddClaimModal: React.FC<OwnProps> = ({
     companies: companiesList,
     purchaseRequestStatus: purchaseRequestStatusList,
   } = useAppSelector(selectRecordsForDropdown);
+  const { module } = useAppSelector(selectModule);
   const { data: leads } = useAppSelector(selectLeads);
   const { data: projects } = useAppSelector(selectProjects);
   const [projectsLeadList, setProjectsLeadList] = React.useState<IDropDownList>([]);
@@ -219,8 +221,8 @@ export const _AddClaimModal: React.FC<OwnProps> = ({
               required
               withAsterisk={false}
               searchable
-              nothingFound="No contact found"
-              label="Contact"
+              nothingFound="No company found"
+              label="Company"
               value={form.values.customerId}
               onChange={handleOnChangeCompany}
               data={companiesList}
@@ -236,7 +238,7 @@ export const _AddClaimModal: React.FC<OwnProps> = ({
                 withAsterisk={false}
                 searchable
                 nothingFound="No record found"
-                label="Prospect / Project"
+                label={module === "crm" ? "Prospect" : "Project"}
                 value={form.values.projectId}
                 onChange={handleOnChangeProject}
                 data={projectsLeadList}

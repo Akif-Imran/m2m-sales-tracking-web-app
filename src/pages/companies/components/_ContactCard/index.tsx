@@ -11,6 +11,7 @@ import {
   createStyles,
 } from "@mantine/core";
 import { routes } from "@routes";
+import { selectModule, useAppSelector } from "@store";
 import { IconCaretRightFilled } from "@tabler/icons-react";
 import { colors } from "@theme";
 import React from "react";
@@ -24,6 +25,7 @@ interface OwnProps {
 export const _ContactCard: React.FC<OwnProps> = ({ contact }) => {
   const { cx, classes } = useStyles();
   const navigate = useNavigate();
+  const { module } = useAppSelector(selectModule);
 
   return (
     <Card {...cardConfig}>
@@ -98,7 +100,11 @@ export const _ContactCard: React.FC<OwnProps> = ({ contact }) => {
                   className={cx(classes.bottomButton, classes.rightAlign, classes.noPadding)}
                   onClick={(event) => {
                     event.stopPropagation();
-                    navigate(routes.company.project_nav(contact.customerId));
+                    if (module === "crm") {
+                      navigate(routes.company.prospect_nav(contact.customerId));
+                    } else if (module === "project") {
+                      navigate(routes.company.project_nav(contact.customerId));
+                    }
                   }}
                 >
                   <IconCaretRightFilled

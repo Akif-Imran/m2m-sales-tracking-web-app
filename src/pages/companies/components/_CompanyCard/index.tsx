@@ -8,6 +8,7 @@ import { routes } from "@routes";
 import { BASE_URL } from "@api";
 import { PhotoView } from "react-photo-view";
 import { noImageStyle } from "@global-styles";
+import { selectModule, useAppSelector } from "@store";
 
 interface OwnProps {
   onClick?: (e?: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
@@ -22,6 +23,7 @@ interface OwnProps {
 const _CompanyCard: React.FC<OwnProps> = ({ onClick, item }) => {
   const { cx, classes } = useStyles();
   const navigate = useNavigate();
+  const { module } = useAppSelector(selectModule);
 
   // const menuStyles = {
   //   itemLabel: {
@@ -180,7 +182,11 @@ const _CompanyCard: React.FC<OwnProps> = ({ onClick, item }) => {
                   className={cx(classes.bottomButton, classes.rightAlign, classes.noPadding)}
                   onClick={(event) => {
                     event.stopPropagation();
-                    navigate(routes.company.project_nav(item._id));
+                    if (module === "crm") {
+                      navigate(routes.company.prospect_nav(item._id));
+                    } else if (module === "project") {
+                      navigate(routes.company.project_nav(item._id));
+                    }
                   }}
                 >
                   <IconCaretRightFilled

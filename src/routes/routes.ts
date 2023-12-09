@@ -19,7 +19,9 @@ const routes = {
   },
   company: {
     list: "/contacts",
-    project: "/company-projects/:companyId",
+    prospects: "/company-prospects/:companyId",
+    prospect_nav: (companyId: string) => `/company-prospects/${companyId}`,
+    projects: "/company-projects/:companyId",
     project_nav: (companyId: string) => `/company-projects/${companyId}`,
     details: "details/:companyId",
     details_nav: (companyId: string) => `details/${companyId}`,

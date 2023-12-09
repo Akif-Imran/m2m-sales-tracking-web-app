@@ -1,4 +1,5 @@
 type IDropDownList = { value: string; label: string }[];
+type Module = "crm" | "project" | "inventory" | "none";
 interface IUserAccountType {
   id: number;
   name: string;

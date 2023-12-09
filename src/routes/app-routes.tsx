@@ -16,6 +16,7 @@ import {
   Users,
   Reports,
   Projects,
+  Home,
 } from "@pages";
 import { routes } from "./routes";
 import { Suspense, lazy } from "react";
@@ -54,15 +55,22 @@ const MainApp: React.FC<OwnProps> = () => {
   //help
   const _Help = lazy(() => import("../pages/help"));
   //about
-  const _About = lazy(() => import("../pages/about"));
+  const _ContactUs = lazy(() => import("../pages/contact-us"));
 
   return (
     <Routes>
-      <Route path="/" element={<Navigate to={routes.dashboard.home} />} />
+      <Route path="/" element={<Navigate to={routes.home} />} />
       <Route path={routes.auth.login} element={<Login />} />
       <Route path={routes.auth.register} element={<Register />} />
       <Route path={routes.auth.forget_password} element={<ForgotPassword />} />
       <Route path={routes.auth.verify_otp} element={<_VerifyOTP />} />
+
+      <Route
+        path={routes.home}
+        element={<_RequireAuth children={<_AppShell page={<Home />} />} />}
+      />
+
+      {/* dashboard */}
       <Route
         path={routes.dashboard.home}
         element={<_RequireAuth children={<_AppShell page={<Dashboard />} />} />}
@@ -225,9 +233,11 @@ const MainApp: React.FC<OwnProps> = () => {
       />
       {/* home */}
       <Route
-        path={routes.about.home}
+        path={routes.contact_us.home}
         element={
-          <_RequireAuth children={<_AppShell page={<SuspendedView children={<_About />} />} />} />
+          <_RequireAuth
+            children={<_AppShell page={<SuspendedView children={<_ContactUs />} />} />}
+          />
         }
       />
       {/* error */}

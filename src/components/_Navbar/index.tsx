@@ -75,7 +75,7 @@ const data: NavbarButtons[] = [
     adminOnly: false,
   },
   {
-    link: routes.about.home,
+    link: routes.contact_us.home,
     label: "About",
     icon: IconInfoCircle,
     adminOnly: false,
@@ -142,7 +142,7 @@ const _Navbar: React.FC<_NavbarProps> = ({ opened, close }) => {
     } else if (active === "Settings") {
       navigate(routes.settings.home);
     } else if (active === "About") {
-      navigate(routes.about.home);
+      navigate(routes.contact_us.home);
     } else if (active === "Help") {
       navigate(routes.help.home);
     }

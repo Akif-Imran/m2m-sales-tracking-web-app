@@ -1,4 +1,8 @@
 const routes = {
+  home: "/home",
+  stock: {
+    list: "/stock",
+  },
   auth: {
     login: "/auth/login",
     forget_password: "/auth/forget_password",
@@ -82,8 +86,8 @@ const routes = {
   help: {
     home: "/help",
   },
-  about: {
-    home: "/about",
+  contact_us: {
+    home: "/contact-us",
   },
 };
 export { routes };

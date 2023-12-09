@@ -23,6 +23,7 @@ import {
   userReducer,
   userTypeReducer,
   projectReducer,
+  moduleReducer,
 } from "@slices";
 import { useSelector } from "react-redux";
 import { TypedUseSelectorHook, useDispatch } from "react-redux";
@@ -30,6 +31,7 @@ import { notificationReducer } from "./slices/notificationsSlice";
 
 const store = configureStore({
   reducer: {
+    module: moduleReducer,
     companyContacts: companyContactReducer,
     companies: companyReducer,
     departments: departmentReducer,
@@ -66,6 +68,7 @@ export const useAppDispatch: () => AppDispatch = useDispatch;
 export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
 
 //selectors
+export const selectModule = (state: RootState) => state.module;
 export const selectCompanies = (state: RootState) => state.companies;
 export const selectCompanyContact = (state: RootState) => state.companyContacts;
 export const selectDepartments = (state: RootState) => state.departments;

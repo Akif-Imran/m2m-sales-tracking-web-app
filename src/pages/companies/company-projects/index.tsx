@@ -13,6 +13,7 @@ import {
   Stack,
   Text,
   TextInput,
+  rem,
 } from "@mantine/core";
 import {
   selectCompanies,
@@ -23,14 +24,13 @@ import {
   useAppSelector,
 } from "@store";
 import { DAY_MM_DD_YYYY, DAY_MM_DD_YYYY_HH_MM_SS_A, projectStatusColors } from "@constants";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { DateTime } from "luxon";
 import { colors } from "@theme";
 import {
-  IconBriefcase,
-  IconCash,
   IconChevronRight,
   IconDotsVertical,
+  IconFiles,
   IconPlus,
   IconSearch,
   IconTrashFilled,
@@ -40,11 +40,11 @@ import { _AddFollowUpModal } from "../../prospects/follow-ups/components";
 import { _AddClaimModal } from "../../prospects/claims/components";
 import { _AddPurchaseRequestModal } from "../../projects/purchase-requests/components";
 import { _AddLeadModal } from "../../prospects/components";
-import { removeContact } from "@thunks";
+import { removeCompany, removeContact } from "@thunks";
 import { useAuthContext } from "@contexts";
 import { notify } from "@utility";
 import { openDeleteModalHelper } from "@helpers";
-import { deleteContact } from "@slices";
+import { deleteCompany, deleteContact } from "@slices";
 import { BASE_URL } from "@api";
 import {
   useGStyles,
@@ -54,18 +54,20 @@ import {
   bodyTextStyle,
 } from "@global-styles";
 import { PhotoView } from "react-photo-view";
+import { routes } from "@routes";
 
 interface OwnProps {}
 type ArrayToObj<T extends Array<Record<string, unknown>>> = T extends Array<infer U> ? U : never;
 
 export const CompanyProjects: React.FC<OwnProps> = () => {
   const { theme } = useStyles();
+  const navigate = useNavigate();
   const { classes: gclasses } = useGStyles();
   const { companyId } = useParams();
   console.log(companyId);
   const dispatch = useAppDispatch();
   const {
-    state: { token, user },
+    state: { token, user, isAdmin },
   } = useAuthContext();
   const followUpList = useAppSelector(selectFollowUpsWithRecords);
   const leads = useAppSelector(selectLeadsWithRecords);
@@ -111,7 +113,37 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
     setFollowUps(followUp_s);
   };
 
-  const handleDelete = (id: string) => {
+  const handleDeleteCompany = (id: string) => {
+    openDeleteModalHelper({
+      theme: theme,
+      title: `Delete Company`,
+      loading: false,
+      description: (
+        <Text fw={"normal"} fs={"normal"} fz={"sm"} color={colors.titleText}>
+          Are you sure you want to delete this Company? This action is destructive and you will have
+          to company support to restore data.
+        </Text>
+      ),
+      cancelLabel: "Cancel",
+      confirmLabel: "Delete Company",
+      onConfirm: () => {
+        dispatch(removeCompany({ id, token }))
+          .unwrap()
+          .then((res) => {
+            notify("Delete Company", res?.message, res.success ? "success" : "error");
+            if (res.success) {
+              dispatch(deleteCompany(res.data._id));
+            }
+          })
+          .catch((err) => {
+            console.log(err?.message);
+          });
+      },
+      onCancel: () => notify("Delete Company", "Operation canceled!", "error"),
+    });
+  };
+
+  const handleDeleteContact = (id: string) => {
     openDeleteModalHelper({
       theme: theme,
       title: `Delete`,
@@ -124,33 +156,31 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
       ),
       cancelLabel: "Cancel",
       confirmLabel: "Delete",
-      onConfirm: () => handleDeleteContact(id),
+      onConfirm: () => {
+        setIsDeletingContact((_prev) => true);
+        dispatch(
+          removeContact({
+            token,
+            id,
+          })
+        )
+          .unwrap()
+          .then((res) => {
+            notify("Delete Contact", res?.message, res.success ? "success" : "error");
+            if (res.success) {
+              dispatch(deleteContact(res.data._id));
+            }
+          })
+          .catch((err) => {
+            console.log("Delete Contact: ", err?.message);
+            notify("Delete Contact", "An error occurred", "error");
+          })
+          .finally(() => {
+            setIsDeletingContact((_prev) => false);
+          });
+      },
       onCancel: () => notify("Delete", "Operation canceled!", "error"),
     });
-  };
-
-  const handleDeleteContact = (id: string) => {
-    setIsDeletingContact((_prev) => true);
-    dispatch(
-      removeContact({
-        token,
-        id,
-      })
-    )
-      .unwrap()
-      .then((res) => {
-        notify("Delete Contact", res?.message, res.success ? "success" : "error");
-        if (res.success) {
-          dispatch(deleteContact(res.data._id));
-        }
-      })
-      .catch((err) => {
-        console.log("Delete Contact: ", err?.message);
-        notify("Delete Contact", "An error occurred", "error");
-      })
-      .finally(() => {
-        setIsDeletingContact((_prev) => false);
-      });
   };
 
   const onChangeContactSearch = (query: string) => {
@@ -182,47 +212,76 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
   } else {
     return (
       <>
-        <Grid>
-          <Grid.Col span={3}>
-            <Card {...cardConfig}>
-              <Flex direction={"row"} justify={"space-between"} align={"center"}>
-                <Text {...titleTextStyle} size={"lg"}>
-                  Prospects
-                </Text>
+        <Card {...cardConfig}>
+          <Flex direction={"row"} justify={"space-between"} align={"center"} w={"100%"}>
+            <Text {...titleTextStyle} size={"xl"} align="center"></Text>
+            <Text {...titleTextStyle} size={"xl"} align="center">
+              {company?.name}
+            </Text>
 
-                <Menu withArrow withinPortal>
-                  <Menu.Target>
-                    <ActionIcon>
-                      <IconDotsVertical size={16} stroke={1.3} color={colors.titleText} />
-                    </ActionIcon>
-                  </Menu.Target>
-                  <Menu.Dropdown>
-                    <Menu.Label>New</Menu.Label>
-                    <Menu.Item
-                      color={colors.titleText}
-                      icon={<IconBriefcase {...menuIconStyle} />}
-                      onClick={() => setAddProjectModalOpened(true)}
-                    >
-                      Prospect
-                    </Menu.Item>
-                    <Menu.Item
-                      color={colors.titleText}
-                      icon={<IconCash {...menuIconStyle} />}
-                      onClick={() => setAddClaimModalOpened(true)}
-                    >
-                      Expense / Claim
-                    </Menu.Item>
-                    {/* TODO - in Project Management module */}
-                    {/* <Menu.Item
+            <Menu withArrow withinPortal position="right-start">
+              <Menu.Target>
+                <ActionIcon>
+                  <IconDotsVertical size={16} stroke={1.3} color={colors.titleText} />
+                </ActionIcon>
+              </Menu.Target>
+              <Menu.Dropdown>
+                <Menu.Label>New</Menu.Label>
+                <Menu.Item
+                  color={colors.titleText}
+                  icon={<IconPlus {...menuIconStyle} />}
+                  onClick={() => setAddProjectModalOpened(true)}
+                >
+                  Prospect
+                </Menu.Item>
+                <Menu.Item
+                  color={colors.titleText}
+                  icon={<IconPlus {...menuIconStyle} />}
+                  onClick={() => setAddClaimModalOpened(true)}
+                >
+                  Expense / Claim
+                </Menu.Item>
+                <Menu.Label>Options</Menu.Label>
+                <Menu.Item
+                  c={colors.titleText}
+                  icon={<IconFiles {...menuIconStyle} />}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    navigate(routes.reports.list_nav(company?._id));
+                  }}
+                >
+                  Reports
+                </Menu.Item>
+                {isAdmin && (
+                  <Menu.Item
+                    color="red"
+                    icon={<IconTrashFilled size={menuIconStyle.size} />}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      handleDeleteCompany(company?._id);
+                    }}
+                  >
+                    Delete
+                  </Menu.Item>
+                )}
+                {/* TODO - in Project Management module */}
+                {/* <Menu.Item
                       color={colors.titleText}
                       icon={<IconShoppingBag {...menuIconStyle} />}
                       onClick={() => setAddPurchaseModalOpened(true)}
                     >
                       Purchase Request
                     </Menu.Item> */}
-                  </Menu.Dropdown>
-                </Menu>
-              </Flex>
+              </Menu.Dropdown>
+            </Menu>
+          </Flex>
+        </Card>
+        <Grid>
+          <Grid.Col span={3}>
+            <Card {...cardConfig} h={rem(56)}>
+              <Text {...titleTextStyle} size={"md"} mt={rem(4)}>
+                Prospects
+              </Text>
             </Card>
             <ScrollArea type="scroll" h={"80vh"}>
               {leadsList.map((project) => {
@@ -257,10 +316,10 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
             <Stack spacing={"xs"}>
               <Grid>
                 <Grid.Col span={7}>
-                  <Card {...cardConfig}>
+                  <Card {...cardConfig} h={rem(56)}>
                     <Stack spacing={"xs"}>
-                      <Flex direction={"row"} align={"center"}>
-                        <Text {...titleTextStyle} size={"lg"}>
+                      <Flex direction={"row"} align={"center"} mt={rem(4)}>
+                        <Text {...titleTextStyle} size={"md"}>
                           Details
                         </Text>
                         {selectedLead?.status && (
@@ -349,10 +408,10 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
                 </Grid.Col>
 
                 <Grid.Col span={5}>
-                  <Card {...cardConfig}>
+                  <Card {...cardConfig} h={rem(56)}>
                     <Flex direction={"row"} justify={"space-between"} align={"center"}>
-                      <Text {...titleTextStyle} size={"lg"}>
-                        Contact Persons
+                      <Text {...titleTextStyle} size={"md"}>
+                        Contacts
                       </Text>
 
                       <Flex direction={"row"} columnGap={"xs"} align={"center"}>
@@ -430,7 +489,7 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
                                       <Menu.Item
                                         color="red"
                                         icon={<IconTrashFilled stroke={1.3} size={16} />}
-                                        onClick={() => handleDelete(contact._id)}
+                                        onClick={() => handleDeleteContact(contact._id)}
                                       >
                                         Delete
                                       </Menu.Item>
@@ -479,9 +538,9 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
               </Grid>
 
               <div>
-                <Card {...cardConfig}>
+                <Card {...cardConfig} h={rem(56)}>
                   <Flex direction={"row"} justify={"space-between"} align={"center"}>
-                    <Text {...titleTextStyle} size={"lg"}>
+                    <Text {...titleTextStyle} size={"md"}>
                       Meetings / Follow Up:
                     </Text>
                     <Flex direction={"row"} columnGap={"xs"} align={"center"}>
@@ -613,7 +672,7 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
           </Grid.Col>
         </Grid>
         <_AddLeadModal
-          title="Add Lead/Project"
+          title="Add Prospect"
           opened={addProjectModalOpened}
           onClose={() => setAddProjectModalOpened(false)}
           companyId={company._id}

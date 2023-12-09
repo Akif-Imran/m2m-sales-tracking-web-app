@@ -1,4 +1,4 @@
-import { ActionIcon, Avatar, Badge, Card, Flex, Menu, Text, rem } from "@mantine/core";
+import { ActionIcon, Avatar, Badge, Card, Flex, Menu, Text, Tooltip, rem } from "@mantine/core";
 import React from "react";
 import { selectLeadsWithRecords } from "@store";
 import {
@@ -35,7 +35,7 @@ export const _LeadCard: React.FC<OwnProps> = ({
 }) => {
   const { classes, theme } = useStyles();
   const {
-    state: { isAdmin, isHR },
+    state: { isAdmin },
   } = useAuthContext();
 
   const menuStyles = {
@@ -93,7 +93,7 @@ export const _LeadCard: React.FC<OwnProps> = ({
                   >
                     Update Status
                   </Menu.Item>
-                  {(isHR || isAdmin) && (
+                  <Tooltip label="Updates status to Work Order Received" position="right-end">
                     <Menu.Item
                       c={colors.titleText}
                       icon={<IconCornerDownRight {...menuIconStyle} />}
@@ -102,9 +102,9 @@ export const _LeadCard: React.FC<OwnProps> = ({
                         moveToProject(item._id);
                       }}
                     >
-                      Move to Projects
+                      <Text>Move to Projects</Text>
                     </Menu.Item>
-                  )}
+                  </Tooltip>
                   {isAdmin && (
                     <>
                       {/* <Menu.Item

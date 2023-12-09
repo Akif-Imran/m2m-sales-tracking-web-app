@@ -59,7 +59,7 @@ interface LeadSort {
 export const Leads: React.FC<OwnProps> = () => {
   useStyles();
   const {
-    state: { isAdmin, isHR, token, user },
+    state: { isAdmin, token, user },
   } = useAuthContext();
   const dispatch = useAppDispatch();
   const { classes: gclasses, theme } = useGStyles();
@@ -331,15 +331,13 @@ export const Leads: React.FC<OwnProps> = () => {
                     >
                       <IconRotateClockwise2 />
                     </ActionIcon>
-                    {(isAdmin || isHR) && (
-                      <ActionIcon
-                        color="gray"
-                        size={"sm"}
-                        onClick={() => handleMoveToProjects(prospect._id)}
-                      >
-                        <IconCornerDownRight />
-                      </ActionIcon>
-                    )}
+                    <ActionIcon
+                      color="gray"
+                      size={"sm"}
+                      onClick={() => handleMoveToProjects(prospect._id)}
+                    >
+                      <IconCornerDownRight />
+                    </ActionIcon>
                     {isAdmin && (
                       <React.Fragment>
                         {/* <ActionIcon

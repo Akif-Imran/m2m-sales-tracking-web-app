@@ -36,7 +36,7 @@ export const cardConfig = {
   shadow: "sm",
   mb: "xs",
   px: "sm",
-  py: "xs",
+  py: "sm",
   radius: "md",
 };
 

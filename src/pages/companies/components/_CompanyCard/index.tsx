@@ -1,35 +1,13 @@
 import React from "react";
 import { useStyles } from "./styles";
-import {
-  ActionIcon,
-  Anchor,
-  Avatar,
-  Card,
-  Flex,
-  Menu,
-  Text,
-  Tooltip,
-  UnstyledButton,
-  rem,
-} from "@mantine/core";
-import {
-  IconBriefcase,
-  IconCalendarPlus,
-  IconCaretRightFilled,
-  IconCash,
-  IconDotsVertical,
-  IconFiles,
-  IconShoppingBag,
-  IconTrash,
-  IconUserPlus,
-} from "@tabler/icons-react";
+import { Anchor, Avatar, Card, Flex, Text, Tooltip, UnstyledButton, rem } from "@mantine/core";
+import { IconCaretRightFilled } from "@tabler/icons-react";
 import { colors } from "@theme";
 import { useNavigate } from "react-router-dom";
 import { routes } from "@routes";
 import { BASE_URL } from "@api";
 import { PhotoView } from "react-photo-view";
-import { menuIconStyle, noImageStyle } from "@global-styles";
-import { useAuthContext } from "@contexts";
+import { noImageStyle } from "@global-styles";
 
 interface OwnProps {
   onClick?: (e?: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
@@ -41,32 +19,15 @@ interface OwnProps {
   handleDelete: () => void;
 }
 
-const _CompanyCard: React.FC<OwnProps> = ({
-  onClick,
-  item,
-  openContact,
-  openFollowUp,
-  openExpense,
-  openPurchaseRequest,
-  handleDelete,
-}) => {
-  const { cx, classes, theme } = useStyles();
-  const {
-    state: { isAdmin },
-  } = useAuthContext();
+const _CompanyCard: React.FC<OwnProps> = ({ onClick, item }) => {
+  const { cx, classes } = useStyles();
   const navigate = useNavigate();
 
-  const handleNavigate = (route: string) => {
-    // toggleLayout();
-    navigate(route);
-    // setScrollIndex(index);
-  };
-
-  const menuStyles = {
-    itemLabel: {
-      fontSize: theme.fontSizes.sm,
-    },
-  };
+  // const menuStyles = {
+  //   itemLabel: {
+  //     fontSize: theme.fontSizes.sm,
+  //   },
+  // };
 
   return (
     <Card shadow="sm" mb={"xs"} px={"sm"} py={"lg"} radius={"md"} onClick={onClick}>
@@ -99,7 +60,7 @@ const _CompanyCard: React.FC<OwnProps> = ({
                   <IconInfoSquareRounded size={22} stroke={1.3} color={colors.titleText} />
                 </ActionIcon> */}
               </Flex>
-              <Menu
+              {/* <Menu
                 withArrow
                 shadow="md"
                 withinPortal
@@ -193,7 +154,7 @@ const _CompanyCard: React.FC<OwnProps> = ({
                     </Menu.Item>
                   )}
                 </Menu.Dropdown>
-              </Menu>
+              </Menu> */}
             </div>
             <Text fz={"sm"} color={colors.titleText}>
               {item?.phone || "N/A"}

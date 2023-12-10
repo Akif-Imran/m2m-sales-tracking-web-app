@@ -114,7 +114,7 @@ const crmButtons: NavbarButtons[] = [
   },
   {
     link: routes.company.list,
-    label: "Company",
+    label: "Contacts",
     icon: IconBuildingBank,
     visibleTo: [1, 2, 3, 4],
   },
@@ -175,7 +175,7 @@ const projectButtons: NavbarButtons[] = [
   },
   {
     link: routes.company.list,
-    label: "Company",
+    label: "Contacts",
     icon: IconBuildingBank,
     visibleTo: [1, 2, 3, 4],
   },

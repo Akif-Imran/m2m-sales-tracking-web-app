@@ -123,6 +123,57 @@ export const selectTasksCombined = createSelector(
     };
   }
 );
+export const selectProspectTasksWithRecords = createSelector(
+  selectLeads,
+  selectUsers,
+  selectTasks,
+  selectCompanies,
+  selectTaskStatusList,
+  (leads, users, tasks, companies, statuses) => {
+    const ids = new Set(leads.data.map((lead) => lead._id));
+    return tasks.data
+      .filter((task) => ids.has(task.projectId))
+      .map((task) => {
+        const project = leads.data.find((project) => project._id === task.projectId);
+        const user = users.data.find((user) => user._id === task.assignedTo);
+        const company = companies.data.find((company) => company._id === task.customerId);
+        const statusName = statuses.data.find((status) => status.id === task.status)?.name;
+        return {
+          ...task,
+          project,
+          assignee: user,
+          company,
+          statusName,
+        };
+      });
+  }
+);
+
+export const selectProjectTasksWithRecords = createSelector(
+  selectProjects,
+  selectUsers,
+  selectTasks,
+  selectCompanies,
+  selectTaskStatusList,
+  (projects, users, tasks, companies, statuses) => {
+    const ids = new Set(projects.data.map((project) => project._id));
+    return tasks.data
+      .filter((task) => ids.has(task.projectId))
+      .map((task) => {
+        const project = projects.data.find((project) => project._id === task.projectId);
+        const user = users.data.find((user) => user._id === task.assignedTo);
+        const company = companies.data.find((company) => company._id === task.customerId);
+        const statusName = statuses.data.find((status) => status.id === task.status)?.name;
+        return {
+          ...task,
+          project,
+          assignee: user,
+          company,
+          statusName,
+        };
+      });
+  }
+);
 
 export const selectUsersBasedOnType = createSelector(selectUsers, (users) => {
   return {

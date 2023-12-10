@@ -29,8 +29,10 @@ import {
   IconTrash,
 } from "@tabler/icons-react";
 import {
+  selectModule,
+  selectProjectTasksWithRecords,
+  selectProspectTasksWithRecords,
   selectRecordsForDropdown,
-  selectTasksCombined,
   useAppDispatch,
   useAppSelector,
 } from "@store";
@@ -85,7 +87,10 @@ const Tasks: React.FC<OwnProps> = () => {
   const [searchedData, setSearchedData] = React.useState<typeof tasks>([]);
 
   const [addTaskModalOpened, setAddTaskModalOpened] = React.useState(false);
-  const { tasks } = useAppSelector(selectTasksCombined);
+  const { module } = useAppSelector(selectModule);
+  const tasks = useAppSelector(
+    module === "crm" ? selectProspectTasksWithRecords : selectProjectTasksWithRecords
+  );
   const {
     taskStatus: taskStatusList,
     companies,
@@ -375,7 +380,7 @@ const Tasks: React.FC<OwnProps> = () => {
               <tr>
                 <th colSpan={2}>Task</th>
                 <th colSpan={1}>Contact</th>
-                <th colSpan={1}>Prospect / Project</th>
+                <th colSpan={1}> {module === "crm" ? "Prospect" : "Project"}</th>
                 <th colSpan={5}>Task Details</th>
                 <th colSpan={1}>Action</th>
               </tr>
@@ -415,7 +420,7 @@ const Tasks: React.FC<OwnProps> = () => {
                     value={sorting.project.toString()}
                     withinPortal
                     withAsterisk={false}
-                    label="Prospect / Project Name"
+                    label={module === "crm" ? "Prospect" : "Project"}
                     variant="filled"
                     size="sm"
                     placeholder="Pick one"

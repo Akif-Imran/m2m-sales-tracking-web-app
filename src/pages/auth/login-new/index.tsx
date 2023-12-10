@@ -35,8 +35,7 @@ const Login: React.FC = () => {
     state: { isLoading, isAuthorized },
   } = useAuthContext();
   const navigate = useNavigate();
-  // const location = useLocation();
-  const redirectPath = routes.dashboard.home;
+  const redirectPath = routes.home;
 
   const validationSchema = yup.object().shape({
     email: yup.string().email("Must be valid email!").required("Email is required!"),

@@ -25,7 +25,9 @@ import { useGStyles } from "@global-styles";
 import { deleteClaim, updateClaimStatus } from "@slices";
 import { _AddClaimModal } from "../components";
 import {
-  selectClaimsWithRecords,
+  selectModule,
+  selectProjectClaimsWithRecords,
+  selectProspectClaimsWithRecords,
   selectRecordsForDropdown,
   useAppDispatch,
   useAppSelector,
@@ -41,10 +43,13 @@ export const Claims: React.FC<OwnProps> = () => {
   } = useAuthContext();
   const dispatch = useAppDispatch();
   const { classes: gclasses, theme } = useGStyles();
+  const { module } = useAppSelector(selectModule);
   const { claimsStatus } = useAppSelector(selectRecordsForDropdown);
 
   const [searchQuery, setSearchQuery] = React.useState("");
-  const claims = useAppSelector(selectClaimsWithRecords);
+  const claims = useAppSelector(
+    module === "crm" ? selectProspectClaimsWithRecords : selectProjectClaimsWithRecords
+  );
   const [addClaimModalOpened, setAddClaimModalOpened] = React.useState(false);
   const [searchedData, setSearchedData] = React.useState<typeof claims>([]);
   const [visible, setVisible] = React.useState<boolean>(false);
@@ -235,7 +240,7 @@ export const Claims: React.FC<OwnProps> = () => {
                 <th>Item Type</th>
                 <th>Status</th>
 
-                <th>Prospect / Project</th>
+                <th>{module === "crm" ? "Prospect" : "Project"}</th>
                 <th>Request By</th>
                 <th>Warranty</th>
                 <th>Qty</th>

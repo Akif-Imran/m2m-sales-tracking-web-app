@@ -119,7 +119,7 @@ export const _ProjectCard: React.FC<OwnProps> = ({
             </div>
             <Flex direction={"row"} align={"center"} justify={"flex-start"}>
               <Text fw={700} color={colors.titleText} mr={"xs"} fz={"sm"}>
-                Contact
+                Company
               </Text>
               <Text color={colors.titleText} fz={"sm"}>
                 {item?.company?.name || "N/A"}

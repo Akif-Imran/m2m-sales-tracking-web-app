@@ -269,8 +269,8 @@ const _AddLeadModal: React.FC<OwnProps> = ({ opened, onClose, title, companyId }
           required
           withAsterisk={false}
           searchable
-          nothingFound="No Contacts"
-          label="Contact"
+          nothingFound="No Company"
+          label="Company"
           value={form.values.customerId}
           onChange={handleOnChangeCompany}
           data={companiesList}

@@ -7,6 +7,7 @@ import { IconCalendar } from "@tabler/icons-react";
 import { notify } from "@utility";
 import {
   selectLeadsWithRecords,
+  selectModule,
   selectProjectsWithRecords,
   selectRecordsForDropdown,
   useAppDispatch,
@@ -34,7 +35,8 @@ const _AddTaskModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
     state: { token },
   } = useAuthContext();
   const [plannedEndDate, setPlannedEndDate] = React.useState(new Date());
-  const leads = useAppSelector(selectLeadsWithRecords);
+  const { module } = useAppSelector(selectModule);
+  const prospects = useAppSelector(selectLeadsWithRecords);
   const projects = useAppSelector(selectProjectsWithRecords);
   const { companies, salesPersons, engineers } = useAppSelector(selectRecordsForDropdown);
   const [projectsLeadList, setProjectsLeadList] = React.useState<IDropDownList>([]);
@@ -105,14 +107,23 @@ const _AddTaskModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
       ...prev,
       customerId: value,
     }));
-    const project_s = leads
-      .concat(projects)
-      .filter((project) => project.customerId === value)
-      .map((project) => ({
-        value: project._id,
-        label: project.name,
-      }));
-    setProjectsLeadList(project_s);
+    if (module === "crm") {
+      const prospect_s = prospects
+        .filter((prospect) => prospect.customerId === value)
+        .map((project) => ({
+          value: project._id,
+          label: project.name,
+        }));
+      setProjectsLeadList(prospect_s);
+    } else if (module === "project") {
+      const project_s = projects
+        .filter((project) => project.customerId === value)
+        .map((project) => ({
+          value: project._id,
+          label: project.name,
+        }));
+      setProjectsLeadList(project_s);
+    }
   };
 
   return (
@@ -146,7 +157,7 @@ const _AddTaskModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
             withAsterisk={false}
             searchable
             nothingFound="No record found"
-            label="Prospect / Project"
+            label={module === "crm" ? "Prospect" : "Project"}
             value={form.values.projectId.toString()}
             onChange={handleOnChangeProject}
             data={projectsLeadList}

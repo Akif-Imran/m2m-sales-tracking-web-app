@@ -24,33 +24,40 @@ import {
 import {
   IconLogout,
   IconChevronDown,
-  IconTrash,
   IconBellFilled,
   IconDashboard,
-  IconUserCircle,
   IconSettingsExclamation,
   IconChecklist,
   IconBuildingBank,
-  IconDots,
   IconSquareRounded,
   IconSquareRoundedCheck,
+  IconSettings,
+  IconInfoCircle,
+  IconHelp,
+  IconLicense,
+  IconBoxSeam,
+  IconHome,
 } from "@tabler/icons-react";
 import type { TablerIconsProps } from "@tabler/icons-react";
 import { useAuthContext } from "@contexts";
 import { useStyles } from "./styles";
-import { deleteAccount } from "@services";
-import { notify } from "@utility";
-import { openDeleteModalHelper } from "@helpers";
 import { colors } from "@theme";
 import { useLocation, useNavigate } from "react-router-dom";
 import { routes } from "@routes";
 import { DateTime } from "luxon";
 import { DAY_MM_DD_YYYY_HH_MM_SS_A } from "@constants";
-import { selectNotifications, selectUserTypes, useAppDispatch, useAppSelector } from "@store";
-import { markAsRead } from "@slices";
+import {
+  selectModule,
+  selectNotifications,
+  selectUserTypes,
+  useAppDispatch,
+  useAppSelector,
+} from "@store";
+import { markAsRead, setModule } from "@slices";
 
 type ActivePage =
   | "Dashboard"
+  | "Company"
   | "Contacts"
   | "Prospects"
   | "Projects"
@@ -60,10 +67,11 @@ type ActivePage =
   | "Users"
   | "Leaves"
   | "Tasks"
+  | "Stock"
   | "More"
   | "Settings"
   | "Help"
-  | "About";
+  | "Contact Us";
 interface NavbarButtons {
   link: string;
   links?: { link: string; label: ActivePage; visibleTo: number[] }[];
@@ -76,7 +84,172 @@ interface NavbarButtons {
 // 2 -> Sales
 // 3 -> Engineer
 // 4 -> HR
-const buttons: NavbarButtons[] = [
+const homeButtons: NavbarButtons[] = [
+  {
+    link: routes.settings.home,
+    icon: IconSettings,
+    label: "Settings",
+    visibleTo: [1, 2, 3, 4],
+  },
+  {
+    label: "Contact Us",
+    link: routes.contact_us.home,
+    icon: IconInfoCircle,
+    visibleTo: [1, 2, 3, 4],
+  },
+  {
+    label: "Help",
+    icon: IconHelp,
+    link: routes.help.home,
+    visibleTo: [1, 2, 3, 4],
+  },
+];
+
+const crmButtons: NavbarButtons[] = [
+  {
+    link: routes.dashboard.crm,
+    label: "Dashboard",
+    icon: IconDashboard,
+    visibleTo: [1, 2, 3, 4],
+  },
+  {
+    link: routes.company.list,
+    label: "Contacts",
+    icon: IconBuildingBank,
+    visibleTo: [1, 2, 3, 4],
+  },
+  {
+    link: routes.prospects.list,
+    label: "Prospects",
+    links: [
+      {
+        link: routes.prospects.list,
+        label: "Prospects",
+        visibleTo: [1, 2, 3, 4],
+      },
+      {
+        link: routes.prospects.followUps.list,
+        label: "Follow ups",
+        visibleTo: [1, 2, 3, 4],
+      },
+      {
+        link: routes.prospects.claims.list,
+        label: "Claims",
+        visibleTo: [1, 2, 3, 4],
+      },
+    ],
+    icon: IconSettingsExclamation,
+    visibleTo: [1, 2, 3, 4],
+  },
+  {
+    link: routes.user.leaves.list,
+    label: "Leaves",
+    links: [
+      {
+        link: routes.user.leaves.list,
+        label: "Leaves",
+        visibleTo: [1, 2, 3, 4],
+      },
+      {
+        link: routes.user.list,
+        label: "Users",
+        visibleTo: [1],
+      },
+    ],
+    icon: IconLicense,
+    visibleTo: [1, 2, 3, 4],
+  },
+  {
+    link: routes.task.list,
+    label: "Tasks",
+    icon: IconChecklist,
+    visibleTo: [1, 2, 3, 4],
+  },
+];
+const projectButtons: NavbarButtons[] = [
+  {
+    link: routes.dashboard.project,
+    label: "Dashboard",
+    icon: IconDashboard,
+    visibleTo: [1, 2, 3, 4],
+  },
+  {
+    link: routes.company.list,
+    label: "Contacts",
+    icon: IconBuildingBank,
+    visibleTo: [1, 2, 3, 4],
+  },
+  {
+    link: routes.projects.list,
+    label: "Projects",
+    links: [
+      {
+        link: routes.projects.list,
+        label: "Projects",
+        visibleTo: [1, 2, 3, 4],
+      },
+      {
+        link: routes.projects.claims.list,
+        label: "Claims",
+        visibleTo: [1, 2, 3, 4],
+      },
+      {
+        link: routes.projects.purchaseRequest.list,
+        label: "Purchase Request",
+        visibleTo: [1, 2, 3, 4],
+      },
+    ],
+    icon: IconSettingsExclamation,
+    visibleTo: [1, 2, 3, 4],
+  },
+  {
+    link: routes.user.leaves.list,
+    label: "Leaves",
+    links: [
+      {
+        link: routes.user.leaves.list,
+        label: "Leaves",
+        visibleTo: [1, 2, 3, 4],
+      },
+      {
+        link: routes.user.list,
+        label: "Users",
+        visibleTo: [1],
+      },
+    ],
+    icon: IconLicense,
+    visibleTo: [1, 2, 3, 4],
+  },
+  {
+    link: routes.task.list,
+    label: "Tasks",
+    icon: IconChecklist,
+    visibleTo: [1, 2, 3, 4],
+  },
+];
+const inventoryButtons: NavbarButtons[] = [
+  {
+    link: routes.dashboard.inventory,
+    label: "Dashboard",
+    icon: IconDashboard,
+    visibleTo: [1, 2, 3, 4],
+  },
+  {
+    link: routes.stock.list,
+    label: "Stock",
+    icon: IconBoxSeam,
+    visibleTo: [1, 2, 3, 4],
+  },
+  {
+    link: routes.settings.home,
+    icon: IconSettings,
+    label: "Settings",
+    visibleTo: [1, 2, 3, 4],
+  },
+];
+
+/* //original buttons array
+const allButtons: NavbarButtons[] = [
   {
     link: routes.dashboard.home,
     label: "Dashboard",
@@ -158,8 +331,8 @@ const buttons: NavbarButtons[] = [
     link: routes.settings.home,
     links: [
       {
-        label: "Settings",
         link: routes.settings.home,
+        label: "Settings",
         visibleTo: [1, 2, 3, 4],
       },
       {
@@ -177,28 +350,14 @@ const buttons: NavbarButtons[] = [
     icon: IconDots,
     visibleTo: [1, 2, 3, 4],
   },
-  // {
-  //   link: routes.settings.home,
-  //   label: "Settings",
-  //   icon: IconSettings,
-  //   adminOnly: true,
-  // },
-  // {
-  //   link: routes.help.home,
-  //   label: "Help",
-  //   icon: IconHelpCircle,
-  //   adminOnly: false,
-  // },
-  // {
-  //   link: routes.about.home,
-  //   label: "About",
-  //   icon: IconInfoCircle,
-  //   adminOnly: false,
-  // },
-  // { link: "", label: "Databases", icon: IconDatabaseImport },
-  // { link: "", label: "Authentication", icon: Icon2fa },
-  // { link: "", label: "Other Settings", icon: IconSettings },
-];
+]; */
+
+const buttons: Record<Module, NavbarButtons[]> = {
+  none: homeButtons,
+  crm: crmButtons,
+  project: projectButtons,
+  inventory: inventoryButtons,
+};
 
 interface _HeaderProps {
   toggleNavbar: () => void;
@@ -209,10 +368,11 @@ const _Header = ({ toggleNavbar, opened }: _HeaderProps) => {
   const { classes, theme, cx } = useStyles();
   const dispatch = useAppDispatch();
   const {
-    state: { token, user },
+    state: { user },
     logout,
   } = useAuthContext();
 
+  const { module } = useAppSelector(selectModule);
   const [notificationOpened, setNotificationOpened] = useState(false);
   const {
     count,
@@ -225,9 +385,9 @@ const _Header = ({ toggleNavbar, opened }: _HeaderProps) => {
   const location = useLocation();
   const [active, setActive] = useState<ActivePage>("Dashboard");
   const [userMenuOpened, setUserMenuOpened] = useState(false);
-  const [isLoading, setIsLoading] = React.useState(false);
+  // const [isLoading, setIsLoading] = React.useState(false);
 
-  const handleDelete = () => {
+  /*  const handleDelete = () => {
     openDeleteModalHelper({
       theme: theme,
       title: `Delete Account`,
@@ -261,7 +421,7 @@ const _Header = ({ toggleNavbar, opened }: _HeaderProps) => {
       .finally(() => {
         setIsLoading(false);
       });
-  };
+  }; */
 
   React.useEffect(() => {
     console.log("useEffect log: ", active);
@@ -298,7 +458,7 @@ const _Header = ({ toggleNavbar, opened }: _HeaderProps) => {
   }, [active]);
 
   // .filter((value) => (isAdmin || isHR ? true : !removePages.includes(value.label)))
-  const links = buttons
+  const links = buttons[module]
     .filter((value) => value.visibleTo.includes(user!.userType))
     .map((item) => {
       const menuItems = item.links
@@ -439,6 +599,14 @@ const _Header = ({ toggleNavbar, opened }: _HeaderProps) => {
     </React.Fragment>
   );
 
+  React.useEffect(() => {
+    if (module === "none") return;
+    const route = buttons[module].at(0)?.link;
+    if (!route) return;
+    navigate(route);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [module]);
+
   return (
     <Header height={{ base: 65 }} zIndex={20}>
       <div className={classes.header}>
@@ -464,6 +632,15 @@ const _Header = ({ toggleNavbar, opened }: _HeaderProps) => {
               />
             </Flex>
           </MediaQuery>
+          <UnstyledButton
+            className={classes.sideBar}
+            onClick={() => {
+              navigate(routes.home);
+              dispatch(setModule("none"));
+            }}
+          >
+            <IconHome stroke={1.5} color="white" />
+          </UnstyledButton>
         </Flex>
 
         <Flex gap={"xs"}>{links}</Flex>
@@ -521,9 +698,12 @@ const _Header = ({ toggleNavbar, opened }: _HeaderProps) => {
                     <Text weight={400} size="sm" sx={{ lineHeight: 1 }} mr={3}>
                       Last Login:{" "}
                       {user?.lastLoginTime
-                        ? DateTime.fromISO(user?.lastLoginTime)
-                            .toUTC()
-                            .toLocaleString(DateTime.DATETIME_MED_WITH_SECONDS)
+                        ? DateTime.fromISO(user?.lastLoginTime).toLocaleString(
+                            DateTime.DATETIME_MED_WITH_SECONDS,
+                            {
+                              locale: "en-US",
+                            }
+                          )
                         : "N/A"}
                     </Text>
                   </div>
@@ -536,13 +716,13 @@ const _Header = ({ toggleNavbar, opened }: _HeaderProps) => {
               {/* <Menu.Item icon={<IconSettings size="0.9rem" stroke={1.5} />}>
               Account settings
             </Menu.Item> */}
-              <Menu.Item
+              {/* <Menu.Item
                 color="red"
                 icon={<IconTrash size="0.9rem" stroke={1.5} />}
                 onClick={() => handleDelete()}
               >
                 Delete Account
-              </Menu.Item>
+              </Menu.Item> */}
               <Menu.Item icon={<IconLogout size="0.9rem" stroke={1.5} />} onClick={() => logout()}>
                 Logout
               </Menu.Item>

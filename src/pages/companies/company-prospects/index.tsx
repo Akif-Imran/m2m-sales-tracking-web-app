@@ -1,4 +1,5 @@
 import React from "react";
+import { useStyles } from "./styles";
 import {
   ActionIcon,
   Anchor,
@@ -13,13 +14,12 @@ import {
   Text,
   TextInput,
   rem,
-  createStyles,
 } from "@mantine/core";
 import {
   selectCompanies,
   selectCompanyContact,
   selectFollowUpsWithRecords,
-  selectProjectsWithRecords,
+  selectLeadsWithRecords,
   useAppDispatch,
   useAppSelector,
 } from "@store";
@@ -40,7 +40,6 @@ import { _AddFollowUpModal } from "../../prospects/follow-ups/components";
 import { _AddClaimModal } from "../../prospects/claims/components";
 import { _AddPurchaseRequestModal } from "../../projects/purchase-requests/components";
 import { _AddLeadModal } from "../../prospects/components";
-import { _AddProjectModal } from "../../projects/components";
 import { removeCompany, removeContact } from "@thunks";
 import { useAuthContext } from "@contexts";
 import { notify } from "@utility";
@@ -60,7 +59,7 @@ import { routes } from "@routes";
 interface OwnProps {}
 type ArrayToObj<T extends Array<Record<string, unknown>>> = T extends Array<infer U> ? U : never;
 
-export const CompanyProjects: React.FC<OwnProps> = () => {
+export const CompanyProspects: React.FC<OwnProps> = () => {
   const { theme } = useStyles();
   const navigate = useNavigate();
   const { classes: gclasses } = useGStyles();
@@ -71,17 +70,17 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
     state: { token, user, isAdmin },
   } = useAuthContext();
   const followUpList = useAppSelector(selectFollowUpsWithRecords);
-  const projects = useAppSelector(selectProjectsWithRecords);
+  const leads = useAppSelector(selectLeadsWithRecords);
   const { data: companiesList } = useAppSelector(selectCompanies);
   const { data: contactsList } = useAppSelector(selectCompanyContact);
 
   const [isDeletingContact, setIsDeletingContact] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(true);
   const [company, setCompany] = React.useState<ICompany>();
-  const [leadsList, setLeadsList] = React.useState<typeof projects>([]);
+  const [leadsList, setLeadsList] = React.useState<typeof leads>([]);
   const [contacts, setContacts] = React.useState<typeof contactsList>([]);
   const [followUps, setFollowUps] = React.useState<typeof followUpList>([]);
-  const [selectedLead, setSelectedLead] = React.useState<ArrayToObj<typeof projects>>();
+  const [selectedLead, setSelectedLead] = React.useState<ArrayToObj<typeof leads>>();
 
   const [addContactModalOpened, setAddContactModalOpened] = React.useState(false);
   const [addProjectModalOpened, setAddProjectModalOpened] = React.useState(false);
@@ -94,7 +93,7 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
   React.useEffect(() => {
     if (!companyId) return;
     const company = companiesList.find((company) => company._id === companyId);
-    const lead_s = projects.filter((project) => project.customerId === companyId);
+    const lead_s = leads.filter((project) => project.customerId === companyId);
     const contact_s = contactsList.filter((contact) => contact.customerId === companyId);
     setContacts(contact_s);
     setLeadsList(lead_s);
@@ -104,10 +103,10 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
       setFollowUps(followUpList.filter((followUp) => followUp.projectId === lead_s[0]._id));
     }
     setIsLoading((_prev) => false);
-  }, [companyId, companiesList, projects, contactsList, followUpList]);
+  }, [companyId, companiesList, leads, contactsList, followUpList]);
 
   const handleSelectProject = (projectId: string) => {
-    const project = projects.find((project) => project._id === projectId);
+    const project = leads.find((project) => project._id === projectId);
     setSelectedLead(project);
     //FIXME - fix this follow project id type
     const followUp_s = followUpList.filter((followUp) => followUp.projectId === projectId);
@@ -233,14 +232,7 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
                   icon={<IconPlus {...menuIconStyle} />}
                   onClick={() => setAddProjectModalOpened(true)}
                 >
-                  Project
-                </Menu.Item>
-                <Menu.Item
-                  color={colors.titleText}
-                  icon={<IconPlus {...menuIconStyle} />}
-                  onClick={() => setAddPurchaseModalOpened(true)}
-                >
-                  Purchase Request
+                  Prospect
                 </Menu.Item>
                 <Menu.Item
                   color={colors.titleText}
@@ -272,6 +264,14 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
                     Delete
                   </Menu.Item>
                 )}
+                {/* TODO - in Project Management module */}
+                {/* <Menu.Item
+                      color={colors.titleText}
+                      icon={<IconShoppingBag {...menuIconStyle} />}
+                      onClick={() => setAddPurchaseModalOpened(true)}
+                    >
+                      Purchase Request
+                    </Menu.Item> */}
               </Menu.Dropdown>
             </Menu>
           </Flex>
@@ -554,14 +554,14 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
                         icon={<IconSearch size={16} />}
                         onChange={(e) => onChangeFollowUpSearch(e.target?.value)}
                       />
-                      {/* <ActionIcon
+                      <ActionIcon
                         variant="filled"
                         size={"sm"}
                         color={"dark"}
                         onClick={() => setAddFollowUpModalOpened(true)}
                       >
                         <IconPlus size={16} stroke={1.3} color={colors.white} />
-                      </ActionIcon> */}
+                      </ActionIcon>
                     </Flex>
                   </Flex>
                 </Card>
@@ -671,8 +671,8 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
             </Stack>
           </Grid.Col>
         </Grid>
-        <_AddProjectModal
-          title="Add Project"
+        <_AddLeadModal
+          title="Add Prospect"
           opened={addProjectModalOpened}
           onClose={() => setAddProjectModalOpened(false)}
           companyId={company._id}
@@ -709,6 +709,4 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
   }
 };
 
-export default CompanyProjects;
-
-const useStyles = createStyles((_theme) => ({}));
+export default CompanyProspects;

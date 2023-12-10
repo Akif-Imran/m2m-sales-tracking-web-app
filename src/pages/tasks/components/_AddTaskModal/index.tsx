@@ -36,7 +36,7 @@ const _AddTaskModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
   } = useAuthContext();
   const [plannedEndDate, setPlannedEndDate] = React.useState(new Date());
   const { module } = useAppSelector(selectModule);
-  const leads = useAppSelector(selectLeadsWithRecords);
+  const prospects = useAppSelector(selectLeadsWithRecords);
   const projects = useAppSelector(selectProjectsWithRecords);
   const { companies, salesPersons, engineers } = useAppSelector(selectRecordsForDropdown);
   const [projectsLeadList, setProjectsLeadList] = React.useState<IDropDownList>([]);
@@ -107,14 +107,23 @@ const _AddTaskModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
       ...prev,
       customerId: value,
     }));
-    const project_s = leads
-      .concat(projects)
-      .filter((project) => project.customerId === value)
-      .map((project) => ({
-        value: project._id,
-        label: project.name,
-      }));
-    setProjectsLeadList(project_s);
+    if (module === "crm") {
+      const prospect_s = prospects
+        .filter((prospect) => prospect.customerId === value)
+        .map((project) => ({
+          value: project._id,
+          label: project.name,
+        }));
+      setProjectsLeadList(prospect_s);
+    } else if (module === "project") {
+      const project_s = projects
+        .filter((project) => project.customerId === value)
+        .map((project) => ({
+          value: project._id,
+          label: project.name,
+        }));
+      setProjectsLeadList(project_s);
+    }
   };
 
   return (

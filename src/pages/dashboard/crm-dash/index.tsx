@@ -15,8 +15,8 @@ import {
   selectFollowUpsWithRecords,
   selectProjectStatusList,
   selectLeadsWithRecords,
-  selectTasksCombined,
   useAppSelector,
+  selectProspectTasksWithRecords,
 } from "@store";
 import { apiGet, urls } from "@api";
 import { useAuthContext } from "@contexts";
@@ -33,7 +33,7 @@ export const CRMDash: React.FC<OwnProps> = () => {
     state: { token },
   } = useAuthContext();
   // const [isFetching, setIsFetching] = React.useState(false);
-  const { tasks } = useAppSelector(selectTasksCombined);
+  const tasks = useAppSelector(selectProspectTasksWithRecords);
   const followUps = useAppSelector(selectFollowUpsWithRecords);
   const prospects = useAppSelector(selectLeadsWithRecords);
   const { data: projectStatusList } = useAppSelector(selectProjectStatusList);

@@ -30,8 +30,9 @@ import {
 } from "@tabler/icons-react";
 import {
   selectModule,
+  selectProjectTasksWithRecords,
+  selectProspectTasksWithRecords,
   selectRecordsForDropdown,
-  selectTasksCombined,
   useAppDispatch,
   useAppSelector,
 } from "@store";
@@ -87,7 +88,9 @@ const Tasks: React.FC<OwnProps> = () => {
 
   const [addTaskModalOpened, setAddTaskModalOpened] = React.useState(false);
   const { module } = useAppSelector(selectModule);
-  const { tasks } = useAppSelector(selectTasksCombined);
+  const tasks = useAppSelector(
+    module === "crm" ? selectProspectTasksWithRecords : selectProjectTasksWithRecords
+  );
   const {
     taskStatus: taskStatusList,
     companies,

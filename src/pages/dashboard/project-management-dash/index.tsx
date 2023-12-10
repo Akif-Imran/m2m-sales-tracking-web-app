@@ -27,7 +27,7 @@ import {
   selectCompanyContact,
   selectFollowUpsWithRecords,
   selectProjectStatusList,
-  selectTasksCombined,
+  selectProjectTasksWithRecords,
   useAppSelector,
   selectProjectsWithRecords,
 } from "@store";
@@ -46,7 +46,7 @@ export const ProjectDash: React.FC<OwnProps> = () => {
     state: { token },
   } = useAuthContext();
   // const [isFetching, setIsFetching] = React.useState(false);
-  const { tasks } = useAppSelector(selectTasksCombined);
+  const tasks = useAppSelector(selectProjectTasksWithRecords);
   const followUps = useAppSelector(selectFollowUpsWithRecords);
   const projects = useAppSelector(selectProjectsWithRecords);
   const { data: projectStatusList } = useAppSelector(selectProjectStatusList);
@@ -75,7 +75,7 @@ export const ProjectDash: React.FC<OwnProps> = () => {
     { name: string; taskTitle: string; dueDate: string }[]
   >([]);
 
-  const [todayActivities, setTodayActivities] = useState<
+  const [_todayActivities, setTodayActivities] = useState<
     { name: string; type: "Task" | "Follow Up"; dueDate: string }[]
   >([]);
 
@@ -395,15 +395,15 @@ export const ProjectDash: React.FC<OwnProps> = () => {
     );
   });
 
-  const todayActivitiesRows = todayActivities.map((activity, index) => {
-    return (
-      <tr key={index}>
-        <td>{activity.name}</td>
-        <td>{activity.type}</td>
-        <td>{activity.dueDate}</td>
-      </tr>
-    );
-  });
+  // const todayActivitiesRows = todayActivities.map((activity, index) => {
+  //   return (
+  //     <tr key={index}>
+  //       <td>{activity.name}</td>
+  //       <td>{activity.type}</td>
+  //       <td>{activity.dueDate}</td>
+  //     </tr>
+  //   );
+  // });
 
   const projectsInProcessRows = projectsUnderDev.map((project, index) => {
     return (
@@ -517,6 +517,38 @@ export const ProjectDash: React.FC<OwnProps> = () => {
             <Card p="xs" shadow="sm" className={classes.card} my={4} px={"xs"} radius={"md"}>
               <div className={classes.grayContainer}>
                 <Text fw={"bold"} fz={rem(60)} color={colors.titleText} mt={-16}>
+                  {upcomingTaskRows.length}
+                </Text>
+                <Text
+                  fz="md"
+                  className={classes.label}
+                  color={colors.titleText}
+                  mt={-10}
+                  mb={2}
+                  ml={rem(8)}
+                >
+                  Upcoming Tasks (Next 2 Days)
+                </Text>
+              </div>
+              <ScrollArea h={rem(272)}>
+                <Table>
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Task</th>
+                      <th>Expected Date</th>
+                    </tr>
+                  </thead>
+                  <tbody>{upcomingTaskRows}</tbody>
+                </Table>
+              </ScrollArea>
+            </Card>
+          </Grid.Col>
+
+          <Grid.Col md={6} lg={6} xl={6}>
+            <Card p="xs" shadow="sm" className={classes.card} my={4} px={"xs"} radius={"md"}>
+              <div className={classes.grayContainer}>
+                <Text fw={"bold"} fz={rem(60)} color={colors.titleText} mt={-16}>
                   {projectOverDue.length}
                 </Text>
                 <Text fz="md" className={classes.label} color={colors.titleText} mt={-10} mb={2}>
@@ -538,7 +570,7 @@ export const ProjectDash: React.FC<OwnProps> = () => {
             </Card>
           </Grid.Col>
 
-          <Grid.Col md={6} lg={6} xl={6}>
+          {/* <Grid.Col md={6} lg={6} xl={6}>
             <Card p="xs" shadow="sm" className={classes.card} my={4} px={"xs"} radius={"md"}>
               <div className={classes.grayContainer}>
                 <Text fw={"bold"} fz={rem(60)} color={colors.titleText} mt={-16}>
@@ -561,7 +593,7 @@ export const ProjectDash: React.FC<OwnProps> = () => {
                 </Table>
               </ScrollArea>
             </Card>
-          </Grid.Col>
+          </Grid.Col> */}
 
           <Grid.Col md={6} lg={6} xl={6}>
             <Card p="xs" shadow="sm" className={classes.card} my={4} px={"xs"} radius={"md"}>
@@ -648,38 +680,6 @@ export const ProjectDash: React.FC<OwnProps> = () => {
                     </tr>
                   </thead>
                   <tbody>{pendingTaskRows}</tbody>
-                </Table>
-              </ScrollArea>
-            </Card>
-          </Grid.Col>
-
-          <Grid.Col md={6} lg={6} xl={6}>
-            <Card p="xs" shadow="sm" className={classes.card} my={4} px={"xs"} radius={"md"}>
-              <div className={classes.grayContainer}>
-                <Text fw={"bold"} fz={rem(60)} color={colors.titleText} mt={-16}>
-                  {upcomingTaskRows.length}
-                </Text>
-                <Text
-                  fz="md"
-                  className={classes.label}
-                  color={colors.titleText}
-                  mt={-10}
-                  mb={2}
-                  ml={rem(8)}
-                >
-                  Upcoming Tasks (Next 2 Days)
-                </Text>
-              </div>
-              <ScrollArea h={rem(272)}>
-                <Table>
-                  <thead>
-                    <tr>
-                      <th>Name</th>
-                      <th>Task</th>
-                      <th>Expected Date</th>
-                    </tr>
-                  </thead>
-                  <tbody>{upcomingTaskRows}</tbody>
                 </Table>
               </ScrollArea>
             </Card>

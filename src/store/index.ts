@@ -123,6 +123,57 @@ export const selectTasksCombined = createSelector(
     };
   }
 );
+export const selectProspectTasksWithRecords = createSelector(
+  selectLeads,
+  selectUsers,
+  selectTasks,
+  selectCompanies,
+  selectTaskStatusList,
+  (leads, users, tasks, companies, statuses) => {
+    const ids = new Set(leads.data.map((lead) => lead._id));
+    return tasks.data
+      .filter((task) => ids.has(task.projectId))
+      .map((task) => {
+        const project = leads.data.find((project) => project._id === task.projectId);
+        const user = users.data.find((user) => user._id === task.assignedTo);
+        const company = companies.data.find((company) => company._id === task.customerId);
+        const statusName = statuses.data.find((status) => status.id === task.status)?.name;
+        return {
+          ...task,
+          project,
+          assignee: user,
+          company,
+          statusName,
+        };
+      });
+  }
+);
+
+export const selectProjectTasksWithRecords = createSelector(
+  selectProjects,
+  selectUsers,
+  selectTasks,
+  selectCompanies,
+  selectTaskStatusList,
+  (projects, users, tasks, companies, statuses) => {
+    const ids = new Set(projects.data.map((project) => project._id));
+    return tasks.data
+      .filter((task) => ids.has(task.projectId))
+      .map((task) => {
+        const project = projects.data.find((project) => project._id === task.projectId);
+        const user = users.data.find((user) => user._id === task.assignedTo);
+        const company = companies.data.find((company) => company._id === task.customerId);
+        const statusName = statuses.data.find((status) => status.id === task.status)?.name;
+        return {
+          ...task,
+          project,
+          assignee: user,
+          company,
+          statusName,
+        };
+      });
+  }
+);
 
 export const selectUsersBasedOnType = createSelector(selectUsers, (users) => {
   return {
@@ -369,6 +420,56 @@ export const selectClaimsWithRecords = createSelector(
         statusName,
       };
     });
+  }
+);
+export const selectProspectClaimsWithRecords = createSelector(
+  selectClaims,
+  selectUsers,
+  selectSuppliers,
+  selectLeads,
+  selectClaimsStatusList,
+  (claims, users, suppliers, prospects, statuses) => {
+    const ids = new Set(prospects.data.map((prospect) => prospect._id));
+    return claims.data
+      .filter((claim) => ids.has(claim.projectId))
+      .map((request) => {
+        const requestByPerson = users.data.find((user) => user._id === request.createdBy);
+        const lead = prospects.data.find((project) => project._id === request.projectId);
+        const supplier = suppliers.data.find((supplier) => supplier._id === request.supplierId);
+        const statusName = statuses.data.find((status) => status.id === request.status)?.name;
+        return {
+          ...request,
+          requestByPerson,
+          lead,
+          supplier,
+          statusName,
+        };
+      });
+  }
+);
+export const selectProjectClaimsWithRecords = createSelector(
+  selectClaims,
+  selectUsers,
+  selectSuppliers,
+  selectProjects,
+  selectClaimsStatusList,
+  (claims, users, suppliers, projects, statuses) => {
+    const ids = new Set(projects.data.map((project) => project._id));
+    return claims.data
+      .filter((claim) => ids.has(claim.projectId))
+      .map((request) => {
+        const requestByPerson = users.data.find((user) => user._id === request.createdBy);
+        const lead = projects.data.find((project) => project._id === request.projectId);
+        const supplier = suppliers.data.find((supplier) => supplier._id === request.supplierId);
+        const statusName = statuses.data.find((status) => status.id === request.status)?.name;
+        return {
+          ...request,
+          requestByPerson,
+          lead,
+          supplier,
+          statusName,
+        };
+      });
   }
 );
 

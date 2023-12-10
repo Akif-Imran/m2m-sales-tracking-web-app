@@ -422,6 +422,56 @@ export const selectClaimsWithRecords = createSelector(
     });
   }
 );
+export const selectProspectClaimsWithRecords = createSelector(
+  selectClaims,
+  selectUsers,
+  selectSuppliers,
+  selectLeads,
+  selectClaimsStatusList,
+  (claims, users, suppliers, prospects, statuses) => {
+    const ids = new Set(prospects.data.map((prospect) => prospect._id));
+    return claims.data
+      .filter((claim) => ids.has(claim.projectId))
+      .map((request) => {
+        const requestByPerson = users.data.find((user) => user._id === request.createdBy);
+        const lead = prospects.data.find((project) => project._id === request.projectId);
+        const supplier = suppliers.data.find((supplier) => supplier._id === request.supplierId);
+        const statusName = statuses.data.find((status) => status.id === request.status)?.name;
+        return {
+          ...request,
+          requestByPerson,
+          lead,
+          supplier,
+          statusName,
+        };
+      });
+  }
+);
+export const selectProjectClaimsWithRecords = createSelector(
+  selectClaims,
+  selectUsers,
+  selectSuppliers,
+  selectProjects,
+  selectClaimsStatusList,
+  (claims, users, suppliers, projects, statuses) => {
+    const ids = new Set(projects.data.map((project) => project._id));
+    return claims.data
+      .filter((claim) => ids.has(claim.projectId))
+      .map((request) => {
+        const requestByPerson = users.data.find((user) => user._id === request.createdBy);
+        const lead = projects.data.find((project) => project._id === request.projectId);
+        const supplier = suppliers.data.find((supplier) => supplier._id === request.supplierId);
+        const statusName = statuses.data.find((status) => status.id === request.status)?.name;
+        return {
+          ...request,
+          requestByPerson,
+          lead,
+          supplier,
+          statusName,
+        };
+      });
+  }
+);
 
 export const selectUserWithRecords = createSelector(
   selectUsers,

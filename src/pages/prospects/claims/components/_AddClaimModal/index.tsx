@@ -115,20 +115,36 @@ export const _AddClaimModal: React.FC<OwnProps> = ({
     },
   });
 
+  const setProjectOrProspectsBasedOnModule = React.useCallback(
+    (companyId: string) => {
+      if (module === "crm") {
+        const prospect_s = leads
+          .filter((project) => project.customerId === companyId)
+          .map((project) => ({
+            value: project._id,
+            label: project.name,
+          }));
+        setProjectsLeadList(prospect_s);
+      } else if (module === "project") {
+        const project_s = projects
+          .filter((project) => project.customerId === companyId)
+          .map((project) => ({
+            value: project._id,
+            label: project.name,
+          }));
+        setProjectsLeadList(project_s);
+      }
+    },
+    [leads, module, projects]
+  );
+
   const handleOnChangeCompany = (value: string | null) => {
     if (!value) return;
     form.setValues((prev) => ({
       ...prev,
       customerId: value,
     }));
-    const project_s = leads
-      .concat(projects)
-      .filter((project) => project.customerId === value)
-      .map((project) => ({
-        value: project._id,
-        label: project.name,
-      }));
-    setProjectsLeadList(project_s);
+    setProjectOrProspectsBasedOnModule(value);
   };
 
   const handleOnChangeProject = (value: string | null) => {
@@ -181,15 +197,8 @@ export const _AddClaimModal: React.FC<OwnProps> = ({
 
   React.useEffect(() => {
     if (!companyId) return;
-    const project_s = leads
-      .concat(projects)
-      .filter((project) => project.customerId === companyId)
-      .map((project) => ({
-        value: project._id,
-        label: project.name,
-      }));
-    setProjectsLeadList(project_s);
-  }, [companyId, opened, leads, projects]);
+    setProjectOrProspectsBasedOnModule(companyId);
+  }, [companyId, setProjectOrProspectsBasedOnModule]);
 
   React.useEffect(() => {
     if (!companyId || !projectId) {

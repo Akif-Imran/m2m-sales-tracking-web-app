@@ -50,8 +50,15 @@ export const urls = {
     getById: (id: string) => `${BASE_CONTACT_URL}/getById/${id}`,
   },
   project: {
-    list: (sort: "asc" | "desc" = "desc", skip = 0, limit = 0) =>
-      `${BASE_PROJECT_URL}/getAll?sortBydeliveryDate=${sort}&skip=${skip}&limit=${limit}`,
+    list: (
+      sort: "asc" | "desc" = "desc",
+      skip = 0,
+      limit = 10000,
+      hasIdleReminderInDays = false,
+      idleReminderInDays = 10
+    ) =>
+      `${BASE_PROJECT_URL}/getAll?sortBydeliveryDate=${sort}&skip=${skip}&limit=${limit}` +
+      (hasIdleReminderInDays ? `&idleReminderInDays=${idleReminderInDays}` : ""),
     create: `${BASE_PROJECT_URL}/create`,
     update: (id: string) => `${BASE_PROJECT_URL}/update/${id}`,
     delete: (id: string) => `${BASE_PROJECT_URL}/delete/${id}`,

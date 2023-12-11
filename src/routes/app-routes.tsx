@@ -52,6 +52,7 @@ const MainApp: React.FC<OwnProps> = () => {
   const _Suppliers = lazy(() => import("../pages/settings/suppliers"));
   const _ExpenseTypes = lazy(() => import("../pages/settings/expense-type"));
   const _PurchaseCategories = lazy(() => import("../pages/settings/purchase-req-category"));
+  const _Warehouse = lazy(() => import("../pages/settings/warehouse"));
   const _StockItems = lazy(() => import("../pages/settings/stock-item"));
   //notifications
   const _Notification = lazy(() => import("../pages/notification"));
@@ -236,6 +237,10 @@ const MainApp: React.FC<OwnProps> = () => {
         <Route
           path={routes.settings.purchase_category}
           element={<SuspendedView children={<_PurchaseCategories />} />}
+        />
+        <Route
+          path={routes.settings.warehouse}
+          element={<SuspendedView children={<_Warehouse />} />}
         />
         <Route
           path={routes.settings.stock_items}

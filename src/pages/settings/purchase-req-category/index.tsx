@@ -46,7 +46,7 @@ export const PurchaseCategories: React.FC<OwnProps> = () => {
     searchedData.length === 0 ? (
       <center>
         <Text color={colors.titleText} align="center">
-          No Purchase categories...
+          No Purchase categories
         </Text>
       </center>
     ) : (

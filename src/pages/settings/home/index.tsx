@@ -12,7 +12,7 @@ const Settings: React.FC<OwnProps> = () => {
   const navigate = useNavigate();
 
   React.useEffect(() => {
-    navigate(routes.settings.change_password);
+    navigate(routes.settings.app_theme);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -20,11 +20,11 @@ const Settings: React.FC<OwnProps> = () => {
     <Grid>
       <Grid.Col sm={12} md={5}>
         <ScrollArea type="scroll" h={{ md: "98vh" }}>
+          <_SettingsCard title="App Theme" onClick={() => navigate(routes.settings.app_theme)} />
           <_SettingsCard
             title="Change Password"
             onClick={() => navigate(routes.settings.change_password)}
           />
-          <_SettingsCard title="App Theme" onClick={() => navigate(routes.settings.app_theme)} />
           <_SettingsCard
             title="Expense Type"
             onClick={() => navigate(routes.settings.expense_type)}
@@ -33,10 +33,13 @@ const Settings: React.FC<OwnProps> = () => {
             title="Purchase Category"
             onClick={() => navigate(routes.settings.purchase_category)}
           />
+          <_SettingsCard title="Warehouse" onClick={() => navigate(routes.settings.warehouse)} />
+
           <_SettingsCard
             title="Stock Items"
             onClick={() => navigate(routes.settings.stock_items)}
           />
+
           <_SettingsCard title="Suppliers" onClick={() => navigate(routes.settings.suppliers)} />
         </ScrollArea>
       </Grid.Col>

@@ -87,6 +87,7 @@ const routes = {
     app_theme: "app-theme",
     expense_type: "expense-type",
     purchase_category: "purchase-category",
+    warehouse: "warehouse",
     stock_items: "stock-items",
     suppliers: "suppliers",
   },

@@ -48,7 +48,7 @@ export const ExpenseTypes: React.FC<OwnProps> = () => {
     searchedData.length === 0 ? (
       <center>
         <Text color={colors.titleText} align="center">
-          No Expense types...
+          No Expense types
         </Text>
       </center>
     ) : (

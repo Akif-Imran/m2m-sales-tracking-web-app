@@ -13,3 +13,4 @@ export { default as _Help } from "./help";
 export { Error404 } from "./errors";
 export { default as Notification } from "./notification";
 export * from "./reports";
+export { Stock } from "./stock";

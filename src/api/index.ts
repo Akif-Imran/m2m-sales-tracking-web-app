@@ -16,7 +16,7 @@ export const BASE_EXPENSE_TYPE_URL = `${BASE_URL}/expense-type`;
 export const BASE_PURCHASE_CATEGORY_URL = `${BASE_URL}/purchase-request-category`;
 export const BASE_WAREHOUSE_URL = `${BASE_URL}/warehouse`;
 export const BASE_SUPPLIER_URL = `${BASE_URL}/supplier`;
-export const BASE_STOCK_ITEM_URL = `${BASE_URL}/stock-item`;
+export const BASE_STOCK_URL = `${BASE_URL}/stock`;
 export const BASE_REPORT_URL = `${BASE_URL}/app_reports`;
 export const MALAYSIA_ZONE = "Asia/Kuala_Lumpur";
 
@@ -138,13 +138,13 @@ export const urls = {
     delete: (id: string) => `${BASE_WAREHOUSE_URL}/delete/${id}`,
     getById: (id: string) => `${BASE_WAREHOUSE_URL}/getById/${id}`,
   },
-  stockItem: {
-    list: `${BASE_STOCK_ITEM_URL}/getAll`,
-    create: `${BASE_STOCK_ITEM_URL}/create`,
-    update: (id: string) => `${BASE_STOCK_ITEM_URL}/update/${id}`,
-    delete: (id: string) => `${BASE_STOCK_ITEM_URL}/delete/${id}`,
-    statusList: `${BASE_STOCK_ITEM_URL}/getStatusList`,
-    getById: (id: string) => `${BASE_STOCK_ITEM_URL}/getById/${id}`,
+  stock: {
+    list: (skip = 0, limit = 10000) => `${BASE_STOCK_URL}/getAll?skip=${skip}&limit=${limit}`,
+    create: `${BASE_STOCK_URL}/create`,
+    update: (id: string) => `${BASE_STOCK_URL}/update/${id}`,
+    delete: (id: string) => `${BASE_STOCK_URL}/delete/${id}`,
+    statusList: `${BASE_STOCK_URL}/getStatusList`,
+    getById: (id: string) => `${BASE_STOCK_URL}/getById/${id}`,
   },
   supplier: {
     list: `${BASE_SUPPLIER_URL}/getAll`,

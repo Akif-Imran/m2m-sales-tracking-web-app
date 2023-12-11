@@ -1,7 +1,7 @@
 import React from "react";
 import { useStyles } from "./styles";
 import { Button, Card, Flex, ScrollArea, Stack, Text, TextInput, rem } from "@mantine/core";
-import { selectStockItemsWithRecords, useAppSelector } from "@store";
+import { selectStockWithRecords, useAppSelector } from "@store";
 import { _AddStockModal, _StockItemCard } from "./components";
 import { IconPlus, IconSearch } from "@tabler/icons-react";
 import { useGStyles } from "@global-styles";
@@ -16,7 +16,7 @@ export const StockItems: React.FC<OwnProps> = () => {
     state: { isAdmin, isHR },
   } = useAuthContext();
   const { classes: gclasses } = useGStyles();
-  const items = useAppSelector(selectStockItemsWithRecords);
+  const items = useAppSelector(selectStockWithRecords);
   const [searchQuery, setSearchQuery] = React.useState("");
   const [addModalOpened, setAddModalOpened] = React.useState(false);
   const [editModalOpened, setEditModalOpened] = React.useState(false);

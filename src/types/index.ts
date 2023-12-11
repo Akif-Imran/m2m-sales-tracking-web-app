@@ -140,6 +140,7 @@ interface IStockItemStatus {
   name: string;
 }
 interface IStockItem {
+  //settings stock item screen
   createdBy: string;
   createdAt: string;
   isActive: boolean;
@@ -154,6 +155,24 @@ interface IStockItem {
   };
   assignedTo: string;
   status: number;
+  _id: string;
+  __v: number;
+}
+
+interface IStock {
+  createdBy: string;
+  createdAt: string;
+  isActive: true;
+  company: string;
+  name: string;
+  type: string;
+  serialNo: string;
+  modelNo: string;
+  totalCost: number;
+  supplierId: string;
+  quantity: number;
+  warehouseId: string;
+  assignedTo: string;
   _id: string;
   __v: number;
 }

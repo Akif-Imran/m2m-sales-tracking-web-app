@@ -19,6 +19,7 @@ import {
   Reports,
   Projects,
   Home,
+  Stock,
 } from "@pages";
 import { routes } from "./routes";
 import { Suspense, lazy } from "react";
@@ -211,6 +212,12 @@ const MainApp: React.FC<OwnProps> = () => {
             }
           />
         }
+      ></Route>
+
+      {/* Stock */}
+      <Route
+        path={routes.stock.list}
+        element={<_RequireAuth children={<_AppShell page={<Stock />} />} />}
       ></Route>
 
       {/* settings */}

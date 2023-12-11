@@ -33,7 +33,7 @@ import {
   IconSquareRoundedCheck,
   IconSettings,
   IconInfoCircle,
-  IconHelp,
+  // IconHelp,
   IconLicense,
   IconBoxSeam,
   IconHome,
@@ -97,12 +97,12 @@ const homeButtons: NavbarButtons[] = [
     icon: IconInfoCircle,
     visibleTo: [1, 2, 3, 4],
   },
-  {
-    label: "Help",
-    icon: IconHelp,
-    link: routes.help.home,
-    visibleTo: [1, 2, 3, 4],
-  },
+  // {
+  //   label: "Help",
+  //   icon: IconHelp,
+  //   link: routes.help.home,
+  //   visibleTo: [1, 2, 3, 4],
+  // },
 ];
 
 const crmButtons: NavbarButtons[] = [
@@ -228,12 +228,12 @@ const projectButtons: NavbarButtons[] = [
   },
 ];
 const inventoryButtons: NavbarButtons[] = [
-  {
-    link: routes.dashboard.inventory,
-    label: "Dashboard",
-    icon: IconDashboard,
-    visibleTo: [1, 2, 3, 4],
-  },
+  // {
+  //   link: routes.dashboard.inventory,
+  //   label: "Dashboard",
+  //   icon: IconDashboard,
+  //   visibleTo: [1, 2, 3, 4],
+  // },
   {
     link: routes.stock.list,
     label: "Stock",

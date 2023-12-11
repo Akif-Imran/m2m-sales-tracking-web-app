@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import { useStyles } from "../styles";
 import { colors } from "@theme";
-import { Card, Grid, Loader, ScrollArea, Table, Tabs, Text, rem } from "@mantine/core";
+import { Badge, Card, Grid, Loader, ScrollArea, Table, Tabs, Text, rem } from "@mantine/core";
 import { Chart, GoogleChartOptions } from "react-google-charts";
 import { IconCalendar, IconGraph } from "@tabler/icons-react";
 import { DateTime } from "luxon";
-import { DAY_MM_DD_YYYY_HH_MM_SS_A } from "@constants";
+import { DAY_MM_DD_YYYY_HH_MM_SS_A, projectStatusColors } from "@constants";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 
@@ -20,6 +20,7 @@ import {
 } from "@store";
 import { apiGet, urls } from "@api";
 import { useAuthContext } from "@contexts";
+import { notify } from "@utility";
 
 interface OwnProps {}
 interface ChartData {
@@ -63,8 +64,8 @@ export const CRMDash: React.FC<OwnProps> = () => {
     { name: string; taskTitle: string; dueDate: string }[]
   >([]);
 
-  const [todayActivities, setTodayActivities] = useState<
-    { name: string; type: "Task" | "Follow Up"; dueDate: string }[]
+  const [noActivityReminder, setNoActivityReminder] = useState<
+    { name: string; lastActivity: string | undefined; status: number; statusName: string }[]
   >([]);
 
   const [upcomingTasks, setUpcomingTasks] = useState<
@@ -236,59 +237,44 @@ export const CRMDash: React.FC<OwnProps> = () => {
   }, [tasks, followUps]);
 
   React.useEffect(() => {
-    //TODO - yahya api change
     if (!token) return;
     apiGet<ApiResponse<{ project: string; claimsCount: number }[]>>(
-      urls.claims.getHighestProjectClaims,
+      urls.claims.getHighestProjectClaims("false"),
       token
-    ).then((res) => {
-      if (res.data.success) {
-        setProspectsWithMostClaims(res.data.data);
-      }
-    });
+    )
+      .then((res) => {
+        if (res.data.success) {
+          setProspectsWithMostClaims(res.data.data);
+        }
+      })
+      .catch((err) => {
+        console.error("No Activity: ", err?.message);
+        notify("Highest Claims", "An error occurred", "error");
+      });
   }, [token]);
 
   React.useEffect(() => {
-    // { name: "Repair AAV (2F)", type: "Task", dueDate: DateTime.now().plus({ hours: 1.5 }) },
-    // { name: "Meet Json Brow", type: "Follow Up", dueDate: DateTime.now().plus({ hours: 3.5 }) },
-    const records: {
-      name: string;
-      type: "Task" | "Follow Up";
-      dueDate: string;
-    }[] = [];
-
-    tasks.forEach((task) => {
-      const today = DateTime.local();
-      const dueDate = DateTime.fromISO(task.completionDeadline);
-      const isSameYear = dueDate.hasSame(today, "year");
-      const isSameMonth = dueDate.hasSame(today, "month");
-      const isSameDay = dueDate.hasSame(today, "day");
-      if (isSameDay && isSameMonth && isSameYear) {
-        records.push({
-          name: task.title,
-          type: "Task",
-          dueDate: dueDate.toFormat(DAY_MM_DD_YYYY_HH_MM_SS_A),
-        });
-      }
-    });
-
-    followUps.forEach((followup) => {
-      const today = DateTime.local();
-      const dueDate = DateTime.fromISO(followup.meetingDate);
-      const isSameYear = dueDate.hasSame(today, "year");
-      const isSameMonth = dueDate.hasSame(today, "month");
-      const isSameDay = dueDate.hasSame(today, "day");
-      if (isSameDay && isSameMonth && isSameYear) {
-        records.push({
-          name: `Meet ${followup.contactPerson?.name}`,
-          type: "Follow Up",
-          dueDate: dueDate.toFormat(DAY_MM_DD_YYYY_HH_MM_SS_A),
-        });
-      }
-    });
-
-    setTodayActivities(records);
-  }, [tasks, followUps]);
+    if (!token) return;
+    apiGet<ApiResponse<IProject[]>>(urls.project.list("desc", 0, 10000, true, 10), token)
+      .then((res) => {
+        if (res.data.success) {
+          const noActivity = res.data.data
+            .filter((project) => project.status < 4)
+            .map((project) => ({
+              name: project.name,
+              status: project.status,
+              statusName:
+                projectStatusList.find((status) => status.id === project.status)?.name || "N/A",
+              lastActivity: project.updatedAt,
+            }));
+          setNoActivityReminder(noActivity);
+        }
+      })
+      .catch((err) => {
+        console.error("No Activity: ", err?.message);
+        notify("No Activity", "An error occurred", "error");
+      });
+  }, [token, projectStatusList]);
 
   React.useEffect(() => {
     const mostFollowedLeadsWithExpense = prospects
@@ -356,12 +342,28 @@ export const CRMDash: React.FC<OwnProps> = () => {
     );
   });
 
-  const todayActivitiesRows = todayActivities.map((activity, index) => {
+  const noActivityReminderRows = noActivityReminder.map((activity, index) => {
     return (
       <tr key={index}>
         <td>{activity.name}</td>
-        <td>{activity.type}</td>
-        <td>{activity.dueDate}</td>
+        <td>
+          <Badge
+            variant="filled"
+            color={projectStatusColors[activity.status]}
+            styles={{
+              root: {
+                width: "100%",
+              },
+            }}
+          >
+            {activity.statusName}
+          </Badge>
+        </td>
+        <td>
+          {activity.lastActivity
+            ? DateTime.fromISO(activity.lastActivity).toFormat(DAY_MM_DD_YYYY_HH_MM_SS_A)
+            : "N/A"}
+        </td>
       </tr>
     );
   });
@@ -443,7 +445,7 @@ export const CRMDash: React.FC<OwnProps> = () => {
             <Card p="xs" shadow="sm" className={classes.card} my={4} px={"xs"} radius={"md"}>
               <div className={classes.grayContainer}>
                 <Text fw={"bold"} fz={rem(60)} color={colors.titleText} mt={-16}>
-                  {todayActivitiesRows.length}
+                  {noActivityReminderRows.length}
                 </Text>
                 <Text fz="md" className={classes.label} color={colors.titleText} mt={-10} mb={2}>
                   Reminders
@@ -453,12 +455,12 @@ export const CRMDash: React.FC<OwnProps> = () => {
                 <Table>
                   <thead>
                     <tr>
-                      <th>Name</th>
-                      <th>Activity Type</th>
-                      <th>Due Date</th>
+                      <th>Prospect Name</th>
+                      <th>Status</th>
+                      <th>Last Activity</th>
                     </tr>
                   </thead>
-                  <tbody>{todayActivitiesRows}</tbody>
+                  <tbody>{noActivityReminderRows}</tbody>
                 </Table>
               </ScrollArea>
             </Card>

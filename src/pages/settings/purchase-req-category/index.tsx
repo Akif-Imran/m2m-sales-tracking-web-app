@@ -13,7 +13,7 @@ interface OwnProps {}
 export const PurchaseCategories: React.FC<OwnProps> = () => {
   useStyles();
   const {
-    state: { isAdmin, isHR },
+    state: { isAdmin },
   } = useAuthContext();
   const { classes: gclasses } = useGStyles();
   const { data: categories } = useAppSelector(selectPurchaseCategories);
@@ -32,23 +32,21 @@ export const PurchaseCategories: React.FC<OwnProps> = () => {
 
   const onChangeSearch = (query: string) => {
     setSearchQuery(query);
-    if (isAdmin || isHR) {
-      const filtered = categories.filter((project) =>
-        project.name.toLowerCase().includes(query.toLowerCase())
-      );
-      setSearchedData(filtered);
-    }
+    const filtered = categories.filter((project) =>
+      project.name.toLowerCase().includes(query.toLowerCase())
+    );
+    setSearchedData(filtered);
   };
 
   React.useEffect(() => {
     setSearchedData(categories);
-  }, [isAdmin, isHR, categories]);
+  }, [categories]);
 
   const rows =
     searchedData.length === 0 ? (
       <center>
         <Text color={colors.titleText} align="center">
-          No Purchase categories...
+          No Purchase categories
         </Text>
       </center>
     ) : (

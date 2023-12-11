@@ -1,58 +1,58 @@
 import React from "react";
 import { useStyles } from "./styles";
 import { Button, Card, Flex, ScrollArea, Stack, Text, TextInput, rem } from "@mantine/core";
-import { selectStockItemsWithRecords, useAppSelector } from "@store";
-import { _AddStockModal, _StockItemCard } from "./components";
+import { colors } from "@theme";
+import { selectWarehouses, useAppSelector } from "@store";
 import { IconPlus, IconSearch } from "@tabler/icons-react";
 import { useGStyles } from "@global-styles";
 import { useAuthContext } from "@contexts";
-import { colors } from "@theme";
+import { _AddWarehouseModal, _WarehouseCard } from "./components";
 
 interface OwnProps {}
 
-export const StockItems: React.FC<OwnProps> = () => {
+export const Warehouses: React.FC<OwnProps> = () => {
   useStyles();
   const {
-    state: { isAdmin, isHR },
+    state: { isAdmin },
   } = useAuthContext();
   const { classes: gclasses } = useGStyles();
-  const items = useAppSelector(selectStockItemsWithRecords);
+  const { data: warehouses } = useAppSelector(selectWarehouses);
   const [searchQuery, setSearchQuery] = React.useState("");
   const [addModalOpened, setAddModalOpened] = React.useState(false);
   const [editModalOpened, setEditModalOpened] = React.useState(false);
-  const [searchedData, setSearchedData] = React.useState<typeof items>([]);
-  const [selectedItem, setSelectedItem] = React.useState<IStockItem>({} as IStockItem);
+  const [searchedData, setSearchedData] = React.useState<typeof warehouses>([]);
+  const [selectedWarehouse, setSelectedWarehouse] = React.useState<IWarehouse>({} as IWarehouse);
 
-  const handleEditSupplier = React.useCallback((type: IStockItem) => {
-    setSelectedItem(type);
+  const handleEditSupplier = React.useCallback((type: IWarehouse) => {
+    setSelectedWarehouse(type);
     setEditModalOpened(true);
   }, []);
 
   const onChangeSearch = (query: string) => {
     setSearchQuery(query);
-    if (isAdmin || isHR) {
-      const filtered = items.filter((project) =>
-        project.name.toLowerCase().includes(query.toLowerCase())
-      );
-      setSearchedData(filtered);
-    }
+    const filtered = warehouses.filter((project) =>
+      project.name.toLowerCase().includes(query.toLowerCase())
+    );
+    setSearchedData(filtered);
   };
 
   React.useEffect(() => {
-    setSearchedData(items);
-  }, [isAdmin, isHR, items]);
+    setSearchedData(warehouses);
+  }, [warehouses]);
 
   const rows =
     searchedData.length === 0 ? (
       <center>
         <Text color={colors.titleText} align="center">
-          No Stock items...
+          No Warehouses
         </Text>
       </center>
     ) : (
       <>
-        {searchedData.map((item) => {
-          return <_StockItemCard key={item._id} item={item} setForEdit={handleEditSupplier} />;
+        {searchedData.map((supplier) => {
+          return (
+            <_WarehouseCard key={supplier._id} item={supplier} setForEdit={handleEditSupplier} />
+          );
         })}
       </>
     );
@@ -61,7 +61,7 @@ export const StockItems: React.FC<OwnProps> = () => {
     <Card radius={"md"} shadow="md" h={"92vh"} py={"xs"} mb={"xs"}>
       <Stack>
         <Text fz={rem(25)} m={"xs"} color={colors.titleText}>
-          Stock Items
+          Warehouses
         </Text>
         <Flex gap={"md"} m={"xs"} className={gclasses.searchContainer}>
           <TextInput
@@ -80,24 +80,24 @@ export const StockItems: React.FC<OwnProps> = () => {
               rightIcon={<IconPlus size={16} />}
               onClick={() => setAddModalOpened(true)}
             >
-              Item
+              Warehouse
             </Button>
           )}
         </Flex>
         <ScrollArea type="scroll" h={"72vh"}>
           {rows}
         </ScrollArea>
-        <_AddStockModal
+        <_AddWarehouseModal
           mode="add"
-          title="Add Stock Item"
+          title="Add Warehouse"
           record={undefined}
           opened={addModalOpened}
           onClose={() => setAddModalOpened(false)}
         />
-        <_AddStockModal
+        <_AddWarehouseModal
           mode="edit"
-          title="Update Stock Item"
-          record={selectedItem}
+          title="Update Warehouse"
+          record={selectedWarehouse}
           opened={editModalOpened}
           onClose={() => setEditModalOpened(false)}
         />
@@ -106,4 +106,4 @@ export const StockItems: React.FC<OwnProps> = () => {
   );
 };
 
-export default StockItems;
+export default Warehouses;

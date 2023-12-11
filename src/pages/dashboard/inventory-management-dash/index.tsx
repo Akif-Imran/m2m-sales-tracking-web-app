@@ -31,8 +31,6 @@ import {
   selectTasksCombined,
   useAppSelector,
 } from "@store";
-import { apiGet, urls } from "@api";
-import { useAuthContext } from "@contexts";
 
 interface OwnProps {}
 interface ChartData {
@@ -42,9 +40,6 @@ interface ChartData {
 
 export const InventoryDash: React.FC<OwnProps> = () => {
   const { classes, theme } = useStyles();
-  const {
-    state: { token },
-  } = useAuthContext();
   // const [isFetching, setIsFetching] = React.useState(false);
   const { tasks } = useAppSelector(selectTasksCombined);
   const followUps = useAppSelector(selectFollowUpsWithRecords);
@@ -61,10 +56,6 @@ export const InventoryDash: React.FC<OwnProps> = () => {
 
   const [projectsUnderDev, setProjectsUnderDev] = useState<
     { name: string; dueDate: string; timeRemaining: string }[]
-  >([]);
-
-  const [projectsWithMostClaims, setProjectsWithMostClaims] = React.useState<
-    { project: string; claimsCount: number }[]
   >([]);
 
   const [mostFollowedUpLeadWithExpenses, setMostFollowedUpLeadWithExpenses] = useState<
@@ -327,18 +318,6 @@ export const InventoryDash: React.FC<OwnProps> = () => {
   }, [tasks, followUps]);
 
   React.useEffect(() => {
-    if (!token) return;
-    apiGet<ApiResponse<{ project: string; claimsCount: number }[]>>(
-      urls.claims.getHighestProjectClaims,
-      token
-    ).then((res) => {
-      if (res.data.success) {
-        setProjectsWithMostClaims(res.data.data);
-      }
-    });
-  }, [token]);
-
-  React.useEffect(() => {
     // { name: "Repair AAV (2F)", type: "Task", dueDate: DateTime.now().plus({ hours: 1.5 }) },
     // { name: "Meet Json Brow", type: "Follow Up", dueDate: DateTime.now().plus({ hours: 3.5 }) },
     const records: {
@@ -475,15 +454,6 @@ export const InventoryDash: React.FC<OwnProps> = () => {
         <td>{project.name}</td>
         <td>{project.dueDate}</td>
         <td>{project.timeRemaining}</td>
-      </tr>
-    );
-  });
-
-  const projectsWithMostClaimsRows = projectsWithMostClaims.map((project, index) => {
-    return (
-      <tr key={index}>
-        <td>{project.project}</td>
-        <td>{project.claimsCount}</td>
       </tr>
     );
   });
@@ -769,37 +739,6 @@ export const InventoryDash: React.FC<OwnProps> = () => {
                     </tr>
                   </thead>
                   <tbody>{upcomingTaskRows}</tbody>
-                </Table>
-              </ScrollArea>
-            </Card>
-          </Grid.Col>
-
-          <Grid.Col md={6} lg={6} xl={6}>
-            <Card p="xs" shadow="sm" className={classes.card} my={4} px={"xs"} radius={"md"}>
-              <div className={classes.grayContainer}>
-                <Text fw={"bold"} fz={rem(60)} color={colors.titleText} mt={-16}>
-                  {projectsWithMostClaims.length}
-                </Text>
-                <Text
-                  fz="md"
-                  className={classes.label}
-                  color={colors.titleText}
-                  mt={-10}
-                  mb={2}
-                  ml={rem(8)}
-                >
-                  Projects with most claims
-                </Text>
-              </div>
-              <ScrollArea h={rem(272)}>
-                <Table>
-                  <thead>
-                    <tr>
-                      <th>Name</th>
-                      <th>No. of Claims</th>
-                    </tr>
-                  </thead>
-                  <tbody>{projectsWithMostClaimsRows}</tbody>
                 </Table>
               </ScrollArea>
             </Card>

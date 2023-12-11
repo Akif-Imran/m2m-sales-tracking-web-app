@@ -1,5 +1,5 @@
 import { SerializedError, createSlice } from "@reduxjs/toolkit";
-import { fetchStockItemStatuses } from "@thunks";
+import { fetchStockStatuses } from "@thunks";
 
 interface State {
   data: IStockItemStatus[];
@@ -27,14 +27,14 @@ const stockItemStatusSlice = createSlice({
   initialState: initialState,
   reducers: {},
   extraReducers: (builder) => {
-    builder.addCase(fetchStockItemStatuses.pending, (state) => {
+    builder.addCase(fetchStockStatuses.pending, (state) => {
       state.isLoading = true;
     });
-    builder.addCase(fetchStockItemStatuses.rejected, (state, action) => {
+    builder.addCase(fetchStockStatuses.rejected, (state, action) => {
       state.isLoading = false;
       state.error = action.error;
     });
-    builder.addCase(fetchStockItemStatuses.fulfilled, (state, action) => {
+    builder.addCase(fetchStockStatuses.fulfilled, (state, action) => {
       if (action.payload.success) {
         state.data = action.payload.data;
       }

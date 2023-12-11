@@ -124,11 +124,23 @@ interface IPurchaseCategory {
   description: string;
   __v: number;
 }
+interface IWarehouse {
+  _id: string;
+  createdBy: string;
+  createdAt: string;
+  isActive: boolean;
+  company: string;
+  name: string;
+  description: string;
+  __v: number;
+  updatedAt?: string;
+}
 interface IStockItemStatus {
   id: number;
   name: string;
 }
 interface IStockItem {
+  //settings stock item screen
   createdBy: string;
   createdAt: string;
   isActive: boolean;
@@ -143,6 +155,24 @@ interface IStockItem {
   };
   assignedTo: string;
   status: number;
+  _id: string;
+  __v: number;
+}
+
+interface IStock {
+  createdBy: string;
+  createdAt: string;
+  isActive: true;
+  company: string;
+  name: string;
+  type: string;
+  serialNo: string;
+  modelNo: string;
+  totalCost: number;
+  supplierId: string;
+  quantity: number;
+  warehouseId: string;
+  assignedTo: string;
   _id: string;
   __v: number;
 }

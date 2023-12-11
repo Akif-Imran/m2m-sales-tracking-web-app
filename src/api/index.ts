@@ -13,9 +13,10 @@ export const BASE_PURCHASE_REQUEST_URL = `${BASE_URL}/purchase-request`;
 export const BASE_TASK_URL = `${BASE_URL}/task`;
 export const BASE_LEAVE_APPLICATION_URL = `${BASE_URL}/leave-application`;
 export const BASE_EXPENSE_TYPE_URL = `${BASE_URL}/expense-type`;
-export const BASE_PURCHASE_CATEGORY_URL = `${BASE_URL}/purchase-category`;
+export const BASE_PURCHASE_CATEGORY_URL = `${BASE_URL}/purchase-request-category`;
+export const BASE_WAREHOUSE_URL = `${BASE_URL}/warehouse`;
 export const BASE_SUPPLIER_URL = `${BASE_URL}/supplier`;
-export const BASE_STOCK_ITEM_URL = `${BASE_URL}/stock-item`;
+export const BASE_STOCK_URL = `${BASE_URL}/stock`;
 export const BASE_REPORT_URL = `${BASE_URL}/app_reports`;
 export const MALAYSIA_ZONE = "Asia/Kuala_Lumpur";
 
@@ -49,8 +50,15 @@ export const urls = {
     getById: (id: string) => `${BASE_CONTACT_URL}/getById/${id}`,
   },
   project: {
-    list: (sort: "asc" | "desc" = "desc", skip = 0, limit = 0) =>
-      `${BASE_PROJECT_URL}/getAll?sortBydeliveryDate=${sort}&skip=${skip}&limit=${limit}`,
+    list: (
+      sort: "asc" | "desc" = "desc",
+      skip = 0,
+      limit = 10000,
+      hasIdleReminderInDays = false,
+      idleReminderInDays = 10
+    ) =>
+      `${BASE_PROJECT_URL}/getAll?sortBydeliveryDate=${sort}&skip=${skip}&limit=${limit}` +
+      (hasIdleReminderInDays ? `&idleReminderInDays=${idleReminderInDays}` : ""),
     create: `${BASE_PROJECT_URL}/create`,
     update: (id: string) => `${BASE_PROJECT_URL}/update/${id}`,
     delete: (id: string) => `${BASE_PROJECT_URL}/delete/${id}`,
@@ -74,7 +82,8 @@ export const urls = {
     getById: (id: string) => `${BASE_CLAIM_URL}/getById/${id}`,
     statusList: `${BASE_URL}/getStatusList`,
     updateStatus: (id: string) => `${BASE_CLAIM_URL}/changeStatus/${id}`,
-    getHighestProjectClaims: `${BASE_CLAIM_URL}/getHighestProjectClaims`,
+    getHighestProjectClaims: (isProject: "true" | "false") =>
+      `${BASE_CLAIM_URL}/getHighestProjectClaims?isProject=${isProject}`,
   },
   expenseType: {
     list: (skip: number = 0, limit: number = 100) =>
@@ -92,6 +101,7 @@ export const urls = {
     delete: (id: string) => `${BASE_PURCHASE_CATEGORY_URL}/delete/${id}`,
     getById: (id: string) => `${BASE_PURCHASE_CATEGORY_URL}/getById/${id}`,
   },
+
   purchaseRequest: {
     list: `${BASE_PURCHASE_REQUEST_URL}/getAll`,
     create: `${BASE_PURCHASE_REQUEST_URL}/create`,
@@ -120,13 +130,21 @@ export const urls = {
     statusList: `${BASE_URL}/getStatusList`,
     updateStatus: (id: string) => `${BASE_LEAVE_APPLICATION_URL}/changeStatus/${id}`,
   },
-  stockItem: {
-    list: `${BASE_STOCK_ITEM_URL}/getAll`,
-    create: `${BASE_STOCK_ITEM_URL}/create`,
-    update: (id: string) => `${BASE_STOCK_ITEM_URL}/update/${id}`,
-    delete: (id: string) => `${BASE_STOCK_ITEM_URL}/delete/${id}`,
-    statusList: `${BASE_STOCK_ITEM_URL}/getStatusList`,
-    getById: (id: string) => `${BASE_STOCK_ITEM_URL}/getById/${id}`,
+  warehouse: {
+    list: (skip: number = 0, limit: number = 100) =>
+      `${BASE_WAREHOUSE_URL}/getAll?skip=${skip}&limit=${limit}`,
+    create: `${BASE_WAREHOUSE_URL}/create`,
+    update: (id: string) => `${BASE_WAREHOUSE_URL}/update/${id}`,
+    delete: (id: string) => `${BASE_WAREHOUSE_URL}/delete/${id}`,
+    getById: (id: string) => `${BASE_WAREHOUSE_URL}/getById/${id}`,
+  },
+  stock: {
+    list: (skip = 0, limit = 10000) => `${BASE_STOCK_URL}/getAll?skip=${skip}&limit=${limit}`,
+    create: `${BASE_STOCK_URL}/create`,
+    update: (id: string) => `${BASE_STOCK_URL}/update/${id}`,
+    delete: (id: string) => `${BASE_STOCK_URL}/delete/${id}`,
+    statusList: `${BASE_STOCK_URL}/getStatusList`,
+    getById: (id: string) => `${BASE_STOCK_URL}/getById/${id}`,
   },
   supplier: {
     list: `${BASE_SUPPLIER_URL}/getAll`,

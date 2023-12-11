@@ -12,6 +12,7 @@ import {
   fetchLeaves,
   fetchProjectStatuses,
   fetchProjects,
+  fetchPurchaseCategory,
   fetchPurchaseRequestStatuses,
   fetchPurchaseRequests,
   fetchSuppliers,
@@ -19,6 +20,7 @@ import {
   fetchTasks,
   fetchUserTypes,
   fetchUsers,
+  fetchWarehouse,
 } from "@thunks";
 import React from "react";
 
@@ -49,6 +51,8 @@ export const _DataLoader: React.FC<React.PropsWithChildren> = ({ children }) => 
     dispatch(fetchTasks(token));
     dispatch(fetchTaskStatuses(token));
     dispatch(fetchExpenseType(token));
+    dispatch(fetchPurchaseCategory(token));
+    dispatch(fetchWarehouse(token));
   }, [dispatch, token]);
 
   return (

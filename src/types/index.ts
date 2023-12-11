@@ -124,6 +124,17 @@ interface IPurchaseCategory {
   description: string;
   __v: number;
 }
+interface IWarehouse {
+  _id: string;
+  createdBy: string;
+  createdAt: string;
+  isActive: boolean;
+  company: string;
+  name: string;
+  description: string;
+  __v: number;
+  updatedAt?: string;
+}
 interface IStockItemStatus {
   id: number;
   name: string;

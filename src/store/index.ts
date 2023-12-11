@@ -24,6 +24,7 @@ import {
   userTypeReducer,
   projectReducer,
   moduleReducer,
+  warehouseReducer,
 } from "@slices";
 import { useSelector } from "react-redux";
 import { TypedUseSelectorHook, useDispatch } from "react-redux";
@@ -53,6 +54,7 @@ const store = configureStore({
     leaveStatusList: leaveStatusReducer,
     leaveTypes: leaveTypeReducer,
     stockItems: stockItemReducer,
+    warehouses: warehouseReducer,
     stockItemStatusList: stockItemStatusListReducer,
     suppliers: supplierReducer,
     notifications: notificationReducer,
@@ -91,6 +93,7 @@ export const selectLeaves = (state: RootState) => state.leaves;
 export const selectLeaveStatusList = (state: RootState) => state.leaveStatusList;
 export const selectLeaveTypes = (state: RootState) => state.leaveTypes;
 export const selectStockItems = (state: RootState) => state.stockItems;
+export const selectWarehouses = (state: RootState) => state.warehouses;
 export const selectStockItemsStatusList = (state: RootState) => state.stockItemStatusList;
 export const selectSuppliers = (state: RootState) => state.suppliers;
 export const selectNotifications = (state: RootState) => state.notifications;
@@ -200,6 +203,7 @@ export const selectRecordsForDropdown = createSelector(
   selectExpenseTypeList,
   selectPurchaseCategories,
   selectStockItemsStatusList,
+  selectWarehouses,
   (
     companies,
     leads,
@@ -216,7 +220,8 @@ export const selectRecordsForDropdown = createSelector(
     leaveTypes,
     expenseTypes,
     purchaseCategories,
-    stockItemStatus
+    stockItemStatus,
+    warehouses
   ) => {
     return {
       companies: companies.data.map((company) => ({
@@ -274,6 +279,10 @@ export const selectRecordsForDropdown = createSelector(
       expenseTypes: expenseTypes.data.map((type) => ({
         value: type._id,
         label: type.name,
+      })),
+      warehouses: warehouses.data.map((warehouse) => ({
+        value: warehouse._id,
+        label: warehouse.name,
       })),
       purchaseCategories: purchaseCategories.data.map((category) => ({
         value: category._id,

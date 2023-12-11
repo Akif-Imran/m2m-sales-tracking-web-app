@@ -23,3 +23,4 @@ export * from "./expenseTypeSlice";
 export * from "./purchaseCategorySlice";
 export * from "./stockItemSlice";
 export * from "./stockItemStatusSlice";
+export * from "./warehouseSlice";

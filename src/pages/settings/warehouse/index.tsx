@@ -2,58 +2,56 @@ import React from "react";
 import { useStyles } from "./styles";
 import { Button, Card, Flex, ScrollArea, Stack, Text, TextInput, rem } from "@mantine/core";
 import { colors } from "@theme";
-import { selectPurchaseCategories, useAppSelector } from "@store";
+import { selectWarehouses, useAppSelector } from "@store";
 import { IconPlus, IconSearch } from "@tabler/icons-react";
 import { useGStyles } from "@global-styles";
 import { useAuthContext } from "@contexts";
-import { _AddCategoryModal, _CategoryCard } from "./components";
+import { _AddWarehouseModal, _WarehouseCard } from "./components";
 
 interface OwnProps {}
 
-export const PurchaseCategories: React.FC<OwnProps> = () => {
+export const Warehouses: React.FC<OwnProps> = () => {
   useStyles();
   const {
     state: { isAdmin },
   } = useAuthContext();
   const { classes: gclasses } = useGStyles();
-  const { data: categories } = useAppSelector(selectPurchaseCategories);
+  const { data: warehouses } = useAppSelector(selectWarehouses);
   const [searchQuery, setSearchQuery] = React.useState("");
-  const [addCategoryModalOpened, setAddCategoryModalOpened] = React.useState(false);
-  const [editCategoryModalOpened, setEditCategoryModalOpened] = React.useState(false);
-  const [searchedData, setSearchedData] = React.useState<typeof categories>([]);
-  const [selectedCategory, setSelectedCategory] = React.useState<IPurchaseCategory>(
-    {} as IPurchaseCategory
-  );
+  const [addModalOpened, setAddModalOpened] = React.useState(false);
+  const [editModalOpened, setEditModalOpened] = React.useState(false);
+  const [searchedData, setSearchedData] = React.useState<typeof warehouses>([]);
+  const [selectedWarehouse, setSelectedWarehouse] = React.useState<IWarehouse>({} as IWarehouse);
 
-  const handleEditSupplier = React.useCallback((type: IPurchaseCategory) => {
-    setSelectedCategory(type);
-    setEditCategoryModalOpened(true);
+  const handleEditSupplier = React.useCallback((type: IWarehouse) => {
+    setSelectedWarehouse(type);
+    setEditModalOpened(true);
   }, []);
 
   const onChangeSearch = (query: string) => {
     setSearchQuery(query);
-    const filtered = categories.filter((project) =>
+    const filtered = warehouses.filter((project) =>
       project.name.toLowerCase().includes(query.toLowerCase())
     );
     setSearchedData(filtered);
   };
 
   React.useEffect(() => {
-    setSearchedData(categories);
-  }, [categories]);
+    setSearchedData(warehouses);
+  }, [warehouses]);
 
   const rows =
     searchedData.length === 0 ? (
       <center>
         <Text color={colors.titleText} align="center">
-          No Purchase categories...
+          No Warehouses...
         </Text>
       </center>
     ) : (
       <>
         {searchedData.map((supplier) => {
           return (
-            <_CategoryCard key={supplier._id} item={supplier} setForEdit={handleEditSupplier} />
+            <_WarehouseCard key={supplier._id} item={supplier} setForEdit={handleEditSupplier} />
           );
         })}
       </>
@@ -63,7 +61,7 @@ export const PurchaseCategories: React.FC<OwnProps> = () => {
     <Card radius={"md"} shadow="md" h={"92vh"} py={"xs"} mb={"xs"}>
       <Stack>
         <Text fz={rem(25)} m={"xs"} color={colors.titleText}>
-          Purchase Categories
+          Warehouses
         </Text>
         <Flex gap={"md"} m={"xs"} className={gclasses.searchContainer}>
           <TextInput
@@ -80,32 +78,32 @@ export const PurchaseCategories: React.FC<OwnProps> = () => {
             <Button
               variant="filled"
               rightIcon={<IconPlus size={16} />}
-              onClick={() => setAddCategoryModalOpened(true)}
+              onClick={() => setAddModalOpened(true)}
             >
-              Category
+              Warehouse
             </Button>
           )}
         </Flex>
         <ScrollArea type="scroll" h={"72vh"}>
           {rows}
         </ScrollArea>
-        <_AddCategoryModal
+        <_AddWarehouseModal
           mode="add"
-          title="Add Category"
+          title="Add Warehouse"
           record={undefined}
-          opened={addCategoryModalOpened}
-          onClose={() => setAddCategoryModalOpened(false)}
+          opened={addModalOpened}
+          onClose={() => setAddModalOpened(false)}
         />
-        <_AddCategoryModal
+        <_AddWarehouseModal
           mode="edit"
-          title="Update Category"
-          record={selectedCategory}
-          opened={editCategoryModalOpened}
-          onClose={() => setEditCategoryModalOpened(false)}
+          title="Update Warehouse"
+          record={selectedWarehouse}
+          opened={editModalOpened}
+          onClose={() => setEditModalOpened(false)}
         />
       </Stack>
     </Card>
   );
 };
 
-export default PurchaseCategories;
+export default Warehouses;

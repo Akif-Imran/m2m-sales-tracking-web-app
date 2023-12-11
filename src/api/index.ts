@@ -13,7 +13,8 @@ export const BASE_PURCHASE_REQUEST_URL = `${BASE_URL}/purchase-request`;
 export const BASE_TASK_URL = `${BASE_URL}/task`;
 export const BASE_LEAVE_APPLICATION_URL = `${BASE_URL}/leave-application`;
 export const BASE_EXPENSE_TYPE_URL = `${BASE_URL}/expense-type`;
-export const BASE_PURCHASE_CATEGORY_URL = `${BASE_URL}/purchase-category`;
+export const BASE_PURCHASE_CATEGORY_URL = `${BASE_URL}/purchase-request-category`;
+export const BASE_WAREHOUSE_URL = `${BASE_URL}/warehouse`;
 export const BASE_SUPPLIER_URL = `${BASE_URL}/supplier`;
 export const BASE_STOCK_ITEM_URL = `${BASE_URL}/stock-item`;
 export const BASE_REPORT_URL = `${BASE_URL}/app_reports`;
@@ -92,6 +93,7 @@ export const urls = {
     delete: (id: string) => `${BASE_PURCHASE_CATEGORY_URL}/delete/${id}`,
     getById: (id: string) => `${BASE_PURCHASE_CATEGORY_URL}/getById/${id}`,
   },
+
   purchaseRequest: {
     list: `${BASE_PURCHASE_REQUEST_URL}/getAll`,
     create: `${BASE_PURCHASE_REQUEST_URL}/create`,
@@ -119,6 +121,14 @@ export const urls = {
     getById: (id: string) => `${BASE_LEAVE_APPLICATION_URL}/getById/${id}`,
     statusList: `${BASE_URL}/getStatusList`,
     updateStatus: (id: string) => `${BASE_LEAVE_APPLICATION_URL}/changeStatus/${id}`,
+  },
+  warehouse: {
+    list: (skip: number = 0, limit: number = 100) =>
+      `${BASE_WAREHOUSE_URL}/getAll?skip=${skip}&limit=${limit}`,
+    create: `${BASE_WAREHOUSE_URL}/create`,
+    update: (id: string) => `${BASE_WAREHOUSE_URL}/update/${id}`,
+    delete: (id: string) => `${BASE_WAREHOUSE_URL}/delete/${id}`,
+    getById: (id: string) => `${BASE_WAREHOUSE_URL}/getById/${id}`,
   },
   stockItem: {
     list: `${BASE_STOCK_ITEM_URL}/getAll`,

@@ -75,7 +75,8 @@ export const urls = {
     getById: (id: string) => `${BASE_CLAIM_URL}/getById/${id}`,
     statusList: `${BASE_URL}/getStatusList`,
     updateStatus: (id: string) => `${BASE_CLAIM_URL}/changeStatus/${id}`,
-    getHighestProjectClaims: `${BASE_CLAIM_URL}/getHighestProjectClaims`,
+    getHighestProjectClaims: (isProject: "true" | "false") =>
+      `${BASE_CLAIM_URL}/getHighestProjectClaims?isProject=${isProject}`,
   },
   expenseType: {
     list: (skip: number = 0, limit: number = 100) =>

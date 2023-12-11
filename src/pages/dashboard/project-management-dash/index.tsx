@@ -321,7 +321,7 @@ export const ProjectDash: React.FC<OwnProps> = () => {
     //TODO - api change yahya
     if (!token) return;
     apiGet<ApiResponse<{ project: string; claimsCount: number }[]>>(
-      urls.claims.getHighestProjectClaims,
+      urls.claims.getHighestProjectClaims("true"),
       token
     ).then((res) => {
       if (res.data.success) {

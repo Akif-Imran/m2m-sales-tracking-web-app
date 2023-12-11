@@ -239,7 +239,7 @@ export const CRMDash: React.FC<OwnProps> = () => {
     //TODO - yahya api change
     if (!token) return;
     apiGet<ApiResponse<{ project: string; claimsCount: number }[]>>(
-      urls.claims.getHighestProjectClaims,
+      urls.claims.getHighestProjectClaims("false"),
       token
     ).then((res) => {
       if (res.data.success) {

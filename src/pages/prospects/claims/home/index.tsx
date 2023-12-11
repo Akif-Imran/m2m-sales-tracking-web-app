@@ -106,8 +106,6 @@ export const Claims: React.FC<OwnProps> = () => {
             console.log("Delete Claim: ", err?.message);
             notify("Delete Claim", "An error occurred", "error");
           });
-        dispatch(deleteClaim(id));
-        notify("Delete Claim", "Claim deleted successfully!", "success");
       },
       onCancel: () => notify("Delete Claim", "Operation canceled!", "error"),
     });

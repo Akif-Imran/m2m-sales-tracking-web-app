@@ -1,3 +1,4 @@
+import { MODULE_SLICE_STORAGE_KEY } from "@constants";
 import type { AuthModel } from "../types";
 import type { AxiosStatic } from "axios";
 
@@ -42,7 +43,8 @@ const removeAuth = async () => {
     return;
   }
   try {
-    await localStorage.removeItem(AUTH_LOCAL_STORAGE_KEY);
+    localStorage.removeItem(AUTH_LOCAL_STORAGE_KEY);
+    localStorage.removeItem(MODULE_SLICE_STORAGE_KEY);
   } catch (error) {
     console.error("AUTH LOCAL STORAGE REMOVE ERROR", error);
   }

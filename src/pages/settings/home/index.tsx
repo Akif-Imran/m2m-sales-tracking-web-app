@@ -35,11 +35,6 @@ const Settings: React.FC<OwnProps> = () => {
           />
           <_SettingsCard title="Warehouse" onClick={() => navigate(routes.settings.warehouse)} />
 
-          <_SettingsCard
-            title="Stock Items"
-            onClick={() => navigate(routes.settings.stock_items)}
-          />
-
           <_SettingsCard title="Suppliers" onClick={() => navigate(routes.settings.suppliers)} />
         </ScrollArea>
       </Grid.Col>

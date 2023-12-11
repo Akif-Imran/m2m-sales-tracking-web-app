@@ -1,4 +1,4 @@
-import React from "react";
+/* import React from "react";
 import { useStyles } from "./styles";
 import { ActionIcon, Avatar, Badge, Card, Flex, Menu, Stack, Text, rem } from "@mantine/core";
 import { IconDotsVertical, IconEdit, IconTrash } from "@tabler/icons-react";
@@ -166,3 +166,4 @@ const _StockItemCard: React.FC<OwnProps> = ({ item, setForEdit }) => {
 };
 
 export { _StockItemCard };
+ */

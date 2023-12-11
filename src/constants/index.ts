@@ -1,5 +1,8 @@
 import { colors } from "@theme";
 
+//localStorage keys
+export const MODULE_SLICE_STORAGE_KEY = "m2m-sales-tracking-module";
+
 export const DAY_MM_DD_YYYY_HH_MM_SS_A = "EEE dd MMM, yyyy hh:mm:ss a";
 export const YYYY_MM_DD_HH_MM_SS_A = "yyyy-MM-dd hh:mm:ss a";
 export const DAY_MM_DD_YYYY = "EEE dd MMM, yyyy";

@@ -1,11 +1,13 @@
+import { MODULE_SLICE_STORAGE_KEY } from "@constants";
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 
-const storage_key = "m2m-sales-tracking-module";
 interface State {
   module: Module;
 }
 const initialState: State = {
-  module: localStorage ? (localStorage.getItem(storage_key) as Module) || "none" : "none",
+  module: localStorage
+    ? (localStorage.getItem(MODULE_SLICE_STORAGE_KEY) as Module) || "none"
+    : "none",
 };
 const moduleSlice = createSlice({
   name: "moduleSelector",
@@ -13,7 +15,7 @@ const moduleSlice = createSlice({
   reducers: {
     setModule: (state, action: PayloadAction<Module>) => {
       state.module = action.payload;
-      localStorage.setItem(storage_key, action.payload);
+      localStorage.setItem(MODULE_SLICE_STORAGE_KEY, action.payload);
     },
   },
 });

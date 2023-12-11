@@ -295,6 +295,7 @@ export const _AddPurchaseRequestModal: React.FC<OwnProps> = ({
                 searchable
                 nothingFound="No projects found"
                 label="Project"
+                description="The project against which to add Purchase Request"
                 value={form.values.projectId.toString()}
                 onChange={handleOnChangeProject}
                 data={projectsList}
@@ -310,6 +311,7 @@ export const _AddPurchaseRequestModal: React.FC<OwnProps> = ({
                 searchable
                 nothingFound="No suppliers found"
                 label="Supplier"
+                description="This list can be modified by admin in settings (Suppliers)"
                 value={form.values.supplierId.toString()}
                 onChange={handleOnChangeSupplier}
                 data={suppliersList}
@@ -429,6 +431,7 @@ export const _AddPurchaseRequestModal: React.FC<OwnProps> = ({
               searchable
               nothingFound="No category found"
               label="Category"
+              description="This list can be modified by admin in settings (Purchase Category)"
               value={form.values.categoryId}
               onChange={(value) => {
                 if (!value) {

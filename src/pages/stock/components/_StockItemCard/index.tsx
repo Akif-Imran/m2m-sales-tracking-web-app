@@ -1,19 +1,19 @@
-import React from "react";
+/* import React from "react";
 import { useStyles } from "./styles";
 import { ActionIcon, Avatar, Badge, Card, Flex, Menu, Stack, Text, rem } from "@mantine/core";
 import { IconDotsVertical, IconEdit, IconTrash } from "@tabler/icons-react";
 import { colors } from "@theme";
 import { useAuthContext } from "@contexts";
-import { selectStockItemsWithRecords, useAppDispatch } from "@store";
+import { selectStockWithRecords, useAppDispatch } from "@store";
 import { openDeleteModalHelper } from "@helpers";
-import { removeStockItem } from "@thunks";
-import { deleteStockItem } from "@slices";
+import { removeStock } from "@thunks";
+import { deleteStock } from "@slices";
 import { notify } from "@utility";
 import { stockItemStatusColors } from "@constants";
 import { PhotoView } from "react-photo-view";
 
 interface OwnProps {
-  item: ReturnType<typeof selectStockItemsWithRecords>[0];
+  item: ReturnType<typeof selectStockWithRecords>[0];
   setForEdit: (item: IStockItem) => void;
 }
 
@@ -41,7 +41,7 @@ const _StockItemCard: React.FC<OwnProps> = ({ item, setForEdit }) => {
       onConfirm: () => {
         setIsDeleting((_prev) => true);
         dispatch(
-          removeStockItem({
+          removeStock({
             token,
             id,
           })
@@ -50,7 +50,7 @@ const _StockItemCard: React.FC<OwnProps> = ({ item, setForEdit }) => {
           .then((res) => {
             notify("Delete Stock Item", res?.message, res.success ? "success" : "error");
             if (res.success) {
-              dispatch(deleteStockItem(id));
+              dispatch(deleteStock(id));
             }
           })
           .catch((err) => {
@@ -166,3 +166,4 @@ const _StockItemCard: React.FC<OwnProps> = ({ item, setForEdit }) => {
 };
 
 export { _StockItemCard };
+ */

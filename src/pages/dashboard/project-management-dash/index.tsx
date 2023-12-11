@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useStyles } from "../styles";
 import { colors } from "@theme";
 import {
+  Badge,
   Button,
   Card,
   Flex,
@@ -18,7 +19,7 @@ import { Chart, GoogleChartOptions } from "react-google-charts";
 import { IconCalendar, IconGraph } from "@tabler/icons-react";
 import { useToggle } from "@mantine/hooks";
 import { DateTime } from "luxon";
-import { DAY_MM_DD_YYYY, DAY_MM_DD_YYYY_HH_MM_SS_A } from "@constants";
+import { DAY_MM_DD_YYYY, DAY_MM_DD_YYYY_HH_MM_SS_A, projectStatusColors } from "@constants";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 
@@ -33,6 +34,7 @@ import {
 } from "@store";
 import { apiGet, urls } from "@api";
 import { useAuthContext } from "@contexts";
+import { notify } from "@utility";
 
 interface OwnProps {}
 interface ChartData {
@@ -75,8 +77,8 @@ export const ProjectDash: React.FC<OwnProps> = () => {
     { name: string; taskTitle: string; dueDate: string }[]
   >([]);
 
-  const [_todayActivities, setTodayActivities] = useState<
-    { name: string; type: "Task" | "Follow Up"; dueDate: string }[]
+  const [noActivityReminder, setNoActivityReminder] = useState<
+    { name: string; lastActivity: string | undefined; status: number; statusName: string }[]
   >([]);
 
   const [upcomingTasks, setUpcomingTasks] = useState<
@@ -321,7 +323,7 @@ export const ProjectDash: React.FC<OwnProps> = () => {
     //TODO - api change yahya
     if (!token) return;
     apiGet<ApiResponse<{ project: string; claimsCount: number }[]>>(
-      urls.claims.getHighestProjectClaims,
+      urls.claims.getHighestProjectClaims("true"),
       token
     ).then((res) => {
       if (res.data.success) {
@@ -331,31 +333,53 @@ export const ProjectDash: React.FC<OwnProps> = () => {
   }, [token]);
 
   React.useEffect(() => {
-    // { name: "Repair AAV (2F)", type: "Task", dueDate: DateTime.now().plus({ hours: 1.5 }) },
-    // { name: "Meet Json Brow", type: "Follow Up", dueDate: DateTime.now().plus({ hours: 3.5 }) },
-    const records: {
-      name: string;
-      type: "Task" | "Follow Up";
-      dueDate: string;
-    }[] = [];
+    if (!token) return;
+    apiGet<ApiResponse<IProject[]>>(urls.project.list("desc", 0, 10000, true, 10), token)
+      .then((res) => {
+        if (res.data.success) {
+          const noActivity = res.data.data
+            .filter((project) => project.status >= 4)
+            .map((project) => ({
+              name: project.name,
+              status: project.status,
+              statusName:
+                projectStatusList.find((status) => status.id === project.status)?.name || "N/A",
+              lastActivity: project.updatedAt,
+            }));
+          setNoActivityReminder(noActivity);
+        }
+      })
+      .catch((err) => {
+        console.error("No Activity: ", err?.message);
+        notify("No Activity", "An error occurred", "error");
+      });
+  }, [token, projectStatusList]);
 
-    tasks.forEach((task) => {
-      const today = DateTime.local();
-      const dueDate = DateTime.fromISO(task.completionDeadline);
-      const isSameYear = dueDate.hasSame(today, "year");
-      const isSameMonth = dueDate.hasSame(today, "month");
-      const isSameDay = dueDate.hasSame(today, "day");
-      if (isSameDay && isSameMonth && isSameYear) {
-        records.push({
-          name: task.title,
-          type: "Task",
-          dueDate: dueDate.toFormat(DAY_MM_DD_YYYY_HH_MM_SS_A),
-        });
-      }
-    });
-
-    setTodayActivities(records);
-  }, [tasks, followUps]);
+  const noActivityReminderRows = noActivityReminder.map((activity, index) => {
+    return (
+      <tr key={index}>
+        <td>{activity.name}</td>
+        <td>
+          <Badge
+            variant="filled"
+            color={projectStatusColors[activity.status]}
+            styles={{
+              root: {
+                width: "100%",
+              },
+            }}
+          >
+            {activity.statusName}
+          </Badge>
+        </td>
+        <td>
+          {activity.lastActivity
+            ? DateTime.fromISO(activity.lastActivity).toFormat(DAY_MM_DD_YYYY_HH_MM_SS_A)
+            : "N/A"}
+        </td>
+      </tr>
+    );
+  });
 
   const projectOverdueRows = projectOverDue.map((project, index) => {
     const dueDate = DateTime.fromISO(project.dueDate).toLocal();
@@ -492,22 +516,22 @@ export const ProjectDash: React.FC<OwnProps> = () => {
             <Card p="xs" shadow="sm" className={classes.card} my={4} px={"xs"} radius={"md"}>
               <div className={classes.grayContainer}>
                 <Text fw={"bold"} fz={rem(60)} color={colors.titleText} mt={-16}>
-                  {projectsUnderDev.length}
+                  {noActivityReminderRows.length}
                 </Text>
                 <Text fz="md" className={classes.label} color={colors.titleText} mt={-10} mb={2}>
-                  Projects Under Development
+                  Reminders
                 </Text>
               </div>
               <ScrollArea h={rem(272)}>
                 <Table>
                   <thead>
                     <tr>
-                      <th>Name</th>
-                      <th>Due Date</th>
-                      <th>Time Remaining (Days)</th>
+                      <th>Project Name</th>
+                      <th>Status</th>
+                      <th>Last Activity</th>
                     </tr>
                   </thead>
-                  <tbody>{projectsInProcessRows}</tbody>
+                  <tbody>{noActivityReminderRows}</tbody>
                 </Table>
               </ScrollArea>
             </Card>
@@ -549,6 +573,31 @@ export const ProjectDash: React.FC<OwnProps> = () => {
             <Card p="xs" shadow="sm" className={classes.card} my={4} px={"xs"} radius={"md"}>
               <div className={classes.grayContainer}>
                 <Text fw={"bold"} fz={rem(60)} color={colors.titleText} mt={-16}>
+                  {projectsUnderDev.length}
+                </Text>
+                <Text fz="md" className={classes.label} color={colors.titleText} mt={-10} mb={2}>
+                  Projects Under Development
+                </Text>
+              </div>
+              <ScrollArea h={rem(272)}>
+                <Table>
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Due Date</th>
+                      <th>Time Remaining (Days)</th>
+                    </tr>
+                  </thead>
+                  <tbody>{projectsInProcessRows}</tbody>
+                </Table>
+              </ScrollArea>
+            </Card>
+          </Grid.Col>
+
+          <Grid.Col md={6} lg={6} xl={6}>
+            <Card p="xs" shadow="sm" className={classes.card} my={4} px={"xs"} radius={"md"}>
+              <div className={classes.grayContainer}>
+                <Text fw={"bold"} fz={rem(60)} color={colors.titleText} mt={-16}>
                   {projectOverDue.length}
                 </Text>
                 <Text fz="md" className={classes.label} color={colors.titleText} mt={-10} mb={2}>
@@ -567,60 +616,6 @@ export const ProjectDash: React.FC<OwnProps> = () => {
                   <tbody>{projectOverdueRows}</tbody>
                 </Table>
               </ScrollArea>
-            </Card>
-          </Grid.Col>
-
-          {/* <Grid.Col md={6} lg={6} xl={6}>
-            <Card p="xs" shadow="sm" className={classes.card} my={4} px={"xs"} radius={"md"}>
-              <div className={classes.grayContainer}>
-                <Text fw={"bold"} fz={rem(60)} color={colors.titleText} mt={-16}>
-                  {todayActivitiesRows.length}
-                </Text>
-                <Text fz="md" className={classes.label} color={colors.titleText} mt={-10} mb={2}>
-                  Today's Activities
-                </Text>
-              </div>
-              <ScrollArea h={rem(272)}>
-                <Table>
-                  <thead>
-                    <tr>
-                      <th>Name</th>
-                      <th>Activity Type</th>
-                      <th>Due Date</th>
-                    </tr>
-                  </thead>
-                  <tbody>{todayActivitiesRows}</tbody>
-                </Table>
-              </ScrollArea>
-            </Card>
-          </Grid.Col> */}
-
-          <Grid.Col md={6} lg={6} xl={6}>
-            <Card p="xs" shadow="sm" className={classes.card} my={4} px={"xs"} radius={"md"}>
-              <div className={classes.grayContainer}>
-                <Text fz="md" className={classes.label} color={colors.titleText} mb={2} pt={"sm"}>
-                  Monthly Project Chart ({value === "by value" ? "By Value" : "By Project"})
-                </Text>
-                <Flex direction={"row"} gap={"xs"} align={"center"} justify={"flex-end"}>
-                  <Button variant="filled" size="xs" onClick={() => toggle()}>
-                    {value.toUpperCase()}
-                  </Button>
-                  <Select
-                    w={rem(128)}
-                    size="xs"
-                    data={[{ label: "2023", value: "2023" }]}
-                    defaultValue={"2023"}
-                    withinPortal
-                  />
-                </Flex>
-              </div>
-              <Chart
-                chartType="ColumnChart"
-                data={
-                  value === "by value" ? projectValueTargetCounts?.data : projectTargetCounts?.data
-                }
-                options={{ ...options, isStacked: true }}
-              />
             </Card>
           </Grid.Col>
 
@@ -649,6 +644,35 @@ export const ProjectDash: React.FC<OwnProps> = () => {
                 </Text>
               </div>
               <Chart chartType="PieChart" data={projectValueCounts?.data} options={options} />
+            </Card>
+          </Grid.Col>
+
+          <Grid.Col md={6} lg={6} xl={6}>
+            <Card p="xs" shadow="sm" className={classes.card} my={4} px={"xs"} radius={"md"}>
+              <div className={classes.grayContainer}>
+                <Text fz="md" className={classes.label} color={colors.titleText} mb={2} pt={"sm"}>
+                  Monthly Project Chart ({value === "by value" ? "By Value" : "By Project"})
+                </Text>
+                <Flex direction={"row"} gap={"xs"} align={"center"} justify={"flex-end"}>
+                  <Button variant="filled" size="xs" onClick={() => toggle()}>
+                    {value.toUpperCase()}
+                  </Button>
+                  <Select
+                    w={rem(128)}
+                    size="xs"
+                    data={[{ label: "2023", value: "2023" }]}
+                    defaultValue={"2023"}
+                    withinPortal
+                  />
+                </Flex>
+              </div>
+              <Chart
+                chartType="ColumnChart"
+                data={
+                  value === "by value" ? projectValueTargetCounts?.data : projectTargetCounts?.data
+                }
+                options={{ ...options, isStacked: true }}
+              />
             </Card>
           </Grid.Col>
 

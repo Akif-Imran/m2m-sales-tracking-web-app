@@ -19,6 +19,7 @@ import {
   Reports,
   Projects,
   Home,
+  Stock,
 } from "@pages";
 import { routes } from "./routes";
 import { Suspense, lazy } from "react";
@@ -52,7 +53,7 @@ const MainApp: React.FC<OwnProps> = () => {
   const _Suppliers = lazy(() => import("../pages/settings/suppliers"));
   const _ExpenseTypes = lazy(() => import("../pages/settings/expense-type"));
   const _PurchaseCategories = lazy(() => import("../pages/settings/purchase-req-category"));
-  const _StockItems = lazy(() => import("../pages/settings/stock-item"));
+  const _Warehouse = lazy(() => import("../pages/settings/warehouse"));
   //notifications
   const _Notification = lazy(() => import("../pages/notification"));
   //help
@@ -212,6 +213,12 @@ const MainApp: React.FC<OwnProps> = () => {
         }
       ></Route>
 
+      {/* Stock */}
+      <Route
+        path={routes.stock.list}
+        element={<_RequireAuth children={<_AppShell page={<Stock />} />} />}
+      ></Route>
+
       {/* settings */}
       <Route
         path={routes.settings.home}
@@ -238,8 +245,8 @@ const MainApp: React.FC<OwnProps> = () => {
           element={<SuspendedView children={<_PurchaseCategories />} />}
         />
         <Route
-          path={routes.settings.stock_items}
-          element={<SuspendedView children={<_StockItems />} />}
+          path={routes.settings.warehouse}
+          element={<SuspendedView children={<_Warehouse />} />}
         />
       </Route>
 

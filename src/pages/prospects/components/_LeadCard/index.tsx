@@ -1,12 +1,23 @@
-import { ActionIcon, Avatar, Badge, Card, Flex, Menu, Text, Tooltip, rem } from "@mantine/core";
-import React from "react";
-import { selectLeadsWithRecords } from "@store";
 import {
+  ActionIcon,
+  Avatar,
+  Badge,
+  Card,
+  Flex,
+  Menu,
+  Text,
+  Tooltip,
+  UnstyledButton,
+  rem,
+} from "@mantine/core";
+import React from "react";
+import { selectLeadsWithRecords, selectModule, useAppSelector } from "@store";
+import {
+  IconCaretRightFilled,
   IconCornerDownRight,
   IconDotsVertical,
   IconRotateClockwise2,
   IconTrash,
-  // IconUserCog,
 } from "@tabler/icons-react";
 import { BASE_URL } from "@api";
 import { menuIconStyle, noImageStyle } from "@global-styles";
@@ -15,6 +26,8 @@ import { PhotoView } from "react-photo-view";
 import { useStyles } from "./styles";
 import { useAuthContext } from "@contexts";
 import { projectStatusColors } from "@constants";
+import { routes } from "@routes";
+import { useNavigate } from "react-router-dom";
 
 interface OwnProps {
   onClick?: (e?: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
@@ -33,10 +46,12 @@ export const _LeadCard: React.FC<OwnProps> = ({
   moveToProject,
   updateStatus,
 }) => {
-  const { classes, theme } = useStyles();
+  const { classes, theme, cx } = useStyles();
+  const navigate = useNavigate();
   const {
     state: { isAdmin },
   } = useAuthContext();
+  const { module } = useAppSelector(selectModule);
 
   const menuStyles = {
     itemLabel: {
@@ -165,6 +180,25 @@ export const _LeadCard: React.FC<OwnProps> = ({
               <Badge variant="filled" color={projectStatusColors[item.status]} mt={"xs"}>
                 {item.statusName}
               </Badge>
+              <Tooltip label={"Contact's Company Details"} position="bottom" withinPortal withArrow>
+                <UnstyledButton
+                  className={cx(classes.bottomButton, classes.rightAlign, classes.noPadding)}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    if (module === "crm") {
+                      navigate(routes.company.prospect_nav(item.customerId, item._id));
+                    } else if (module === "project") {
+                      navigate(routes.company.project_nav(item.customerId));
+                    }
+                  }}
+                >
+                  <IconCaretRightFilled
+                    stroke={1.3}
+                    size={22}
+                    style={{ color: colors.titleText }}
+                  />
+                </UnstyledButton>
+              </Tooltip>
             </div>
           </div>
         </div>

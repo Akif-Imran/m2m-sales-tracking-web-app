@@ -63,7 +63,7 @@ export const CompanyProspects: React.FC<OwnProps> = () => {
   const { theme } = useStyles();
   const navigate = useNavigate();
   const { classes: gclasses } = useGStyles();
-  const { companyId } = useParams();
+  const { companyId, prospectId } = useParams();
   console.log(companyId);
   const dispatch = useAppDispatch();
   const {
@@ -99,17 +99,28 @@ export const CompanyProspects: React.FC<OwnProps> = () => {
     setLeadsList(lead_s);
     setCompany(company);
     if (lead_s.length > 0) {
-      setSelectedLead(lead_s[0]);
-      setFollowUps(followUpList.filter((followUp) => followUp.projectId === lead_s[0]._id));
+      if (prospectId) {
+        const prospect = lead_s.find((lead) => lead._id === prospectId);
+        if (prospect) {
+          setSelectedLead(prospect);
+          setFollowUps(followUpList.filter((followUp) => followUp.projectId === prospect._id));
+        } else {
+          setSelectedLead(lead_s[0]);
+          setFollowUps(followUpList.filter((followUp) => followUp.projectId === lead_s[0]._id));
+        }
+      } else {
+        setSelectedLead(lead_s[0]);
+        setFollowUps(followUpList.filter((followUp) => followUp.projectId === lead_s[0]._id));
+      }
     }
     setIsLoading((_prev) => false);
-  }, [companyId, companiesList, leads, contactsList, followUpList]);
+  }, [companyId, prospectId, companiesList, leads, contactsList, followUpList]);
 
-  const handleSelectProject = (projectId: string) => {
-    const project = leads.find((project) => project._id === projectId);
+  const handleSelectProspect = (prospectId: string) => {
+    const project = leads.find((project) => project._id === prospectId);
     setSelectedLead(project);
     //FIXME - fix this follow project id type
-    const followUp_s = followUpList.filter((followUp) => followUp.projectId === projectId);
+    const followUp_s = followUpList.filter((followUp) => followUp.projectId === prospectId);
     setFollowUps(followUp_s);
   };
 
@@ -293,7 +304,7 @@ export const CompanyProspects: React.FC<OwnProps> = () => {
                     px={"sm"}
                     py={"xs"}
                     radius={"md"}
-                    onClick={() => handleSelectProject(project._id)}
+                    onClick={() => handleSelectProspect(project._id)}
                   >
                     <Flex direction={"row"} justify={"space-between"} align={"center"}>
                       <Flex direction={"column"} align={"flex-start"}>

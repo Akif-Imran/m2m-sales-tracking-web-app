@@ -19,8 +19,13 @@ const routes = {
   },
   company: {
     list: "/contacts",
-    prospects: "/company-prospects/:companyId",
-    prospect_nav: (companyId: string) => `/company-prospects/${companyId}`,
+    prospects: "/company-prospects/:companyId/:prospectId?",
+    prospect_nav: (companyId: string, prospectId?: string) => {
+      if (prospectId) {
+        return `/company-prospects/${companyId}/${prospectId}`;
+      }
+      return `/company-prospects/${companyId}`;
+    },
     projects: "/company-projects/:companyId",
     project_nav: (companyId: string) => `/company-projects/${companyId}`,
     details: "details/:companyId",

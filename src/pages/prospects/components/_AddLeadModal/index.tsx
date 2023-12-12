@@ -50,8 +50,10 @@ interface IProjectForm
     | "updatedAt"
     | "engineer"
     | "assignedEngineerDate"
+    | "quotation"
   > {
   hasImage: boolean;
+  quotation?: number;
 }
 
 const schema: yup.ObjectSchema<IProjectForm> = yup.object().shape({
@@ -65,7 +67,7 @@ const schema: yup.ObjectSchema<IProjectForm> = yup.object().shape({
   }),
   contractDate: yup.string().required("Contract date is required"),
   deliveryDate: yup.string().required("Delivery date is required"),
-  quotation: yup.number().required("Quotation is required"),
+  quotation: yup.number().optional(),
   status: yup.number().required("Status is required"),
   customerId: yup.string().required("Customer is required"),
   hasImage: yup.boolean().required("Has Image is required"),
@@ -383,7 +385,7 @@ const _AddLeadModal: React.FC<OwnProps> = ({ opened, onClose, title, companyId }
             }
           />
         </Group>
-        <Group grow align="flex-start">
+        {/* <Group grow align="flex-start">
           <TextInput
             required
             withAsterisk={false}
@@ -397,8 +399,8 @@ const _AddLeadModal: React.FC<OwnProps> = ({ opened, onClose, title, companyId }
             error={
               form.touched.quotation && form.errors.quotation ? `${form.errors.quotation}` : null
             }
-          />
-          {/* <Select
+          /> */}
+        {/* <Select
                 required
                 withAsterisk={false}
                 searchable
@@ -413,7 +415,7 @@ const _AddLeadModal: React.FC<OwnProps> = ({ opened, onClose, title, companyId }
                     : null
                 }
               /> */}
-        </Group>
+        {/* </Group> */}
         <Select
           required
           withAsterisk={false}

@@ -38,6 +38,7 @@ import {
   IconBoxSeam,
   IconHome,
   IconAddressBook,
+  IconHelp,
 } from "@tabler/icons-react";
 import type { TablerIconsProps } from "@tabler/icons-react";
 import { useAuthContext } from "@contexts";
@@ -98,12 +99,12 @@ const homeButtons: NavbarButtons[] = [
     icon: IconInfoCircle,
     visibleTo: [1, 2, 3, 4],
   },
-  // {
-  //   label: "Help",
-  //   icon: IconHelp,
-  //   link: routes.help.home,
-  //   visibleTo: [1, 2, 3, 4],
-  // },
+  {
+    label: "Help",
+    icon: IconHelp,
+    link: routes.help.home,
+    visibleTo: [1, 2, 3, 4],
+  },
 ];
 
 const crmButtons: NavbarButtons[] = [

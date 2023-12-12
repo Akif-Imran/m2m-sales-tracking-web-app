@@ -60,7 +60,7 @@ export const _LeadCard: React.FC<OwnProps> = ({
   };
 
   return (
-    <Card shadow="sm" mb={"xs"} px={"sm"} py={"lg"} radius={"md"} onClick={onClick}>
+    <Card shadow="sm" mb={"xs"} px={"sm"} py={"lg"} radius={"md"} mih={rem(180)} onClick={onClick}>
       <div className={classes.imageWithInfoContainer}>
         <div className={classes.machineImageContainer}>
           <PhotoView

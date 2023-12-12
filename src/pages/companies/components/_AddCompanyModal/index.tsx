@@ -23,6 +23,7 @@ import { createCompany } from "@thunks";
 import { useAuthContext } from "@contexts";
 import * as yup from "yup";
 import { uploadFile } from "@services";
+import { validWebsiteURL } from "@constants";
 
 interface OwnProps {
   opened: boolean;
@@ -42,7 +43,10 @@ const schema: yup.ObjectSchema<ICompanyForm> = yup.object().shape({
   address: yup.string().required("Address is required"),
   state: yup.string().required("State is required"),
   country: yup.string().required("Country is required"),
-  website: yup.string().url().required("Website is required"),
+  website: yup
+    .string()
+    .matches(validWebsiteURL, "Invalid Website URl")
+    .required("Website is required"),
   city: yup.string().required("City is required"),
   phone: yup.string().required("Phone number is required"),
 });

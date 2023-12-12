@@ -3,7 +3,7 @@ export { Login, Register, ForgotPassword, _VerifyOTP } from "./auth";
 export { CRMDash, InventoryDash, ProjectDash } from "./dashboard";
 export { Leads, Claims, FollowUps } from "./prospects";
 export { Projects, PurchaseRequests } from "./projects";
-export { Company } from "./companies";
+export { Company, Contact } from "./companies";
 export { Tasks } from "./tasks";
 export { Users } from "./users";
 export { Settings, AppTheme, ChangPassword } from "./settings";

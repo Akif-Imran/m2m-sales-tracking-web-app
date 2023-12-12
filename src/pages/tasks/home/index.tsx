@@ -17,6 +17,7 @@ import {
   Table,
   Text,
   TextInput,
+  Tooltip,
   rem,
 } from "@mantine/core";
 import {
@@ -466,14 +467,21 @@ const Tasks: React.FC<OwnProps> = () => {
           icon={<IconSearch size={16} />}
           onChange={(e) => onChangeSearch(e.target?.value)}
         />
-        <ActionIcon
-          variant="filled"
-          size={"2.2rem"}
-          color={theme.primaryColor}
-          onClick={() => toggle()}
-        >
-          {icon}
-        </ActionIcon>
+        <Tooltip label="Toggle Card / Table View" position="bottom" withArrow withinPortal>
+          <ActionIcon
+            variant="filled"
+            size={"2.2rem"}
+            color={theme.primaryColor}
+            onClick={() => toggle()}
+          >
+            {icon}
+          </ActionIcon>
+        </Tooltip>
+        <Tooltip label="Clear Filters" position="bottom" withArrow withinPortal>
+          <Button variant="filled" rightIcon={<IconFilterFilled size={16} />} onClick={clearSort}>
+            Clear
+          </Button>
+        </Tooltip>
         {isAdmin && (
           <Button
             variant="filled"
@@ -483,9 +491,6 @@ const Tasks: React.FC<OwnProps> = () => {
             Task
           </Button>
         )}
-        <Button variant="filled" rightIcon={<IconFilterFilled size={16} />} onClick={clearSort}>
-          Clear
-        </Button>
       </Flex>
       {content}
       <_AddTaskModal

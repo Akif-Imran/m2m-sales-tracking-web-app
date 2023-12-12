@@ -12,6 +12,7 @@ import {
   Table,
   Text,
   TextInput,
+  Tooltip,
 } from "@mantine/core";
 import { IconId, IconPlus, IconSearch, IconTable, IconTrash } from "@tabler/icons-react";
 import { colors } from "@theme";
@@ -199,14 +200,16 @@ const Users: React.FC<OwnProps> = () => {
           icon={<IconSearch size={16} />}
           onChange={(e) => onChangeSearch(e.target?.value)}
         />
-        <ActionIcon
-          variant="filled"
-          size={"2.2rem"}
-          color={theme.primaryColor}
-          onClick={() => toggle()}
-        >
-          {icon}
-        </ActionIcon>
+        <Tooltip label="Toggle Card / Table View" position="bottom" withArrow withinPortal>
+          <ActionIcon
+            variant="filled"
+            size={"2.2rem"}
+            color={theme.primaryColor}
+            onClick={() => toggle()}
+          >
+            {icon}
+          </ActionIcon>
+        </Tooltip>
         <Button
           variant="filled"
           rightIcon={<IconPlus size={16} />}

@@ -1,6 +1,7 @@
 import { createStyles, UnstyledButton, Avatar, Text, Flex, rem } from "@mantine/core";
 import { setModule } from "@slices";
 import { useAppDispatch } from "@store";
+import { notify } from "@utility";
 import React from "react";
 
 interface OwnProps {}
@@ -10,7 +11,12 @@ export const Home: React.FC<OwnProps> = () => {
 
   return (
     <Flex direction={"row"} justify={"space-between"} my={rem(160)} mx={rem(160)}>
-      <UnstyledButton onClick={() => dispatch(setModule("crm"))} className={classes.btn}>
+      <UnstyledButton
+        className={classes.btn}
+        onClick={() => {
+          dispatch(setModule("crm"));
+        }}
+      >
         <Flex direction={"column"} align={"center"}>
           <Avatar size={160} color={"blue"} radius={"lg"} className={classes.initials}>
             CRM
@@ -24,7 +30,13 @@ export const Home: React.FC<OwnProps> = () => {
         </Flex>
       </UnstyledButton>
 
-      <UnstyledButton onClick={() => dispatch(setModule("project"))} className={classes.btn}>
+      <UnstyledButton
+        className={classes.btn}
+        onClick={() => {
+          notify("Project Management", "This module has been temporarily disabled", "error");
+          // dispatch(setModule("project"));
+        }}
+      >
         <Flex direction={"column"} align={"center"}>
           <Avatar size={160} color={"green"} radius={"lg"} className={classes.initials}>
             PM
@@ -38,7 +50,13 @@ export const Home: React.FC<OwnProps> = () => {
         </Flex>
       </UnstyledButton>
 
-      <UnstyledButton onClick={() => dispatch(setModule("inventory"))} className={classes.btn}>
+      <UnstyledButton
+        className={classes.btn}
+        onClick={() => {
+          notify("Inventory Management", "This module has been temporarily disabled", "error");
+          // dispatch(setModule("inventory"));
+        }}
+      >
         <Flex direction={"column"} align={"center"}>
           <Avatar size={160} color={"red"} radius={"lg"} className={classes.initials}>
             IM

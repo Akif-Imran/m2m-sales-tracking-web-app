@@ -17,6 +17,7 @@ import {
   Table,
   Text,
   TextInput,
+  Tooltip,
 } from "@mantine/core";
 import {
   selectLeadsWithRecords,
@@ -440,14 +441,16 @@ export const Leads: React.FC<OwnProps> = () => {
           //   <IconFilter size={14} color={colors.borderColor} onClick={showFilterModal} />
           // }
         />
-        <ActionIcon
-          variant="filled"
-          size={"2.2rem"}
-          color={theme.primaryColor}
-          onClick={() => toggle()}
-        >
-          {icon}
-        </ActionIcon>
+        <Tooltip label="Toggle Card / Table View" position="bottom" withArrow withinPortal>
+          <ActionIcon
+            variant="filled"
+            size={"2.2rem"}
+            color={theme.primaryColor}
+            onClick={() => toggle()}
+          >
+            {icon}
+          </ActionIcon>
+        </Tooltip>
         <Button
           variant="filled"
           rightIcon={<IconPlus size={16} />}

@@ -20,6 +20,7 @@ import {
   Projects,
   Home,
   Stock,
+  Contact,
 } from "@pages";
 import { routes } from "./routes";
 import { Suspense, lazy } from "react";
@@ -99,6 +100,10 @@ const MainApp: React.FC<OwnProps> = () => {
       />
 
       {/* company */}
+      <Route
+        path={routes.contact.list}
+        element={<_RequireAuth children={<_AppShell page={<Contact />} />} />}
+      />
       <Route
         path={routes.company.list}
         element={<_RequireAuth children={<_AppShell page={<Company />} />} />}

@@ -63,54 +63,74 @@ export const CompanyProspects: React.FC<OwnProps> = () => {
   const { theme } = useStyles();
   const navigate = useNavigate();
   const { classes: gclasses } = useGStyles();
-  const { companyId } = useParams();
+  const { companyId, prospectId } = useParams();
   console.log(companyId);
   const dispatch = useAppDispatch();
   const {
     state: { token, user, isAdmin },
   } = useAuthContext();
   const followUpList = useAppSelector(selectFollowUpsWithRecords);
-  const leads = useAppSelector(selectLeadsWithRecords);
-  const { data: companiesList } = useAppSelector(selectCompanies);
-  const { data: contactsList } = useAppSelector(selectCompanyContact);
+  const prospects = useAppSelector(selectLeadsWithRecords);
+  const { data: companies } = useAppSelector(selectCompanies);
+  const { data: contacts } = useAppSelector(selectCompanyContact);
 
   const [isDeletingContact, setIsDeletingContact] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(true);
   const [company, setCompany] = React.useState<ICompany>();
-  const [leadsList, setLeadsList] = React.useState<typeof leads>([]);
-  const [contacts, setContacts] = React.useState<typeof contactsList>([]);
-  const [followUps, setFollowUps] = React.useState<typeof followUpList>([]);
-  const [selectedLead, setSelectedLead] = React.useState<ArrayToObj<typeof leads>>();
+  const [contactsList, setContactsList] = React.useState<typeof contacts>([]);
+  const [followUpsList, setFollowUpsList] = React.useState<typeof followUpList>([]);
+  const [prospectsList, setProspectsList] = React.useState<typeof prospects>([]);
+  const [searchedProspects, setSearchedProspects] = React.useState<typeof prospects>([]);
+
+  const [selectedLead, setSelectedLead] = React.useState<ArrayToObj<typeof prospects>>();
 
   const [addContactModalOpened, setAddContactModalOpened] = React.useState(false);
-  const [addProjectModalOpened, setAddProjectModalOpened] = React.useState(false);
+  const [addProspectModalOpened, setAddProspectModalOpened] = React.useState(false);
   const [addClaimModalOpened, setAddClaimModalOpened] = React.useState(false);
   const [addPurchaseModalOpened, setAddPurchaseModalOpened] = React.useState(false);
-  const [contactSearchQuery, setContactSearchQuery] = React.useState("");
   const [addFollowUpModalOpened, setAddFollowUpModalOpened] = React.useState(false);
+
+  const [contactSearchQuery, setContactSearchQuery] = React.useState("");
+  const [prospectSearchQuery, setProspectSearchQuery] = React.useState("");
   const [followupSearchQuery, setFollowUpSearchQuery] = React.useState("");
 
   React.useEffect(() => {
     if (!companyId) return;
-    const company = companiesList.find((company) => company._id === companyId);
-    const lead_s = leads.filter((project) => project.customerId === companyId);
-    const contact_s = contactsList.filter((contact) => contact.customerId === companyId);
-    setContacts(contact_s);
-    setLeadsList(lead_s);
+    const company = companies.find((company) => company._id === companyId);
+    const prospect_s = prospects.filter((project) => project.customerId === companyId);
+    const contact_s = contacts.filter((contact) => contact.customerId === companyId);
+    setContactsList(contact_s);
+    setProspectsList(prospect_s);
+    setSearchedProspects(prospect_s);
     setCompany(company);
-    if (lead_s.length > 0) {
-      setSelectedLead(lead_s[0]);
-      setFollowUps(followUpList.filter((followUp) => followUp.projectId === lead_s[0]._id));
+    if (prospect_s.length > 0) {
+      if (prospectId) {
+        const prospect = prospect_s.find((lead) => lead._id === prospectId);
+        if (prospect) {
+          setSelectedLead(prospect);
+          setFollowUpsList(followUpList.filter((followUp) => followUp.projectId === prospect._id));
+        } else {
+          setSelectedLead(prospect_s[0]);
+          setFollowUpsList(
+            followUpList.filter((followUp) => followUp.projectId === prospect_s[0]._id)
+          );
+        }
+      } else {
+        setSelectedLead(prospect_s[0]);
+        setFollowUpsList(
+          followUpList.filter((followUp) => followUp.projectId === prospect_s[0]._id)
+        );
+      }
     }
     setIsLoading((_prev) => false);
-  }, [companyId, companiesList, leads, contactsList, followUpList]);
+  }, [companyId, prospectId, companies, prospects, contacts, followUpList]);
 
-  const handleSelectProject = (projectId: string) => {
-    const project = leads.find((project) => project._id === projectId);
+  const handleSelectProspect = (prospectId: string) => {
+    const project = prospects.find((project) => project._id === prospectId);
     setSelectedLead(project);
     //FIXME - fix this follow project id type
-    const followUp_s = followUpList.filter((followUp) => followUp.projectId === projectId);
-    setFollowUps(followUp_s);
+    const followUp_s = followUpList.filter((followUp) => followUp.projectId === prospectId);
+    setFollowUpsList(followUp_s);
   };
 
   const handleDeleteCompany = (id: string) => {
@@ -185,11 +205,19 @@ export const CompanyProspects: React.FC<OwnProps> = () => {
 
   const onChangeContactSearch = (query: string) => {
     setContactSearchQuery(query);
-    const filtered = contactsList.filter(
+    const filtered = contacts.filter(
       (contact) =>
         contact.name.toLowerCase().includes(query.toLowerCase()) && contact.customerId === companyId
     );
-    setContacts(filtered);
+    setContactsList(filtered);
+  };
+
+  const onChangeProspectSearch = (query: string) => {
+    setProspectSearchQuery(query);
+    const filtered = prospectsList.filter((prospect) =>
+      prospect.name.toLowerCase().includes(query.toLowerCase())
+    );
+    setSearchedProspects(filtered);
   };
 
   const onChangeFollowUpSearch = (query: string) => {
@@ -202,7 +230,7 @@ export const CompanyProspects: React.FC<OwnProps> = () => {
           followUp.contactPerson?.name.toLowerCase().includes(query.toLowerCase()) ||
           followUp.meetingPlace.toLowerCase().includes(query.toLowerCase())
       );
-    setFollowUps(filtered);
+    setFollowUpsList(filtered);
   };
   //  } else if (!company || !selectedProject) {
   if (isLoading) {
@@ -230,7 +258,7 @@ export const CompanyProspects: React.FC<OwnProps> = () => {
                 <Menu.Item
                   color={colors.titleText}
                   icon={<IconPlus {...menuIconStyle} />}
-                  onClick={() => setAddProjectModalOpened(true)}
+                  onClick={() => setAddProspectModalOpened(true)}
                 >
                   Prospect
                 </Menu.Item>
@@ -279,12 +307,37 @@ export const CompanyProspects: React.FC<OwnProps> = () => {
         <Grid>
           <Grid.Col span={3}>
             <Card {...cardConfig} h={rem(56)}>
-              <Text {...titleTextStyle} size={"md"} mt={rem(4)}>
+              {/* <Text {...titleTextStyle} size={"md"} mt={rem(4)}>
                 Prospects
-              </Text>
+              </Text> */}
+              <Flex direction={"row"} justify={"space-between"} align={"center"}>
+                <Text {...titleTextStyle} size={"md"}>
+                  Prospects
+                </Text>
+
+                <Flex direction={"row"} columnGap={"xs"} align={"center"}>
+                  <TextInput
+                    size="xs"
+                    radius={"md"}
+                    value={prospectSearchQuery}
+                    className={gclasses.searchInput}
+                    placeholder="Search by any field"
+                    icon={<IconSearch size={16} />}
+                    onChange={(e) => onChangeProspectSearch(e.target?.value)}
+                  />
+                  <ActionIcon
+                    variant="filled"
+                    size={"sm"}
+                    color={"dark"}
+                    onClick={() => setAddProspectModalOpened(true)}
+                  >
+                    <IconPlus size={16} stroke={1.3} color={colors.white} />
+                  </ActionIcon>
+                </Flex>
+              </Flex>
             </Card>
             <ScrollArea type="scroll" h={"80vh"}>
-              {leadsList.map((project) => {
+              {searchedProspects.map((project) => {
                 return (
                   <Card
                     key={project._id}
@@ -293,7 +346,7 @@ export const CompanyProspects: React.FC<OwnProps> = () => {
                     px={"sm"}
                     py={"xs"}
                     radius={"md"}
-                    onClick={() => handleSelectProject(project._id)}
+                    onClick={() => handleSelectProspect(project._id)}
                   >
                     <Flex direction={"row"} justify={"space-between"} align={"center"}>
                       <Flex direction={"column"} align={"flex-start"}>
@@ -436,7 +489,7 @@ export const CompanyProspects: React.FC<OwnProps> = () => {
                     </Flex>
                   </Card>
                   <ScrollArea type="scroll" h={"36vh"}>
-                    {contacts.map((contact) => {
+                    {contactsList.map((contact) => {
                       return (
                         <Card {...cardConfig}>
                           <React.Fragment key={contact._id}>
@@ -566,7 +619,7 @@ export const CompanyProspects: React.FC<OwnProps> = () => {
                   </Flex>
                 </Card>
                 <ScrollArea type="scroll" h={"33vh"}>
-                  {followUps.map((followUp, index) => {
+                  {followUpsList.map((followUp, index) => {
                     const value = followUp?.expensePrice
                       ? Intl.NumberFormat("en-US", {
                           style: "currency",
@@ -673,8 +726,8 @@ export const CompanyProspects: React.FC<OwnProps> = () => {
         </Grid>
         <_AddLeadModal
           title="Add Prospect"
-          opened={addProjectModalOpened}
-          onClose={() => setAddProjectModalOpened(false)}
+          opened={addProspectModalOpened}
+          onClose={() => setAddProspectModalOpened(false)}
           companyId={company._id}
         />
         <_AddContactModal

@@ -1,5 +1,8 @@
 import { colors } from "@theme";
 
+//regex
+export const validWebsiteURL =
+  /^(?:(?:https?|ftp):\/\/)?(?:www\.)?[a-zA-Z0-9-]+(?:\.[a-zA-Z]{2,})+(?:\/[^\s]*)?$/;
 //localStorage keys
 export const MODULE_SLICE_STORAGE_KEY = "m2m-sales-tracking-module";
 

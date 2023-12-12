@@ -1,5 +1,4 @@
 import React from "react";
-import { useStyles } from "./styles";
 import {
   ActionIcon,
   Avatar,
@@ -43,18 +42,16 @@ import { BASE_URL } from "@api";
 
 interface OwnProps {}
 
-const Company: React.FC<OwnProps> = () => {
-  useStyles();
+export const Contact: React.FC<OwnProps> = () => {
   const {
     state: { token, isAdmin },
   } = useAuthContext();
   const dispatch = useAppDispatch();
-  // const { pathname } = useLocation();
   const { classes: gclasses, theme } = useGStyles();
   const [viewMode, toggleViewMode] = useToggle(["cards", "list"]);
-  const [recordType, toggleRecordType] = useToggle<"Companies" | "Contacts">([
-    "Companies",
+  const [recordType, toggleRecordType] = useToggle<"Contacts" | "Companies">([
     "Contacts",
+    "Companies",
   ]);
   const [searchQuery, setSearchQuery] = React.useState("");
   const { data: companies } = useAppSelector(selectCompanies);
@@ -117,7 +114,7 @@ const Company: React.FC<OwnProps> = () => {
             }
           })
           .catch((err) => {
-            console.error(err?.message);
+            console.log(err?.message);
           })
           .finally(() => {
             setIsDeleting((_prev) => false);
@@ -155,7 +152,7 @@ const Company: React.FC<OwnProps> = () => {
             }
           })
           .catch((err) => {
-            console.error("Delete Contact: ", err?.message);
+            console.log("Delete Contact: ", err?.message);
             notify("Delete Contact", "An error occurred", "error");
           });
       },
@@ -508,4 +505,4 @@ const Company: React.FC<OwnProps> = () => {
   );
 };
 
-export { Company };
+export default Contact;

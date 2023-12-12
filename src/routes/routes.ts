@@ -17,8 +17,11 @@ const routes = {
   notification: {
     list: "/notifications",
   },
-  company: {
+  contact: {
     list: "/contacts",
+  },
+  company: {
+    list: "/companies",
     prospects: "/company-prospects/:companyId/:prospectId?",
     prospect_nav: (companyId: string, prospectId?: string) => {
       if (prospectId) {

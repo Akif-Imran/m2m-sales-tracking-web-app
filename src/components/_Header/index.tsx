@@ -37,6 +37,7 @@ import {
   IconLicense,
   IconBoxSeam,
   IconHome,
+  IconAddressBook,
 } from "@tabler/icons-react";
 import type { TablerIconsProps } from "@tabler/icons-react";
 import { useAuthContext } from "@contexts";
@@ -113,9 +114,9 @@ const crmButtons: NavbarButtons[] = [
     visibleTo: [1, 2, 3, 4],
   },
   {
-    link: routes.company.list,
+    link: routes.contact.list,
     label: "Contacts",
-    icon: IconBuildingBank,
+    icon: IconAddressBook,
     visibleTo: [1, 2, 3, 4],
   },
   {
@@ -142,12 +143,12 @@ const crmButtons: NavbarButtons[] = [
     visibleTo: [1, 2, 3, 4],
   },
   {
-    link: routes.user.leaves.list,
-    label: "Leaves",
+    link: routes.company.list,
+    label: "Company",
     links: [
       {
-        link: routes.user.leaves.list,
-        label: "Leaves",
+        link: routes.company.list,
+        label: "Company",
         visibleTo: [1, 2, 3, 4],
       },
       {
@@ -156,7 +157,7 @@ const crmButtons: NavbarButtons[] = [
         visibleTo: [1],
       },
     ],
-    icon: IconLicense,
+    icon: IconBuildingBank,
     visibleTo: [1, 2, 3, 4],
   },
   {
@@ -174,9 +175,9 @@ const projectButtons: NavbarButtons[] = [
     visibleTo: [1, 2, 3, 4],
   },
   {
-    link: routes.company.list,
+    link: routes.contact.list,
     label: "Contacts",
-    icon: IconBuildingBank,
+    icon: IconAddressBook,
     visibleTo: [1, 2, 3, 4],
   },
   {
@@ -424,7 +425,7 @@ const _Header = ({ toggleNavbar, opened }: _HeaderProps) => {
   }; */
 
   React.useEffect(() => {
-    console.log("useEffect log: ", active);
+    // console.log("useEffect log: ", active);
     if (location.pathname === "/notifications") {
       navigate(routes.notification.list);
       return;
@@ -490,13 +491,13 @@ const _Header = ({ toggleNavbar, opened }: _HeaderProps) => {
                   [classes.iconCentered]: !opened,
                 })}
                 onClick={(_event) => {
-                  console.log("menu click");
+                  // console.log("menu click");
                   if (
                     item.links
                       ?.find((inner) => inner.label === item.label)
                       ?.visibleTo.includes(user!.userType)
                   ) {
-                    console.log("user is navigated");
+                    // console.log("user is navigated");
                     navigate(item.link);
                   }
                   setActive(item.label);
@@ -530,7 +531,7 @@ const _Header = ({ toggleNavbar, opened }: _HeaderProps) => {
               [classes.iconCentered]: !opened,
             })}
             onClick={(_event) => {
-              console.log("simple click");
+              // console.log("simple click");
               if (item.visibleTo.includes(user!.userType)) navigate(item.link);
               setActive(item.label);
             }}

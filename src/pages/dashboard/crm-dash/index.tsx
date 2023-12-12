@@ -140,8 +140,6 @@ export const CRMDash: React.FC<OwnProps> = () => {
     },
   };
 
-  console.log(tasks);
-
   const drawProjectCharts = React.useCallback(() => {
     const projectsLegends: (string | number)[][] = [
       ["Vehicle Status", "Counts"],

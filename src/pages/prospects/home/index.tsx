@@ -10,6 +10,7 @@ import {
   Flex,
   Grid,
   Group,
+  Menu,
   Modal,
   Radio,
   ScrollArea,
@@ -28,6 +29,7 @@ import {
 import { useGStyles, noImageStyle } from "@global-styles";
 import {
   IconCornerDownRight,
+  IconFilterFilled,
   IconId,
   IconPlus,
   IconRotateClockwise2,
@@ -237,6 +239,17 @@ export const Leads: React.FC<OwnProps> = () => {
       });
   };
 
+  const handleStatusFilter = (status: string) => {
+    if (status === "0") {
+      setSearchedData(leads);
+    } else {
+      const parsed = parseInt(status);
+      if (isNaN(parsed)) return;
+      const filtered = leads.filter((prospect) => prospect.status === parsed);
+      setSearchedData(filtered);
+    }
+  };
+
   React.useEffect(() => {
     setSearchedData(leads);
   }, [leads]);
@@ -441,6 +454,26 @@ export const Leads: React.FC<OwnProps> = () => {
           //   <IconFilter size={14} color={colors.borderColor} onClick={showFilterModal} />
           // }
         />
+        <Menu>
+          <Menu.Target>
+            <Tooltip label="Status Filter" position="bottom" withArrow withinPortal>
+              <ActionIcon variant="filled" size={"2.2rem"} color={theme.primaryColor}>
+                <IconFilterFilled size={16} />
+              </ActionIcon>
+            </Tooltip>
+          </Menu.Target>
+          <Menu.Dropdown>
+            <Menu.Label>Status Filters</Menu.Label>
+            {[{ label: "All", value: "0" }].concat(leadsStatusList).map((status) => {
+              return (
+                <Menu.Item onClick={() => handleStatusFilter(status.value)}>
+                  {status.label}
+                </Menu.Item>
+              );
+            })}
+          </Menu.Dropdown>
+        </Menu>
+
         <Tooltip label="Toggle Card / Table View" position="bottom" withArrow withinPortal>
           <ActionIcon
             variant="filled"

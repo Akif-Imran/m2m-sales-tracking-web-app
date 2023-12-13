@@ -36,13 +36,14 @@ interface OwnProps {
 interface ILeaveForm
   extends Omit<
     ILeaveApplication,
-    "_id" | "__v" | "isActive" | "createdBy" | "createdAt" | "company" | "remarks"
+    "_id" | "__v" | "isActive" | "createdBy" | "createdAt" | "company" | "remarks" | "document"
   > {
   hasDocument: boolean;
+  document?: string;
 }
 
 const schema: yup.ObjectSchema<ILeaveForm> = yup.object().shape({
-  document: yup.string().required("Type is required").nullable(),
+  document: yup.string().optional(),
   hasDocument: yup.boolean().required("Type is required"),
   name: yup.string().required("Name is required"),
   reason: yup.string().required("Reason is required"),
@@ -56,10 +57,10 @@ const _AddLeaveModal: React.FC<OwnProps> = ({ onClose, opened, title }) => {
   const { theme } = useStyles();
   const { classes: gclasses } = useGStyles();
   const {
-    state: { token },
+    state: { token, user },
   } = useAuthContext();
-  const { leaveStatus, leaveTypes } = useAppSelector(selectRecordsForDropdown);
-  const leaveStatusList = leaveStatus.filter((status) => status.label === "Pending");
+  const { leaveTypes } = useAppSelector(selectRecordsForDropdown);
+  // const leaveStatusList = leaveStatus.filter((status) => status.label === "Pending");
   const dispatch = useAppDispatch();
   const [isCreating, setIsCreating] = React.useState(false);
   const [file, setFile] = React.useState<File>({} as File);
@@ -68,7 +69,7 @@ const _AddLeaveModal: React.FC<OwnProps> = ({ onClose, opened, title }) => {
     initialValues: {
       document: "",
       hasDocument: false,
-      name: "",
+      name: user?.name || "",
       reason: "",
       startDate: "",
       endDate: "",
@@ -92,7 +93,10 @@ const _AddLeaveModal: React.FC<OwnProps> = ({ onClose, opened, title }) => {
       dispatch(
         createLeave({
           token,
-          leave: values,
+          leave: {
+            ...values,
+            document: values.document || "",
+          },
         })
       )
         .unwrap()
@@ -140,7 +144,7 @@ const _AddLeaveModal: React.FC<OwnProps> = ({ onClose, opened, title }) => {
     }));
   };
 
-  const handleOnChangeStatus = (value: string | null) => {
+  /*   const handleOnChangeStatus = (value: string | null) => {
     if (!value) return;
     const typeName = leaveStatus.find((type) => type.value === value)?.label;
     if (!typeName) return;
@@ -148,7 +152,7 @@ const _AddLeaveModal: React.FC<OwnProps> = ({ onClose, opened, title }) => {
       ...prev,
       status: parseInt(value),
     }));
-  };
+  }; */
 
   const handleOnChangeStartDate = (value: DateValue) => {
     if (value) {
@@ -229,7 +233,7 @@ const _AddLeaveModal: React.FC<OwnProps> = ({ onClose, opened, title }) => {
             data={leaveTypes}
             error={form.touched.type && form.errors.type ? `${form.errors.type}` : null}
           />
-          <Select
+          {/* <Select
             required
             withAsterisk={false}
             searchable
@@ -239,7 +243,7 @@ const _AddLeaveModal: React.FC<OwnProps> = ({ onClose, opened, title }) => {
             onChange={handleOnChangeStatus}
             data={leaveStatusList}
             error={form.touched.status && form.errors.status ? `${form.errors.status}` : null}
-          />
+              />*/}
         </Group>
         <Group grow align="flex-start">
           <DatePickerInput

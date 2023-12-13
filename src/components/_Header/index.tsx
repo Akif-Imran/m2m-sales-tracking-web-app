@@ -153,6 +153,11 @@ const crmButtons: NavbarButtons[] = [
         visibleTo: [1, 2, 3, 4],
       },
       {
+        link: routes.user.leaves.list,
+        label: "Leaves",
+        visibleTo: [1, 2, 3, 4],
+      },
+      {
         link: routes.user.list,
         label: "Users",
         visibleTo: [1],

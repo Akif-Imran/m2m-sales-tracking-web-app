@@ -26,13 +26,14 @@ import { _AddLeaveModal, _UpdateLeaveModal } from "../components";
 import { useAuthContext } from "@contexts";
 import { BASE_URL } from "@api";
 import { PhotoView } from "react-photo-view";
+import { removeLeave } from "@thunks";
 
 interface OwnProps {}
 
 export const LeaveApplications: React.FC<OwnProps> = () => {
   useStyles();
   const {
-    state: { isAdmin, isHR, user },
+    state: { isAdmin, isHR, user, token },
   } = useAuthContext();
   const dispatch = useAppDispatch();
   const { classes: gclasses, theme } = useGStyles();
@@ -106,8 +107,23 @@ export const LeaveApplications: React.FC<OwnProps> = () => {
       cancelLabel: "Cancel",
       confirmLabel: "Delete Leave",
       onConfirm: () => {
-        dispatch(deleteLeave(id));
-        notify("Delete Leave", "Leave deleted successfully!", "success");
+        dispatch(
+          removeLeave({
+            id,
+            token,
+          })
+        )
+          .unwrap()
+          .then((res) => {
+            notify("Delete Leave", res?.message || "", res.success ? "success" : "error");
+            if (res.success) {
+              dispatch(deleteLeave(res.data._id));
+            }
+          })
+          .catch((err) => {
+            console.error(err?.message);
+            notify("Delete Leave", "An error occurred", "error");
+          });
       },
       onCancel: () => notify("Delete Leave", "Operation canceled!", "error"),
     });

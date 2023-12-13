@@ -7,6 +7,7 @@ import {
   Button,
   Center,
   Container,
+  FileButton,
   Flex,
   Grid,
   Group,
@@ -26,8 +27,9 @@ import {
   useAppDispatch,
   useAppSelector,
 } from "@store";
-import { useGStyles, noImageStyle } from "@global-styles";
+import { useGStyles, noImageStyle, bodyTextStyle } from "@global-styles";
 import {
+  IconCalendar,
   IconCornerDownRight,
   IconFilterFilled,
   IconId,
@@ -36,9 +38,15 @@ import {
   IconSearch,
   IconTable,
   IconTrash,
+  IconUpload,
   // IconUserCog,
 } from "@tabler/icons-react";
-import { modalOverlayPropsHelper, openConfirmModalHelper, openDeleteModalHelper } from "@helpers";
+import {
+  DATE_FORMAT_YYYY_MM_DD,
+  modalOverlayPropsHelper,
+  openConfirmModalHelper,
+  openDeleteModalHelper,
+} from "@helpers";
 import { notify } from "@utility";
 import { colors } from "@theme";
 import { deleteLead } from "@slices";
@@ -50,6 +58,10 @@ import { Outlet, useSearchParams } from "react-router-dom";
 import { removeProject, updateStatusProject } from "@thunks";
 import { useToggle } from "@mantine/hooks";
 import { BASE_URL } from "@api";
+import { DatePickerInput, DateValue } from "@mantine/dates";
+import { useFormik } from "formik";
+import * as yup from "yup";
+import { uploadFile } from "@services";
 
 interface OwnProps {}
 
@@ -58,6 +70,45 @@ interface LeadSort {
   salesPerson: string;
   // Add other properties as needed
 }
+
+interface IForm {
+  hasQuotation: boolean;
+  hasFile: boolean;
+  quotationDate?: string;
+  quotationFile?: string;
+  quotationAmount?: number;
+}
+
+const schema: yup.ObjectSchema<IForm> = yup.object().shape({
+  hasQuotation: yup.boolean().required("Quotation is required."),
+  hasFile: yup
+    .boolean()
+    .when(["hasQuotation"], {
+      is: true,
+      then: (schema) =>
+        schema.oneOf([true], "Quotation file is required").required("Quotation file is required"),
+      otherwise: (schema) => schema.oneOf([false]).required("File error"),
+    })
+    .required(),
+  quotationDate: yup.string().when(["hasQuotation"], {
+    is: true,
+    then: (schema) => schema.required("Quotation Date is required"),
+    otherwise: (schema) => schema.optional(),
+  }),
+  quotationFile: yup.string().when(["hasQuotation"], {
+    is: true,
+    then: (schema) => schema.nullable("Quotation Date is required"),
+    otherwise: (schema) => schema.optional(),
+  }),
+  quotationAmount: yup
+    .number()
+    .min(0)
+    .when(["hasQuotation"], {
+      is: true,
+      then: (schema) => schema.required("Quotation Date is required"),
+      otherwise: (schema) => schema.optional(),
+    }),
+});
 
 export const Leads: React.FC<OwnProps> = () => {
   useStyles();
@@ -80,8 +131,13 @@ export const Leads: React.FC<OwnProps> = () => {
   const [searchedData, setSearchedData] = React.useState<typeof leads>([]);
 
   const { leadStatus: leadsStatusList } = useAppSelector(selectRecordsForDropdown);
+
   const [visible, setVisible] = React.useState<boolean>(false);
-  const [selectedStatus, setSelectedStatus] = React.useState<string>();
+  const [file, setFile] = React.useState({} as File);
+  const [selectedStatus, setSelectedStatus] = React.useState<string>("");
+  const [_quotationDate, setQuotationDate] = React.useState(new Date());
+  const [isCreating, setIsCreating] = React.useState<boolean>(false);
+
   const [selectedLead, setSelectedLead] = React.useState<string>("");
   const [sortOrder, setSortOrder] = React.useState<LeadSort>({
     statusName: "asc", // Initial sorting order (asc or desc)
@@ -211,9 +267,9 @@ export const Leads: React.FC<OwnProps> = () => {
     });
   };
 
-  const handleOnChangeStatus = (value: string | null) => {
+  const handleOnChangeStatus = (value: string | null, quotation?: Quotation) => {
     if (!value) {
-      notify("Update Lead Status", "Invalid status value", "error");
+      notify("Update Prospect Status", "Invalid status value", "error");
       return;
     }
     dispatch(
@@ -222,20 +278,24 @@ export const Leads: React.FC<OwnProps> = () => {
         id: selectedLead,
         body: {
           status: parseInt(value),
+          quotation,
         },
       })
     )
       .unwrap()
       .then((res) => {
-        notify("Lead Status", res?.message, res.success ? "success" : "error");
+        notify("Prospect Status", res?.message, res.success ? "success" : "error");
         if (res.success) {
           // dispatch(modifyLeadStatus(res.data));
           hideUpdateStatusModal();
         }
       })
       .catch((err) => {
-        console.log("Update Lead Status: ", err?.message);
-        notify("Lead Status", "An error occurred", "error");
+        console.log("Update Prospect Status: ", err?.message);
+        notify("Prospect Status", "An error occurred", "error");
+      })
+      .finally(() => {
+        setIsCreating((_prev) => false);
       });
   };
 
@@ -248,6 +308,78 @@ export const Leads: React.FC<OwnProps> = () => {
       const filtered = leads.filter((prospect) => prospect.status === parsed);
       setSearchedData(filtered);
     }
+  };
+
+  const handleOnChangeQuotationDate = (value: DateValue) => {
+    if (value) {
+      setQuotationDate(value);
+      form.setValues((prev) => ({
+        ...prev,
+        quotationDate: DATE_FORMAT_YYYY_MM_DD(value),
+      }));
+    }
+  };
+
+  const handleImageChange = (file: File) => {
+    if (file === null) {
+      notify("Image Upload", "Prospect Image not uploaded", "error");
+      return;
+    }
+    setFile(file);
+    form.setValues((prev) => ({ ...prev, hasFile: true }));
+    // const reader = new FileReader();
+    // reader.onload = (e) => {
+    //   const dataUri = e?.target?.result as string;
+    //   if (dataUri) {
+    //     form.setValues((prev) => ({ ...prev, hasFile: true }));
+    //   }
+    // };
+    // reader.readAsDataURL(file);
+  };
+
+  const form = useFormik<IForm>({
+    initialValues: {
+      hasFile: false,
+      hasQuotation: false,
+      quotationAmount: 0,
+      quotationDate: "",
+      quotationFile: "",
+    },
+    validationSchema: schema,
+    onSubmit: async (values) => {
+      console.log(values);
+      setIsCreating((_prev) => true);
+      if (values.hasQuotation) {
+        if (!values.hasFile) {
+          notify("File Upload", "Quotation file not uploaded", "error");
+          return;
+        } else {
+          const res = await uploadFile(token, file);
+          console.log("Prospect Image Upload: ", res);
+          if (res.statusCode === 200 || res.statusCode === 201) {
+            values.quotationFile = res.data;
+          } else {
+            setIsCreating((_prev) => false);
+            notify("Update Prospect Status", res?.message, "error");
+            return;
+          }
+          handleOnChangeStatus(selectedStatus, {
+            quotationAmount: values.quotationAmount || 0,
+            quotationDate: values.quotationDate || "",
+            quotationFile: values.quotationFile,
+          });
+        }
+      } else {
+        handleOnChangeStatus(selectedStatus);
+      }
+    },
+  });
+
+  const handleCancel = () => {
+    form.resetForm();
+    setFile({} as File);
+    setQuotationDate(new Date());
+    hideUpdateStatusModal();
   };
 
   React.useEffect(() => {
@@ -441,6 +573,7 @@ export const Leads: React.FC<OwnProps> = () => {
     );
   }
 
+  console.log(form.errors);
   return (
     <Stack spacing={"xs"}>
       <Flex gap={"md"} className={gclasses.searchContainer}>
@@ -510,7 +643,7 @@ export const Leads: React.FC<OwnProps> = () => {
         centered
         radius="md"
         opened={visible}
-        onClose={hideUpdateStatusModal}
+        onClose={handleCancel}
         title="Prospect Status"
         scrollAreaComponent={ScrollArea.Autosize}
         withinPortal
@@ -521,7 +654,10 @@ export const Leads: React.FC<OwnProps> = () => {
           value={selectedStatus}
           name="userFilter"
           defaultValue="7"
-          onChange={handleOnChangeStatus}
+          onChange={(value) => {
+            setSelectedStatus(value);
+            form.setValues((prev) => ({ ...prev, hasQuotation: value === "3" }));
+          }}
         >
           <div className={gclasses.radioContainer}>
             {leadsStatusList.map((value) => {
@@ -529,6 +665,90 @@ export const Leads: React.FC<OwnProps> = () => {
             })}
           </div>
         </Radio.Group>
+        {form.values.hasQuotation && (
+          <React.Fragment>
+            <Group align="flex-start" grow mt={"md"}>
+              <TextInput
+                required
+                withAsterisk={false}
+                label="Quotation Amount"
+                name="quotationAmount"
+                id="quotationAmount"
+                type="number"
+                value={form.values.quotationAmount}
+                onChange={form.handleChange}
+                onBlur={form.handleBlur}
+                error={
+                  form.touched.quotationAmount && form.errors.quotationAmount
+                    ? `${form.errors.quotationAmount}`
+                    : null
+                }
+              />
+              <DatePickerInput
+                dropdownType="modal"
+                required
+                // value={quotationDate}
+                withAsterisk={false}
+                name="quotationDate"
+                id="quotationDate"
+                label="Quotation Date"
+                onBlur={form.handleBlur}
+                onChange={handleOnChangeQuotationDate}
+                icon={<IconCalendar size={16} stroke={1.5} color={colors.titleText} />}
+                error={
+                  form.touched.quotationDate && form.errors.quotationDate
+                    ? `${form.errors.quotationDate}`
+                    : null
+                }
+              />
+            </Group>
+            <Flex direction={"row"} align={"center"} justify={"space-between"} mt={"md"}>
+              {form.values.hasFile ? (
+                <Text {...bodyTextStyle}>{file?.name}</Text>
+              ) : (
+                <Text {...bodyTextStyle}>No file uploaded</Text>
+              )}
+              {/* <div className={gclasses.fileUploadButton}> */}
+              <FileButton onChange={handleImageChange} accept="application/pdf">
+                {(props) => (
+                  <Button
+                    radius={"xl"}
+                    variant="filled"
+                    color={theme.primaryColor}
+                    rightIcon={<IconUpload size={16} color={theme.white} stroke={1.5} />}
+                    {...props}
+                  >
+                    Quotation
+                  </Button>
+                )}
+              </FileButton>
+              {/* </div> */}
+            </Flex>
+            {form.touched.hasFile && form.errors.hasFile ? (
+              <Text fz="sm" color="red">
+                {form.errors.hasFile}
+              </Text>
+            ) : null}
+            {form.touched.quotationAmount && form.errors.quotationAmount ? (
+              <Text fz="sm" color="red">
+                {form.errors.quotationAmount}
+              </Text>
+            ) : null}
+          </React.Fragment>
+        )}
+        <Group align="flex-end" position="right" mt={"md"}>
+          <Button variant="outline" onClick={handleCancel} size="xs">
+            Cancel
+          </Button>
+          <Button
+            size="xs"
+            variant="filled"
+            loading={isCreating}
+            onClick={() => form.handleSubmit()}
+          >
+            Save
+          </Button>
+        </Group>
       </Modal>
     </Stack>
   );

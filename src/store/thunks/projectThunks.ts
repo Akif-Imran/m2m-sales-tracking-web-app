@@ -36,6 +36,11 @@ interface StatusReq {
   id: string;
   body: {
     status: number;
+    quotation?: {
+      quotationDate: string;
+      quotationFile: string;
+      quotationAmount: number;
+    };
   };
 }
 

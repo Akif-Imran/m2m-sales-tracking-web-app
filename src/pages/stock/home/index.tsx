@@ -11,14 +11,21 @@ import {
   Text,
   TextInput,
 } from "@mantine/core";
-import { IconPlus, IconRotateClockwise2, IconSearch, IconTrash } from "@tabler/icons-react";
+import {
+  IconCircleCheckFilled,
+  IconPlus,
+  IconRotateClockwise2,
+  IconSearch,
+  IconTransfer,
+  IconTrash,
+} from "@tabler/icons-react";
 import { colors } from "@theme";
 import { notify } from "@utility";
-import { openDeleteModalHelper } from "@helpers";
+import { openConfirmModalHelper, openDeleteModalHelper } from "@helpers";
 import { useAuthContext } from "@contexts";
 import { useGStyles } from "@global-styles";
 import { deleteStock } from "@slices";
-import { _AddStockModal } from "../components";
+import { _AddStockModal, _AssignStockModal } from "../components";
 import { selectStockWithRecords, useAppDispatch, useAppSelector } from "@store";
 import { removeStock } from "@thunks";
 
@@ -36,6 +43,7 @@ export const Stock: React.FC<OwnProps> = () => {
   const [searchedData, setSearchedData] = React.useState<typeof items>([]);
   const [addModalOpened, setAddModalOpened] = React.useState(false);
   const [editModalOpened, setEditModalOpened] = React.useState(false);
+  const [assignStockOpened, setAssignStockModalOpened] = React.useState(false);
   const [selectedItem, setSelectedItem] = React.useState<IStock>({} as IStock);
 
   const onChangeSearch = (query: string) => {
@@ -54,6 +62,11 @@ export const Stock: React.FC<OwnProps> = () => {
   const showEditModal = (stock: IStock) => {
     setSelectedItem(stock);
     setEditModalOpened(true);
+  };
+
+  const showAssignModal = (stock: IStock) => {
+    setSelectedItem(stock);
+    setAssignStockModalOpened(true);
   };
 
   const handleDelete = (id: string) => {
@@ -92,6 +105,45 @@ export const Stock: React.FC<OwnProps> = () => {
     });
   };
 
+  const handleAcceptStock = (_id: string) => {
+    openConfirmModalHelper({
+      theme: theme,
+      title: `Accept Stock`,
+      loading: false,
+      description: (
+        <Text fw={"normal"} fs={"normal"} fz={"sm"} color={colors.titleText}>
+          Are you sure you want to Accept this Stock? This will remove the selected quantity from
+          sender's inventory and add to yours.
+        </Text>
+      ),
+      cancelLabel: "Cancel",
+      confirmLabel: "Accept Stock",
+      onConfirm: () => {
+        /* dispatch(
+          removeStock({
+            token,
+            id,
+          })
+        )
+          .unwrap() */
+        new Promise<ApiResponse<IStock>>((_resolve, reject) => {
+          reject({ message: "An error occurred", success: false });
+        })
+          .then((res) => {
+            notify("Accept Stock", res?.message, res.success ? "success" : "error");
+            if (res.success) {
+              dispatch(deleteStock(res.data._id));
+            }
+          })
+          .catch((err) => {
+            console.log("Accept Stock: ", err?.message);
+            notify("Accept Stock", "An error occurred", "error");
+          });
+      },
+      onCancel: () => notify("Accept Stock", "Operation canceled!", "error"),
+    });
+  };
+
   React.useEffect(() => {
     setSearchedData(items);
   }, [items]);
@@ -110,6 +162,7 @@ export const Stock: React.FC<OwnProps> = () => {
             <tr key={stock._id}>
               <td>{index + 1}</td>
               <td>{stock.name}</td>
+              <td>{"N/A"}</td>
               <td>{stock.type}</td>
               <td>{stock.serialNo}</td>
               <td>{stock.modelNo || "N/A"}</td>
@@ -124,6 +177,16 @@ export const Stock: React.FC<OwnProps> = () => {
                     <React.Fragment>
                       <ActionIcon color="gray" size={"sm"} onClick={() => showEditModal(stock)}>
                         <IconRotateClockwise2 />
+                      </ActionIcon>
+                      <ActionIcon color="gray" size={"sm"} onClick={() => showAssignModal(stock)}>
+                        <IconTransfer />
+                      </ActionIcon>
+                      <ActionIcon
+                        color="gray"
+                        size={"sm"}
+                        onClick={() => handleAcceptStock(stock._id)}
+                      >
+                        <IconCircleCheckFilled />
                       </ActionIcon>
                       <ActionIcon color="red" size={"sm"} onClick={() => handleDelete(stock._id)}>
                         <IconTrash />
@@ -166,7 +229,7 @@ export const Stock: React.FC<OwnProps> = () => {
       </Flex>
       <ScrollArea type="always" h={"80vh"}>
         <ScrollArea w={"140vw"}>
-          <Table border={1} bgcolor={theme.white} withBorder>
+          <Table border={1} bgcolor={theme.white} withBorder withColumnBorders>
             <thead>
               <tr>
                 <th colSpan={5}>Stock</th>
@@ -175,6 +238,7 @@ export const Stock: React.FC<OwnProps> = () => {
               <tr>
                 <th>#</th>
                 <th>Name</th>
+                <th>Status</th>
                 <th>Type</th>
                 <th>Serial No.</th>
                 <th>Model No.</th>
@@ -204,8 +268,17 @@ export const Stock: React.FC<OwnProps> = () => {
         opened={editModalOpened}
         onClose={() => setEditModalOpened(false)}
       />
+      <_AssignStockModal
+        title="Assign Modal"
+        opened={assignStockOpened}
+        onClose={() => setAssignStockModalOpened(false)}
+        stock={selectedItem}
+      />
     </Stack>
   );
 };
 
 export default Stock;
+
+//pending
+//accepted

@@ -204,6 +204,7 @@ export const selectRecordsForDropdown = createSelector(
   selectPurchaseCategories,
   selectStockItemsStatusList,
   selectWarehouses,
+  selectStock,
   (
     companies,
     leads,
@@ -221,7 +222,8 @@ export const selectRecordsForDropdown = createSelector(
     expenseTypes,
     purchaseCategories,
     stockItemStatus,
-    warehouses
+    warehouses,
+    stocks
   ) => {
     return {
       companies: companies.data.map((company) => ({
@@ -235,6 +237,10 @@ export const selectRecordsForDropdown = createSelector(
       projects: projects.data.map((project) => ({
         value: project._id,
         label: project.name,
+      })),
+      stocks: stocks.data.map((stock) => ({
+        value: stock._id,
+        label: stock.name,
       })),
       suppliers: suppliers.data.map((supplier) => ({
         value: supplier._id,
@@ -300,13 +306,19 @@ export const selectRecordsForDropdown = createSelector(
         .filter((user) => user.userType === 2)
         .map((sales) => ({
           value: sales._id,
-          label: `${sales.name}`,
+          label: sales.name,
         })),
       engineers: users.data
         .filter((user) => user.userType === 3)
         .map((engineer) => ({
           value: engineer._id,
-          label: `${engineer.name}`,
+          label: engineer.name,
+        })),
+      hrs: users.data
+        .filter((user) => user.userType === 4)
+        .map((hr) => ({
+          value: hr._id,
+          label: hr.name,
         })),
     };
   }

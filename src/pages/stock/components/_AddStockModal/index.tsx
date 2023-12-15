@@ -4,11 +4,11 @@ import { useStyles } from "./styles";
 import { Button, Grid, Group, Modal, Select, Stack, TextInput, rem } from "@mantine/core";
 import { FormikHelpers, useFormik } from "formik";
 import { selectRecordsForDropdown, useAppDispatch, useAppSelector } from "@store";
-import * as yup from "yup";
 import { createStock, updateStock } from "@thunks";
 import { useAuthContext } from "@contexts";
-import { notify } from "@utility";
 import { addStock, modifyStock } from "@slices";
+import { notify } from "@utility";
+import * as yup from "yup";
 
 type OwnProps =
   | {

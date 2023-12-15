@@ -53,8 +53,8 @@ export const Home: React.FC<OwnProps> = () => {
       <UnstyledButton
         className={classes.btn}
         onClick={() => {
-          notify("Inventory Management", "This module has been temporarily disabled", "error");
-          // dispatch(setModule("inventory"));
+          // notify("Inventory Management", "This module has been temporarily disabled", "error");
+          dispatch(setModule("inventory"));
         }}
       >
         <Flex direction={"column"} align={"center"}>

@@ -93,8 +93,8 @@ export const selectLeaves = (state: RootState) => state.leaves;
 export const selectLeaveStatusList = (state: RootState) => state.leaveStatusList;
 export const selectLeaveTypes = (state: RootState) => state.leaveTypes;
 export const selectStock = (state: RootState) => state.stocks;
-export const selectWarehouses = (state: RootState) => state.warehouses;
 export const selectStockItemsStatusList = (state: RootState) => state.stockItemStatusList;
+export const selectWarehouses = (state: RootState) => state.warehouses;
 export const selectSuppliers = (state: RootState) => state.suppliers;
 export const selectNotifications = (state: RootState) => state.notifications;
 
@@ -183,6 +183,7 @@ export const selectUsersBasedOnType = createSelector(selectUsers, (users) => {
     engineers: users.data.filter((user) => user.userType === 3),
     sales: users.data.filter((user) => user.userType === 2),
     admins: users.data.filter((user) => user.userType === 1),
+    hrs: users.data.filter((user) => user.userType === 4),
   };
 });
 
@@ -418,6 +419,7 @@ export const selectPurchaseRequestsWithRecords = createSelector(
     });
   }
 );
+
 export const selectClaimsWithRecords = createSelector(
   selectClaims,
   selectUsers,
@@ -443,6 +445,7 @@ export const selectClaimsWithRecords = createSelector(
     });
   }
 );
+
 export const selectProspectClaimsWithRecords = createSelector(
   selectClaims,
   selectUsers,

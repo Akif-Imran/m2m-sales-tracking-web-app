@@ -15,6 +15,7 @@ import {
   fetchPurchaseCategory,
   fetchPurchaseRequestStatuses,
   fetchPurchaseRequests,
+  fetchStock,
   fetchSuppliers,
   fetchTaskStatuses,
   fetchTasks,
@@ -53,6 +54,7 @@ export const _DataLoader: React.FC<React.PropsWithChildren> = ({ children }) => 
     dispatch(fetchExpenseType(token));
     dispatch(fetchPurchaseCategory(token));
     dispatch(fetchWarehouse(token));
+    dispatch(fetchStock(token));
   }, [dispatch, token]);
 
   return (

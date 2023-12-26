@@ -41,6 +41,14 @@ export const cardConfig = {
   mih: rem(180),
 };
 
+export const cardConfigWithoutHeight = {
+  shadow: "sm",
+  mb: "xs",
+  px: "sm",
+  py: "sm",
+  radius: "md",
+};
+
 export const useGStyles = createStyles((_theme) => ({
   fileUploadButton: {
     marginTop: rem(-32),

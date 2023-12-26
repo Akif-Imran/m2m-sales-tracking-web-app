@@ -36,8 +36,7 @@ interface ICompanyContact {
   designation: string;
   department: string;
   email: string;
-  mobile: string;
-  mobile2: string;
+  mobile: string[];
   customerId: string;
   createdBy: string;
   createdAt: string;

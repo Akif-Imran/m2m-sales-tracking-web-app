@@ -68,6 +68,7 @@ export const Contact: React.FC<OwnProps> = () => {
 
   const [searchedCompanyData, setSearchedCompanyData] = React.useState<typeof companies>([]);
   const [searchedContactData, setSearchedContactData] = React.useState<typeof contacts>([]);
+  const [toDelete, setToDelete] = React.useState<string>("");
   const [selectedCompany, setSelectedCompany] = React.useState<string>("");
 
   const onChangeSearch = (query: string) => {
@@ -163,21 +164,21 @@ export const Contact: React.FC<OwnProps> = () => {
   };
 
   const handleOpenContact = (companyId: string) => {
-    setSelectedCompany(companyId);
+    setToDelete(companyId);
     setAddContactModalOpened(true);
   };
 
   const handleOpenFollowUp = (companyId: string) => {
-    setSelectedCompany(companyId);
+    setToDelete(companyId);
     setAddFollowUpModalOpened(true);
   };
 
   const handleOpenExpense = (companyId: string) => {
-    setSelectedCompany(companyId);
+    setToDelete(companyId);
     setAddClaimModalOpened(true);
   };
   const handleOpenPurchaseRequest = (companyId: string) => {
-    setSelectedCompany(companyId);
+    setToDelete(companyId);
     setAddPurchaseReqModalOpened(true);
   };
 
@@ -350,7 +351,7 @@ export const Contact: React.FC<OwnProps> = () => {
                 </td>
                 <td>{contact.name}</td>
                 <td>{contact.email}</td>
-                <td>{contact.mobile}</td>
+                <td>{contact.mobile.join(", ")}</td>
                 <td>{contact.designation}</td>
                 <td>{contact.designation}</td>
                 <td>
@@ -504,25 +505,25 @@ export const Contact: React.FC<OwnProps> = () => {
       <_AddContactModal
         title="Add Contact"
         opened={addContactModalOpened}
-        companyId={selectedCompany}
+        companyId={toDelete}
         onClose={() => setAddContactModalOpened(false)}
       />
       <_AddFollowUpModal
         title="Add Follow Up"
         opened={addFollowUpModalOpened}
-        companyId={selectedCompany}
+        companyId={toDelete}
         onClose={() => setAddFollowUpModalOpened(false)}
       />
       <_AddClaimModal
         title="Add Claim"
         opened={addClaimModalOpened}
-        companyId={selectedCompany}
+        companyId={toDelete}
         onClose={() => setAddClaimModalOpened(false)}
       />
       <_AddPurchaseRequestModal
         title="Add Purchase Request"
         opened={addPurchaseReqModalOpened}
-        companyId={selectedCompany}
+        companyId={toDelete}
         onClose={() => setAddPurchaseReqModalOpened(false)}
       />
     </Stack>

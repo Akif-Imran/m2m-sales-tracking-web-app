@@ -82,12 +82,7 @@ export const _ContactCard: React.FC<OwnProps> = ({ contact }) => {
                 {contact?.email || "N/A"}
               </Anchor>
             </Flex>
-            <Flex direction={"row"} align={"center"} justify={"flex-start"}>
-              <Text {...titleTextStyle} mr={"xs"}>
-                Mobile No.:
-              </Text>
-              <Text {...bodyTextStyle}>{contact?.mobile || "N/A"}</Text>
-            </Flex>
+
             <Flex direction={"row"} align={"center"} justify={"flex-start"}>
               <Text {...titleTextStyle} mr={"xs"}>
                 Department:
@@ -95,12 +90,19 @@ export const _ContactCard: React.FC<OwnProps> = ({ contact }) => {
               <Text {...bodyTextStyle}>{contact?.department || "N/A"}</Text>
             </Flex>
 
+            <Flex direction={"row"} align={"flex-start"} justify={"flex-start"}>
+              <Text {...titleTextStyle} mr={"xs"}>
+                Designation:
+              </Text>
+              <Text {...bodyTextStyle}>{contact?.designation || "N/A"}</Text>
+            </Flex>
+
             <div className={classes.textWithIconButton}>
               <Flex direction={"row"} align={"flex-start"} justify={"flex-start"}>
                 <Text {...titleTextStyle} mr={"xs"}>
-                  Designation:
+                  Mobile:
                 </Text>
-                <Text {...bodyTextStyle}>{contact?.designation || "N/A"}</Text>
+                <Text {...bodyTextStyle}>{contact?.mobile.join(", ") || "N/A"}</Text>
               </Flex>
               <Tooltip label={"Contact's Company Details"} position="bottom" withinPortal withArrow>
                 <UnstyledButton

@@ -34,10 +34,11 @@ interface OwnProps {
 interface IContactForm
   extends Omit<
     ICompanyContact,
-    "_id" | "__v" | "createdBy" | "createdAt" | "company" | "isActive" | "businessCard"
+    "_id" | "__v" | "createdBy" | "createdAt" | "company" | "isActive" | "businessCard" | "mobile"
   > {
   businessCard?: string;
   hasImage: boolean;
+  mobile: string;
 }
 
 const schema: yup.ObjectSchema<IContactForm> = yup.object().shape({
@@ -48,7 +49,6 @@ const schema: yup.ObjectSchema<IContactForm> = yup.object().shape({
   designation: yup.string().required("Designation is required"),
   department: yup.string().required("Department is required"),
   mobile: yup.string().required("Mobile No is required"),
-  mobile2: yup.string().required("Mobile No. 2 is required"),
   customerId: yup.string().required("Company is required"),
 });
 
@@ -71,7 +71,6 @@ const _AddContactModal: React.FC<OwnProps> = ({ opened, onClose, title, companyI
       designation: "",
       department: "",
       mobile: "",
-      mobile2: "",
       hasImage: false,
       customerId: companyId || "",
     },
@@ -89,12 +88,14 @@ const _AddContactModal: React.FC<OwnProps> = ({ opened, onClose, title, companyI
           return;
         }
       }
+      const mobile = values.mobile.split(", ");
       dispatch(
         createContact({
           token,
           contact: {
             ...values,
             businessCard: values.businessCard || "",
+            mobile,
           },
         })
       )
@@ -249,26 +250,14 @@ const _AddContactModal: React.FC<OwnProps> = ({ opened, onClose, title, companyI
           required
           withAsterisk={false}
           label="Mobile No."
+          description="You can add multiple contact with comma separated values"
+          placeholder="contact-1, contact-2, contact-3"
           name="mobile"
           id="mobile"
-          placeholder="+XX XXX XXXXXXX"
           value={form.values.mobile}
           onChange={form.handleChange}
           onBlur={form.handleBlur}
           error={form.errors.mobile && form.touched.mobile ? form.errors.mobile : ""}
-        />
-
-        <TextInput
-          required
-          withAsterisk={false}
-          label="Mobile No. 2"
-          name="mobile2"
-          id="mobile2"
-          placeholder="+XX XXX XXXXXXX"
-          value={form.values.mobile2}
-          onChange={form.handleChange}
-          onBlur={form.handleBlur}
-          error={form.errors.mobile2 && form.touched.mobile2 ? form.errors.mobile2 : ""}
         />
 
         <Group align="flex-end" position="right" mt={rem(32)}>

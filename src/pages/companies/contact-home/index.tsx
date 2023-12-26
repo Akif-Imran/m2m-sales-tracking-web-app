@@ -21,11 +21,12 @@ import {
   IconColumns2,
   IconId,
   IconPlus,
+  IconRotateClockwise2,
   IconSearch,
   IconTable,
   IconTrash,
 } from "@tabler/icons-react";
-import { selectCompanies, selectCompanyContact, useAppDispatch, useAppSelector } from "@store";
+import { selectCompanies, selectContactsWithRecords, useAppDispatch, useAppSelector } from "@store";
 import { colors } from "@theme";
 import { _AddCompanyModal, _AddContactModal, _CompanyCard, _ContactCard } from "../components";
 import { openDeleteModalHelper } from "@helpers";
@@ -55,10 +56,11 @@ export const Contact: React.FC<OwnProps> = () => {
   ]);
   const [searchQuery, setSearchQuery] = React.useState("");
   const { data: companies } = useAppSelector(selectCompanies);
-  const { data: contacts } = useAppSelector(selectCompanyContact);
+  const contacts = useAppSelector(selectContactsWithRecords);
   const [isDeleting, setIsDeleting] = React.useState(false);
 
   const [addCompanyModalOpened, setAddCompanyModalOpened] = React.useState(false);
+  const [editCompanyModalOpened, setEditCompanyModalOpened] = React.useState(false);
   const [addContactModalOpened, setAddContactModalOpened] = React.useState(false);
   const [addFollowUpModalOpened, setAddFollowUpModalOpened] = React.useState(false);
   const [addClaimModalOpened, setAddClaimModalOpened] = React.useState(false);
@@ -66,6 +68,7 @@ export const Contact: React.FC<OwnProps> = () => {
 
   const [searchedCompanyData, setSearchedCompanyData] = React.useState<typeof companies>([]);
   const [searchedContactData, setSearchedContactData] = React.useState<typeof contacts>([]);
+  const [toDelete, setToDelete] = React.useState<string>("");
   const [selectedCompany, setSelectedCompany] = React.useState<string>("");
 
   const onChangeSearch = (query: string) => {
@@ -161,21 +164,21 @@ export const Contact: React.FC<OwnProps> = () => {
   };
 
   const handleOpenContact = (companyId: string) => {
-    setSelectedCompany(companyId);
+    setToDelete(companyId);
     setAddContactModalOpened(true);
   };
 
   const handleOpenFollowUp = (companyId: string) => {
-    setSelectedCompany(companyId);
+    setToDelete(companyId);
     setAddFollowUpModalOpened(true);
   };
 
   const handleOpenExpense = (companyId: string) => {
-    setSelectedCompany(companyId);
+    setToDelete(companyId);
     setAddClaimModalOpened(true);
   };
   const handleOpenPurchaseRequest = (companyId: string) => {
-    setSelectedCompany(companyId);
+    setToDelete(companyId);
     setAddPurchaseReqModalOpened(true);
   };
 
@@ -262,15 +265,26 @@ export const Contact: React.FC<OwnProps> = () => {
                   />
                 </td>
                 <td>{company.name}</td>
+                <td>{company?.registration || "N/A"}</td>
                 <td>{company.email}</td>
                 <td>{company.phone}</td>
                 <td>{company.address}</td>
                 <td>{company.city}</td>
                 <td>{company.state}</td>
                 <td>{company.country}</td>
+                <td>{company?.postalCode || "N/A"}</td>
                 <td>
                   {isAdmin ? (
                     <Group>
+                      <ActionIcon
+                        size={"sm"}
+                        onClick={() => {
+                          setSelectedCompany(company._id);
+                          setEditCompanyModalOpened(true);
+                        }}
+                      >
+                        <IconRotateClockwise2 />
+                      </ActionIcon>
                       <ActionIcon
                         color="red"
                         size={"sm"}
@@ -336,7 +350,7 @@ export const Contact: React.FC<OwnProps> = () => {
                 </td>
                 <td>{contact.name}</td>
                 <td>{contact.email}</td>
-                <td>{contact.mobile}</td>
+                <td>{contact.mobile.join(", ")}</td>
                 <td>{contact.designation}</td>
                 <td>{contact.designation}</td>
                 <td>
@@ -401,6 +415,7 @@ export const Contact: React.FC<OwnProps> = () => {
             <th>#</th>
             <th>Logo</th>
             <th>Name</th>
+            <th>Registration No.</th>
             <th>Email</th>
 
             <th>Phone</th>
@@ -408,6 +423,7 @@ export const Contact: React.FC<OwnProps> = () => {
             <th>City</th>
             <th>State</th>
             <th>Country</th>
+            <th>Postal Code</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -473,32 +489,40 @@ export const Contact: React.FC<OwnProps> = () => {
       </Flex>
       {content}
       <_AddCompanyModal
+        mode="add"
         title="Add Company"
         opened={addCompanyModalOpened}
         onClose={() => setAddCompanyModalOpened(false)}
       />
+      <_AddCompanyModal
+        mode="edit"
+        title="Update Company"
+        opened={editCompanyModalOpened}
+        onClose={() => setEditCompanyModalOpened(false)}
+        companyId={selectedCompany}
+      />
       <_AddContactModal
         title="Add Contact"
         opened={addContactModalOpened}
-        companyId={selectedCompany}
+        companyId={toDelete}
         onClose={() => setAddContactModalOpened(false)}
       />
       <_AddFollowUpModal
         title="Add Follow Up"
         opened={addFollowUpModalOpened}
-        companyId={selectedCompany}
+        companyId={toDelete}
         onClose={() => setAddFollowUpModalOpened(false)}
       />
       <_AddClaimModal
         title="Add Claim"
         opened={addClaimModalOpened}
-        companyId={selectedCompany}
+        companyId={toDelete}
         onClose={() => setAddClaimModalOpened(false)}
       />
       <_AddPurchaseRequestModal
         title="Add Purchase Request"
         opened={addPurchaseReqModalOpened}
-        companyId={selectedCompany}
+        companyId={toDelete}
         onClose={() => setAddPurchaseReqModalOpened(false)}
       />
     </Stack>

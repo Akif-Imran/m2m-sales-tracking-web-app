@@ -53,6 +53,7 @@ import {
   cardConfig,
   titleTextStyle,
   bodyTextStyle,
+  cardConfigWithoutHeight,
 } from "@global-styles";
 import { PhotoView } from "react-photo-view";
 import { routes } from "@routes";
@@ -213,7 +214,7 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
   } else {
     return (
       <>
-        <Card {...cardConfig}>
+        <Card {...cardConfigWithoutHeight}>
           <Flex direction={"row"} justify={"space-between"} align={"center"} w={"100%"}>
             <Text {...titleTextStyle} size={"xl"} align="center"></Text>
             <Text {...titleTextStyle} size={"xl"} align="center">
@@ -278,7 +279,7 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
         </Card>
         <Grid>
           <Grid.Col span={3}>
-            <Card {...cardConfig} h={rem(56)}>
+            <Card {...cardConfigWithoutHeight} h={rem(56)}>
               <Text {...titleTextStyle} size={"md"} mt={rem(4)}>
                 Prospects
               </Text>
@@ -316,7 +317,7 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
             <Stack spacing={"xs"}>
               <Grid>
                 <Grid.Col span={7}>
-                  <Card {...cardConfig} h={rem(56)}>
+                  <Card {...cardConfigWithoutHeight} h={rem(56)}>
                     <Stack spacing={"xs"}>
                       <Flex direction={"row"} align={"center"} mt={rem(4)}>
                         <Text {...titleTextStyle} size={"md"}>
@@ -408,7 +409,7 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
                 </Grid.Col>
 
                 <Grid.Col span={5}>
-                  <Card {...cardConfig} h={rem(56)}>
+                  <Card {...cardConfigWithoutHeight} h={rem(56)}>
                     <Flex direction={"row"} justify={"space-between"} align={"center"}>
                       <Text {...titleTextStyle} size={"md"}>
                         Contacts
@@ -468,7 +469,11 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
                               </Flex>
                               <Flex direction={"column"} w={"100%"}>
                                 <Flex direction={"row"} justify={"space-between"} align={"center"}>
-                                  <Flex direction={"row"} align={"center"} justify={"flex-start"}>
+                                  <Flex
+                                    direction={"row"}
+                                    align={"flex-start"}
+                                    justify={"flex-start"}
+                                  >
                                     <Text {...titleTextStyle} mr={"xs"}>
                                       Name:
                                     </Text>
@@ -511,12 +516,6 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
                                 </Flex>
                                 <Flex direction={"row"} align={"center"} justify={"flex-start"}>
                                   <Text {...titleTextStyle} mr={"xs"}>
-                                    Mobile No.:
-                                  </Text>
-                                  <Text {...bodyTextStyle}>{contact?.mobile || "N/A"}</Text>
-                                </Flex>
-                                <Flex direction={"row"} align={"center"} justify={"flex-start"}>
-                                  <Text {...titleTextStyle} mr={"xs"}>
                                     Designation:
                                   </Text>
                                   <Text {...bodyTextStyle}>{contact?.designation || "N/A"}</Text>
@@ -526,6 +525,12 @@ export const CompanyProjects: React.FC<OwnProps> = () => {
                                     Department:
                                   </Text>
                                   <Text {...bodyTextStyle}>{contact?.department || "N/A"}</Text>
+                                </Flex>
+                                <Flex direction={"row"} align={"center"} justify={"flex-start"}>
+                                  <Text {...titleTextStyle} mr={"xs"}>
+                                    Mobile:
+                                  </Text>
+                                  <Text {...bodyTextStyle}>{contact?.mobile || "N/A"}</Text>
                                 </Flex>
                               </Flex>
                             </Flex>

@@ -11,7 +11,7 @@ import {
   createStyles,
 } from "@mantine/core";
 import { routes } from "@routes";
-import { selectModule, useAppSelector } from "@store";
+import { selectContactsWithRecords, selectModule, useAppSelector } from "@store";
 import { IconCaretRightFilled } from "@tabler/icons-react";
 import { colors } from "@theme";
 import React from "react";
@@ -19,7 +19,7 @@ import { PhotoView } from "react-photo-view";
 import { useNavigate } from "react-router-dom";
 
 interface OwnProps {
-  contact: ICompanyContact;
+  contact: ReturnType<typeof selectContactsWithRecords>[0];
 }
 
 export const _ContactCard: React.FC<OwnProps> = ({ contact }) => {
@@ -70,30 +70,39 @@ export const _ContactCard: React.FC<OwnProps> = ({ contact }) => {
             </Flex>
             <Flex direction={"row"} align={"center"} justify={"flex-start"}>
               <Text {...titleTextStyle} mr={"xs"}>
+                Company:
+              </Text>
+              <Text {...bodyTextStyle}>{contact?.company?.name || "N/A"}</Text>
+            </Flex>
+            <Flex direction={"row"} align={"center"} justify={"flex-start"}>
+              <Text {...titleTextStyle} mr={"xs"}>
                 Email:
               </Text>
               <Anchor {...bodyTextStyle} href={contact?.email} target={"_blank"} c={"blue"}>
                 {contact?.email || "N/A"}
               </Anchor>
             </Flex>
+
             <Flex direction={"row"} align={"center"} justify={"flex-start"}>
               <Text {...titleTextStyle} mr={"xs"}>
-                Mobile No.:
+                Department:
               </Text>
-              <Text {...bodyTextStyle}>{contact?.mobile || "N/A"}</Text>
+              <Text {...bodyTextStyle}>{contact?.department || "N/A"}</Text>
             </Flex>
-            <Flex direction={"row"} align={"center"} justify={"flex-start"}>
+
+            <Flex direction={"row"} align={"flex-start"} justify={"flex-start"}>
               <Text {...titleTextStyle} mr={"xs"}>
-                Designation:
+                Mobile:
               </Text>
-              <Text {...bodyTextStyle}>{contact?.designation || "N/A"}</Text>
+              <Text {...bodyTextStyle}>{contact?.mobile.join(", ") || "N/A"}</Text>
             </Flex>
+
             <div className={classes.textWithIconButton}>
-              <Flex direction={"row"} align={"center"} justify={"flex-start"}>
+              <Flex direction={"row"} align={"flex-start"} justify={"flex-start"}>
                 <Text {...titleTextStyle} mr={"xs"}>
-                  Department:
+                  Designation:
                 </Text>
-                <Text {...bodyTextStyle}>{contact?.department || "N/A"}</Text>
+                <Text {...bodyTextStyle}>{contact?.designation || "N/A"}</Text>
               </Flex>
               <Tooltip label={"Contact's Company Details"} position="bottom" withinPortal withArrow>
                 <UnstyledButton

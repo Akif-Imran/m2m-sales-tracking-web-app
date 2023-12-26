@@ -36,7 +36,7 @@ interface ICompanyContact {
   designation: string;
   department: string;
   email: string;
-  mobile: string;
+  mobile: string[];
   customerId: string;
   createdBy: string;
   createdAt: string;
@@ -55,6 +55,9 @@ interface ICompany {
   website: string; //
   email: string; //
   phone: string; //
+  branch?: string;
+  postalCode?: string;
+  registration?: string;
   __v: number; //
   // id: number;
   // logo: string;
@@ -178,6 +181,8 @@ interface IStock {
   quantity: number;
   warehouseId: string;
   assignedTo: string;
+  image?: string;
+  status?: number;
   _id: string;
   __v: number;
 }

@@ -24,6 +24,7 @@ import { useAuthContext } from "@contexts";
 import * as yup from "yup";
 import { uploadFile } from "@services";
 import { _AddCompanyModal } from "../_AddCompanyModal";
+import SelectItem from "./SelectItem";
 
 interface OwnProps {
   opened: boolean;
@@ -34,10 +35,11 @@ interface OwnProps {
 interface IContactForm
   extends Omit<
     ICompanyContact,
-    "_id" | "__v" | "createdBy" | "createdAt" | "company" | "isActive" | "businessCard"
+    "_id" | "__v" | "createdBy" | "createdAt" | "company" | "isActive" | "businessCard" | "mobile"
   > {
   businessCard?: string;
   hasImage: boolean;
+  mobile: string;
 }
 
 const schema: yup.ObjectSchema<IContactForm> = yup.object().shape({
@@ -47,7 +49,7 @@ const schema: yup.ObjectSchema<IContactForm> = yup.object().shape({
   hasImage: yup.boolean().required(),
   designation: yup.string().required("Designation is required"),
   department: yup.string().required("Department is required"),
-  mobile: yup.string().required("Mobile number is required"),
+  mobile: yup.string().required("Mobile No is required"),
   customerId: yup.string().required("Company is required"),
 });
 
@@ -57,7 +59,7 @@ const _AddContactModal: React.FC<OwnProps> = ({ opened, onClose, title, companyI
   const {
     state: { token },
   } = useAuthContext();
-  const { companies: companiesList } = useAppSelector(selectRecordsForDropdown);
+  const { companiesWithBranches: companiesList } = useAppSelector(selectRecordsForDropdown);
   const [addCompanyModalOpened, setAddCompanyModalOpened] = React.useState(false);
   const [isCreating, setIsCreating] = React.useState(false);
   const [file, setFile] = React.useState<File>({} as File);
@@ -87,12 +89,14 @@ const _AddContactModal: React.FC<OwnProps> = ({ opened, onClose, title, companyI
           return;
         }
       }
+      const mobile = values.mobile.split(", ");
       dispatch(
         createContact({
           token,
           contact: {
             ...values,
             businessCard: values.businessCard || "",
+            mobile,
           },
         })
       )
@@ -182,6 +186,7 @@ const _AddContactModal: React.FC<OwnProps> = ({ opened, onClose, title, companyI
           searchable
           nothingFound="No Company"
           label="Company"
+          itemComponent={SelectItem}
           rightSection={
             <ActionIcon variant="light" onClick={() => setAddCompanyModalOpened(true)}>
               <IconPlus size={16} />
@@ -243,20 +248,19 @@ const _AddContactModal: React.FC<OwnProps> = ({ opened, onClose, title, companyI
           />
         </Group>
 
-        <Group grow align="flex-start">
-          <TextInput
-            required
-            withAsterisk={false}
-            label="Mobile"
-            name="mobile"
-            id="mobile"
-            placeholder="+XX XXX XXXXXXX"
-            value={form.values.mobile}
-            onChange={form.handleChange}
-            onBlur={form.handleBlur}
-            error={form.errors.mobile && form.touched.mobile ? form.errors.mobile : ""}
-          />
-        </Group>
+        <TextInput
+          required
+          withAsterisk={false}
+          label="Mobile No."
+          description="You can add multiple contact with comma separated values"
+          placeholder="contact-1, contact-2, contact-3"
+          name="mobile"
+          id="mobile"
+          value={form.values.mobile}
+          onChange={form.handleChange}
+          onBlur={form.handleBlur}
+          error={form.errors.mobile && form.touched.mobile ? form.errors.mobile : ""}
+        />
 
         <Group align="flex-end" position="right" mt={rem(32)}>
           <Button variant="outline" onClick={handleCancel} size="xs">
@@ -274,6 +278,7 @@ const _AddContactModal: React.FC<OwnProps> = ({ opened, onClose, title, companyI
       </Stack>
 
       <_AddCompanyModal
+        mode="add"
         title="Add Company"
         opened={addCompanyModalOpened}
         onClose={() => setAddCompanyModalOpened(false)}

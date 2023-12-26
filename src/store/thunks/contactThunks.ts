@@ -9,7 +9,7 @@ interface CreateReq {
     businessCard: string;
     designation: string;
     department: string;
-    mobile: string;
+    mobile: string[];
     customerId: string;
   };
 }
@@ -22,7 +22,7 @@ interface UpdateReq {
     businessCard: string;
     designation: string;
     department: string;
-    mobile: string;
+    mobile: string[];
     customerId: string;
   };
 }

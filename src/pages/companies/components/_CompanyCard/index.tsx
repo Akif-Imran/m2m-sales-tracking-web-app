@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { routes } from "@routes";
 import { BASE_URL } from "@api";
 import { PhotoView } from "react-photo-view";
-import { noImageStyle } from "@global-styles";
+import { cardConfig, noImageStyle } from "@global-styles";
 import { selectModule, useAppSelector } from "@store";
 
 interface OwnProps {
@@ -32,7 +32,7 @@ const _CompanyCard: React.FC<OwnProps> = ({ onClick, item }) => {
   // };
 
   return (
-    <Card shadow="sm" mb={"xs"} px={"sm"} py={"lg"} radius={"md"} mih={rem(180)} onClick={onClick}>
+    <Card {...cardConfig} onClick={onClick}>
       <div className={classes.imageWithInfoContainer}>
         <div className={classes.machineImageContainer}>
           <PhotoView src={item?.logo ? `${BASE_URL}\\${item?.logo}` : "/company.png"}>

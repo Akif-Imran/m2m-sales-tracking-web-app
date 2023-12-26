@@ -26,7 +26,7 @@ import {
   IconTable,
   IconTrash,
 } from "@tabler/icons-react";
-import { selectCompanies, selectCompanyContact, useAppDispatch, useAppSelector } from "@store";
+import { selectCompanies, selectContactsWithRecords, useAppDispatch, useAppSelector } from "@store";
 import { colors } from "@theme";
 import { _AddCompanyModal, _AddContactModal, _CompanyCard, _ContactCard } from "../components";
 import { openDeleteModalHelper } from "@helpers";
@@ -58,7 +58,7 @@ const Company: React.FC<OwnProps> = () => {
   ]);
   const [searchQuery, setSearchQuery] = React.useState("");
   const { data: companies } = useAppSelector(selectCompanies);
-  const { data: contacts } = useAppSelector(selectCompanyContact);
+  const contacts = useAppSelector(selectContactsWithRecords);
   const [isDeleting, setIsDeleting] = React.useState(false);
 
   const [addCompanyModalOpened, setAddCompanyModalOpened] = React.useState(false);
@@ -265,12 +265,14 @@ const Company: React.FC<OwnProps> = () => {
                   />
                 </td>
                 <td>{company.name}</td>
+                <td>{company?.registration || "N/A"}</td>
                 <td>{company.email}</td>
                 <td>{company.phone}</td>
                 <td>{company.address}</td>
                 <td>{company.city}</td>
                 <td>{company.state}</td>
                 <td>{company.country}</td>
+                <td>{company?.postalCode || "N/A"}</td>
                 <td>
                   {isAdmin ? (
                     <Group>
@@ -404,6 +406,7 @@ const Company: React.FC<OwnProps> = () => {
             <th>#</th>
             <th>Logo</th>
             <th>Name</th>
+            <th>Registration No.</th>
             <th>Email</th>
 
             <th>Phone</th>
@@ -411,6 +414,7 @@ const Company: React.FC<OwnProps> = () => {
             <th>City</th>
             <th>State</th>
             <th>Country</th>
+            <th>Postal Code</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -476,6 +480,7 @@ const Company: React.FC<OwnProps> = () => {
       </Flex>
       {content}
       <_AddCompanyModal
+        mode="add"
         title="Add Company"
         opened={addCompanyModalOpened}
         onClose={() => setAddCompanyModalOpened(false)}

@@ -274,6 +274,7 @@ const _AddContactModal: React.FC<OwnProps> = ({ opened, onClose, title, companyI
       </Stack>
 
       <_AddCompanyModal
+        mode="add"
         title="Add Company"
         opened={addCompanyModalOpened}
         onClose={() => setAddCompanyModalOpened(false)}

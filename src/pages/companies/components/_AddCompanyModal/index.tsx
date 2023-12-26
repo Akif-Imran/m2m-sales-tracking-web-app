@@ -10,6 +10,7 @@ import {
   Grid,
   Group,
   Modal,
+  Select,
   Stack,
   TextInput,
   rem,
@@ -17,50 +18,74 @@ import {
 import { useFormik } from "formik";
 import { IconUpload } from "@tabler/icons-react";
 import { notify } from "@utility";
-import { useAppDispatch } from "@store";
-import { addCompany } from "@slices";
-import { createCompany } from "@thunks";
+import { selectCompanies, useAppDispatch, useAppSelector } from "@store";
+import { addCompany, modifyCompany } from "@slices";
+import { createCompany, updateCompany } from "@thunks";
 import { useAuthContext } from "@contexts";
 import * as yup from "yup";
 import { uploadFile } from "@services";
-import { validWebsiteURL } from "@constants";
+import { malaysianStatesList, validWebsiteURL } from "@constants";
+import { BASE_URL } from "@api";
 
-interface OwnProps {
-  opened: boolean;
-  onClose: () => void;
-  title: string;
-}
-interface ICompanyForm extends Omit<ICompany, "_id" | "__v" | "company" | "isActive" | "logo"> {
+type OwnProps =
+  | {
+      mode: "add";
+      opened: boolean;
+      onClose: () => void;
+      title: string;
+      companyId?: undefined;
+    }
+  | {
+      mode: "edit";
+      opened: boolean;
+      onClose: () => void;
+      title: string;
+      companyId: string;
+    };
+interface ICompanyForm
+  extends Omit<
+    ICompany,
+    "_id" | "__v" | "company" | "isActive" | "logo" | "email" | "website" | "branch"
+  > {
   logo?: string;
   hasLogo: boolean;
+  isDefaultCountry: boolean;
+  email?: string;
+  website?: string;
+  branch?: string;
+  postalCode: string;
+  registration: string;
 }
 
 const schema: yup.ObjectSchema<ICompanyForm> = yup.object().shape({
   name: yup.string().required("Company name is required"),
-  email: yup.string().email("Invalid email").required("Email is required"),
+  email: yup.string().email("Invalid email").optional(),
   logo: yup.string().optional(),
   hasLogo: yup.boolean().required(),
+  isDefaultCountry: yup.boolean().required(),
   address: yup.string().required("Address is required"),
   state: yup.string().required("State is required"),
   country: yup.string().required("Country is required"),
-  website: yup
-    .string()
-    .matches(validWebsiteURL, "Invalid Website URl")
-    .required("Website is required"),
+  website: yup.string().matches(validWebsiteURL, "Invalid Website URl").optional(),
   city: yup.string().required("City is required"),
   phone: yup.string().required("Phone number is required"),
+  branch: yup.string().optional(),
+  postalCode: yup.string().required("Postal code is required"),
+  registration: yup.string().required("Registration number is required"),
 });
 
-const _AddCompanyModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
+const _AddCompanyModal: React.FC<OwnProps> = (props) => {
+  const { opened, onClose, title, mode = "add", companyId } = props;
   const { theme, classes } = useStyles();
   const {
     state: { token },
   } = useAuthContext();
   const dispatch = useAppDispatch();
+  const { data: companies } = useAppSelector(selectCompanies);
   const [isCreating, setIsCreating] = React.useState(false);
   const [file, setFile] = React.useState<File>({} as File);
 
-  const company = useFormik<ICompanyForm>({
+  const form = useFormik<ICompanyForm>({
     initialValues: {
       name: "",
       email: "",
@@ -68,10 +93,14 @@ const _AddCompanyModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
       hasLogo: false,
       address: "",
       state: "",
-      country: "",
+      isDefaultCountry: true,
+      country: "Malaysia",
       website: "",
       city: "",
       phone: "",
+      branch: "",
+      postalCode: "",
+      registration: "",
     },
     validationSchema: schema,
     onSubmit: async (values, helpers) => {
@@ -87,28 +116,62 @@ const _AddCompanyModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
           return;
         }
       }
-      dispatch(
-        createCompany({
-          token,
-          company: values,
-        })
-      )
-        .unwrap()
-        .then((res) => {
-          notify("Company", res?.message, res.success ? "success" : "error");
-          if (res.success) {
-            dispatch(addCompany(res.data));
-            helpers.resetForm();
-            onClose();
-          }
-        })
-        .catch((err) => {
-          console.log("Add Company: ", err?.message);
-          notify("Company", "An error occurred", "error");
-        })
-        .finally(() => {
-          setIsCreating(false);
-        });
+      if (mode === "add") {
+        dispatch(
+          createCompany({
+            token,
+            company: {
+              ...values,
+              email: values.email || "",
+              website: values.website || "",
+            },
+          })
+        )
+          .unwrap()
+          .then((res) => {
+            notify("Company", res?.message, res.success ? "success" : "error");
+            if (res.success) {
+              dispatch(addCompany(res.data));
+              helpers.resetForm();
+              onClose();
+            }
+          })
+          .catch((err) => {
+            console.log("Add Company: ", err?.message);
+            notify("Company", "An error occurred", "error");
+          })
+          .finally(() => {
+            setIsCreating(false);
+          });
+      } else {
+        dispatch(
+          updateCompany({
+            token,
+            id: companyId || "",
+            company: {
+              ...values,
+              email: values.email || "",
+              website: values.website || "",
+            },
+          })
+        )
+          .unwrap()
+          .then((res) => {
+            notify("Company", res?.message, res.success ? "success" : "error");
+            if (res.success) {
+              dispatch(modifyCompany(res.data));
+              helpers.resetForm();
+              onClose();
+            }
+          })
+          .catch((err) => {
+            console.log("Update Company: ", err?.message);
+            notify("Company", "An error occurred", "error");
+          })
+          .finally(() => {
+            setIsCreating(false);
+          });
+      }
     },
   });
 
@@ -122,16 +185,53 @@ const _AddCompanyModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
     reader.onload = (e) => {
       const dataUri = e?.target?.result as string;
       if (dataUri) {
-        company.setValues((prev) => ({ ...prev, logo: dataUri, hasLogo: true }));
+        form.setValues((prev) => ({ ...prev, logo: dataUri, hasLogo: true }));
       }
     };
     reader.readAsDataURL(file);
   };
 
+  const handleOnChangeState = (value: string | null) => {
+    if (!value) return;
+    form.setValues((prev) => ({
+      ...prev,
+      state: value,
+    }));
+  };
+
   const handleCancel = () => {
-    company.resetForm();
+    form.resetForm();
     onClose();
   };
+
+  React.useEffect(() => {
+    if (mode === "add") return;
+    if (!companyId) return;
+    const company = companies.find((company) => company._id === companyId);
+    if (!company) {
+      notify("Company", "Company not found", "error");
+      onClose();
+      return;
+    }
+    console.log("company to updated found", company);
+    form.setValues({
+      name: company.name,
+      email: company.email,
+      logo: `${BASE_URL}\\${company.logo}` || "",
+      hasLogo: !!company.logo,
+      address: company.address,
+      state: company.state,
+      isDefaultCountry: company.country.toLowerCase() === "malaysia",
+      country: company.country,
+      website: company.website,
+      city: company.city,
+      phone: company.phone,
+      branch: company.branch,
+      postalCode: company.postalCode || "",
+      registration: company.registration || "",
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [companies, mode, companyId]);
 
   return (
     <Modal
@@ -148,8 +248,8 @@ const _AddCompanyModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
           <Grid.Col span={12}>
             <Stack spacing={"xs"}>
               <Flex direction={"column"} align={"center"} justify={"flex-end"}>
-                {company.values.logo ? (
-                  <Avatar src={company.values.logo} radius={rem(250)} size={rem(170)} />
+                {form.values.logo ? (
+                  <Avatar src={form.values.logo} radius={rem(250)} size={rem(170)} />
                 ) : (
                   <Avatar src={"/user.png"} radius={rem(250)} size={rem(170)} />
                 )}
@@ -176,11 +276,39 @@ const _AddCompanyModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
                 label="Name"
                 name="name"
                 id="name"
-                value={company.values.name}
-                onChange={company.handleChange}
-                onBlur={company.handleBlur}
-                error={company.errors.name && company.touched.name ? company.errors.name : ""}
+                value={form.values.name}
+                onChange={form.handleChange}
+                onBlur={form.handleBlur}
+                error={form.errors.name && form.touched.name ? form.errors.name : ""}
               />
+              <Group grow align="flex-start">
+                <TextInput
+                  required
+                  withAsterisk={false}
+                  label="Registration No."
+                  name="registration"
+                  id="registration"
+                  value={form.values.registration}
+                  onChange={form.handleChange}
+                  onBlur={form.handleBlur}
+                  error={
+                    form.errors.registration && form.touched.registration
+                      ? form.errors.registration
+                      : ""
+                  }
+                />
+                <TextInput
+                  required
+                  withAsterisk={false}
+                  label="Branch"
+                  name="branch"
+                  id="branch"
+                  value={form.values.branch}
+                  onChange={form.handleChange}
+                  onBlur={form.handleBlur}
+                  error={form.errors.branch && form.touched.branch ? form.errors.branch : ""}
+                />
+              </Group>
               <Group grow align="flex-start">
                 <TextInput
                   required
@@ -188,10 +316,10 @@ const _AddCompanyModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
                   label="Email"
                   name="email"
                   id="email"
-                  value={company.values.email}
-                  onChange={company.handleChange}
-                  onBlur={company.handleBlur}
-                  error={company.errors.email && company.touched.email ? company.errors.email : ""}
+                  value={form.values.email}
+                  onChange={form.handleChange}
+                  onBlur={form.handleBlur}
+                  error={form.errors.email && form.touched.email ? form.errors.email : ""}
                 />
                 <TextInput
                   required
@@ -199,10 +327,10 @@ const _AddCompanyModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
                   label="Phone"
                   name="phone"
                   id="phone"
-                  value={company.values.phone}
-                  onChange={company.handleChange}
-                  onBlur={company.handleBlur}
-                  error={company.errors.phone && company.touched.phone ? company.errors.phone : ""}
+                  value={form.values.phone}
+                  onChange={form.handleChange}
+                  onBlur={form.handleBlur}
+                  error={form.errors.phone && form.touched.phone ? form.errors.phone : ""}
                 />
               </Group>
               <TextInput
@@ -211,12 +339,10 @@ const _AddCompanyModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
                 label="Address"
                 name="address"
                 id="address"
-                value={company.values.address}
-                onChange={company.handleChange}
-                onBlur={company.handleBlur}
-                error={
-                  company.errors.address && company.touched.address ? company.errors.address : ""
-                }
+                value={form.values.address}
+                onChange={form.handleChange}
+                onBlur={form.handleBlur}
+                error={form.errors.address && form.touched.address ? form.errors.address : ""}
               />
               <Group grow align="flex-start">
                 <TextInput
@@ -225,22 +351,37 @@ const _AddCompanyModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
                   label="City"
                   name="city"
                   id="city"
-                  value={company.values.city}
-                  onChange={company.handleChange}
-                  onBlur={company.handleBlur}
-                  error={company.errors.city && company.touched.city ? company.errors.city : ""}
+                  value={form.values.city}
+                  onChange={form.handleChange}
+                  onBlur={form.handleBlur}
+                  error={form.errors.city && form.touched.city ? form.errors.city : ""}
                 />
-                <TextInput
-                  required
-                  withAsterisk={false}
-                  label="State"
-                  name="state"
-                  id="state"
-                  value={company.values.state}
-                  onChange={company.handleChange}
-                  onBlur={company.handleBlur}
-                  error={company.errors.state && company.touched.state ? company.errors.state : ""}
-                />
+                {form.values.isDefaultCountry ? (
+                  <Select
+                    withinPortal
+                    required
+                    withAsterisk={false}
+                    searchable
+                    nothingFound="No State"
+                    label="State"
+                    value={form.values.state}
+                    onChange={handleOnChangeState}
+                    data={malaysianStatesList}
+                    error={form.touched.state && form.errors.state ? `${form.errors.state}` : null}
+                  />
+                ) : (
+                  <TextInput
+                    required
+                    withAsterisk={false}
+                    label="State"
+                    name="state"
+                    id="state"
+                    value={form.values.state}
+                    onChange={form.handleChange}
+                    onBlur={form.handleBlur}
+                    error={form.errors.state && form.touched.state ? form.errors.state : ""}
+                  />
+                )}
               </Group>
 
               <Group grow align="flex-start">
@@ -250,28 +391,43 @@ const _AddCompanyModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
                   label="Country"
                   name="country"
                   id="country"
-                  value={company.values.country}
-                  onChange={company.handleChange}
-                  onBlur={company.handleBlur}
-                  error={
-                    company.errors.country && company.touched.country ? company.errors.country : ""
-                  }
+                  value={form.values.country}
+                  onChange={(e) => {
+                    form.setValues((prev) => ({
+                      ...prev,
+                      isDefaultCountry: e.currentTarget.value.toLowerCase() === "malaysia",
+                    }));
+                    form.handleChange(e);
+                  }}
+                  onBlur={form.handleBlur}
+                  error={form.errors.country && form.touched.country ? form.errors.country : ""}
                 />
                 <TextInput
                   required
                   withAsterisk={false}
-                  label="Website URL"
-                  name="website"
-                  id="website"
-                  placeholder="https://www.example.com"
-                  value={company.values.website}
-                  onChange={company.handleChange}
-                  onBlur={company.handleBlur}
+                  label="Postal Code"
+                  name="postalCode"
+                  id="postalCode"
+                  value={form.values.postalCode}
+                  onChange={form.handleChange}
+                  onBlur={form.handleBlur}
                   error={
-                    company.errors.website && company.touched.website ? company.errors.website : ""
+                    form.errors.postalCode && form.touched.postalCode ? form.errors.postalCode : ""
                   }
                 />
               </Group>
+              <TextInput
+                required
+                withAsterisk={false}
+                label="Website URL"
+                name="website"
+                id="website"
+                placeholder="https://www.example.com"
+                value={form.values.website}
+                onChange={form.handleChange}
+                onBlur={form.handleBlur}
+                error={form.errors.website && form.touched.website ? form.errors.website : ""}
+              />
 
               <Group align="flex-end" position="right" mt={rem(32)}>
                 <Button variant="outline" onClick={handleCancel} size="xs">
@@ -281,7 +437,7 @@ const _AddCompanyModal: React.FC<OwnProps> = ({ opened, onClose, title }) => {
                   size="xs"
                   variant="filled"
                   loading={isCreating}
-                  onClick={() => company.handleSubmit()}
+                  onClick={() => form.handleSubmit()}
                 >
                   Save
                 </Button>

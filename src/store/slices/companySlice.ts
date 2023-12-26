@@ -20,7 +20,7 @@ const companySlice = createSlice({
     addCompany: (state, action: PayloadAction<ICompany>) => {
       state.data.push(action.payload);
     },
-    updateCompany: (state, action: PayloadAction<ICompany>) => {
+    modifyCompany: (state, action: PayloadAction<ICompany>) => {
       const index = state.data.findIndex((company) => company._id === action.payload._id);
       state.data[index] = action.payload;
     },
@@ -52,7 +52,7 @@ const companySlice = createSlice({
 });
 
 export { companySlice };
-export const { addCompany, deleteCompany, updateCompany } = companySlice.actions;
+export const { addCompany, deleteCompany, modifyCompany } = companySlice.actions;
 export const companyReducer = companySlice.reducer;
 
 // interface IUpdatePrimaryContactPayload {

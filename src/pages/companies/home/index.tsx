@@ -265,12 +265,14 @@ const Company: React.FC<OwnProps> = () => {
                   />
                 </td>
                 <td>{company.name}</td>
+                <td>{company?.registration || "N/A"}</td>
                 <td>{company.email}</td>
                 <td>{company.phone}</td>
                 <td>{company.address}</td>
                 <td>{company.city}</td>
                 <td>{company.state}</td>
                 <td>{company.country}</td>
+                <td>{company?.postalCode || "N/A"}</td>
                 <td>
                   {isAdmin ? (
                     <Group>
@@ -404,6 +406,7 @@ const Company: React.FC<OwnProps> = () => {
             <th>#</th>
             <th>Logo</th>
             <th>Name</th>
+            <th>Registration No.</th>
             <th>Email</th>
 
             <th>Phone</th>
@@ -411,6 +414,7 @@ const Company: React.FC<OwnProps> = () => {
             <th>City</th>
             <th>State</th>
             <th>Country</th>
+            <th>Postal Code</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -476,6 +480,7 @@ const Company: React.FC<OwnProps> = () => {
       </Flex>
       {content}
       <_AddCompanyModal
+        mode="add"
         title="Add Company"
         opened={addCompanyModalOpened}
         onClose={() => setAddCompanyModalOpened(false)}

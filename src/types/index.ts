@@ -55,6 +55,9 @@ interface ICompany {
   website: string; //
   email: string; //
   phone: string; //
+  branch?: string;
+  postalCode?: string;
+  registration?: string;
   __v: number; //
   // id: number;
   // logo: string;

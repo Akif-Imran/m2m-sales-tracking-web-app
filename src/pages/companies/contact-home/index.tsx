@@ -21,6 +21,7 @@ import {
   IconColumns2,
   IconId,
   IconPlus,
+  IconRotateClockwise2,
   IconSearch,
   IconTable,
   IconTrash,
@@ -59,6 +60,7 @@ export const Contact: React.FC<OwnProps> = () => {
   const [isDeleting, setIsDeleting] = React.useState(false);
 
   const [addCompanyModalOpened, setAddCompanyModalOpened] = React.useState(false);
+  const [editCompanyModalOpened, setEditCompanyModalOpened] = React.useState(false);
   const [addContactModalOpened, setAddContactModalOpened] = React.useState(false);
   const [addFollowUpModalOpened, setAddFollowUpModalOpened] = React.useState(false);
   const [addClaimModalOpened, setAddClaimModalOpened] = React.useState(false);
@@ -262,15 +264,27 @@ export const Contact: React.FC<OwnProps> = () => {
                   />
                 </td>
                 <td>{company.name}</td>
+                <td>{company?.registration || "N/A"}</td>
                 <td>{company.email}</td>
                 <td>{company.phone}</td>
                 <td>{company.address}</td>
                 <td>{company.city}</td>
                 <td>{company.state}</td>
                 <td>{company.country}</td>
+                <td>{company?.postalCode || "N/A"}</td>
                 <td>
                   {isAdmin ? (
                     <Group>
+                      <ActionIcon
+                        color="red"
+                        size={"sm"}
+                        onClick={() => {
+                          setSelectedCompany(company._id);
+                          setEditCompanyModalOpened(true);
+                        }}
+                      >
+                        <IconRotateClockwise2 />
+                      </ActionIcon>
                       <ActionIcon
                         color="red"
                         size={"sm"}
@@ -401,6 +415,7 @@ export const Contact: React.FC<OwnProps> = () => {
             <th>#</th>
             <th>Logo</th>
             <th>Name</th>
+            <th>Registration No.</th>
             <th>Email</th>
 
             <th>Phone</th>
@@ -408,6 +423,7 @@ export const Contact: React.FC<OwnProps> = () => {
             <th>City</th>
             <th>State</th>
             <th>Country</th>
+            <th>Postal Code</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -473,9 +489,17 @@ export const Contact: React.FC<OwnProps> = () => {
       </Flex>
       {content}
       <_AddCompanyModal
+        mode="add"
         title="Add Company"
         opened={addCompanyModalOpened}
         onClose={() => setAddCompanyModalOpened(false)}
+      />
+      <_AddCompanyModal
+        mode="edit"
+        title="Update Company"
+        opened={editCompanyModalOpened}
+        onClose={() => setEditCompanyModalOpened(false)}
+        companyId={selectedCompany}
       />
       <_AddContactModal
         title="Add Contact"

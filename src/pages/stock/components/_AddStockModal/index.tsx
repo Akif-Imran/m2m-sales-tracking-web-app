@@ -1,7 +1,19 @@
 import { modalOverlayPropsHelper } from "@helpers";
 import React from "react";
 import { useStyles } from "./styles";
-import { Button, Grid, Group, Modal, Select, Stack, TextInput, rem } from "@mantine/core";
+import {
+  Avatar,
+  Button,
+  FileButton,
+  Flex,
+  Grid,
+  Group,
+  Modal,
+  Select,
+  Stack,
+  TextInput,
+  rem,
+} from "@mantine/core";
 import { FormikHelpers, useFormik } from "formik";
 import { selectRecordsForDropdown, useAppDispatch, useAppSelector } from "@store";
 import { createStock, updateStock } from "@thunks";
@@ -9,6 +21,9 @@ import { useAuthContext } from "@contexts";
 import { addStock, modifyStock } from "@slices";
 import { notify } from "@utility";
 import * as yup from "yup";
+import { IconUpload } from "@tabler/icons-react";
+import { useGStyles } from "@global-styles";
+import { uploadFile } from "@services";
 
 type OwnProps =
   | {
@@ -29,12 +44,24 @@ type OwnProps =
 interface IForm
   extends Omit<
     IStock,
-    "_id" | "__v" | "createdBy" | "createdAt" | "company" | "isActive" | "modelNo"
+    | "_id"
+    | "__v"
+    | "createdBy"
+    | "createdAt"
+    | "company"
+    | "isActive"
+    | "modelNo"
+    | "image"
+    | "status"
   > {
   modelNo?: string;
+  image?: string;
+  hasImage: boolean;
 }
 
 const schema: yup.ObjectSchema<IForm> = yup.object().shape({
+  image: yup.string().optional(),
+  hasImage: yup.boolean().required(),
   name: yup.string().required("Name is required"),
   type: yup.string().required("Type is required"),
   serialNo: yup.string().required("Serial No is required"),
@@ -49,6 +76,7 @@ const schema: yup.ObjectSchema<IForm> = yup.object().shape({
 const _AddStockModal: React.FC<OwnProps> = (props) => {
   const { opened, onClose, title, mode = "add" } = props;
   const { theme } = useStyles();
+  const { classes: gclasses } = useGStyles();
   const dispatch = useAppDispatch();
   const {
     state: { token },
@@ -56,10 +84,12 @@ const _AddStockModal: React.FC<OwnProps> = (props) => {
   const { warehouses, suppliers, engineers, salesPersons } =
     useAppSelector(selectRecordsForDropdown);
   const [isCreating, setIsCreating] = React.useState(false);
-  // const [_file, setFile] = React.useState<File>({} as File);
+  const [file, setFile] = React.useState<File>({} as File);
 
   const form = useFormik<IForm>({
     initialValues: {
+      image: mode === "edit" ? props.record?.image || "" : "",
+      hasImage: false,
       name: mode === "edit" ? props.record?.name || "" : "",
       type: mode === "edit" ? props.record?.type || "" : "",
       serialNo: mode === "edit" ? props.record?.serialNo || "" : "",
@@ -71,8 +101,19 @@ const _AddStockModal: React.FC<OwnProps> = (props) => {
       quantity: mode === "edit" ? props.record?.quantity || 0 : 0,
     },
     validationSchema: schema,
-    onSubmit: (values, helpers) => {
+    onSubmit: async (values, helpers) => {
       console.log(values);
+      setIsCreating(true);
+      if (values.hasImage) {
+        const res = await uploadFile(token, file);
+        if (res.statusCode === 200 || res.statusCode === 201) {
+          values.image = res.data;
+        } else {
+          setIsCreating((_prev) => false);
+          notify("Stock", res?.message, "error");
+          return;
+        }
+      }
       if (mode === "add") {
         handleAdd(values, helpers);
       } else {
@@ -145,7 +186,7 @@ const _AddStockModal: React.FC<OwnProps> = (props) => {
       });
   };
 
-  /* const handleReceiptChange = (file: File) => {
+  const handleReceiptChange = (file: File) => {
     if (file === null) {
       notify("Image Upload", "Item image not uploaded", "error");
       return;
@@ -159,7 +200,7 @@ const _AddStockModal: React.FC<OwnProps> = (props) => {
       }
     };
     reader.readAsDataURL(file);
-  }; */
+  };
 
   const handleOnChangeAssignTo = (value: string | null) => {
     if (!value) return;
@@ -232,7 +273,7 @@ const _AddStockModal: React.FC<OwnProps> = (props) => {
         <Grid>
           <Grid.Col span={12}>
             <Stack spacing={"xs"}>
-              {/* <Flex direction={"column"} align={"center"} justify={"flex-end"}>
+              <Flex direction={"column"} align={"center"} justify={"flex-end"}>
                 {form.values.image ? (
                   <Avatar src={form.values.image} radius={"md"} size={rem(170)} />
                 ) : (
@@ -261,7 +302,7 @@ const _AddStockModal: React.FC<OwnProps> = (props) => {
                     )}
                   </FileButton>
                 </div>
-              </Flex> */}
+              </Flex>
 
               <Group align="flex-start" grow>
                 <TextInput

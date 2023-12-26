@@ -15,7 +15,7 @@ import {
   TextInput,
   rem,
 } from "@mantine/core";
-import { useFormik } from "formik";
+import { FormikHelpers, useFormik } from "formik";
 import { IconUpload } from "@tabler/icons-react";
 import { notify } from "@utility";
 import { selectCompanies, useAppDispatch, useAppSelector } from "@store";
@@ -42,7 +42,7 @@ type OwnProps =
       title: string;
       companyId: string;
     };
-interface ICompanyForm
+interface IForm
   extends Omit<
     ICompany,
     "_id" | "__v" | "company" | "isActive" | "logo" | "email" | "website" | "branch"
@@ -57,7 +57,7 @@ interface ICompanyForm
   registration: string;
 }
 
-const schema: yup.ObjectSchema<ICompanyForm> = yup.object().shape({
+const schema: yup.ObjectSchema<IForm> = yup.object().shape({
   name: yup.string().required("Company name is required"),
   email: yup.string().email("Invalid email").optional(),
   logo: yup.string().optional(),
@@ -85,7 +85,7 @@ const _AddCompanyModal: React.FC<OwnProps> = (props) => {
   const [isCreating, setIsCreating] = React.useState(false);
   const [file, setFile] = React.useState<File>({} as File);
 
-  const form = useFormik<ICompanyForm>({
+  const form = useFormik<IForm>({
     initialValues: {
       name: "",
       email: "",
@@ -117,63 +117,70 @@ const _AddCompanyModal: React.FC<OwnProps> = (props) => {
         }
       }
       if (mode === "add") {
-        dispatch(
-          createCompany({
-            token,
-            company: {
-              ...values,
-              email: values.email || "",
-              website: values.website || "",
-            },
-          })
-        )
-          .unwrap()
-          .then((res) => {
-            notify("Company", res?.message, res.success ? "success" : "error");
-            if (res.success) {
-              dispatch(addCompany(res.data));
-              helpers.resetForm();
-              onClose();
-            }
-          })
-          .catch((err) => {
-            console.log("Add Company: ", err?.message);
-            notify("Company", "An error occurred", "error");
-          })
-          .finally(() => {
-            setIsCreating(false);
-          });
+        handleAdd(values, helpers);
       } else {
-        dispatch(
-          updateCompany({
-            token,
-            id: companyId || "",
-            company: {
-              ...values,
-              email: values.email || "",
-              website: values.website || "",
-            },
-          })
-        )
-          .unwrap()
-          .then((res) => {
-            notify("Company", res?.message, res.success ? "success" : "error");
-            if (res.success) {
-              dispatch(modifyCompany(res.data));
-              helpers.resetForm();
-              onClose();
-            }
-          })
-          .catch((err) => {
-            console.log("Update Company: ", err?.message);
-            notify("Company", "An error occurred", "error");
-          })
-          .finally(() => {
-            setIsCreating(false);
-          });
+        handleUpdate(values, helpers);
       }
     },
   });
+  const handleAdd = (values: IForm, helpers: FormikHelpers<IForm>) => {
+    dispatch(
+      createCompany({
+        token,
+        company: {
+          ...values,
+          email: values.email || "",
+          website: values.website || "",
+        },
+      })
+    )
+      .unwrap()
+      .then((res) => {
+        notify("Company", res?.message, res.success ? "success" : "error");
+        if (res.success) {
+          dispatch(addCompany(res.data));
+          helpers.resetForm();
+          onClose();
+        }
+      })
+      .catch((err) => {
+        console.log("Add Company: ", err?.message);
+        notify("Company", "An error occurred", "error");
+      })
+      .finally(() => {
+        setIsCreating(false);
+      });
+  };
+
+  const handleUpdate = (values: IForm, helpers: FormikHelpers<IForm>) => {
+    dispatch(
+      updateCompany({
+        token,
+        id: companyId || "",
+        company: {
+          ...values,
+          email: values.email || "",
+          website: values.website || "",
+        },
+      })
+    )
+      .unwrap()
+      .then((res) => {
+        notify("Company", res?.message, res.success ? "success" : "error");
+        if (res.success) {
+          dispatch(modifyCompany(res.data));
+          helpers.resetForm();
+          onClose();
+        }
+      })
+      .catch((err) => {
+        console.log("Update Company: ", err?.message);
+        notify("Company", "An error occurred", "error");
+      })
+      .finally(() => {
+        setIsCreating(false);
+      });
+  };
 
   const handleLogoChange = (file: File) => {
     if (file === null) {

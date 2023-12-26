@@ -182,6 +182,8 @@ interface IStock {
   quantity: number;
   warehouseId: string;
   assignedTo: string;
+  image?: string;
+  status?: number;
   _id: string;
   __v: number;
 }

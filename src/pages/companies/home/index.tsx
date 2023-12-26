@@ -26,7 +26,7 @@ import {
   IconTable,
   IconTrash,
 } from "@tabler/icons-react";
-import { selectCompanies, selectCompanyContact, useAppDispatch, useAppSelector } from "@store";
+import { selectCompanies, selectContactsWithRecords, useAppDispatch, useAppSelector } from "@store";
 import { colors } from "@theme";
 import { _AddCompanyModal, _AddContactModal, _CompanyCard, _ContactCard } from "../components";
 import { openDeleteModalHelper } from "@helpers";
@@ -58,7 +58,7 @@ const Company: React.FC<OwnProps> = () => {
   ]);
   const [searchQuery, setSearchQuery] = React.useState("");
   const { data: companies } = useAppSelector(selectCompanies);
-  const { data: contacts } = useAppSelector(selectCompanyContact);
+  const contacts = useAppSelector(selectContactsWithRecords);
   const [isDeleting, setIsDeleting] = React.useState(false);
 
   const [addCompanyModalOpened, setAddCompanyModalOpened] = React.useState(false);

@@ -38,6 +38,7 @@ export const cardConfig = {
   px: "sm",
   py: "sm",
   radius: "md",
+  mih: rem(180),
 };
 
 export const useGStyles = createStyles((_theme) => ({

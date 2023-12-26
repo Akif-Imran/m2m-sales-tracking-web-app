@@ -99,6 +99,19 @@ export const selectSuppliers = (state: RootState) => state.suppliers;
 export const selectNotifications = (state: RootState) => state.notifications;
 
 //memoized selectors
+export const selectContactsWithRecords = createSelector(
+  selectCompanies,
+  selectCompanyContact,
+  (companies, contacts) => {
+    return contacts.data.map((contact) => {
+      const company = companies.data.find((company) => company._id === contact.customerId);
+      return {
+        ...contact,
+        company,
+      };
+    });
+  }
+);
 export const selectTasksCombined = createSelector(
   selectLeads,
   selectProjects,

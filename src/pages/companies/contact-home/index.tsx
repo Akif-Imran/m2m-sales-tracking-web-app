@@ -277,7 +277,6 @@ export const Contact: React.FC<OwnProps> = () => {
                   {isAdmin ? (
                     <Group>
                       <ActionIcon
-                        color="red"
                         size={"sm"}
                         onClick={() => {
                           setSelectedCompany(company._id);

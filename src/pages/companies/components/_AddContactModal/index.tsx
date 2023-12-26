@@ -24,6 +24,7 @@ import { useAuthContext } from "@contexts";
 import * as yup from "yup";
 import { uploadFile } from "@services";
 import { _AddCompanyModal } from "../_AddCompanyModal";
+import SelectItem from "./SelectItem";
 
 interface OwnProps {
   opened: boolean;
@@ -58,7 +59,7 @@ const _AddContactModal: React.FC<OwnProps> = ({ opened, onClose, title, companyI
   const {
     state: { token },
   } = useAuthContext();
-  const { companies: companiesList } = useAppSelector(selectRecordsForDropdown);
+  const { companiesWithBranches: companiesList } = useAppSelector(selectRecordsForDropdown);
   const [addCompanyModalOpened, setAddCompanyModalOpened] = React.useState(false);
   const [isCreating, setIsCreating] = React.useState(false);
   const [file, setFile] = React.useState<File>({} as File);
@@ -185,6 +186,7 @@ const _AddContactModal: React.FC<OwnProps> = ({ opened, onClose, title, companyI
           searchable
           nothingFound="No Company"
           label="Company"
+          itemComponent={SelectItem}
           rightSection={
             <ActionIcon variant="light" onClick={() => setAddCompanyModalOpened(true)}>
               <IconPlus size={16} />

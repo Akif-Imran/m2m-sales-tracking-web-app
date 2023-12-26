@@ -92,17 +92,17 @@ export const _ContactCard: React.FC<OwnProps> = ({ contact }) => {
 
             <Flex direction={"row"} align={"flex-start"} justify={"flex-start"}>
               <Text {...titleTextStyle} mr={"xs"}>
-                Designation:
+                Mobile:
               </Text>
-              <Text {...bodyTextStyle}>{contact?.designation || "N/A"}</Text>
+              <Text {...bodyTextStyle}>{contact?.mobile.join(", ") || "N/A"}</Text>
             </Flex>
 
             <div className={classes.textWithIconButton}>
               <Flex direction={"row"} align={"flex-start"} justify={"flex-start"}>
                 <Text {...titleTextStyle} mr={"xs"}>
-                  Mobile:
+                  Designation:
                 </Text>
-                <Text {...bodyTextStyle}>{contact?.mobile.join(", ") || "N/A"}</Text>
+                <Text {...bodyTextStyle}>{contact?.designation || "N/A"}</Text>
               </Flex>
               <Tooltip label={"Contact's Company Details"} position="bottom" withinPortal withArrow>
                 <UnstyledButton

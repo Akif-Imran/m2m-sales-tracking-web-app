@@ -49,6 +49,7 @@ interface IForm
   > {
   logo?: string;
   hasLogo: boolean;
+  hasUpdated: boolean;
   isDefaultCountry: boolean;
   email?: string;
   website?: string;
@@ -62,6 +63,7 @@ const schema: yup.ObjectSchema<IForm> = yup.object().shape({
   email: yup.string().email("Invalid email").optional(),
   logo: yup.string().optional(),
   hasLogo: yup.boolean().required(),
+  hasUpdated: yup.boolean().required(),
   isDefaultCountry: yup.boolean().required(),
   address: yup.string().required("Address is required"),
   state: yup.string().required("State is required"),
@@ -91,6 +93,7 @@ const _AddCompanyModal: React.FC<OwnProps> = (props) => {
       email: "",
       logo: "",
       hasLogo: false,
+      hasUpdated: false,
       address: "",
       state: "",
       isDefaultCountry: true,
@@ -106,7 +109,10 @@ const _AddCompanyModal: React.FC<OwnProps> = (props) => {
     onSubmit: async (values, helpers) => {
       console.log(values);
       setIsCreating(true);
-      if (values.hasLogo) {
+      if (
+        values.hasLogo &&
+        (props.mode === "add" || (props.mode === "edit" && values.hasUpdated))
+      ) {
         const res = await uploadFile(token, file);
         if (res.statusCode === 200 || res.statusCode === 201) {
           values.logo = res.data;
@@ -153,6 +159,9 @@ const _AddCompanyModal: React.FC<OwnProps> = (props) => {
   };
 
   const handleUpdate = (values: IForm, helpers: FormikHelpers<IForm>) => {
+    if (!values.hasUpdated) {
+      delete values.logo;
+    }
     dispatch(
       updateCompany({
         token,
@@ -192,7 +201,12 @@ const _AddCompanyModal: React.FC<OwnProps> = (props) => {
     reader.onload = (e) => {
       const dataUri = e?.target?.result as string;
       if (dataUri) {
-        form.setValues((prev) => ({ ...prev, logo: dataUri, hasLogo: true }));
+        form.setValues((prev) => ({
+          ...prev,
+          logo: dataUri,
+          hasLogo: true,
+          hasUpdated: props.mode === "edit",
+        }));
       }
     };
     reader.readAsDataURL(file);
@@ -224,8 +238,9 @@ const _AddCompanyModal: React.FC<OwnProps> = (props) => {
     form.setValues({
       name: company.name,
       email: company.email,
-      logo: `${BASE_URL}\\${company.logo}` || "",
+      logo: company.logo ? `${BASE_URL}\\${company.logo}` : "",
       hasLogo: !!company.logo,
+      hasUpdated: false,
       address: company.address,
       state: company.state,
       isDefaultCountry: company.country.toLowerCase() === "malaysia",
@@ -238,7 +253,7 @@ const _AddCompanyModal: React.FC<OwnProps> = (props) => {
       registration: company.registration || "",
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [companies, mode, companyId]);
+  }, [companies, mode, companyId, opened]);
 
   return (
     <Modal

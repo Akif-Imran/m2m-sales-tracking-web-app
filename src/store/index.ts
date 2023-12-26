@@ -244,6 +244,11 @@ export const selectRecordsForDropdown = createSelector(
         value: company._id,
         label: company.name,
       })),
+      companiesWithBranches: companies.data.map((company) => ({
+        value: company._id,
+        label: company.name,
+        description: company.branch || "N/A",
+      })),
       leads: leads.data.map((lead) => ({
         value: lead._id,
         label: lead.name,

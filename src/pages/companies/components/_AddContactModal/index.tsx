@@ -25,6 +25,7 @@ import * as yup from "yup";
 import { uploadFile } from "@services";
 import { _AddCompanyModal } from "../_AddCompanyModal";
 import SelectItem from "./SelectItem";
+import { excludedCompany } from "@constants";
 
 interface OwnProps {
   opened: boolean;
@@ -73,7 +74,7 @@ const _AddContactModal: React.FC<OwnProps> = ({ opened, onClose, title, companyI
       department: "",
       mobile: "",
       hasImage: false,
-      customerId: companyId || "",
+      customerId: companyId || excludedCompany,
     },
     validationSchema: schema,
     onSubmit: async (values, helpers) => {

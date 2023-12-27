@@ -40,6 +40,7 @@ import { Outlet } from "react-router-dom";
 import { removeCompany, removeContact } from "@thunks";
 import { useAuthContext } from "@contexts";
 import { BASE_URL } from "@api";
+import { excludedCompany } from "@constants";
 
 interface OwnProps {}
 
@@ -79,15 +80,15 @@ export const Contact: React.FC<OwnProps> = () => {
       );
       setSearchedContactData(filtered);
     } else {
-      const filtered = companies.filter((company) =>
-        company.name.toLowerCase().includes(query.toLocaleLowerCase())
-      );
+      const filtered = companies
+        .filter((company) => company._id !== excludedCompany)
+        .filter((company) => company.name.toLowerCase().includes(query.toLocaleLowerCase()));
       setSearchedCompanyData(filtered);
     }
   };
 
   React.useEffect(() => {
-    setSearchedCompanyData(companies);
+    setSearchedCompanyData(companies.filter((company) => company._id !== excludedCompany));
   }, [companies]);
   React.useEffect(() => {
     setSearchedContactData(contacts);

@@ -5,6 +5,7 @@ import {
   Avatar,
   Badge,
   Button,
+  Center,
   Flex,
   Grid,
   Group,
@@ -40,6 +41,7 @@ import { Outlet } from "react-router-dom";
 import { removeCompany, removeContact } from "@thunks";
 import { useAuthContext } from "@contexts";
 import { BASE_URL } from "@api";
+import { excludedCompany } from "@constants";
 
 interface OwnProps {}
 
@@ -79,16 +81,17 @@ const Company: React.FC<OwnProps> = () => {
       );
       setSearchedContactData(filtered);
     } else {
-      const filtered = companies.filter((company) =>
-        company.name.toLowerCase().includes(query.toLocaleLowerCase())
-      );
+      const filtered = companies
+        .filter((company) => company._id !== excludedCompany)
+        .filter((company) => company.name.toLowerCase().includes(query.toLocaleLowerCase()));
       setSearchedCompanyData(filtered);
     }
   };
 
   React.useEffect(() => {
-    setSearchedCompanyData(companies);
+    setSearchedCompanyData(companies.filter((company) => company._id !== excludedCompany));
   }, [companies]);
+
   React.useEffect(() => {
     setSearchedContactData(contacts);
   }, [contacts]);
@@ -311,11 +314,19 @@ const Company: React.FC<OwnProps> = () => {
 
   const contactRows =
     searchedContactData.length === 0 ? (
-      <tr>
-        <td colSpan={14} color={colors.titleText} align="center">
-          No Contacts
-        </td>
-      </tr>
+      <>
+        {viewMode === "cards" ? (
+          <Center>
+            <Text>No Contacts</Text>
+          </Center>
+        ) : (
+          <tr>
+            <td colSpan={14} color={colors.titleText} align="center">
+              No Contacts
+            </td>
+          </tr>
+        )}
+      </>
     ) : (
       <>
         {searchedContactData.map((contact, index) => {

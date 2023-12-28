@@ -10,7 +10,7 @@ interface BaseReq {
   quantity: number;
   warehouseId: string;
   supplierId: string;
-  assignedTo: string;
+  images: string[];
 }
 interface CreateReq {
   token: string;

@@ -51,17 +51,19 @@ interface IForm
     | "company"
     | "isActive"
     | "modelNo"
-    | "image"
+    | "images"
     | "status"
   > {
   modelNo?: string;
-  image?: string;
+  images: string[];
   hasImage: boolean;
+  hasUpdated: boolean;
 }
 
 const schema: yup.ObjectSchema<IForm> = yup.object().shape({
-  image: yup.string().optional(),
+  images: yup.array().of(yup.string().required("Image is required")).required(),
   hasImage: yup.boolean().required(),
+  hasUpdated: yup.boolean().required(),
   name: yup.string().required("Name is required"),
   type: yup.string().required("Type is required"),
   serialNo: yup.string().required("Serial No is required"),
@@ -88,8 +90,9 @@ const _AddStockModal: React.FC<OwnProps> = (props) => {
 
   const form = useFormik<IForm>({
     initialValues: {
-      image: mode === "edit" ? props.record?.image || "" : "",
+      images: mode === "edit" ? props.record?.images || [] : [],
       hasImage: false,
+      hasUpdated: false,
       name: mode === "edit" ? props.record?.name || "" : "",
       type: mode === "edit" ? props.record?.type || "" : "",
       serialNo: mode === "edit" ? props.record?.serialNo || "" : "",
@@ -104,10 +107,10 @@ const _AddStockModal: React.FC<OwnProps> = (props) => {
     onSubmit: async (values, helpers) => {
       console.log(values);
       setIsCreating(true);
-      if (values.hasImage) {
+      if (values.hasImage && (mode === "add" || (mode === "edit" && values.hasUpdated))) {
         const res = await uploadFile(token, file);
         if (res.statusCode === 200 || res.statusCode === 201) {
-          values.image = res.data;
+          values.images[0] = res.data;
         } else {
           setIsCreating((_prev) => false);
           notify("Stock", res?.message, "error");
@@ -196,7 +199,12 @@ const _AddStockModal: React.FC<OwnProps> = (props) => {
     reader.onload = (e) => {
       const dataUri = e?.target?.result as string;
       if (dataUri) {
-        form.setValues((prev) => ({ ...prev, image: dataUri }));
+        form.setValues((prev) => ({
+          ...prev,
+          images: [dataUri],
+          hasImage: true,
+          hasUpdated: mode === "edit",
+        }));
       }
     };
     reader.readAsDataURL(file);
@@ -243,18 +251,22 @@ const _AddStockModal: React.FC<OwnProps> = (props) => {
   }; */
 
   React.useEffect(() => {
-    if (mode === "edit" && !props.record) return;
+    const { record } = props;
+    if (!record) return;
+    if (mode === "add") return;
     form.setValues((prev) => ({
       ...prev,
-      name: mode === "edit" ? props.record?.name || "" : "",
+      images: mode === "edit" ? record?.images || [] : [],
+      name: mode === "edit" ? record?.name || "" : "",
       type: mode === "edit" ? props.record?.type || "" : "",
       serialNo: mode === "edit" ? props.record?.serialNo || "" : "",
       modelNo: mode === "edit" ? props.record?.modelNo || "" : "",
       totalCost: mode === "edit" ? props.record?.totalCost || 0 : 0,
       supplierId: mode === "edit" ? props.record?.supplierId || "" : "",
       warehouseId: mode === "edit" ? props.record?.warehouseId || "" : "",
-      assignedTo: mode === "edit" ? props.record?.assignedTo || "" : "",
       quantity: mode === "edit" ? props.record?.quantity || 0 : 0,
+      hasImage: record?.images?.length > 0 ? true : false,
+      hasUpdated: false,
     }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.record, mode]);
@@ -274,8 +286,8 @@ const _AddStockModal: React.FC<OwnProps> = (props) => {
           <Grid.Col span={12}>
             <Stack spacing={"xs"}>
               <Flex direction={"column"} align={"center"} justify={"flex-end"}>
-                {form.values.image ? (
-                  <Avatar src={form.values.image} radius={"md"} size={rem(170)} />
+                {form.values.hasImage ? (
+                  <Avatar src={form.values.images[0]} radius={"md"} size={rem(170)} />
                 ) : (
                   <div
                     style={{
@@ -294,7 +306,7 @@ const _AddStockModal: React.FC<OwnProps> = (props) => {
                         variant="filled"
                         color={theme.primaryColor}
                         {...props}
-                        disabled={!form.values.image}
+                        disabled={!form.values.images.length}
                         rightIcon={<IconUpload size={16} color={theme.white} stroke={1.5} />}
                       >
                         Image

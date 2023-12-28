@@ -157,3 +157,5 @@ export const malaysianStatesList = [
   { label: "Selangor", value: "Selangor" },
   { label: "Terengganu", value: "Terengganu" },
 ];
+
+export const excludedCompany = "658c34fecc36b5738082a41f";

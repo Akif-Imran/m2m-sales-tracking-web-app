@@ -11,11 +11,15 @@ const initialState: State = {
   data: [
     {
       id: 1,
-      name: "Assigned",
+      name: "Added",
     },
     {
       id: 2,
-      name: "Unassigned",
+      name: "Pending",
+    },
+    {
+      id: 3,
+      name: "Accepted",
     },
   ],
   isLoading: false,
@@ -45,4 +49,4 @@ const stockItemStatusSlice = createSlice({
 });
 
 export { stockItemStatusSlice };
-export const stockItemStatusListReducer = stockItemStatusSlice.reducer;
+export const stockStatusListReducer = stockItemStatusSlice.reducer;

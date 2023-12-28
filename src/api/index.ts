@@ -145,6 +145,8 @@ export const urls = {
     delete: (id: string) => `${BASE_STOCK_URL}/delete/${id}`,
     statusList: `${BASE_STOCK_URL}/getStatusList`,
     getById: (id: string) => `${BASE_STOCK_URL}/getById/${id}`,
+    transfer: `${BASE_STOCK_URL}/assignStock`,
+    accept: (id: string) => `${BASE_STOCK_URL}/acceptStock/${id}`,
   },
   supplier: {
     list: `${BASE_SUPPLIER_URL}/getAll`,

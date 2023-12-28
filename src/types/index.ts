@@ -180,9 +180,12 @@ interface IStock {
   supplierId: string;
   quantity: number;
   warehouseId: string;
-  assignedTo: string;
-  image?: string;
-  status?: number;
+  assignedTo?: string;
+  assignedDate?: string;
+  assignedQuantity?: string;
+  acceptedDate?: string;
+  images: string[];
+  status: number;
   _id: string;
   __v: number;
 }

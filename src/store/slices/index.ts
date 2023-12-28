@@ -22,5 +22,5 @@ export * from "./notificationsSlice";
 export * from "./expenseTypeSlice";
 export * from "./purchaseCategorySlice";
 export * from "./stockSlice";
-export * from "./stockItemStatusSlice";
+export * from "./stockStatusSlice";
 export * from "./warehouseSlice";

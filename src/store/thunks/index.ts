@@ -10,5 +10,5 @@ export * from "./leaveApplicationThunks";
 export * from "./taskThunks";
 export * from "./expenseTypeThunks";
 export * from "./purchaseCategoryThunks";
-export * from "./stockItemThunks";
+export * from "./stockThunks";
 export * from "./warehouseThunks";

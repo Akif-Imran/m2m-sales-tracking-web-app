@@ -16,7 +16,7 @@ import {
   purchaseRequestReducer,
   purchaseRequestStatusListReducer,
   stockReducer,
-  stockItemStatusListReducer,
+  stockStatusListReducer,
   supplierReducer,
   taskReducer,
   taskStatusListReducer,
@@ -55,7 +55,7 @@ const store = configureStore({
     leaveTypes: leaveTypeReducer,
     stocks: stockReducer,
     warehouses: warehouseReducer,
-    stockItemStatusList: stockItemStatusListReducer,
+    stockStatusList: stockStatusListReducer,
     suppliers: supplierReducer,
     notifications: notificationReducer,
   },
@@ -93,7 +93,7 @@ export const selectLeaves = (state: RootState) => state.leaves;
 export const selectLeaveStatusList = (state: RootState) => state.leaveStatusList;
 export const selectLeaveTypes = (state: RootState) => state.leaveTypes;
 export const selectStock = (state: RootState) => state.stocks;
-export const selectStockItemsStatusList = (state: RootState) => state.stockItemStatusList;
+export const selectStockStatusList = (state: RootState) => state.stockStatusList;
 export const selectWarehouses = (state: RootState) => state.warehouses;
 export const selectSuppliers = (state: RootState) => state.suppliers;
 export const selectNotifications = (state: RootState) => state.notifications;
@@ -216,7 +216,7 @@ export const selectRecordsForDropdown = createSelector(
   selectLeaveTypes,
   selectExpenseTypeList,
   selectPurchaseCategories,
-  selectStockItemsStatusList,
+  selectStockStatusList,
   selectWarehouses,
   selectStock,
   (
@@ -548,18 +548,21 @@ export const selectStockWithRecords = createSelector(
   selectUsers,
   selectWarehouses,
   selectSuppliers,
-  (item, users, warehouses, suppliers) => {
+  selectStockStatusList,
+  (item, users, warehouses, suppliers, statuses) => {
     return item.data.map((item) => {
       const stockAddedBy = users.data.find((user) => user._id === item.createdBy);
       const assignee = users.data.find((user) => user._id === item.assignedTo);
       const warehouse = warehouses.data.find((warehouse) => warehouse._id === item.warehouseId);
       const supplier = suppliers.data.find((supplier) => supplier._id === item.supplierId);
+      const statusName = statuses.data.find((status) => status.id === item.status)?.name;
       return {
         ...item,
         stockAddedBy,
         assignee,
         warehouse,
         supplier,
+        statusName,
       };
     });
   }

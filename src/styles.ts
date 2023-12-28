@@ -10,8 +10,8 @@ export const noImageStyle = {
   image: {
     filter: `invert(33%) sepia(65%) saturate(0%) hue-rotate(253deg) brightness(98%) contrast(88%)`,
     objectFit: "contain",
-    width: rem(64),
-    height: rem(64),
+    width: rem(56),
+    height: rem(56),
   },
 };
 

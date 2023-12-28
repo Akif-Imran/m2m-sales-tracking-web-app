@@ -10,7 +10,7 @@ interface BaseReq {
   quantity: number;
   warehouseId: string;
   supplierId: string;
-  images: string[];
+  images?: string[];
 }
 interface CreateReq {
   token: string;
@@ -31,6 +31,23 @@ interface DeleteReq {
 interface ByIdReq {
   token: string;
   id: string;
+}
+
+interface TransferReq {
+  token: string;
+  body: {
+    id: string;
+    quantity: number;
+    assignmentNote: string;
+    assignedTo: string;
+  };
+}
+
+interface AcceptReq {
+  token: string;
+  body: {
+    id: string;
+  };
 }
 
 export const createStock = createAsyncThunk("stock/create", async (params: CreateReq) => {
@@ -69,5 +86,23 @@ export const fetchStockStatuses = createAsyncThunk("stock/status/fetch", async (
 
 export const getStockById = createAsyncThunk("stock/get", async (params: ByIdReq) => {
   const response = await apiGet<ApiResponse<IStock>>(urls.stock.getById(params.id), params.token);
+  return response.data;
+});
+
+export const transferStock = createAsyncThunk("stock/transfer", async (params: TransferReq) => {
+  const response = await apiPut<ApiResponse<IStock>, typeof params.body>(
+    urls.stock.transfer,
+    params.token,
+    params.body
+  );
+  return response.data;
+});
+
+export const acceptStock = createAsyncThunk("stock/accept", async (params: AcceptReq) => {
+  const response = await apiPut<ApiResponse<IStock>, typeof params.body>(
+    urls.stock.accept(params.body.id),
+    params.token,
+    params.body
+  );
   return response.data;
 });

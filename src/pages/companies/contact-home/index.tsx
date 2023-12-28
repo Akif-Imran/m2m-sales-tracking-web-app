@@ -19,9 +19,9 @@ import {
   IconAddressBook,
   IconBuildingBank,
   IconColumns2,
+  IconEdit,
   IconId,
   IconPlus,
-  IconRotateClockwise2,
   IconSearch,
   IconTable,
   IconTrash,
@@ -284,7 +284,7 @@ export const Contact: React.FC<OwnProps> = () => {
                           setEditCompanyModalOpened(true);
                         }}
                       >
-                        <IconRotateClockwise2 />
+                        <IconEdit />
                       </ActionIcon>
                       <ActionIcon
                         color="red"
@@ -345,8 +345,6 @@ export const Contact: React.FC<OwnProps> = () => {
                       contact?.businessCard ? `${BASE_URL}\\${contact?.businessCard}` : "/user.png"
                     }
                     size={50}
-                    //@ts-expect-error style works
-                    styles={contact?.logo ? undefined : noImageStyle}
                   />
                 </td>
                 <td>{contact.name}</td>

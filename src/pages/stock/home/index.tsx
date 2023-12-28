@@ -1,6 +1,7 @@
 import React from "react";
 import {
   ActionIcon,
+  Avatar,
   Badge,
   Button,
   Flex,
@@ -10,11 +11,13 @@ import {
   Table,
   Text,
   TextInput,
+  Tooltip,
+  rem,
 } from "@mantine/core";
 import {
   IconCircleCheckFilled,
+  IconEdit,
   IconPlus,
-  IconRotateClockwise2,
   IconSearch,
   IconTransfer,
   IconTrash,
@@ -23,17 +26,20 @@ import { colors } from "@theme";
 import { notify } from "@utility";
 import { openConfirmModalHelper, openDeleteModalHelper } from "@helpers";
 import { useAuthContext } from "@contexts";
-import { useGStyles } from "@global-styles";
-import { deleteStock } from "@slices";
+import { noImageStyle, useGStyles } from "@global-styles";
+import { deleteStock, modifyStock } from "@slices";
 import { _AddStockModal, _AssignStockModal } from "../components";
 import { selectStockWithRecords, useAppDispatch, useAppSelector } from "@store";
-import { removeStock } from "@thunks";
+import { acceptStock, removeStock } from "@thunks";
+import { DAY_MM_DD_YYYY_HH_MM_SS_A, stockItemStatusColors } from "@constants";
+import { DateTime } from "luxon";
+import { BASE_URL } from "@api";
 
 interface OwnProps {}
 
 export const Stock: React.FC<OwnProps> = () => {
   const {
-    state: { isAdmin, isHR, token },
+    state: { isAdmin, isHR, token, user },
   } = useAuthContext();
   const dispatch = useAppDispatch();
   const { classes: gclasses, theme } = useGStyles();
@@ -105,7 +111,7 @@ export const Stock: React.FC<OwnProps> = () => {
     });
   };
 
-  const handleAcceptStock = (_id: string) => {
+  const handleAcceptStock = (id: string) => {
     openConfirmModalHelper({
       theme: theme,
       title: `Accept Stock`,
@@ -119,20 +125,19 @@ export const Stock: React.FC<OwnProps> = () => {
       cancelLabel: "Cancel",
       confirmLabel: "Accept Stock",
       onConfirm: () => {
-        /* dispatch(
-          removeStock({
+        dispatch(
+          acceptStock({
             token,
-            id,
+            body: {
+              id,
+            },
           })
         )
-          .unwrap() */
-        new Promise<ApiResponse<IStock>>((_resolve, reject) => {
-          reject({ message: "An error occurred", success: false });
-        })
+          .unwrap()
           .then((res) => {
             notify("Accept Stock", res?.message, res.success ? "success" : "error");
             if (res.success) {
-              dispatch(deleteStock(res.data._id));
+              dispatch(modifyStock(res.data));
             }
           })
           .catch((err) => {
@@ -161,42 +166,83 @@ export const Stock: React.FC<OwnProps> = () => {
           return (
             <tr key={stock._id}>
               <td>{index + 1}</td>
+              <td>
+                <Avatar
+                  src={stock?.images.length > 0 ? `${BASE_URL}\\${stock.images[0]}` : "/box.png"}
+                  size={50}
+                  // @ts-expect-error image styles works
+                  styles={
+                    stock?.images.length > 0
+                      ? undefined
+                      : {
+                          root: noImageStyle.root,
+                          image: {
+                            ...noImageStyle.image,
+                            width: rem(48),
+                            height: rem(48),
+                          },
+                        }
+                  }
+                />
+              </td>
               <td>{stock.name}</td>
-              <td>{"N/A"}</td>
+              <td>
+                <Badge variant="filled" color={stockItemStatusColors[stock.status]}>
+                  {stock.statusName || "N/A"}
+                </Badge>
+              </td>
               <td>{stock.type}</td>
               <td>{stock.serialNo}</td>
               <td>{stock.modelNo || "N/A"}</td>
-              <td>{stock.assignee?.name || "N/A"}</td>
               <td>{stock.totalCost}</td>
               <td>{stock.supplier?.name || "N/A"}</td>
               <td>{stock.quantity}</td>
               <td>{stock.warehouse?.name || "N/A"}</td>
+              <td>{stock?.assignedTo === user?._id ? "(You)" : stock.assignee?.name || "N/A"}</td>
+              <td>
+                {stock?.assignedDate
+                  ? DateTime.fromISO(stock?.assignedDate).toFormat(DAY_MM_DD_YYYY_HH_MM_SS_A)
+                  : "N/A"}
+              </td>
+              <td>{stock?.assignedQuantity || "N/A"}</td>
               <td>
                 <Group>
-                  {isAdmin ? (
-                    <React.Fragment>
-                      <ActionIcon color="gray" size={"sm"} onClick={() => showEditModal(stock)}>
-                        <IconRotateClockwise2 />
-                      </ActionIcon>
-                      <ActionIcon color="gray" size={"sm"} onClick={() => showAssignModal(stock)}>
-                        <IconTransfer />
-                      </ActionIcon>
-                      <ActionIcon
-                        color="gray"
-                        size={"sm"}
-                        onClick={() => handleAcceptStock(stock._id)}
-                      >
-                        <IconCircleCheckFilled />
-                      </ActionIcon>
+                  <Tooltip label="Edit">
+                    <ActionIcon color="gray" size={"sm"} onClick={() => showEditModal(stock)}>
+                      <IconEdit />
+                    </ActionIcon>
+                  </Tooltip>
+                  <Tooltip label="Transfer Stock">
+                    <ActionIcon
+                      color="gray"
+                      size={"sm"}
+                      disabled={![1, 3].includes(stock.status)}
+                      onClick={() => showAssignModal(stock)}
+                    >
+                      <IconTransfer />
+                    </ActionIcon>
+                  </Tooltip>
+                  <Tooltip label="Accept Stock">
+                    <ActionIcon
+                      color="gray"
+                      size={"sm"}
+                      disabled={stock?.assignedTo !== user?._id || stock.status !== 2}
+                      onClick={() => handleAcceptStock(stock._id)}
+                    >
+                      <IconCircleCheckFilled />
+                    </ActionIcon>
+                  </Tooltip>
+                  <Tooltip label="Delete">
+                    {isAdmin ? (
                       <ActionIcon color="red" size={"sm"} onClick={() => handleDelete(stock._id)}>
                         <IconTrash />
                       </ActionIcon>
-                    </React.Fragment>
-                  ) : (
-                    <Badge variant="light" color="red">
-                      Admin Required
-                    </Badge>
-                  )}
+                    ) : (
+                      <Badge variant="light" color="red">
+                        Admin Required
+                      </Badge>
+                    )}
+                  </Tooltip>
                 </Group>
               </td>
             </tr>
@@ -232,21 +278,26 @@ export const Stock: React.FC<OwnProps> = () => {
           <Table border={1} bgcolor={theme.white} withBorder withColumnBorders>
             <thead>
               <tr>
-                <th colSpan={5}>Stock</th>
-                <th colSpan={7}>Details</th>
+                <th colSpan={3}>Stock</th>
+                <th colSpan={8}>Details</th>
+                <th colSpan={3}>Transfer Details</th>
+                <th colSpan={1}>Actions</th>
               </tr>
               <tr>
                 <th>#</th>
+                <th>Image</th>
                 <th>Name</th>
                 <th>Status</th>
                 <th>Type</th>
                 <th>Serial No.</th>
                 <th>Model No.</th>
-                <th>Assigned To</th>
                 <th>Cost</th>
                 <th>Supplier</th>
                 <th>Quantity</th>
                 <th>Warehouse</th>
+                <th>Transferred To</th>
+                <th>Transfer Date/Time</th>
+                <th>Transfer Quantity</th>
                 <th>Actions</th>
               </tr>
             </thead>

@@ -24,6 +24,7 @@ import * as yup from "yup";
 import { IconUpload } from "@tabler/icons-react";
 import { useGStyles } from "@global-styles";
 import { uploadFile } from "@services";
+import { BASE_URL } from "@api";
 
 type OwnProps =
   | {
@@ -53,15 +54,19 @@ interface IForm
     | "modelNo"
     | "images"
     | "status"
+    | "assignedTo"
+    | "assignedDate"
+    | "assignedQuantity"
+    | "acceptedDate"
   > {
   modelNo?: string;
-  images: string[];
+  image?: string;
   hasImage: boolean;
   hasUpdated: boolean;
 }
 
 const schema: yup.ObjectSchema<IForm> = yup.object().shape({
-  images: yup.array().of(yup.string().required("Image is required")).required(),
+  image: yup.string().optional(),
   hasImage: yup.boolean().required(),
   hasUpdated: yup.boolean().required(),
   name: yup.string().required("Name is required"),
@@ -71,7 +76,7 @@ const schema: yup.ObjectSchema<IForm> = yup.object().shape({
   totalCost: yup.number().min(0).required("Cost is required"),
   supplierId: yup.string().required("Supplier is required"),
   warehouseId: yup.string().required("Warehouse is required"),
-  assignedTo: yup.string().required("Assignment must be made"),
+  // assignedTo: yup.string().required("Assignment must be made"),
   quantity: yup.number().required("Quantity is required"),
 });
 
@@ -83,14 +88,13 @@ const _AddStockModal: React.FC<OwnProps> = (props) => {
   const {
     state: { token },
   } = useAuthContext();
-  const { warehouses, suppliers, engineers, salesPersons } =
-    useAppSelector(selectRecordsForDropdown);
+  const { warehouses, suppliers } = useAppSelector(selectRecordsForDropdown);
   const [isCreating, setIsCreating] = React.useState(false);
   const [file, setFile] = React.useState<File>({} as File);
 
   const form = useFormik<IForm>({
     initialValues: {
-      images: mode === "edit" ? props.record?.images || [] : [],
+      image: mode === "edit" ? props.record?.images?.at(0) || "" : "",
       hasImage: false,
       hasUpdated: false,
       name: mode === "edit" ? props.record?.name || "" : "",
@@ -100,17 +104,16 @@ const _AddStockModal: React.FC<OwnProps> = (props) => {
       totalCost: mode === "edit" ? props.record?.totalCost || 0 : 0,
       supplierId: mode === "edit" ? props.record?.supplierId || "" : "",
       warehouseId: mode === "edit" ? props.record?.warehouseId || "" : "",
-      assignedTo: mode === "edit" ? props.record?.assignedTo || "" : "",
       quantity: mode === "edit" ? props.record?.quantity || 0 : 0,
     },
     validationSchema: schema,
     onSubmit: async (values, helpers) => {
       console.log(values);
-      setIsCreating(true);
+      if (values.hasUpdated) setIsCreating(true);
       if (values.hasImage && (mode === "add" || (mode === "edit" && values.hasUpdated))) {
         const res = await uploadFile(token, file);
         if (res.statusCode === 200 || res.statusCode === 201) {
-          values.images[0] = res.data;
+          values.image = res.data;
         } else {
           setIsCreating((_prev) => false);
           notify("Stock", res?.message, "error");
@@ -138,6 +141,7 @@ const _AddStockModal: React.FC<OwnProps> = (props) => {
         stock: {
           ...values,
           modelNo: values.modelNo || "",
+          images: values.hasImage ? [values.image || ""] : [],
         },
       })
     )
@@ -168,6 +172,7 @@ const _AddStockModal: React.FC<OwnProps> = (props) => {
         stock: {
           ...values,
           modelNo: values.modelNo || "",
+          images: values.hasUpdated ? [values.image || ""] : [],
         },
       })
     )
@@ -201,21 +206,13 @@ const _AddStockModal: React.FC<OwnProps> = (props) => {
       if (dataUri) {
         form.setValues((prev) => ({
           ...prev,
-          images: [dataUri],
+          image: dataUri,
           hasImage: true,
           hasUpdated: mode === "edit",
         }));
       }
     };
     reader.readAsDataURL(file);
-  };
-
-  const handleOnChangeAssignTo = (value: string | null) => {
-    if (!value) return;
-    form.setValues((prev) => ({
-      ...prev,
-      assignedTo: value,
-    }));
   };
 
   const handleOnChangeSupplier = (value: string | null) => {
@@ -226,7 +223,7 @@ const _AddStockModal: React.FC<OwnProps> = (props) => {
     }));
   };
 
-  const handlOnChangeWarehouse = (value: string | null) => {
+  const handleOnChangeWarehouse = (value: string | null) => {
     if (!value) return;
     form.setValues((prev) => ({
       ...prev,
@@ -256,7 +253,8 @@ const _AddStockModal: React.FC<OwnProps> = (props) => {
     if (mode === "add") return;
     form.setValues((prev) => ({
       ...prev,
-      images: mode === "edit" ? record?.images || [] : [],
+      image:
+        mode === "edit" && record?.images?.at(0) ? `${BASE_URL}\\${record?.images?.at(0)}` : "",
       name: mode === "edit" ? record?.name || "" : "",
       type: mode === "edit" ? props.record?.type || "" : "",
       serialNo: mode === "edit" ? props.record?.serialNo || "" : "",
@@ -287,7 +285,7 @@ const _AddStockModal: React.FC<OwnProps> = (props) => {
             <Stack spacing={"xs"}>
               <Flex direction={"column"} align={"center"} justify={"flex-end"}>
                 {form.values.hasImage ? (
-                  <Avatar src={form.values.images[0]} radius={"md"} size={rem(170)} />
+                  <Avatar src={form.values.image} radius={"md"} size={rem(170)} />
                 ) : (
                   <div
                     style={{
@@ -306,7 +304,7 @@ const _AddStockModal: React.FC<OwnProps> = (props) => {
                         variant="filled"
                         color={theme.primaryColor}
                         {...props}
-                        disabled={!form.values.images.length}
+                        // disabled={!form.values.images.length}
                         rightIcon={<IconUpload size={16} color={theme.white} stroke={1.5} />}
                       >
                         Image
@@ -392,7 +390,7 @@ const _AddStockModal: React.FC<OwnProps> = (props) => {
                 inputMode="numeric"
               />
 
-              <Select
+              {/* <Select
                 required
                 withAsterisk={false}
                 searchable
@@ -406,7 +404,7 @@ const _AddStockModal: React.FC<OwnProps> = (props) => {
                     ? `${form.errors.assignedTo}`
                     : null
                 }
-              />
+              /> */}
               <Group align="flex-start" grow>
                 <Select
                   required
@@ -415,7 +413,7 @@ const _AddStockModal: React.FC<OwnProps> = (props) => {
                   nothingFound="No status found"
                   label="Warehouse"
                   value={form.values.warehouseId}
-                  onChange={handlOnChangeWarehouse}
+                  onChange={handleOnChangeWarehouse}
                   data={warehouses}
                   error={
                     form.errors.warehouseId && form.touched.warehouseId

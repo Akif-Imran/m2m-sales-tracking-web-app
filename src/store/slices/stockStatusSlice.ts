@@ -49,4 +49,4 @@ const stockItemStatusSlice = createSlice({
 });
 
 export { stockItemStatusSlice };
-export const stockItemStatusListReducer = stockItemStatusSlice.reducer;
+export const stockStatusListReducer = stockItemStatusSlice.reducer;

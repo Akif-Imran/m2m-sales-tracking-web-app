@@ -1,4 +1,4 @@
-import { apiDelete, apiPost, urls } from "@api";
+import { apiDelete, apiPost, apiPut, urls } from "@api";
 
 export const apiLogin = async (body: LoginRequest) => {
   const response = await apiPost<LoginResponse, LoginRequest>(urls.auth.login, "", body);
@@ -15,7 +15,7 @@ export const createAccount = async (body: CreateAccountRequest) => {
 };
 
 export const changePassword = async (token: string, body: ChangePasswordRequest) => {
-  const response = await apiPost<ChangePasswordResponse, ChangePasswordRequest>(
+  const response = await apiPut<ChangePasswordResponse, ChangePasswordRequest>(
     urls.user.changePassword,
     token,
     body

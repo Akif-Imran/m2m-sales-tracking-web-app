@@ -10,13 +10,13 @@ import { notify } from "@utility";
 
 interface OwnProps {}
 interface IForm {
-  old_password: string;
+  current_password: string;
   new_password: string;
   confirm_new_password: string;
 }
 
 const schema = yup.object().shape({
-  old_password: yup.string().required("Old Password is required"),
+  current_password: yup.string().required("Old Password is required"),
   new_password: yup
     .string()
     .required("New Password is required")
@@ -31,6 +31,7 @@ const ChangePassword: React.FC<OwnProps> = () => {
   useStyles();
   const {
     state: { token },
+    logout,
   } = useAuthContext();
   const [isLoading, setIsLoading] = React.useState(false);
 
@@ -38,7 +39,7 @@ const ChangePassword: React.FC<OwnProps> = () => {
     initialValues: {
       confirm_new_password: "",
       new_password: "",
-      old_password: "",
+      current_password: "",
     },
     onSubmit: (values, helpers) => {
       fetchChangePassword(values, helpers);
@@ -49,13 +50,14 @@ const ChangePassword: React.FC<OwnProps> = () => {
   const fetchChangePassword = (values: IForm, helpers: FormikHelpers<IForm>) => {
     setIsLoading(true);
     changePassword(token, {
-      old_password: values.old_password,
-      new_password: values.new_password,
+      currentPassword: values.current_password,
+      newPassword: values.new_password,
     })
       .then((res) => {
         notify("Change Password", res.message, res.success ? "success" : "error");
         if (res.success) {
           helpers.resetForm();
+          logout();
         }
       })
       .catch((err) => {
@@ -77,16 +79,16 @@ const ChangePassword: React.FC<OwnProps> = () => {
           <PasswordInput
             required
             withAsterisk={false}
-            label="Old Password"
-            name="old_password"
-            id="old_password"
-            value={form.values.old_password}
-            placeholder="Old Password"
+            label="Current Password"
+            name="current_password"
+            id="current_password"
+            value={form.values.current_password}
+            placeholder="Current Password"
             onChange={form.handleChange}
             onBlur={form.handleBlur}
             error={
-              form.touched.old_password && form.errors.old_password
-                ? `${form.errors.old_password}`
+              form.touched.current_password && form.errors.current_password
+                ? `${form.errors.current_password}`
                 : null
             }
             radius="md"

@@ -32,7 +32,7 @@ export const urls = {
     delete: (id: string) => `${BASE_USER_URL}/delete/${id}`,
     getById: (id: string) => `${BASE_USER_URL}/getById/${id}`,
     getUserTypes: `${BASE_USER_URL}/getUserTypes`,
-    changePassword: `${BASE_USER_URL}/resetPassword`,
+    changePassword: `${BASE_USER_URL}/changePassword`,
     deleteAccount: `${BASE_USER_URL}/deleteAccount`,
   },
   company: {
